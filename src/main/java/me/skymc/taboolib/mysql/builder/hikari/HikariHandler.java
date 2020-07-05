@@ -6,7 +6,7 @@ import com.google.gson.JsonParser;
 import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
 import me.skymc.taboolib.mysql.builder.SQLHost;
-import net.development.mitw.Mitw;
+import org.imanity.framework.Imanity;
 
 import javax.sql.DataSource;
 import java.io.File;
@@ -22,9 +22,9 @@ public class HikariHandler {
 
     public static void init() {
         File file;
-        file = new File(Mitw.getInstance().getDataFolder(), "HikariSettings.json");
+        file = new File(Imanity.PLUGIN.getDataFolder(), "HikariSettings.json");
         if (!file.exists()) {
-        	Mitw.getInstance().saveResource("HikariSettings.json", true);
+            Imanity.PLUGIN.saveResource("HikariSettings.json", true);
         }
         try {
             JsonElement parse = new JsonParser().parse(new FileReader(file));

@@ -33,11 +33,13 @@ public class MongoDatabase extends AbstractDatabase {
             for (Map.Entry<String, DataType> entry : this.getDataTypes().entrySet()) {
                 Data<?> data = entry.getValue().newData();
 
-                data.set(document.get(entry.getKey(), data.getType()));
+                if (document.containsKey(entry.getKey())) {
+                    data.set(document.get(entry.getKey(), data.getType()));
 
-                Field field = playerData.getClass().getDeclaredField(entry.getKey());
-                field.setAccessible(true);
-                field.set(playerData, data.toFieldObject(field));
+                    Field field = playerData.getClass().getDeclaredField(entry.getKey());
+                    field.setAccessible(true);
+                    field.set(playerData, data.toFieldObject(field));
+                }
             }
         } catch (NoSuchFieldException | IllegalAccessException ex) {
             throw new RuntimeException("Unexpected error while loading PlayerData", ex);

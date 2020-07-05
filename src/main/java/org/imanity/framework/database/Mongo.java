@@ -5,6 +5,7 @@ import com.mongodb.MongoCredential;
 import com.mongodb.ServerAddress;
 import com.mongodb.client.MongoDatabase;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import org.imanity.framework.Imanity;
 import org.imanity.framework.config.util.annotation.Comment;
 import org.imanity.framework.config.util.annotation.ConfigurationElement;
@@ -23,27 +24,28 @@ public class Mongo {
 
     private MongoConfig config;
 
+    public void generateConfig() {
+        this.config = new MongoConfig();
+        this.config.loadAndSave();
+    }
+
     public void init() {
-        MongoConfig mongoConfig = new MongoConfig();
-        mongoConfig.loadAndSave();
 
-        this.config = mongoConfig;
-
-        if (mongoConfig.AUTHENTICATION.ENABLED) {
+        if (this.config.AUTHENTICATION.ENABLED) {
 
             MongoCredential credential = MongoCredential.createCredential(
-                    mongoConfig.AUTHENTICATION.USERNAME,
-                    mongoConfig.AUTHENTICATION.DATABASE,
-                    mongoConfig.AUTHENTICATION.PASSWORD.toCharArray()
+                    this.config.AUTHENTICATION.USERNAME,
+                    this.config.AUTHENTICATION.DATABASE,
+                    this.config.AUTHENTICATION.PASSWORD.toCharArray()
             );
 
-            this.client = new MongoClient(new ServerAddress(mongoConfig.HOST, mongoConfig.PORT), Collections.singletonList(credential));
+            this.client = new MongoClient(new ServerAddress(this.config.HOST, this.config.PORT), Collections.singletonList(credential));
 
         } else {
-            this.client = new MongoClient(new ServerAddress(mongoConfig.HOST, mongoConfig.PORT));
+            this.client = new MongoClient(new ServerAddress(this.config.HOST, this.config.PORT));
         }
 
-        this.database = this.client.getDatabase(mongoConfig.DATABASE);
+        this.database = this.client.getDatabase(this.config.DATABASE);
     }
 
     public static class MongoConfig extends BukkitYamlConfiguration {
@@ -62,16 +64,18 @@ public class Mongo {
 
         protected MongoConfig() {
             super(new File(Imanity.PLUGIN.getDataFolder(), "mongo.yml").toPath(), BukkitYamlProperties.builder()
-                .setFormatter(FieldNameFormatters.LOWER_UNDERSCORE)
+                .setFormatter(FieldNameFormatters.LOWER_CASE)
                 .setPrependedComments(Arrays.asList(
                         "================================",
                         "The configuration to adjust MongoDB Settings",
-                        "================================"
+                        "================================",
+                        " "
                 )).build());
         }
 
         @ConfigurationElement
-        class AuthCredentials {
+        @NoArgsConstructor
+        public static class AuthCredentials {
 
             private boolean ENABLED = false;
             private String USERNAME = "user";

@@ -49,11 +49,14 @@ public class FlatfileDatabase extends AbstractDatabase {
             for (Map.Entry<String, DataType> entry : this.getDataTypes().entrySet()) {
                 Data<?> data = entry.getValue().newData();
 
-                data.set(jsonObject.get(entry.getKey(), entry.getValue().getDataClass()));
+                if (jsonObject.containsKey(entry.getKey())) {
+                    data.set(jsonObject.get(entry.getKey(), data.getType()));
 
-                Field field = playerData.getClass().getDeclaredField(entry.getKey());
-                field.setAccessible(true);
-                field.set(playerData, data.toFieldObject(field));
+                    Field field = playerData.getClass().getDeclaredField(entry.getKey());
+                    field.setAccessible(true);
+
+                    field.set(playerData, data.toFieldObject(field));
+                }
             }
         } catch (IOException | NoSuchFieldException | IllegalAccessException ex) {
             throw new RuntimeException("Unexpected error while reading json files", ex);
@@ -75,6 +78,9 @@ public class FlatfileDatabase extends AbstractDatabase {
 
         try {
             Document jsonObject = new Document();
+
+            jsonObject.put("uuid", playerData.getUuid().toString());
+            jsonObject.put("name", playerData.getName());
 
             for (Data<?> data : playerData.toDataList()) {
                 jsonObject.put(data.name(), data.get());

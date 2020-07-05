@@ -32,6 +32,13 @@ public enum FieldNameFormatters implements FieldNameFormatter {
             return builder.toString();
         }
     },
+
+    LOWER_CASE {
+        @Override
+        public String fromFieldName(String fn) {
+            return fn.toLowerCase();
+        }
+    },
     /**
      * Represents a {@code FieldNameFormatter} that transforms <i>camelCase</i> to
      * <i>UPPER_UNDERSCORE</i>.

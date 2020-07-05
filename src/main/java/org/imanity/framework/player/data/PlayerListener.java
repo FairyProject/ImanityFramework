@@ -15,6 +15,10 @@ public class PlayerListener implements Listener {
 
     @EventHandler
     public void onPlayerJoin(PlayerJoinEvent event) {
+        if (Imanity.SHUTTING_DOWN) {
+            return;
+        }
+
         Player player = event.getPlayer();
 
         Runnable runnable = () -> {
@@ -34,6 +38,10 @@ public class PlayerListener implements Listener {
 
     @EventHandler
     public void onPlayerQuit(PlayerQuitEvent event) {
+        if (Imanity.SHUTTING_DOWN) {
+            return;
+        }
+
         Player player = event.getPlayer();
 
         Runnable runnable = () -> {

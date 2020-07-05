@@ -25,11 +25,12 @@ public class DataConfig extends BukkitYamlConfiguration {
     public DataConfig() {
         super(new File(Imanity.PLUGIN.getDataFolder(), "data.yml").toPath(), BukkitYamlProperties
             .builder()
-            .setFormatter(FieldNameFormatters.LOWER_UNDERSCORE)
+                .setFormatter(FieldNameFormatters.LOWER_CASE)
             .setPrependedComments(Arrays.asList(
                     "==============================",
                     "The configuration to adjust data settings",
-                    "=============================="
+                    "==============================",
+                    " "
             )).build());
     }
 
@@ -38,6 +39,13 @@ public class DataConfig extends BukkitYamlConfiguration {
             return SPECIFIC_DATABASES.get(name);
         }
         return DEFAULT_DATABASE;
+    }
+
+    public boolean isDatabaseTypeUsed(DatabaseType databaseType) {
+        if (DEFAULT_DATABASE == databaseType) {
+            return true;
+        }
+        return SPECIFIC_DATABASES.containsValue(databaseType);
     }
 
     private static class SpecificDatabasesConverter implements Converter<Map<String, DatabaseType>, List<String>> {

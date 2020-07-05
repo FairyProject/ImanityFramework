@@ -1,8 +1,5 @@
 package org.imanity.framework.player.data.type.impl;
 
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
-import com.google.gson.JsonObject;
 import lombok.NoArgsConstructor;
 import me.skymc.taboolib.mysql.builder.SQLColumnType;
 import org.bson.Document;
@@ -10,7 +7,6 @@ import org.bson.Document;
 @NoArgsConstructor
 public class DocumentData extends AbstactData<Document> {
 
-    private static final Gson GSON = new GsonBuilder().create();
     private Document document;
 
     @Override
@@ -26,7 +22,7 @@ public class DocumentData extends AbstactData<Document> {
         }
         if (jsonObject instanceof String) {
             String string = (String) jsonObject;
-            this.document = GSON.fromJson(string, Document.class);
+            this.document = Document.parse(string);
             return;
         }
         throw new UnsupportedOperationException(jsonObject.getClass().getSimpleName() + " cannot be case to JsonObject");
@@ -39,6 +35,6 @@ public class DocumentData extends AbstactData<Document> {
 
     @Override
     public String toStringData(boolean sql) {
-        return (sql ? "\"" : "") + GSON.toJson(this.document) + (sql ? "\"" : "");
+        return (sql ? "\"" : "") + document.toJson() + (sql ? "\"" : "");
     }
 }

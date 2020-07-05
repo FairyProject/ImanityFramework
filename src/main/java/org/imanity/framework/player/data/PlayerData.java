@@ -1,5 +1,6 @@
 package org.imanity.framework.player.data;
 
+import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.imanity.framework.Imanity;
 import org.imanity.framework.player.PlayerInfo;
@@ -43,10 +44,10 @@ public class PlayerData extends PlayerInfo {
                 continue;
             }
 
-            DataType dataType = DataType.getType(field.getDeclaringClass());
+            DataType dataType = DataType.getType(field.getType());
 
             if (dataType == null) {
-                Imanity.LOGGER.error("The data type " + field.getDeclaringClass().getSimpleName() + " does not exists!");
+                Imanity.LOGGER.error("The data type " + field.getType().getSimpleName() + " does not exists!");
                 continue;
             }
 
@@ -75,10 +76,10 @@ public class PlayerData extends PlayerInfo {
                 continue;
             }
 
-            DataType dataType = DataType.getType(field.getDeclaringClass());
+            DataType dataType = DataType.getType(field.getType());
 
             if (dataType == null) {
-                Imanity.LOGGER.error("The data type " + field.getDeclaringClass().getSimpleName() + " does not exists!");
+                Imanity.LOGGER.error("The data type " + field.getType().getSimpleName() + " does not exists!");
                 continue;
             }
 
@@ -89,9 +90,9 @@ public class PlayerData extends PlayerInfo {
         return types;
     }
 
-    public static PlayerData getPlayerData(Player player, Class<? extends PlayerData> dataClass) {
+    public static <T extends PlayerData> T getPlayerData(Player player, Class<T> dataClass) {
         StoreDatabase database = PlayerData.getDatabase(dataClass);
-        return database.getByPlayer(player);
+        return (T) database.getByPlayer(player);
     }
 
     public static StoreDatabase getDatabase(Class<? extends PlayerData> dataClass) {
@@ -99,6 +100,15 @@ public class PlayerData extends PlayerInfo {
             return DATABASES.get(dataClass);
         }
         throw new IllegalStateException("PlayerData " + dataClass.getSimpleName() + " has not register yet!");
+    }
+
+    public static void shutdown() {
+        for (Player player : Bukkit.getOnlinePlayers()) {
+            DATABASES.values().forEach(database -> {
+                PlayerData playerData = database.getByPlayer(player);
+                database.save(playerData);
+            });
+        }
     }
 
     public static Collection<StoreDatabase> getStoreDatabases() {

@@ -24,6 +24,13 @@ public class DataType {
     static {
         JSON = DataType.register(JsonObject.class, JsonData.class);
         STRING = DataType.register(String.class, StringData.class);
+
+        DataType.register(int.class, IntData.class);
+        DataType.register(short.class, IntData.class);
+        DataType.register(double.class, DoubleData.class);
+        DataType.register(float.class, DoubleData.class);
+        DataType.register(boolean.class, BooleanData.class);
+
         INT = DataType.register(Integer.class, IntData.class);
         SHORT = DataType.register(Short.class, IntData.class);
         DOUBLE = DataType.register(Double.class, DoubleData.class);
@@ -48,7 +55,9 @@ public class DataType {
     }
 
     public static DataType register(Class<?> clazz, Class<? extends Data> dataClass) {
-        return DATA_TYPES.put(clazz, new DataType(dataClass));
+        DataType dataType = new DataType(dataClass);
+        DATA_TYPES.put(clazz, dataType);
+        return dataType;
     }
 
     public static DataType getType(Class<?> clazz) {

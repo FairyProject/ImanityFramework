@@ -22,10 +22,12 @@ public class MySQL {
     public MySQL() {
     }
 
-    public void init(Plugin plugin) {
+    public void generateConfig(Plugin plugin) {
         this.config = new SQLConfig(plugin);
         config.loadAndSave();
+    }
 
+    public void init() {
         HikariHandler.init();
 
         host = new SQLHost(config.HOST, config.USER, config.PORT, config.PASSWORD, config.DATABASE);
@@ -49,13 +51,14 @@ public class MySQL {
 
         public SQLConfig(Plugin plugin) {
             super(new File(plugin.getDataFolder(), "mysql.yml").toPath(), BukkitYamlProperties.builder()
-                    .setFormatter(FieldNameFormatters.LOWER_UNDERSCORE)
+                    .setFormatter(FieldNameFormatters.LOWER_CASE)
                 .setPrependedComments(Arrays.asList(
                         "================================",
                         " ",
                         "The configuration to config mysql stuffs",
                         " ",
-                        "================================"
+                        "================================",
+                        " "
                 )).build());
         }
 
