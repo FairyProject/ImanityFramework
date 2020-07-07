@@ -104,10 +104,10 @@ public class PlayerData extends PlayerInfo {
 
     public static void shutdown() {
         for (Player player : Bukkit.getOnlinePlayers()) {
-            DATABASES.values().forEach(database -> {
+            for (StoreDatabase database : PlayerData.getStoreDatabases()) {
                 PlayerData playerData = database.getByPlayer(player);
                 database.save(playerData);
-            });
+            }
         }
     }
 

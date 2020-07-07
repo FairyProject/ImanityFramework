@@ -6,7 +6,7 @@ import org.imanity.framework.Imanity;
 public abstract class ImanityPlugin extends JavaPlugin {
 
     @Override
-    public void onEnable() {
+    public final void onEnable() {
         this.preEnable();
 
         Imanity.init(this);
@@ -15,7 +15,7 @@ public abstract class ImanityPlugin extends JavaPlugin {
     }
 
     @Override
-    public void onDisable() {
+    public final void onDisable() {
         this.preDisable();
 
         Imanity.shutdown();
