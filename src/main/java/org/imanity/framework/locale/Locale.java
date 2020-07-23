@@ -2,6 +2,8 @@ package org.imanity.framework.locale;
 
 import it.unimi.dsi.fastutil.chars.Char2ObjectOpenHashMap;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
+import lombok.Getter;
+import org.imanity.framework.util.Utility;
 
 import java.util.Map;
 
@@ -9,8 +11,11 @@ public class Locale {
 
     private final Char2ObjectOpenHashMap<Map<String, String>> translateEntries = new Char2ObjectOpenHashMap<>();
 
-    protected Locale() {
+    @Getter
+    private final String name;
 
+    protected Locale(String name) {
+        this.name = name;
     }
 
     public void registerEntry(String key, String value) {
@@ -25,6 +30,14 @@ public class Locale {
         }
 
         subEntries.put(key, value);
+    }
+
+    public void registerEntry(String key, Iterable<String> strings) {
+        this.registerEntry(key, Utility.joinToString(strings, "\n"));
+    }
+
+    public void registerEntry(String key, String[] strings) {
+        this.registerEntry(key, Utility.joinToString(strings, "\n"));
     }
 
     public void unregisterEntry(String key) {

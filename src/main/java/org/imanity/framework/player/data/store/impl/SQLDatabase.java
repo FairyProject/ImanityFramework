@@ -26,11 +26,11 @@ public class SQLDatabase extends AbstractDatabase {
             .addColumn(new SQLColumn(SQLColumnType.TEXT, "uuid", SQLColumnOption.NOTNULL, SQLColumnOption.PRIMARY_KEY))
             .addColumn(new SQLColumn(SQLColumnType.TINYTEXT, "name"));
 
-        for (Map.Entry<String, DataType> entry : this.dataTypes.entrySet()) {
-            Data<?> emptyData = entry.getValue().newData();
+        this.getDataTypes().forEach((key, value) -> {
+            Data<?> emptyData = value.newData();
 
-            this.table.addColumn(new SQLColumn(emptyData.columnType(), entry.getKey()));
-        }
+            this.table.addColumn(new SQLColumn(emptyData.columnType(), key));
+        });
 
         this.table.executeUpdate(this.table.createQuery()).dataSource(Imanity.SQL.getDataSource()).run();
     }
@@ -44,7 +44,7 @@ public class SQLDatabase extends AbstractDatabase {
                 }).result(result -> {
             if (result.isBeforeFirst()) {
                 result.next();
-                for (String key : this.dataTypes.keySet()) {
+                this.getDataTypes().forEach((key, value) -> {
                     try {
                         Field field = playerData.getClass().getDeclaredField(key);
                         field.setAccessible(true);
@@ -52,7 +52,7 @@ public class SQLDatabase extends AbstractDatabase {
                     } catch (Exception ex) {
                         throw new RuntimeException(ex);
                     }
-                }
+                });
             }
             return null;
         }).run();

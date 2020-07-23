@@ -41,24 +41,12 @@ public class FlatfileDatabase extends AbstractDatabase {
         try {
             String string = FileUtils.readFileToString(file, Charsets.UTF_8);
 
-            DocumentData jsonData = (DocumentData) DataType.DOCUMENT.newData();
-            jsonData.set(string);
+            DocumentData documentData = (DocumentData) DataType.DOCUMENT.newData();
+            documentData.set(string);
 
-            Document jsonObject = jsonData.get();
-
-            for (Map.Entry<String, DataType> entry : this.getDataTypes().entrySet()) {
-                Data<?> data = entry.getValue().newData();
-
-                if (jsonObject.containsKey(entry.getKey())) {
-                    data.set(jsonObject.get(entry.getKey(), data.getType()));
-
-                    Field field = playerData.getClass().getDeclaredField(entry.getKey());
-                    field.setAccessible(true);
-
-                    field.set(playerData, data.toFieldObject(field));
-                }
-            }
-        } catch (IOException | NoSuchFieldException | IllegalAccessException ex) {
+            Document document = documentData.get();
+            playerData.loadFromDocument(document);
+        } catch (IOException ex) {
             throw new RuntimeException("Unexpected error while reading json files", ex);
         }
 

@@ -2,13 +2,12 @@ package org.imanity.framework.player.data.type.impl;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import lombok.NoArgsConstructor;
 import me.skymc.taboolib.mysql.builder.SQLColumnType;
 
 @NoArgsConstructor
-public class JsonData extends AbstactData<JsonObject> {
+public class JsonData extends AbstractData<JsonObject> {
 
     private static final Gson GSON = new GsonBuilder().create();
     private JsonObject json;

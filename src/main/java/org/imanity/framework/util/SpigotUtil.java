@@ -43,7 +43,7 @@ public class SpigotUtil {
         return Bukkit.isPrimaryThread();
     }
 
-    public static enum SpigotType {
+    public enum SpigotType {
 
         IMANITY,
         PAPER,

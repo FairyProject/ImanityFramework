@@ -15,6 +15,10 @@ public class Utility {
         return array == null ? "null" : joinToString(Arrays.asList(array));
     }
 
+    public static <T> String joinToString(final T[] array, final String delimiter) {
+        return array == null ? "null" : joinToString(Arrays.asList(array), delimiter);
+    }
+
     public static <T> String joinToString(final Iterable<T> array) {
         return array == null ? "null" : joinToString(array, ", ");
     }
@@ -46,6 +50,10 @@ public class Utility {
          * @return
          */
         String toString(T object);
+    }
+
+    public static Iterable<String> toStringList(String string, final String delimiter) {
+        return Arrays.asList(string.split(delimiter));
     }
 
     public static void error(Throwable ex, String message) {

@@ -1,10 +1,8 @@
 package org.imanity.framework.player.data.type.impl;
 
-import com.google.gson.JsonElement;
-import lombok.NoArgsConstructor;
 import me.skymc.taboolib.mysql.builder.SQLColumnType;
 
-public class BooleanData extends AbstactData<java.lang.Boolean> {
+public class BooleanData extends AbstractData<Boolean> {
 
     private boolean b;
 

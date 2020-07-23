@@ -1,23 +1,21 @@
 package org.imanity.framework;
 
-import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.bukkit.World;
-import org.bukkit.event.EventHandler;
+import org.bukkit.entity.Player;
 import org.bukkit.event.Listener;
-import org.bukkit.event.world.WorldInitEvent;
-import org.bukkit.event.world.WorldLoadEvent;
-import org.bukkit.event.world.WorldUnloadEvent;
 import org.bukkit.plugin.Plugin;
 import org.imanity.framework.chunk.KeepChunkHandler;
 import org.imanity.framework.chunk.block.CacheBlockSetHandler;
 import org.imanity.framework.chunk.block.CacheBlockSetListener;
-import org.imanity.framework.config.DataConfig;
+import org.imanity.framework.config.CoreConfig;
 import org.imanity.framework.database.DatabaseType;
 import org.imanity.framework.database.Mongo;
 import org.imanity.framework.database.MySQL;
+import org.imanity.framework.locale.Locale;
 import org.imanity.framework.locale.LocaleHandler;
+import org.imanity.framework.locale.player.LocaleData;
 import org.imanity.framework.menu.task.MenuUpdateTask;
 import org.imanity.framework.player.data.PlayerData;
 import org.imanity.framework.player.data.PlayerListener;
@@ -25,18 +23,18 @@ import org.imanity.framework.scoreboard.ImanityBoardAdapter;
 import org.imanity.framework.scoreboard.ImanityBoardHandler;
 import org.imanity.framework.scoreboard.impl.ExampleBoardAdapter;
 import org.imanity.framework.util.ReflectionUtil;
-import org.imanity.framework.util.SampleMetadata;
 import org.imanity.framework.util.SpigotUtil;
+import org.imanity.framework.util.Utility;
 
 public class Imanity {
 
     public static final Logger LOGGER = LogManager.getLogger("Imanity");
     public static final MySQL SQL = new MySQL();
     public static final Mongo MONGO = new Mongo();
-    public static final LocaleHandler LOCALE_HANDLER = new LocaleHandler();
+    public static LocaleHandler LOCALE_HANDLER;
     public static ImanityBoardHandler BOARD_HANDLER;
     public static KeepChunkHandler KEEP_CHUNK_HANDLER;
-    public static DataConfig DATA_CONFIG;
+    public static CoreConfig CORE_CONFIG;
     public static Plugin PLUGIN;
 
     public static boolean SHUTTING_DOWN = false;
@@ -49,18 +47,21 @@ public class Imanity {
         SpigotUtil.init();
         ReflectionUtil.init();
 
-        Imanity.DATA_CONFIG = new DataConfig();
-        Imanity.DATA_CONFIG.loadAndSave();
+        Imanity.CORE_CONFIG = new CoreConfig();
+        Imanity.CORE_CONFIG.loadAndSave();
+
+        Imanity.LOCALE_HANDLER = new LocaleHandler();
+        Imanity.LOCALE_HANDLER.init();
 
         Imanity.KEEP_CHUNK_HANDLER = new KeepChunkHandler();
 
         Imanity.SQL.generateConfig(plugin);
-        if (DATA_CONFIG.isDatabaseTypeUsed(DatabaseType.MYSQL)) {
+        if (CORE_CONFIG.isDatabaseTypeUsed(DatabaseType.MYSQL)) {
             Imanity.SQL.init();
         }
 
         Imanity.MONGO.generateConfig();
-        if (DATA_CONFIG.isDatabaseTypeUsed(DatabaseType.MONGO)) {
+        if (CORE_CONFIG.isDatabaseTypeUsed(DatabaseType.MONGO)) {
             Imanity.MONGO.init();
         }
 
@@ -72,19 +73,6 @@ public class Imanity {
                 new PlayerListener(),
                 new CacheBlockSetListener()
         );
-
-        Imanity.registerEvents(new Listener() {
-            @EventHandler
-            public void onWorldLoad(WorldInitEvent event) {
-                CacheBlockSetHandler blockSetHandler = new CacheBlockSetHandler(event.getWorld());
-                event.getWorld().setMetadata(CacheBlockSetHandler.METADATA, new SampleMetadata(blockSetHandler));
-            }
-
-            @EventHandler
-            public void onWorldUnload(WorldUnloadEvent event) {
-                event.getWorld().removeMetadata(CacheBlockSetHandler.METADATA, PLUGIN);
-            }
-        });
     }
 
     public static CacheBlockSetHandler getBlockSetHandler(World world) {
@@ -102,6 +90,21 @@ public class Imanity {
 
     public static void registerBoardHandler(ImanityBoardAdapter adapter) {
         Imanity.BOARD_HANDLER = new ImanityBoardHandler(adapter);
+    }
+
+    public static String translate(Player player, String key) {
+        LocaleData localeData = PlayerData.getPlayerData(player, LocaleData.class);
+        Locale locale;
+        if (localeData == null || localeData.getLocale() == null) {
+            locale = Imanity.LOCALE_HANDLER.getDefaultLocale();
+        } else {
+            locale = localeData.getLocale();
+        }
+        return locale.get(key);
+    }
+
+    public static Iterable<String> translateList(Player player, String key) {
+        return Utility.toStringList(Imanity.translate(player, key), "\n");
     }
 
     public static void shutdown() {

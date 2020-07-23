@@ -1,12 +1,12 @@
 package org.imanity.framework.player.data;
 
-import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.imanity.framework.Imanity;
+import org.imanity.framework.player.data.event.PlayerDataLoadEvent;
 import org.imanity.framework.util.SampleMetadata;
 import org.imanity.framework.util.SpigotUtil;
 import org.imanity.framework.util.TaskUtil;
@@ -24,15 +24,20 @@ public class PlayerListener implements Listener {
         Runnable runnable = () -> {
             PlayerData.getStoreDatabases()
                     .forEach(database -> {
+                        if (!database.autoLoad()) {
+                            return;
+                        }
                         PlayerData playerData = database.load(player);
                         player.setMetadata(database.getMetadataTag(), new SampleMetadata(playerData));
+
+                        PlayerDataLoadEvent.callEvent(player, playerData);
                     });
         };
 
-        if (Imanity.DATA_CONFIG.ASYNCHRONOUS_DATA_STORING) {
+        if (Imanity.CORE_CONFIG.ASYNCHRONOUS_DATA_STORING) {
             TaskUtil.runAsync(runnable);
         } else {
-            TaskUtil.runSync(runnable);
+            runnable.run();
         }
     }
 
@@ -47,6 +52,9 @@ public class PlayerListener implements Listener {
         Runnable runnable = () -> {
             PlayerData.getStoreDatabases()
                 .forEach(database -> {
+                    if (!database.autoSave()) {
+                        return;
+                    }
                     PlayerData playerData = database.getByPlayer(player);
                     database.save(playerData);
                 });
@@ -64,10 +72,10 @@ public class PlayerListener implements Listener {
             }
         };
 
-        if (Imanity.DATA_CONFIG.ASYNCHRONOUS_DATA_STORING) {
+        if (Imanity.CORE_CONFIG.ASYNCHRONOUS_DATA_STORING) {
             TaskUtil.runAsync(runnable);
         } else {
-            TaskUtil.runSync(runnable);
+            runnable.run();
         }
     }
 

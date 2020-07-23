@@ -6,17 +6,17 @@ import org.bukkit.entity.Player;
 import org.imanity.framework.player.data.PlayerData;
 import org.imanity.framework.player.data.store.StoreDatabase;
 import org.imanity.framework.player.data.type.DataType;
+import org.imanity.framework.util.entry.EntryArrayList;
 import org.imanity.framework.util.ReflectionUtil;
 
 import java.lang.reflect.Constructor;
-import java.util.Map;
 import java.util.UUID;
 
 @Getter
 public abstract class AbstractDatabase implements StoreDatabase {
 
     protected Class<? extends PlayerData> dataClass;
-    protected Map<String, DataType> dataTypes;
+    protected EntryArrayList<String, DataType> dataTypes;
     private String name;
     @Setter
     private boolean autoLoad, autoSave;

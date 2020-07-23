@@ -40,9 +40,9 @@ public class DataType {
     }
 
     @Getter
-    private Class<? extends Data> dataClass;
+    private final Class<? extends Data<?>> dataClass;
 
-    public DataType(Class<? extends Data> dataClass) {
+    public DataType(Class<? extends Data<?>> dataClass) {
         this.dataClass = dataClass;
     }
 
@@ -54,7 +54,7 @@ public class DataType {
         }
     }
 
-    public static DataType register(Class<?> clazz, Class<? extends Data> dataClass) {
+    public static DataType register(Class<?> clazz, Class<? extends Data<?>> dataClass) {
         DataType dataType = new DataType(dataClass);
         DATA_TYPES.put(clazz, dataType);
         return dataType;

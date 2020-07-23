@@ -12,7 +12,7 @@ import java.io.File;
 import java.util.*;
 import java.util.stream.Collectors;
 
-public class DataConfig extends BukkitYamlConfiguration {
+public class CoreConfig extends BukkitYamlConfiguration {
 
     @Convert(DatabaseTypeConverter.class)
     private DatabaseType DEFAULT_DATABASE = DatabaseType.FLAT_FILE;
@@ -22,8 +22,10 @@ public class DataConfig extends BukkitYamlConfiguration {
 
     public boolean ASYNCHRONOUS_DATA_STORING = true;
 
-    public DataConfig() {
-        super(new File(Imanity.PLUGIN.getDataFolder(), "data.yml").toPath(), BukkitYamlProperties
+    public String DEFAULT_LOCALE = "en_us";
+
+    public CoreConfig() {
+        super(new File(Imanity.PLUGIN.getDataFolder(), "core.yml").toPath(), BukkitYamlProperties
             .builder()
                 .setFormatter(FieldNameFormatters.LOWER_CASE)
             .setPrependedComments(Arrays.asList(

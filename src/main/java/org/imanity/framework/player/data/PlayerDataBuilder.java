@@ -32,7 +32,7 @@ public class PlayerDataBuilder {
     }
 
     public void build() {
-        StoreDatabase database = Imanity.DATA_CONFIG.getDatabaseType(name).newDatabase();
+        StoreDatabase database = Imanity.CORE_CONFIG.getDatabaseType(name).newDatabase();
 
         database.setAutoLoad(this.loadOnJoin);
         database.setAutoSave(this.saveOnQuit);

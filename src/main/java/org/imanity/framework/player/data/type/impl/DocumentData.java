@@ -5,7 +5,7 @@ import me.skymc.taboolib.mysql.builder.SQLColumnType;
 import org.bson.Document;
 
 @NoArgsConstructor
-public class DocumentData extends AbstactData<Document> {
+public class DocumentData extends AbstractData<Document> {
 
     private Document document;
 

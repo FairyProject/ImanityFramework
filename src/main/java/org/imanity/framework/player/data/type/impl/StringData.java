@@ -1,11 +1,10 @@
 package org.imanity.framework.player.data.type.impl;
 
-import com.google.gson.JsonElement;
 import lombok.NoArgsConstructor;
 import me.skymc.taboolib.mysql.builder.SQLColumnType;
 
 @NoArgsConstructor
-public class StringData extends AbstactData<String> {
+public class StringData extends AbstractData<String> {
 
     private String s;
 

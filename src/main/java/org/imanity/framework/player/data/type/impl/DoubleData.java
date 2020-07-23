@@ -1,12 +1,10 @@
 package org.imanity.framework.player.data.type.impl;
 
-import com.google.gson.JsonElement;
-import lombok.NoArgsConstructor;
 import me.skymc.taboolib.mysql.builder.SQLColumnType;
 
 import java.lang.reflect.Field;
 
-public class DoubleData extends AbstactData<java.lang.Double> {
+public class DoubleData extends AbstractData<Double> {
 
     private double d;
 

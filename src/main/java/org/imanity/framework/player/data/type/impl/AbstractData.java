@@ -7,7 +7,7 @@ import java.lang.reflect.Field;
 import java.lang.reflect.ParameterizedType;
 
 @NoArgsConstructor
-public abstract class AbstactData<T> implements Data<T> {
+public abstract class AbstractData<T> implements Data<T> {
 
     private String name;
 
