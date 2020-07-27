@@ -12,6 +12,7 @@ import org.imanity.framework.player.data.type.DataType;
 import org.imanity.framework.util.entry.EntryArrayList;
 
 import java.lang.reflect.Field;
+import java.lang.reflect.Modifier;
 import java.util.*;
 
 public class PlayerData extends PlayerInfo {
@@ -34,6 +35,19 @@ public class PlayerData extends PlayerInfo {
         StoreDatabase database = DATABASES.get(this.getClass());
 
         database.save(this);
+    }
+
+    public Document toDocument() {
+        Document document = new Document();
+
+        document.put("uuid", this.getUuid().toString());
+        document.put("name", this.getName());
+
+        for (Data<?> data : this.toDataList()) {
+            document.put(data.name(), data.get());
+        }
+
+        return document;
     }
 
     public List<Data<?>> toDataList() {
@@ -65,7 +79,7 @@ public class PlayerData extends PlayerInfo {
 
             if (document.containsKey(key)) {
                 try {
-                    data.set(document.get(key, data.getType()));
+                    data.set(document.get(key, data.getLoadType()));
 
                     Field field = this.getClass().getDeclaredField(key);
                     field.setAccessible(true);
@@ -88,7 +102,17 @@ public class PlayerData extends PlayerInfo {
                 continue;
             }
 
-            DataType dataType = DataType.getType(field.getType());
+            if (Modifier.isFinal(field.getModifiers())) {
+                new IllegalStateException("The field " + field.getName() + " is final but it's storing datas!").printStackTrace();
+                continue;
+            }
+
+            if (Modifier.isStatic(field.getModifiers())) {
+                new IllegalStateException("The field " + field.getName() + " is static but it's storing datas!").printStackTrace();
+                continue;
+            }
+
+            DataType dataType = DataType.getType(field);
 
             if (dataType == null) {
                 Imanity.LOGGER.error("The data type " + field.getType().getSimpleName() + " does not exists!");

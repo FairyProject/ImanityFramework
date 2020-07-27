@@ -1,16 +1,26 @@
 package org.imanity.framework.player.data.type;
 
 import com.google.gson.JsonObject;
+import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import lombok.Getter;
 import org.bson.Document;
 import org.imanity.framework.player.data.type.impl.*;
+import org.imanity.framework.util.CustomLocation;
+import org.imanity.framework.util.entry.Entry;
+import org.imanity.framework.util.entry.EntryArrayList;
 
+import java.lang.reflect.Field;
+import java.lang.reflect.ParameterizedType;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.function.Function;
+import java.util.function.Supplier;
 
 public class DataType {
 
-    private static final Map<Class<?>, DataType> DATA_TYPES = new HashMap<>();
+    private static final Map<Class<?>, Function<Field, DataType>> DATA_TYPES = new HashMap<>();
 
     public static final DataType JSON;
     public static final DataType STRING;
@@ -20,23 +30,40 @@ public class DataType {
     public static final DataType FLOAT;
     public static final DataType SHORT;
     public static final DataType DOCUMENT;
+    public static final DataType ENTRY;
+    public static final DataType CUSTOM_LOCATION;
 
     static {
-        JSON = DataType.register(JsonObject.class, JsonData.class);
-        STRING = DataType.register(String.class, StringData.class);
+        JSON = DataType.register(JsonData.class, JsonObject.class);
+        STRING = DataType.register(StringData.class, String.class);
+        ENTRY = DataType.register(EntryData.class, Entry.class);
+        CUSTOM_LOCATION = DataType.register(CustomLocationData.class, CustomLocation.class);
 
-        DataType.register(int.class, IntData.class);
-        DataType.register(short.class, IntData.class);
-        DataType.register(double.class, DoubleData.class);
-        DataType.register(float.class, DoubleData.class);
-        DataType.register(boolean.class, BooleanData.class);
+        INT = SHORT = DataType.register(IntData.class,
+                int.class,
+                short.class,
+                Integer.class,
+                Short.class
+        );
+        FLOAT = DOUBLE = DataType.register(DoubleData.class,
+                double.class,
+                float.class,
+                Double.class,
+                Float.class
+        );
+        BOOLEAN = DataType.register(BooleanData.class,
+                boolean.class,
+                Boolean.class
+        );
 
-        INT = DataType.register(Integer.class, IntData.class);
-        SHORT = DataType.register(Short.class, IntData.class);
-        DOUBLE = DataType.register(Double.class, DoubleData.class);
-        FLOAT = DataType.register(Float.class, DoubleData.class);
-        BOOLEAN = DataType.register(Boolean.class, BooleanData.class);
-        DOCUMENT = DataType.register(Document.class, DocumentData.class);
+        DOCUMENT = DataType.register(DocumentData.class, Document.class);
+
+        DataType.register(ListDataType::new,
+                List.class,
+                ArrayList.class,
+                ObjectArrayList.class,
+                EntryArrayList.class
+                );
     }
 
     @Getter
@@ -54,16 +81,51 @@ public class DataType {
         }
     }
 
-    public static DataType register(Class<?> clazz, Class<? extends Data<?>> dataClass) {
+    public static DataType register(Class<? extends Data<?>> dataClass, Class<?>... classes) {
         DataType dataType = new DataType(dataClass);
-        DATA_TYPES.put(clazz, dataType);
+
+        for (Class<?> clazz : classes) {
+            DATA_TYPES.put(clazz, field -> dataType);
+        }
         return dataType;
     }
 
-    public static DataType getType(Class<?> clazz) {
+    public static void register(Function<Field, DataType> function, Class<?>... classes) {
+        for (Class<?> clazz : classes) {
+            DATA_TYPES.put(clazz, function);
+        }
+    }
 
-        return DATA_TYPES.get(clazz);
+    public static DataType getType(Field field) {
+
+        Class<?> type = field.getType();
+        return DATA_TYPES.get(type).apply(field);
 
     }
+
+    public static DataType getType(Class<?> clazz) {
+        return DATA_TYPES.get(clazz).apply(null);
+    }
+
+    private static class ListDataType extends DataType {
+
+        private final DataType insideType;
+
+        public ListDataType(Field field) {
+            super(ListData.class);
+
+            ParameterizedType parameterizedType = (ParameterizedType) field.getGenericType();
+            this.insideType = DataType.getType((Class<?>) parameterizedType.getActualTypeArguments()[0]);
+        }
+
+        @Override
+        public Data<?> newData() {
+            ListData listData = new ListData();
+            listData.setType(this.insideType);
+            return listData;
+        }
+
+    }
+
 
 }

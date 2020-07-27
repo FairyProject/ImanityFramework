@@ -3,6 +3,7 @@ package org.imanity.framework.locale.player;
 import lombok.Getter;
 import lombok.Setter;
 import org.bukkit.entity.Player;
+import org.imanity.framework.Imanity;
 import org.imanity.framework.locale.Locale;
 import org.imanity.framework.player.data.PlayerData;
 import org.imanity.framework.player.data.annotation.StoreData;
@@ -12,7 +13,7 @@ import org.imanity.framework.player.data.annotation.StoreData;
 public class LocaleData extends PlayerData {
 
     @StoreData
-    private Locale locale;
+    private Locale locale = Imanity.LOCALE_HANDLER.getDefaultLocale();
 
     public LocaleData(Player player) {
         super(player);

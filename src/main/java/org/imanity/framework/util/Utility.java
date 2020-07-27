@@ -11,6 +11,8 @@ import java.util.Iterator;
 
 public class Utility {
 
+    private static final int INDEX_NOT_FOUND = -1;
+
     public static <T> String joinToString(final T[] array) {
         return array == null ? "null" : joinToString(Arrays.asList(array));
     }
@@ -73,6 +75,43 @@ public class Utility {
         ChunkSection cs = nmsChunk.getSections()[y >> 4];
 
         cs.setType(x & 15, y & 15, z & 15, ibd);
+    }
+
+    public static boolean isEmpty(final CharSequence cs) {
+        return cs == null || cs.length() == 0;
+    }
+
+    public static String replace(final String text, final String searchString, final String replacement) {
+        if (isEmpty(text) || isEmpty(searchString) || replacement == null)
+            return text;
+        final String searchText = text;
+        int start = 0;
+        int end = searchText.indexOf(searchString, start);
+        if (end == INDEX_NOT_FOUND)
+            return text;
+        final int replLength = searchString.length();
+        int increase = replacement.length() - replLength;
+        increase = increase < 0 ? 0 : increase;
+        increase *= 16;
+        final StringBuilder buf = new StringBuilder(text.length() + increase);
+        while (end != INDEX_NOT_FOUND) {
+            buf.append(text, start, end).append(replacement);
+            start = end + replLength;
+            end = searchText.indexOf(searchString, start);
+        }
+        buf.append(text, start, text.length());
+        return buf.toString();
+    }
+
+    public static String replace(final String text, final String searchString, final Object replacement) {
+        return replace(text, searchString, replacement.toString());
+    }
+
+    public static String replace(String text, final RV... replaceValues) {
+        for (final RV replaceValue : replaceValues) {
+            text = ChatColor.translateAlternateColorCodes('&', replace(text, replaceValue.getTarget(), replaceValue.getReplacement()));
+        }
+        return text;
     }
 
 }

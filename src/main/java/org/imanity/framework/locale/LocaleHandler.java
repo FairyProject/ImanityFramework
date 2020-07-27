@@ -19,14 +19,14 @@ public class LocaleHandler {
     private Locale defaultLocale;
 
     public void init() {
-        DataType.register(Locale.class, LocaleTypeData.class);
+        DataType.register(LocaleTypeData.class, Locale.class);
 
         this.defaultLocale = this.registerLocale(Imanity.CORE_CONFIG.DEFAULT_LOCALE);
 
         new PlayerDataBuilder()
                 .loadOnJoin(true)
                 .saveOnQuit(true)
-                .name("LocaleData")
+                .name("locale")
                 .playerDataClass(LocaleData.class)
                 .build();
     }

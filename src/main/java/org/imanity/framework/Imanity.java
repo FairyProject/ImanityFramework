@@ -1,5 +1,8 @@
 package org.imanity.framework;
 
+import lombok.AccessLevel;
+import lombok.NoArgsConstructor;
+import lombok.NonNull;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.bukkit.World;
@@ -13,6 +16,8 @@ import org.imanity.framework.config.CoreConfig;
 import org.imanity.framework.database.DatabaseType;
 import org.imanity.framework.database.Mongo;
 import org.imanity.framework.database.MySQL;
+import org.imanity.framework.hologram.HologramHandler;
+import org.imanity.framework.hologram.HologramListener;
 import org.imanity.framework.locale.Locale;
 import org.imanity.framework.locale.LocaleHandler;
 import org.imanity.framework.locale.player.LocaleData;
@@ -26,6 +31,9 @@ import org.imanity.framework.util.ReflectionUtil;
 import org.imanity.framework.util.SpigotUtil;
 import org.imanity.framework.util.Utility;
 
+import javax.annotation.Nonnull;
+
+@NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class Imanity {
 
     public static final Logger LOGGER = LogManager.getLogger("Imanity");
@@ -71,7 +79,8 @@ public class Imanity {
 
         Imanity.registerEvents(
                 new PlayerListener(),
-                new CacheBlockSetListener()
+                new CacheBlockSetListener(),
+                new HologramListener()
         );
     }
 
@@ -80,6 +89,13 @@ public class Imanity {
             return (CacheBlockSetHandler) world.getMetadata(CacheBlockSetHandler.METADATA).get(0).value();
         }
         return null;
+    }
+
+    public static HologramHandler getHologramHandler(World world) {
+        if (world.hasMetadata(HologramHandler.WORLD_METADATA)) {
+            return (HologramHandler) world.getMetadata(HologramHandler.WORLD_METADATA).get(0).value();
+        }
+        throw new RuntimeException("Something wrong");
     }
 
     public static void registerEvents(Listener... listeners) {
@@ -100,7 +116,7 @@ public class Imanity {
         } else {
             locale = localeData.getLocale();
         }
-        return locale.get(key);
+        return Utility.color(locale.get(key));
     }
 
     public static Iterable<String> translateList(Player player, String key) {

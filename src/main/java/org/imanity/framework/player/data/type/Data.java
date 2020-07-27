@@ -11,7 +11,7 @@ public interface Data<T> {
 
     String name();
 
-    T get();
+    Object get();
 
     void set(Object object);
 
@@ -23,6 +23,8 @@ public interface Data<T> {
 
     Object toFieldObject(Field field);
 
-    Class<T> getType();
+    Class<?> getLoadType();
+
+    Class<?> getType();
 
 }

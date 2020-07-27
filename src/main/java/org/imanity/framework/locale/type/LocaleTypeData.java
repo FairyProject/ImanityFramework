@@ -5,13 +5,15 @@ import org.imanity.framework.Imanity;
 import org.imanity.framework.locale.Locale;
 import org.imanity.framework.player.data.type.impl.AbstractData;
 
+import java.lang.reflect.Field;
+
 public class LocaleTypeData extends AbstractData<Locale> {
 
     private Locale locale;
 
     @Override
-    public Locale get() {
-        return locale;
+    public String get() {
+        return locale.getName();
     }
 
     @Override
@@ -25,6 +27,16 @@ public class LocaleTypeData extends AbstractData<Locale> {
                 this.locale = Imanity.LOCALE_HANDLER.registerLocale((String) object);
             }
         }
+    }
+
+    @Override
+    public Object toFieldObject(Field field) {
+        return locale;
+    }
+
+    @Override
+    public Class<?> getLoadType() {
+        return String.class;
     }
 
     @Override

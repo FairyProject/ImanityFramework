@@ -1,6 +1,10 @@
 package org.imanity.framework.util;
 
 import org.bukkit.Bukkit;
+import org.bukkit.World;
+import org.bukkit.craftbukkit.v1_8_R3.CraftWorld;
+import org.bukkit.craftbukkit.v1_8_R3.entity.CraftPlayer;
+import org.bukkit.entity.Player;
 
 public class SpigotUtil {
 
@@ -36,11 +40,22 @@ public class SpigotUtil {
 
     }
 
+    public static int getWorldId(World world) {
+        return ((CraftWorld) world).getHandle().dimension;
+    }
+
     public static boolean isServerThread() {
         if (SPIGOT_TYPE == SpigotType.IMANITY) {
             return Bukkit.isPrimaryThread(false);
         }
         return Bukkit.isPrimaryThread();
+    }
+
+    public static int getProtocolVersion(Player player) {
+        if (SPIGOT_TYPE == SpigotType.IMANITY) {
+            return ((CraftPlayer) player).getHandle().playerConnection.networkManager.getVersion();
+        }
+        return -1;
     }
 
     public enum SpigotType {

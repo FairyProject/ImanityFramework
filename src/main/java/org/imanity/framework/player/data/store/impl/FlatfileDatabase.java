@@ -65,19 +65,10 @@ public class FlatfileDatabase extends AbstractDatabase {
         }
 
         try {
-            Document jsonObject = new Document();
+            DocumentData documentData = (DocumentData) DataType.DOCUMENT.newData();
+            documentData.set(playerData.toDocument());
 
-            jsonObject.put("uuid", playerData.getUuid().toString());
-            jsonObject.put("name", playerData.getName());
-
-            for (Data<?> data : playerData.toDataList()) {
-                jsonObject.put(data.name(), data.get());
-            }
-
-            DocumentData jsonData = (DocumentData) DataType.DOCUMENT.newData();
-            jsonData.set(jsonObject);
-
-            FileUtils.writeStringToFile(file, jsonData.toStringData(false), Charsets.UTF_8);
+            FileUtils.writeStringToFile(file, documentData.toStringData(false), Charsets.UTF_8);
         } catch (IOException ex) {
             throw new RuntimeException("Unexpected error while writing json files", ex);
         }

@@ -34,15 +34,8 @@ public class MongoDatabase extends AbstractDatabase {
 
     @Override
     public void save(PlayerData playerData) {
-        Document document = new Document();
-
-        document.put("uuid", playerData.getUuid().toString());
-        document.put("name", playerData.getName());
-
-        for (Data<?> data : playerData.toDataList()) {
-            document.put(data.name(), data.get());
-        }
-
-        this.players.replaceOne(Filters.eq("uuid", playerData.getUuid().toString()), document, new ReplaceOptions().upsert(true));
+        this.players.replaceOne(Filters.eq("uuid", playerData.getUuid().toString()),
+                playerData.toDocument(),
+                new ReplaceOptions().upsert(true));
     }
 }

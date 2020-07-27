@@ -22,7 +22,7 @@ public abstract class AbstractData<T> implements Data<T> {
     }
 
     @Override
-    public Class<T> getType() {
+    public Class<?> getType() {
         return (Class<T>) ((ParameterizedType) getClass().getGenericSuperclass()).getActualTypeArguments()[0];
     }
 
@@ -34,5 +34,10 @@ public abstract class AbstractData<T> implements Data<T> {
     @Override
     public Object toFieldObject(Field field) {
         return this.get();
+    }
+
+    @Override
+    public Class<?> getLoadType() {
+        return this.getType();
     }
 }
