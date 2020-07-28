@@ -11,6 +11,17 @@ import java.util.List;
 
 public class ImanityBoard {
 
+    private static Field PACKET_G_FIELD;
+
+    static {
+        try {
+            PACKET_G_FIELD = PacketPlayOutScoreboardScore.class.getDeclaredField("g");
+            PACKET_G_FIELD.setAccessible(true);
+        } catch (Exception ex) {
+            ex.printStackTrace();
+        }
+    }
+
     public static final String METADATA_TAG = "Imanity-Scoreboard";
 
     private final Player player;
@@ -184,11 +195,8 @@ public class ImanityBoard {
             packetB.setH(0);
 
             try {
-                final Field f = packetB.getClass().getDeclaredField("g");
-                f.setAccessible(true);
-
-                ((List<String>) f.get(packetB)).add(getEntry(line));
-            } catch (NoSuchFieldException | IllegalAccessException e) {
+                ((List<String>) PACKET_G_FIELD.get(packetB)).add(getEntry(line));
+            } catch (IllegalAccessException e) {
                 Utility.error(e, "An error occurred while creating new fake team");
             }
 

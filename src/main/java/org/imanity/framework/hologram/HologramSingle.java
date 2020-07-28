@@ -15,11 +15,23 @@ import org.imanity.framework.util.ReflectionUtil;
 import org.imanity.framework.util.SpigotUtil;
 import org.imanity.framework.util.nms.NMSUtil;
 
+import java.lang.reflect.Field;
 import java.util.Collection;
 
 @Getter
 @Setter
 public class HologramSingle {
+
+    private static Field ENTITY_ID_FIELD;
+
+    static {
+        try {
+            ENTITY_ID_FIELD = Entity.class.getDeclaredField("id");
+            ENTITY_ID_FIELD.setAccessible(true);
+        } catch (Exception ex) {
+            ex.printStackTrace();
+        }
+    }
 
     private Hologram hologram;
 
@@ -75,9 +87,13 @@ public class HologramSingle {
 
         if (rebuild) {
 
-            ReflectionUtil.setDeclaredField(witherSkull, "id", this.entityIds[0]);
-            ReflectionUtil.setDeclaredField(horse1_7, "id", this.entityIds[1]);
-            ReflectionUtil.setDeclaredField(horse1_8, "id", this.entityIds[2]);
+            try {
+                ENTITY_ID_FIELD.set(witherSkull, this.entityIds[0]);
+                ENTITY_ID_FIELD.set(horse1_7, this.entityIds[1]);
+                ENTITY_ID_FIELD.set(horse1_8, this.entityIds[2]);
+            } catch (Exception ex) {
+                throw new RuntimeException("Something wrong while building packets for hologram", ex);
+            }
 
             Entity.setEntityCount(Entity.getEntityCount() - 3);
 
