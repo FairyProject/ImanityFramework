@@ -13,6 +13,7 @@ import org.bukkit.entity.Player;
 import org.imanity.framework.hologram.api.ViewHandler;
 import org.imanity.framework.util.ReflectionUtil;
 import org.imanity.framework.util.SpigotUtil;
+import org.imanity.framework.util.nms.NMSUtil;
 
 import java.util.Collection;
 
@@ -93,10 +94,10 @@ public class HologramSingle {
             this.horseDataWatcher1_7 = this.packetHorse1_7.getL();
 
             if (defaultName != null) {
-                setDataWatcher(this.horseDataWatcher1_7, 10, defaultName);
+                NMSUtil.setDataWatcher(this.horseDataWatcher1_7, 10, defaultName);
             }
-            setDataWatcher(this.horseDataWatcher1_7, 11, (byte) (defaultName != null && !defaultName.isEmpty() ? 1 : 0));
-            setDataWatcher(this.horseDataWatcher1_7, 12, -1700000);
+            NMSUtil.setDataWatcher(this.horseDataWatcher1_7, 11, (byte) (defaultName != null && !defaultName.isEmpty() ? 1 : 0));
+            NMSUtil.setDataWatcher(this.horseDataWatcher1_7, 12, -1700000);
         }
 
         {
@@ -239,8 +240,8 @@ public class HologramSingle {
     private DataWatcher witherSkullDataWatcher, horseDataWatcher1_7, horseDataWatcher1_8;
 
     private PacketPlayOutEntityMetadata buildNamePacket(int id, DataWatcher dataWatcher, int nameIndex, int visibilityIndex, String name) {
-        setDataWatcher(dataWatcher, nameIndex, name != null ? name : "");
-        setDataWatcher(dataWatcher, visibilityIndex, (byte) (name != null && !name.isEmpty() ? 1 : 0));
+        NMSUtil.setDataWatcher(dataWatcher, nameIndex, name != null ? name : "");
+        NMSUtil.setDataWatcher(dataWatcher, visibilityIndex, (byte) (name != null && !name.isEmpty() ? 1 : 0));
 
         return new PacketPlayOutEntityMetadata(id, dataWatcher, true);
     }
@@ -264,40 +265,9 @@ public class HologramSingle {
 
         if (datawatcher) {
             entityHorse.setAge(-1700000);
-            setDataWatcher(entityHorse.getDataWatcher(), 12, (byte) 96);
+            NMSUtil.setDataWatcher(entityHorse.getDataWatcher(), 12, (byte) 96);
         }
         return entityHorse;
-    }
-
-    private static void setDataWatcher(DataWatcher dataWatcher, int index, Object value) {
-        int type = HologramSingle.getValueType(value);
-
-        dataWatcher.dataValues.put(index, new DataWatcher.WatchableObject(type, index, value));
-    }
-
-    public static int getValueType(Object value) {
-        int type = 0;
-        if (value instanceof Number) {
-            if (value instanceof Byte) {
-                type = 0;
-            } else if (value instanceof Short) {
-                type = 1;
-            } else if (value instanceof Integer) {
-                type = 2;
-            } else if (value instanceof Float) {
-                type = 3;
-            }
-        } else if (value instanceof String) {
-            type = 4;
-        } else if (value != null && value.getClass().equals(ItemStack.class)) {
-            type = 5;
-        } else if (value != null && value.getClass().equals(BlockPosition.class)) {
-            type = 6;
-        } else if (value != null && value.getClass().equals(Vector3f.class)) {
-            type = 7;
-        }
-
-        return type;
     }
 
 }

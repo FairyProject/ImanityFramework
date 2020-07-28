@@ -9,6 +9,8 @@ import org.bukkit.World;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Listener;
 import org.bukkit.plugin.Plugin;
+import org.imanity.framework.bossbar.BossBarAdapter;
+import org.imanity.framework.bossbar.BossBarHandler;
 import org.imanity.framework.chunk.KeepChunkHandler;
 import org.imanity.framework.chunk.block.CacheBlockSetHandler;
 import org.imanity.framework.chunk.block.CacheBlockSetListener;
@@ -42,6 +44,7 @@ public class Imanity {
     public static LocaleHandler LOCALE_HANDLER;
     public static ImanityBoardHandler BOARD_HANDLER;
     public static KeepChunkHandler KEEP_CHUNK_HANDLER;
+    public static BossBarHandler BOSS_BAR_HANDLER;
     public static CoreConfig CORE_CONFIG;
     public static Plugin PLUGIN;
 
@@ -106,6 +109,10 @@ public class Imanity {
 
     public static void registerBoardHandler(ImanityBoardAdapter adapter) {
         Imanity.BOARD_HANDLER = new ImanityBoardHandler(adapter);
+    }
+
+    public static void registerBossBarHandler(BossBarAdapter adapter, long tick) {
+        Imanity.BOSS_BAR_HANDLER = new BossBarHandler(adapter, tick);
     }
 
     public static String translate(Player player, String key) {
