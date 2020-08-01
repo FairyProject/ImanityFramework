@@ -2,11 +2,11 @@ package org.imanity.framework;
 
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
-import lombok.NonNull;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.bukkit.World;
 import org.bukkit.entity.Player;
+import org.bukkit.event.Event;
 import org.bukkit.event.Listener;
 import org.bukkit.plugin.Plugin;
 import org.imanity.framework.bossbar.BossBarAdapter;
@@ -29,11 +29,10 @@ import org.imanity.framework.player.data.PlayerListener;
 import org.imanity.framework.scoreboard.ImanityBoardAdapter;
 import org.imanity.framework.scoreboard.ImanityBoardHandler;
 import org.imanity.framework.scoreboard.impl.ExampleBoardAdapter;
+import org.imanity.framework.timer.TimerHandler;
 import org.imanity.framework.util.ReflectionUtil;
 import org.imanity.framework.util.SpigotUtil;
 import org.imanity.framework.util.Utility;
-
-import javax.annotation.Nonnull;
 
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class Imanity {
@@ -45,6 +44,7 @@ public class Imanity {
     public static ImanityBoardHandler BOARD_HANDLER;
     public static KeepChunkHandler KEEP_CHUNK_HANDLER;
     public static BossBarHandler BOSS_BAR_HANDLER;
+    public static TimerHandler TIMER_HANDLER;
     public static CoreConfig CORE_CONFIG;
     public static Plugin PLUGIN;
 
@@ -63,6 +63,9 @@ public class Imanity {
 
         Imanity.LOCALE_HANDLER = new LocaleHandler();
         Imanity.LOCALE_HANDLER.init();
+
+        Imanity.TIMER_HANDLER = new TimerHandler();
+        Imanity.TIMER_HANDLER.init();
 
         Imanity.KEEP_CHUNK_HANDLER = new KeepChunkHandler();
 
@@ -105,6 +108,10 @@ public class Imanity {
         for (Listener listener : listeners) {
             PLUGIN.getServer().getPluginManager().registerEvents(listener, PLUGIN);
         }
+    }
+
+    public static void callEvent(Event event) {
+        PLUGIN.getServer().getPluginManager().callEvent(event);
     }
 
     public static void registerBoardHandler(ImanityBoardAdapter adapter) {

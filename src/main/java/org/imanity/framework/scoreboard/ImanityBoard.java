@@ -15,7 +15,7 @@ public class ImanityBoard {
 
     static {
         try {
-            PACKET_G_FIELD = PacketPlayOutScoreboardScore.class.getDeclaredField("g");
+            PACKET_G_FIELD = PacketPlayOutScoreboardTeam.class.getDeclaredField("g");
             PACKET_G_FIELD.setAccessible(true);
         } catch (Exception ex) {
             ex.printStackTrace();
