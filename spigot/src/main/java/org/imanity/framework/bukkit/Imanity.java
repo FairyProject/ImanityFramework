@@ -19,8 +19,6 @@ import org.imanity.framework.bukkit.chunk.block.CacheBlockSetHandler;
 import org.imanity.framework.bukkit.chunk.block.CacheBlockSetListener;
 import org.imanity.framework.bukkit.hologram.HologramHandler;
 import org.imanity.framework.bukkit.hologram.HologramListener;
-import org.imanity.framework.locale.Locale;
-import org.imanity.framework.locale.player.LocaleData;
 import org.imanity.framework.bukkit.menu.task.MenuUpdateTask;
 import org.imanity.framework.bukkit.player.BukkitPlayerData;
 import org.imanity.framework.player.PlayerBridge;
@@ -157,14 +155,7 @@ public class Imanity {
     }
 
     public static String translate(Player player, String key) {
-        LocaleData localeData = PlayerData.getPlayerData(player, LocaleData.class);
-        Locale locale;
-        if (localeData == null || localeData.getLocale() == null) {
-            locale = ImanityCommon.LOCALE_HANDLER.getDefaultLocale();
-        } else {
-            locale = localeData.getLocale();
-        }
-        return Utility.color(locale.get(key));
+        return Utility.color(ImanityCommon.translate(player, key));
     }
 
     public static Iterable<String> translateList(Player player, String key) {

@@ -7,10 +7,12 @@ import org.imanity.framework.util.builder.SQLTable;
 import org.imanity.framework.ImanityCommon;
 import org.imanity.framework.player.data.PlayerData;
 import org.imanity.framework.player.data.type.Data;
+import org.redisson.api.RReadWriteLock;
 
 import java.lang.reflect.Field;
 import java.util.Iterator;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 public class SQLDatabase extends AbstractDatabase {
 
@@ -35,6 +37,12 @@ public class SQLDatabase extends AbstractDatabase {
 
     @Override
     public void load(PlayerData playerData) {
+        RReadWriteLock lock = null;
+        if (ImanityCommon.CORE_CONFIG.USE_REDIS_DISTRIBUTED_LOCK) {
+            lock = ImanityCommon.REDIS.getLock("Data-" + playerData.getUuid());
+            lock.readLock().lock(3L, TimeUnit.SECONDS);
+        }
+
         this.table.executeSelect("WHERE uuid = ?")
                 .dataSource(ImanityCommon.SQL.getDataSource())
                 .statement(s -> {
@@ -54,6 +62,10 @@ public class SQLDatabase extends AbstractDatabase {
             }
             return null;
         }).run();
+
+        if (lock != null) {
+            lock.readLock().unlock();
+        }
     }
 
     @Override
@@ -89,8 +101,18 @@ public class SQLDatabase extends AbstractDatabase {
 
         stringBuilder.append(";");
 
+        RReadWriteLock lock = null;
+        if (ImanityCommon.CORE_CONFIG.USE_REDIS_DISTRIBUTED_LOCK) {
+            lock = ImanityCommon.REDIS.getLock("Data-" + playerData.getUuid());
+            lock.writeLock().lock(3L, TimeUnit.SECONDS);
+        }
+
         this.table.executeUpdate(stringBuilder.toString())
                 .dataSource(ImanityCommon.SQL.getDataSource())
                 .run();
+
+        if (lock != null) {
+            lock.writeLock().unlock();
+        }
     }
 }

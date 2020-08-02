@@ -1,7 +1,8 @@
-package org.imanity.framework.jedis.server;
+package org.imanity.framework.redis.server;
 
 import lombok.Getter;
 import lombok.Setter;
+import org.imanity.framework.redis.server.enums.ServerState;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -13,6 +14,7 @@ public class ImanityServer {
     private String name;
     private int onlinePlayers;
     private int maxPlayers;
+    private ServerState serverState;
 
     private final Map<String, String> metadata = new HashMap<>();
 
@@ -23,7 +25,11 @@ public class ImanityServer {
     public void load(Map<String, String> data) {
         this.onlinePlayers = Integer.parseInt(data.get("onlinePlayers"));
         this.maxPlayers = Integer.parseInt(data.get("maxPlayers"));
+        this.serverState = ServerState.valueOf(data.get("state").toUpperCase());
 
+        data.remove("onlinePlayers");
+        data.remove("maxPlayers");
+        data.remove("state");
         this.metadata.putAll(data);
     }
 
@@ -41,6 +47,10 @@ public class ImanityServer {
         } catch (NumberFormatException ex) {
             return -1D;
         }
+    }
+
+    public boolean getBoolean(String key) {
+        return Boolean.parseBoolean(metadata.get(key));
     }
 
     public String getString(String key) {

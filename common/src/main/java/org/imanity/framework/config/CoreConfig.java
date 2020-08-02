@@ -19,7 +19,11 @@ public class CoreConfig extends YamlConfiguration {
     @Convert(SpecificDatabasesConverter.class)
     private Map<String, DatabaseType> SPECIFIC_DATABASES = new HashMap<>();
 
-    public boolean USE_JEDIS = false;
+    public boolean USE_REDIS = false;
+
+    public boolean USE_REDIS_DISTRIBUTED_LOCK = false;
+
+    public boolean USE_LOCALE = false;
 
     public boolean ASYNCHRONOUS_DATA_STORING = true;
 
