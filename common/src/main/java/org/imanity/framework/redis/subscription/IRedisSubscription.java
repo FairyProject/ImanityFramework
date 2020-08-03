@@ -4,6 +4,6 @@ import com.google.gson.JsonObject;
 
 public interface IRedisSubscription {
 
-    void onMessage(String channel, JsonObject jsonObject);
+    void onMessage(String payload, JsonObject jsonObject);
 
 }

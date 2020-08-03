@@ -1,12 +1,14 @@
 package org.imanity.framework.redis.subscription;
 
 import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 import lombok.Getter;
 import org.imanity.framework.redis.ImanityRedis;
 import org.redisson.api.RTopic;
 
 @Getter
 public class RedisPubSub {
+    private static final JsonParser JSON_PARSER = new JsonParser();
 
     private final String name;
     private final RTopic topic;
@@ -17,11 +19,26 @@ public class RedisPubSub {
     }
 
     public void subscribe(IRedisSubscription subscription) {
-        this.topic.addListenerAsync(JsonObject.class, (channel, jsonObject) -> subscription.onMessage(channel.toString(), jsonObject));
+        this.topic.addListenerAsync(String.class, (channel, message) -> {
+            JsonObject object = JSON_PARSER.parse(message).getAsJsonObject();
+            String payload = object.get("payload").getAsString();
+            JsonObject data = object.get("data").getAsJsonObject();
+            subscription.onMessage(payload, data);
+        });
     }
 
-    public void publish(JsonObject jsonObject) {
-        this.topic.publishAsync(jsonObject);
+    public void publish(String payload, JsonObject data) {
+        JsonObject payloadObject = new JsonObject();
+        payloadObject.addProperty("payload", payload);
+        payloadObject.add("data", data == null ? new JsonObject() : data);
+        this.topic.publishAsync(payloadObject);
+    }
+
+    public void publish(Enum payload, JsonObject data) {
+        JsonObject payloadObject = new JsonObject();
+        payloadObject.addProperty("payload", payload.name());
+        payloadObject.add("data", data == null ? new JsonObject() : data);
+        this.topic.publishAsync(payloadObject);
     }
 
     public void disable() {

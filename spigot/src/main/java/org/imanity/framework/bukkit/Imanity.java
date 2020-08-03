@@ -5,12 +5,10 @@ import lombok.NoArgsConstructor;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.bukkit.World;
-import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Event;
 import org.bukkit.event.Listener;
 import org.bukkit.plugin.Plugin;
-import org.imanity.framework.ImanityBridge;
 import org.imanity.framework.ImanityCommon;
 import org.imanity.framework.bukkit.bossbar.BossBarAdapter;
 import org.imanity.framework.bukkit.bossbar.BossBarHandler;
@@ -19,12 +17,13 @@ import org.imanity.framework.bukkit.chunk.block.CacheBlockSetHandler;
 import org.imanity.framework.bukkit.chunk.block.CacheBlockSetListener;
 import org.imanity.framework.bukkit.hologram.HologramHandler;
 import org.imanity.framework.bukkit.hologram.HologramListener;
+import org.imanity.framework.bukkit.impl.BukkitCommandExecutor;
+import org.imanity.framework.bukkit.impl.BukkitEventHandler;
+import org.imanity.framework.bukkit.impl.BukkitImanityBridge;
+import org.imanity.framework.bukkit.impl.BukkitPlayerBridge;
 import org.imanity.framework.bukkit.menu.task.MenuUpdateTask;
 import org.imanity.framework.bukkit.player.BukkitPlayerData;
-import org.imanity.framework.player.PlayerBridge;
-import org.imanity.framework.player.data.PlayerData;
 import org.imanity.framework.bukkit.player.PlayerListener;
-import org.imanity.framework.player.data.store.StoreDatabase;
 import org.imanity.framework.bukkit.scoreboard.ImanityBoardAdapter;
 import org.imanity.framework.bukkit.scoreboard.ImanityBoardHandler;
 import org.imanity.framework.bukkit.scoreboard.impl.ExampleBoardAdapter;
@@ -32,11 +31,6 @@ import org.imanity.framework.bukkit.timer.TimerHandler;
 import org.imanity.framework.bukkit.util.ReflectionUtil;
 import org.imanity.framework.bukkit.util.SpigotUtil;
 import org.imanity.framework.bukkit.util.Utility;
-
-import java.io.File;
-import java.util.Collection;
-import java.util.Map;
-import java.util.UUID;
 
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class Imanity {
@@ -76,50 +70,9 @@ public class Imanity {
     }
 
     private static void initCommon() {
-        ImanityCommon.init(new ImanityBridge() {
-            @Override
-            public File getDataFolder() {
-                return PLUGIN.getDataFolder();
-            }
-
-            @Override
-            public Logger getLogger() {
-                return LOGGER;
-            }
-
-            @Override
-            public Map<String, Object> loadYaml(File file) {
-                YamlConfiguration configuration = YamlConfiguration.loadConfiguration(file);
-                return configuration.getValues(true);
-            }
-            @Override
-            public void saveResources(String name, boolean replace) {
-                PLUGIN.saveResource(name, replace);
-            }
-        }, new PlayerBridge<Player>() {
-            @Override
-            public PlayerData getPlayerData(Player player, StoreDatabase database) {
-                return (PlayerData) player.getMetadata(database.getMetadataTag()).get(0).value();
-            }
-            @Override
-            public Collection<? extends Player> getOnlinePlayers() {
-                return Imanity.PLUGIN.getServer().getOnlinePlayers();
-            }
-            @Override
-            public UUID getUUID(Player player) {
-                return player.getUniqueId();
-            }
-
-            @Override
-            public String getName(Player player) {
-                return player.getName();
-            }
-
-            @Override
-            public Class<Player> getPlayerClass() {
-                return Player.class;
-            }
-        });
+        ImanityCommon.init(new BukkitImanityBridge(), new BukkitPlayerBridge());
+        ImanityCommon.COMMAND_EXECUTOR = new BukkitCommandExecutor();
+        ImanityCommon.EVENT_HANDLER = new BukkitEventHandler();
     }
 
     public static CacheBlockSetHandler getBlockSetHandler(World world) {
@@ -164,8 +117,7 @@ public class Imanity {
 
     public static void shutdown() {
         SHUTTING_DOWN = true;
-
-        PlayerData.shutdown();
+        ImanityCommon.shutdown();
     }
 
 }

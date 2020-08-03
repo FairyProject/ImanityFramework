@@ -1,7 +1,9 @@
 package org.imanity.framework.bukkit.plugin;
 
 import org.bukkit.plugin.java.JavaPlugin;
+import org.imanity.framework.ImanityCommon;
 import org.imanity.framework.bukkit.Imanity;
+import org.imanity.framework.redis.server.enums.ServerState;
 
 public abstract class ImanityPlugin extends JavaPlugin {
 

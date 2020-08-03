@@ -6,7 +6,7 @@ import org.imanity.framework.player.data.store.StoreDatabase;
 import java.util.Collection;
 import java.util.UUID;
 
-public interface PlayerBridge<T> {
+public interface IPlayerBridge<T> {
 
     PlayerData getPlayerData(T t, StoreDatabase database);
 

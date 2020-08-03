@@ -15,4 +15,6 @@ public interface ImanityBridge {
 
     Map<String, Object> loadYaml(File file);
 
+    boolean isShuttingDown();
+
 }

@@ -3,6 +3,7 @@ package org.imanity.framework.redis.server;
 import lombok.Getter;
 import lombok.Setter;
 import org.imanity.framework.redis.server.enums.ServerState;
+import org.imanity.framework.util.JsonChain;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -30,6 +31,7 @@ public class ImanityServer {
         data.remove("onlinePlayers");
         data.remove("maxPlayers");
         data.remove("state");
+        this.metadata.clear();
         this.metadata.putAll(data);
     }
 
@@ -55,6 +57,11 @@ public class ImanityServer {
 
     public String getString(String key) {
         return metadata.get(key);
+    }
+
+    public JsonChain packageJson() {
+        return new JsonChain()
+                .addProperty("serverName", this.name);
     }
 
 }

@@ -2,7 +2,7 @@ package org.imanity.framework.player.data;
 
 import org.bson.Document;
 import org.imanity.framework.ImanityCommon;
-import org.imanity.framework.player.PlayerBridge;
+import org.imanity.framework.player.IPlayerBridge;
 import org.imanity.framework.player.PlayerInfo;
 import org.imanity.framework.player.data.annotation.StoreData;
 import org.imanity.framework.player.data.store.StoreDatabase;
@@ -16,7 +16,7 @@ import java.util.*;
 
 public class PlayerData extends PlayerInfo {
 
-    public static PlayerBridge PLAYER_BRIDGE;
+    public static IPlayerBridge PLAYER_BRIDGE;
     protected static final Map<Class<? extends PlayerData>, StoreDatabase> DATABASES = new HashMap<>();
 
     public PlayerData(Object player) {

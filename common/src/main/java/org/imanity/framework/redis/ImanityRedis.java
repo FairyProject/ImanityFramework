@@ -4,6 +4,7 @@ import lombok.Getter;
 import org.imanity.framework.ImanityCommon;
 import org.imanity.framework.config.format.FieldNameFormatters;
 import org.imanity.framework.config.yaml.YamlConfiguration;
+import org.imanity.framework.redis.server.ServerHandler;
 import org.redisson.Redisson;
 import org.redisson.api.RMap;
 import org.redisson.api.RReadWriteLock;
@@ -16,6 +17,7 @@ import java.io.File;
 public class ImanityRedis {
 
     private RedissonClient client;
+    private ServerHandler serverHandler;
 
     public void init() {
         RedisConfig redisConfig = new RedisConfig();
@@ -30,6 +32,8 @@ public class ImanityRedis {
         }
 
         this.client = Redisson.create(config);
+        this.serverHandler = new ServerHandler(this);
+        this.serverHandler.init();
     }
 
     public RReadWriteLock getLock(String name) {
@@ -38,6 +42,10 @@ public class ImanityRedis {
 
     public RMap<String, String> getMap(String name) {
         return this.client.getMap(name);
+    }
+
+    public Iterable<String> getKeys(String pattern) {
+        return this.client.getKeys().getKeysByPattern(pattern);
     }
 
     public static class RedisConfig extends YamlConfiguration {
