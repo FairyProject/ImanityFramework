@@ -92,6 +92,10 @@ public abstract class AbstractTimer implements Timer {
         return "Time Remaining: <seconds>";
     }
 
+    public void clear() {
+        Imanity.TIMER_HANDLER.clear(this);
+    }
+
     @Override
     public void tick() {
 

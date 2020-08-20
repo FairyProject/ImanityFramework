@@ -9,10 +9,10 @@ import java.util.List;
 
 public class TimerHandler implements Runnable {
 
-    private List<Timer> timers = new ArrayList<>();
+    private final List<Timer> timers = new ArrayList<>();
 
     public void init() {
-        TaskUtil.runAsyncRepeated(this, 5L);
+        TaskUtil.runRepeated(this, 5L);
     }
 
     public void add(Timer timer) {
@@ -27,27 +27,33 @@ public class TimerHandler implements Runnable {
         timer.start();
     }
 
+    public void clear(Timer timer) {
+        this.timers.remove(timer);
+    }
+
+    public boolean isTimerRunning(Class<? extends Timer> timerClass) {
+        return this.getTimer(timerClass) != null;
+    }
+
+    public <T extends Timer> T getTimer(Class<T> timerClass) {
+        return (T) this.timers
+                .stream()
+                .filter(timerClass::isInstance)
+                .findFirst()
+                .orElse(null);
+    }
+
     @Override
     public void run() {
-        List<Timer> toRemove = null;
-
         for (Timer timer : this.timers) {
             if (!timer.isPaused()) {
 
                 timer.tick();
                 if (timer.isTimerElapsed() && timer.finish()) {
-                    if (toRemove == null) {
-                        toRemove = new ArrayList<>();
-                    }
-                    toRemove.add(timer);
+                    this.timers.remove(timer);
                 }
 
             }
-        }
-
-        if (toRemove != null) {
-            List<Timer> finalToRemove = toRemove;
-            TaskUtil.runSync(() -> this.timers.removeAll(finalToRemove));
         }
     }
 }
