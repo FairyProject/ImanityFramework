@@ -28,9 +28,11 @@ import org.imanity.framework.bukkit.scoreboard.ImanityBoardAdapter;
 import org.imanity.framework.bukkit.scoreboard.ImanityBoardHandler;
 import org.imanity.framework.bukkit.scoreboard.impl.ExampleBoardAdapter;
 import org.imanity.framework.bukkit.timer.TimerHandler;
+import org.imanity.framework.bukkit.util.RV;
 import org.imanity.framework.bukkit.util.ReflectionUtil;
 import org.imanity.framework.bukkit.util.SpigotUtil;
 import org.imanity.framework.bukkit.util.Utility;
+import org.imanity.framework.bukkit.util.items.ItemListener;
 
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class Imanity {
@@ -63,7 +65,8 @@ public class Imanity {
         Imanity.registerEvents(
                 new PlayerListener(),
                 new CacheBlockSetListener(),
-                new HologramListener()
+                new HologramListener(),
+                new ItemListener()
         );
     }
 
@@ -111,6 +114,14 @@ public class Imanity {
 
     public static Iterable<String> translateList(Player player, String key) {
         return Utility.toStringList(Imanity.translate(player, key), "\n");
+    }
+
+    public static String translate(Player player, String key, RV... replaceValues) {
+        return Utility.replace(Imanity.translate(player, key), replaceValues);
+    }
+
+    public static Iterable<String> translateList(Player player, String key, RV... replaceValues) {
+        return Utility.toStringList(Imanity.translate(player, key, replaceValues), "\n");
     }
 
     public static void shutdown() {
