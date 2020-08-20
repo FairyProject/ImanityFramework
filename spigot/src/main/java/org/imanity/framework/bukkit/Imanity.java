@@ -58,8 +58,6 @@ public class Imanity {
 
         Imanity.KEEP_CHUNK_HANDLER = new KeepChunkHandler();
 
-        Imanity.registerBoardHandler(new ExampleBoardAdapter());
-
         MenuUpdateTask.init();
 
         Imanity.registerEvents(

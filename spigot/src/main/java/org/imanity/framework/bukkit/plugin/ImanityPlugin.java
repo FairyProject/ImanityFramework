@@ -1,11 +1,18 @@
 package org.imanity.framework.bukkit.plugin;
 
+import org.bukkit.plugin.PluginLoadOrder;
 import org.bukkit.plugin.java.JavaPlugin;
-import org.imanity.framework.ImanityCommon;
 import org.imanity.framework.bukkit.Imanity;
-import org.imanity.framework.redis.server.enums.ServerState;
 
 public abstract class ImanityPlugin extends JavaPlugin {
+
+    @Override
+    public void onLoad() {
+        if (this.getDescription().getLoad() != PluginLoadOrder.STARTUP) {
+            new IllegalStateException("The ImanityFramework requires the plugin to be load on startup, please add [load: STARTUP] into your plugin.yml!").printStackTrace();
+            this.getServer().getPluginManager().disablePlugin(this);
+        }
+    }
 
     @Override
     public final void onEnable() {
