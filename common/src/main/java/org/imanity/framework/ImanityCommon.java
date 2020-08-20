@@ -4,6 +4,7 @@ import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 import org.imanity.framework.command.ICommandExecutor;
 import org.imanity.framework.config.CoreConfig;
+import org.imanity.framework.data.DataHandler;
 import org.imanity.framework.database.DatabaseType;
 import org.imanity.framework.database.Mongo;
 import org.imanity.framework.database.MySQL;
@@ -13,7 +14,7 @@ import org.imanity.framework.locale.Locale;
 import org.imanity.framework.locale.LocaleHandler;
 import org.imanity.framework.locale.player.LocaleData;
 import org.imanity.framework.player.IPlayerBridge;
-import org.imanity.framework.player.data.PlayerData;
+import org.imanity.framework.data.PlayerData;
 import org.imanity.framework.redis.ImanityRedis;
 import org.imanity.framework.redis.server.enums.ServerState;
 
@@ -53,8 +54,10 @@ public class ImanityCommon {
         ImanityCommon.LOCALE_HANDLER = new LocaleHandler();
         ImanityCommon.LOCALE_HANDLER.init();
 
+        ImanityCommon.REDIS = new ImanityRedis();
+
+        ImanityCommon.REDIS.generateConfig();
         if (ImanityCommon.CORE_CONFIG.USE_REDIS) {
-            REDIS = new ImanityRedis();
             REDIS.init();
         }
     }
@@ -64,16 +67,18 @@ public class ImanityCommon {
             ImanityCommon.REDIS.getServerHandler().changeServerState(ServerState.STOPPING);
         }
 
-        PlayerData.shutdown();
+        DataHandler.shutdown();
 
-        ImanityCommon.REDIS.getServerHandler().shutdown();
+        if (ImanityCommon.CORE_CONFIG.USE_REDIS) {
+            ImanityCommon.REDIS.getServerHandler().shutdown();
+        }
     }
 
     public static String translate(Object player, String key) {
         if (!ImanityCommon.CORE_CONFIG.USE_LOCALE) {
             throw new OptionNotEnabledException("use_locale", "config.yml");
         }
-        LocaleData localeData = PlayerData.getPlayerData(player, LocaleData.class);
+        LocaleData localeData = DataHandler.getPlayerData(player, LocaleData.class);
         Locale locale;
         if (localeData == null || localeData.getLocale() == null) {
             locale = ImanityCommon.LOCALE_HANDLER.getDefaultLocale();

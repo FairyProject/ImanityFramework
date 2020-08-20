@@ -5,7 +5,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.HandlerList;
 import org.bukkit.event.player.PlayerEvent;
 import org.imanity.framework.bukkit.Imanity;
-import org.imanity.framework.player.data.PlayerData;
+import org.imanity.framework.data.PlayerData;
 
 public class PlayerDataLoadEvent extends PlayerEvent {
 

@@ -1,9 +1,9 @@
 package org.imanity.framework.database;
 
-import org.imanity.framework.player.data.store.StoreDatabase;
-import org.imanity.framework.player.data.store.impl.FlatfileDatabase;
-import org.imanity.framework.player.data.store.impl.MongoDatabase;
-import org.imanity.framework.player.data.store.impl.SQLDatabase;
+import org.imanity.framework.data.store.StoreDatabase;
+import org.imanity.framework.data.store.impl.FlatfileDatabase;
+import org.imanity.framework.data.store.impl.MongoDatabase;
+import org.imanity.framework.data.store.impl.SQLDatabase;
 
 public enum DatabaseType {
     MYSQL(SQLDatabase.class),

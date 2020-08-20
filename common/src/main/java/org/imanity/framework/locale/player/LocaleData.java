@@ -4,8 +4,8 @@ import lombok.Getter;
 import lombok.Setter;
 import org.imanity.framework.ImanityCommon;
 import org.imanity.framework.locale.Locale;
-import org.imanity.framework.player.data.PlayerData;
-import org.imanity.framework.player.data.annotation.StoreData;
+import org.imanity.framework.data.PlayerData;
+import org.imanity.framework.data.annotation.StoreData;
 
 import java.util.UUID;
 

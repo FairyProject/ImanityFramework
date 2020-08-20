@@ -5,12 +5,16 @@ import org.imanity.framework.ImanityCommon;
 import org.imanity.framework.config.format.FieldNameFormatters;
 import org.imanity.framework.config.yaml.YamlConfiguration;
 import org.imanity.framework.redis.ImanityRedis;
+import org.imanity.framework.redis.message.MessageHandler;
 import org.imanity.framework.redis.server.enums.ServerAction;
 import org.imanity.framework.redis.server.enums.ServerState;
-import org.imanity.framework.redis.server.impl.ImanityServerSubscription;
+import org.imanity.framework.redis.server.message.ServerAddMessage;
+import org.imanity.framework.redis.server.message.ServerCommandMessage;
+import org.imanity.framework.redis.server.message.ServerDeleteMessage;
+import org.imanity.framework.redis.server.message.ServerStateChangedMessage;
+import org.imanity.framework.redis.server.message.listener.ServerListener;
 import org.imanity.framework.redis.server.thread.FetchThread;
 import org.imanity.framework.redis.server.thread.PushThread;
-import org.imanity.framework.redis.subscription.RedisPubSub;
 
 import java.io.File;
 import java.util.HashMap;
@@ -27,10 +31,10 @@ public class ServerHandler {
     private FetchThread fetchThread;
     private PushThread pushThread;
 
+    private MessageHandler messageHandler;
+
     private ImanityServer currentServer;
     private ServerConfig serverConfig;
-
-    private RedisPubSub subscriber;
 
     public ServerHandler(ImanityRedis redis) {
         this.redis = redis;
@@ -49,8 +53,13 @@ public class ServerHandler {
         this.pushThread = new PushThread(this);
         this.pushThread.start();
 
-        this.subscriber = new RedisPubSub("imanity", ImanityCommon.REDIS);
-        this.subscriber.subscribe(new ImanityServerSubscription(this));
+        this.messageHandler = new MessageHandler("imanity-server");
+        this.messageHandler.registerMessage(0, ServerStateChangedMessage.class);
+        this.messageHandler.registerMessage(1, ServerAddMessage.class);
+        this.messageHandler.registerMessage(2, ServerDeleteMessage.class);
+        this.messageHandler.registerMessage(3, ServerCommandMessage.class);
+
+        this.messageHandler.registerListener(new ServerListener(this));
     }
 
     public ImanityServer getServer(String name) {
@@ -72,9 +81,7 @@ public class ServerHandler {
         }
 
         this.currentServer.setServerState(serverState);
-        this.subscriber.publish(ServerAction.CHANGE_STATE, this.currentServer
-            .packageJson().addProperty("state", serverState)
-            .get());
+        this.messageHandler.sendMessage(new ServerStateChangedMessage(this.currentServer, serverState));
     }
 
     public void addMetadata(String key, String value) {
@@ -86,7 +93,7 @@ public class ServerHandler {
     }
 
     public void shutdown() {
-        this.subscriber.publish(ServerAction.DELETE, this.currentServer.packageJson().get());
+        this.messageHandler.sendMessage(new ServerDeleteMessage(this.currentServer));
         this.pushThread.shutdown();
 
         this.pushThread.interrupt();

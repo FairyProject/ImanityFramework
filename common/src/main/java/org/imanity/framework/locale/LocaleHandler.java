@@ -3,9 +3,9 @@ package org.imanity.framework.locale;
 import lombok.Getter;
 import org.imanity.framework.ImanityCommon;
 import org.imanity.framework.locale.player.LocaleData;
-import org.imanity.framework.locale.type.LocaleTypeData;
-import org.imanity.framework.player.data.PlayerDataBuilder;
-import org.imanity.framework.player.data.type.DataType;
+import org.imanity.framework.locale.type.LocaleTypeDataConverter;
+import org.imanity.framework.data.PlayerDataBuilder;
+import org.imanity.framework.data.type.DataConverterType;
 
 import java.io.File;
 import java.util.HashMap;
@@ -18,7 +18,7 @@ public class LocaleHandler {
     private Locale defaultLocale;
 
     public void init() {
-        DataType.register(LocaleTypeData.class, Locale.class);
+        DataConverterType.register(LocaleTypeDataConverter.class, Locale.class);
 
         this.defaultLocale = this.registerLocale(ImanityCommon.CORE_CONFIG.DEFAULT_LOCALE);
 

@@ -1,7 +1,7 @@
 package org.imanity.framework.player;
 
-import org.imanity.framework.player.data.PlayerData;
-import org.imanity.framework.player.data.store.StoreDatabase;
+import org.imanity.framework.data.PlayerData;
+import org.imanity.framework.data.store.StoreDatabase;
 
 import java.util.Collection;
 import java.util.UUID;

@@ -59,7 +59,7 @@ public class ImanityServer {
         return metadata.get(key);
     }
 
-    public JsonChain packageJson() {
+    public JsonChain json() {
         return new JsonChain()
                 .addProperty("serverName", this.name);
     }

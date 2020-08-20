@@ -18,11 +18,14 @@ public class ImanityRedis {
 
     private RedissonClient client;
     private ServerHandler serverHandler;
+    private RedisConfig redisConfig;
+
+    public void generateConfig() {
+        this.redisConfig = new RedisConfig();
+        redisConfig.loadAndSave();
+    }
 
     public void init() {
-        RedisConfig redisConfig = new RedisConfig();
-        redisConfig.loadAndSave();
-
         Config config = new Config();
         config.useClusterServers()
                 .addNodeAddress("redis://" + redisConfig.IP_ADDRESS + ":" + redisConfig.PASSWORD);
@@ -32,6 +35,7 @@ public class ImanityRedis {
         }
 
         this.client = Redisson.create(config);
+
         this.serverHandler = new ServerHandler(this);
         this.serverHandler.init();
     }
