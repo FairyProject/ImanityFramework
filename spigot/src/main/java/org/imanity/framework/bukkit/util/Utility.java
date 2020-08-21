@@ -2,12 +2,21 @@ package org.imanity.framework.bukkit.util;
 
 import net.minecraft.server.v1_8_R3.ChunkSection;
 import net.minecraft.server.v1_8_R3.IBlockData;
+import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.World;
 import org.bukkit.craftbukkit.v1_8_R3.CraftWorld;
+import org.bukkit.entity.Entity;
+import org.bukkit.entity.Player;
+import org.bukkit.entity.Projectile;
+import org.bukkit.event.entity.EntityDamageByEntityEvent;
+import org.bukkit.event.entity.EntityDamageEvent;
+import org.bukkit.projectiles.ProjectileSource;
+import spg.lgdev.knockback.impl.RegularKnockback;
 
-import java.util.Arrays;
-import java.util.Iterator;
+import javax.annotation.Nullable;
+import java.util.*;
+import java.util.stream.Collectors;
 
 public class Utility {
 
@@ -112,6 +121,54 @@ public class Utility {
             text = ChatColor.translateAlternateColorCodes('&', replace(text, replaceValue.getTarget(), replaceValue.getReplacement()));
         }
         return text;
+    }
+
+    public static List<Player> getPlayersFromUuids(List<UUID> uuids) {
+        return uuids
+                .stream()
+                .map(Bukkit::getPlayer)
+                .filter(Objects::nonNull)
+                .collect(Collectors.toList());
+    }
+
+    @Nullable
+    public static Player getDamager(EntityDamageEvent event) {
+        if (event instanceof EntityDamageByEntityEvent) {
+            EntityDamageByEntityEvent damageByEntityEvent = (EntityDamageByEntityEvent) event;
+            Entity damager = damageByEntityEvent.getDamager();
+
+            if (damager instanceof Player) {
+                return (Player) damageByEntityEvent.getDamager();
+            }
+
+            if (damager instanceof Projectile) {
+                ProjectileSource shooter = ((Projectile) damager).getShooter();
+                if (shooter instanceof Player) {
+                    return (Player) shooter;
+                }
+            }
+        }
+        return null;
+    }
+
+    public static String getProgressBar(int current, int max, int totalBars, String symbol, String completedColor, String notCompletedColor){
+
+        float percent = (float) current / max;
+
+        int progressBars = (int) ((int) totalBars * percent);
+
+        int leftOver = (totalBars - progressBars);
+
+        StringBuilder sb = new StringBuilder();
+        sb.append(ChatColor.translateAlternateColorCodes('&', completedColor));
+        for (int i = 0; i < progressBars; i++) {
+            sb.append(symbol);
+        }
+        sb.append(ChatColor.translateAlternateColorCodes('&', notCompletedColor));
+        for (int i = 0; i < leftOver; i++) {
+            sb.append(symbol);
+        }
+        return sb.toString();
     }
 
 }

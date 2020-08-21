@@ -13,10 +13,15 @@ import java.util.TreeSet;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 
+import net.minecraft.server.v1_8_R3.IChatBaseComponent;
+import net.minecraft.server.v1_8_R3.Packet;
+import net.minecraft.server.v1_8_R3.PacketPlayOutChat;
 import org.apache.commons.lang.ClassUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.Validate;
+import org.bukkit.ChatColor;
 import org.bukkit.Material;
+import org.bukkit.craftbukkit.v1_8_R3.entity.CraftPlayer;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.Plugin;
@@ -857,5 +862,12 @@ public final class ReflectionUtil {
         } catch (final ReflectiveOperationException ex) {
             throw new ReflectionException("Could not send " + packet.getClass().getSimpleName() + " to " + player.getName(), ex);
         }
+    }
+
+    public static void sendActionBar(Player player, String actionBar) {
+        IChatBaseComponent icbc = IChatBaseComponent.ChatSerializer.a("{\"text\": \"" +
+                ChatColor.translateAlternateColorCodes('&', actionBar) + "\"}");
+        PacketPlayOutChat bar = new PacketPlayOutChat(icbc, (byte)2);
+        (((CraftPlayer)player).getHandle()).playerConnection.sendPacket(bar);
     }
 }

@@ -4,6 +4,7 @@ import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.bukkit.Sound;
 import org.bukkit.World;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Event;
@@ -15,6 +16,7 @@ import org.imanity.framework.bukkit.bossbar.BossBarHandler;
 import org.imanity.framework.bukkit.chunk.KeepChunkHandler;
 import org.imanity.framework.bukkit.chunk.block.CacheBlockSetHandler;
 import org.imanity.framework.bukkit.chunk.block.CacheBlockSetListener;
+import org.imanity.framework.bukkit.command.CommandHandler;
 import org.imanity.framework.bukkit.hologram.HologramHandler;
 import org.imanity.framework.bukkit.hologram.HologramListener;
 import org.imanity.framework.bukkit.impl.BukkitCommandExecutor;
@@ -26,15 +28,16 @@ import org.imanity.framework.bukkit.player.BukkitPlayerData;
 import org.imanity.framework.bukkit.player.PlayerListener;
 import org.imanity.framework.bukkit.scoreboard.ImanityBoardAdapter;
 import org.imanity.framework.bukkit.scoreboard.ImanityBoardHandler;
-import org.imanity.framework.bukkit.scoreboard.impl.ExampleBoardAdapter;
 import org.imanity.framework.bukkit.timer.TimerHandler;
 import org.imanity.framework.bukkit.util.*;
 import org.imanity.framework.bukkit.util.items.ItemListener;
+import org.imanity.framework.util.FastRandom;
 
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class Imanity {
 
     public static final Logger LOGGER = LogManager.getLogger("Imanity");
+    public static FastRandom RANDOM;
     public static ImanityBoardHandler BOARD_HANDLER;
     public static KeepChunkHandler KEEP_CHUNK_HANDLER;
     public static BossBarHandler BOSS_BAR_HANDLER;
@@ -45,6 +48,7 @@ public class Imanity {
 
     public static void init(Plugin plugin) {
         Imanity.PLUGIN = plugin;
+        Imanity.RANDOM = new FastRandom();
         Imanity.initCommon();
 
         BukkitPlayerData.init();
@@ -57,6 +61,7 @@ public class Imanity {
 
         Imanity.KEEP_CHUNK_HANDLER = new KeepChunkHandler();
 
+        CommandHandler.init();
         MenuUpdateTask.init();
 
         Imanity.registerEvents(
@@ -134,6 +139,23 @@ public class Imanity {
             }
 
             player.sendMessage(result);
+        }
+    }
+
+    public static void broadcastWithSound(String key, Sound sound, LocaleRV... rvs) {
+        Imanity.broadcastWithSound(Imanity.PLUGIN.getServer().getOnlinePlayers(), key, sound, rvs);
+    }
+
+    public static void broadcastWithSound(Iterable<? extends Player> players, String key, Sound sound, LocaleRV... rvs) {
+        for (Player player : players) {
+            String result = Imanity.translate(player, key);
+
+            for (LocaleRV rv : rvs) {
+                result = Utility.replace(result, rv.getTarget(), rv.getReplacement(player));
+            }
+
+            player.sendMessage(result);
+            player.playSound(player.getLocation(), sound, 1f, 1f);
         }
     }
 

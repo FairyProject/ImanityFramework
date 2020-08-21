@@ -6,7 +6,9 @@ import lombok.Setter;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.World;
+import org.bukkit.entity.Player;
 import org.bukkit.util.NumberConversions;
+import org.imanity.framework.bukkit.Imanity;
 
 import java.util.StringJoiner;
 
@@ -138,6 +140,15 @@ public class CustomLocation {
 
 	public int getBlockZ() {
 		return locToBlock(z);
+	}
+
+	public void teleport(Player player, double range) {
+		this.teleport(player, range, true);
+	}
+
+	public void teleport(Player player, double range, boolean safe) {
+		double rand = -range + (range * 2) * Imanity.RANDOM.nextDouble();
+		player.teleport(this.toBukkitLocation().add(rand, safe ? 0.5D : 0.0D, rand));
 	}
 
 }

@@ -3,6 +3,8 @@ package org.imanity.framework.bukkit.util;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import org.bukkit.entity.Player;
+import org.bukkit.entity.Villager;
+import org.imanity.framework.bukkit.Imanity;
 
 import java.util.function.Function;
 
@@ -36,6 +38,10 @@ public class LocaleRV {
 
     public static LocaleRV o(String target, Function<Player, String> replacement) {
         return new LocaleRV(target, replacement);
+    }
+
+    public static LocaleRV oT(String target, String locale) {
+        return new LocaleRV(target, player -> Imanity.translate(player, locale));
     }
 
 }

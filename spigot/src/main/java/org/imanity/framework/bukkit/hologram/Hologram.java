@@ -195,6 +195,8 @@ public class Hologram {
                 });
         this.renderedPlayers.clear();
 
+        this.hologramHandler.removeHologram(this);
+
         this.spawned = false;
         return true;
     }

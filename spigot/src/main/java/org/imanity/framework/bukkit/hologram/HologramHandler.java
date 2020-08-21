@@ -69,4 +69,7 @@ public class HologramHandler {
         return holograms;
     }
 
+    public void removeHologram(Hologram hologram) {
+        this.holograms.remove(hologram.getId());
+    }
 }
