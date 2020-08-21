@@ -2,6 +2,7 @@ package org.imanity.framework.bukkit.util.items;
 
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
+import lombok.Getter;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
@@ -16,6 +17,7 @@ import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Function;
 
+@Getter
 public class ImanityItem {
 
     private static final Int2ObjectMap<ImanityItem> REGISTERED_ITEM = new Int2ObjectOpenHashMap<>();
@@ -50,6 +52,8 @@ public class ImanityItem {
     private String displayNameLocale;
     private String displayLoreLocale;
 
+    private ItemCallback clickCallback;
+
     private final List<LocaleRV> displayNamePlaceholders = new ArrayList<>();
     private final List<LocaleRV> displayLorePlaceholders = new ArrayList<>();
 
@@ -75,6 +79,11 @@ public class ImanityItem {
 
     public ImanityItem appendLoreReplace(String target, Function<Player, String> replacement) {
         this.displayLorePlaceholders.add(LocaleRV.o(target, replacement));
+        return this;
+    }
+
+    public ImanityItem callback(ItemCallback callback) {
+        this.clickCallback = callback;
         return this;
     }
 
