@@ -1,6 +1,7 @@
 package org.imanity.framework.bukkit.listener;
 
 import co.aikar.timings.TimedEventExecutor;
+import lombok.Getter;
 import org.bukkit.event.Event;
 import org.bukkit.event.EventException;
 import org.bukkit.event.HandlerList;
@@ -18,6 +19,7 @@ import java.util.Set;
 
 public class FunctionListener<T extends Plugin> implements Listener {
 
+    @Getter
     private FunctionEventChecker checker;
     public T plugin;
 

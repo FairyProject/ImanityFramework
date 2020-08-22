@@ -8,6 +8,7 @@ import org.bukkit.event.Listener;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.inventory.meta.LeatherArmorMeta;
+import org.bukkit.inventory.meta.SkullMeta;
 import org.bukkit.material.MaterialData;
 import org.imanity.framework.bukkit.util.nms.NBTEditor;
 
@@ -124,6 +125,16 @@ public class ItemBuilder implements Listener, Cloneable {
 			throw new IllegalArgumentException("color() only applicable for leather armor!");
 	}
 
+	public ItemBuilder skull(String owner) {
+		if (itemStack.getType() == Material.SKULL_ITEM && itemStack.getData().getData() == (byte) 3) {
+			SkullMeta skullMeta = (SkullMeta) itemStack.getItemMeta();
+			skullMeta.setOwner(owner);
+			return this;
+		} else {
+			throw new IllegalArgumentException("skull() only applicable for human skull item!");
+		}
+	}
+
 	public ItemBuilder tag(Object value, String... key) {
 		this.itemStack = NBTEditor.set(this.itemStack, value, key);
 		return this;
@@ -136,6 +147,10 @@ public class ItemBuilder implements Listener, Cloneable {
 
 	public ItemStack build() {
 		return itemStack;
+	}
+
+	public Material getType() {
+		return this.itemStack.getType();
 	}
 
 }

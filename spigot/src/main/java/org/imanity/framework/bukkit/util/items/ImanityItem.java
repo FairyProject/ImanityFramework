@@ -13,7 +13,9 @@ import org.imanity.framework.bukkit.util.nms.NBTEditor;
 
 import javax.annotation.Nullable;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Function;
 
@@ -48,6 +50,7 @@ public class ImanityItem {
     }
 
     private int id;
+    private boolean submitted;
     private ItemBuilder itemBuilder;
     private String displayNameLocale;
     private String displayLoreLocale;
@@ -56,6 +59,8 @@ public class ImanityItem {
 
     private final List<LocaleRV> displayNamePlaceholders = new ArrayList<>();
     private final List<LocaleRV> displayLorePlaceholders = new ArrayList<>();
+
+    private final Map<String, Object> metadata = new HashMap<>();
 
     public ImanityItem item(ItemBuilder itemBuilder) {
         this.itemBuilder = itemBuilder;
@@ -87,33 +92,52 @@ public class ImanityItem {
         return this;
     }
 
+    public ImanityItem metadata(String key, Object object) {
+        this.metadata.put(key, object);
+        return this;
+    }
+
     public ImanityItem submit() {
 
         this.id = ITEM_COUNTER.getAndIncrement();
         REGISTERED_ITEM.put(this.id, this);
 
+        this.submitted = true;
+
         return this;
 
+    }
+
+    public Material getType() {
+        return this.itemBuilder.getType();
     }
 
     public ItemStack build(Player receiver) {
         ItemBuilder itemBuilder = this.itemBuilder.clone();
 
-        String name = Imanity.translate(receiver, displayNameLocale);
-        for (LocaleRV rv : this.displayNamePlaceholders) {
-            name = Utility.replace(name, rv.getTarget(), rv.getReplacement(receiver));
+        if (displayNameLocale != null) {
+            String name = Imanity.translate(receiver, displayNameLocale);
+            for (LocaleRV rv : this.displayNamePlaceholders) {
+                name = Utility.replace(name, rv.getTarget(), rv.getReplacement(receiver));
+            }
+
+            itemBuilder.name(name);
         }
 
-        itemBuilder.name(name);
+        if (displayLoreLocale != null) {
+            String lore = Imanity.translate(receiver, displayLoreLocale);
+            for (LocaleRV rv : this.displayLorePlaceholders) {
+                lore = Utility.replace(lore, rv.getTarget(), rv.getReplacement(receiver));
+            }
 
-        String lore = Imanity.translate(receiver, displayLoreLocale);
-        for (LocaleRV rv : this.displayLorePlaceholders) {
-            lore = Utility.replace(lore, rv.getTarget(), rv.getReplacement(receiver));
+            itemBuilder.lore(Utility.toStringList(lore, "\n"));
+
         }
 
+        if (!this.submitted) {
+            return itemBuilder.build();
+        }
         return itemBuilder
-                .name(name)
-                .lore(Utility.toStringList(lore, "\n"))
                 .tag(this.id, "imanity", "item", "id")
                 .build();
     }

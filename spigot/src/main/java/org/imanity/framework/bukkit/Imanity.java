@@ -17,6 +17,7 @@ import org.imanity.framework.bukkit.chunk.KeepChunkHandler;
 import org.imanity.framework.bukkit.chunk.block.CacheBlockSetHandler;
 import org.imanity.framework.bukkit.chunk.block.CacheBlockSetListener;
 import org.imanity.framework.bukkit.command.CommandHandler;
+import org.imanity.framework.bukkit.events.player.CallEventListener;
 import org.imanity.framework.bukkit.hologram.HologramHandler;
 import org.imanity.framework.bukkit.hologram.HologramListener;
 import org.imanity.framework.bukkit.impl.BukkitCommandExecutor;
@@ -68,7 +69,8 @@ public class Imanity {
                 new PlayerListener(),
                 new CacheBlockSetListener(),
                 new HologramListener(),
-                new ItemListener()
+                new ItemListener(),
+                new CallEventListener()
         );
     }
 

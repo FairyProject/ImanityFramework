@@ -1,5 +1,6 @@
 package org.imanity.framework.bukkit.listener;
 
+import lombok.Getter;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Event;
 import org.bukkit.event.player.PlayerEvent;
@@ -10,6 +11,7 @@ import java.util.Map;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
+@Getter
 public class FunctionEventChecker {
 
     private Supplier<Boolean> nonPlayerChecker;

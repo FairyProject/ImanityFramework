@@ -1,16 +1,16 @@
 package org.imanity.framework.bukkit.util;
 
-import net.minecraft.server.v1_8_R3.ChunkSection;
-import net.minecraft.server.v1_8_R3.IBlockData;
-import org.bukkit.Bukkit;
-import org.bukkit.ChatColor;
+import net.minecraft.server.v1_8_R3.*;
+import org.bukkit.*;
 import org.bukkit.World;
 import org.bukkit.craftbukkit.v1_8_R3.CraftWorld;
+import org.bukkit.craftbukkit.v1_8_R3.entity.CraftPlayer;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 import org.bukkit.entity.Projectile;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
+import org.bukkit.potion.PotionEffect;
 import org.bukkit.projectiles.ProjectileSource;
 import spg.lgdev.knockback.impl.RegularKnockback;
 
@@ -169,6 +169,50 @@ public class Utility {
             sb.append(symbol);
         }
         return sb.toString();
+    }
+
+    public static void clear(final Player player) {
+        player.setHealth(20.0);
+        player.setFoodLevel(20);
+        player.setExp(0.0f);
+        player.setTotalExperience(0);
+        player.setLevel(0);
+        player.setFireTicks(0);
+        player.getInventory().clear();
+        player.getInventory().setArmorContents(null);
+        player.updateInventory();
+        player.setGameMode(GameMode.SURVIVAL);
+        player.getActivePotionEffects().stream().map(PotionEffect::getType).forEach(type -> player.removePotionEffect(type));
+    }
+
+    public static void showDyingNPC(Player player) {
+        Location loc = player.getLocation();
+        final List<Player> players = new ArrayList<>();
+        for (Player other : Bukkit.getOnlinePlayers()) {
+            if (other != player && other.getWorld() == player.getWorld() && other.getLocation().distanceSquared(loc) < 32 * 32) {
+                players.add(other);
+            }
+        }
+        EntityPlayer entityPlayer = ((CraftPlayer) player).getHandle();
+        PacketPlayOutNamedEntitySpawn packet = new PacketPlayOutNamedEntitySpawn(entityPlayer);
+        int i = net.minecraft.server.v1_8_R3.Entity.getEntityCount() + 1;
+        net.minecraft.server.v1_8_R3.Entity.setEntityCount(i);
+        packet.setA(i);
+        PacketPlayOutEntityStatus statusPacket = new PacketPlayOutEntityStatus();
+        statusPacket.setA(i);
+        statusPacket.setB((byte) 3);
+        PacketPlayOutEntityDestroy destoryPacket = new PacketPlayOutEntityDestroy(i);
+
+        for (Player other : players) {
+            ((CraftPlayer) other).getHandle().playerConnection.fakeEntities.add(i);
+            ((CraftPlayer) other).getHandle().playerConnection.sendPacket(packet);
+            ((CraftPlayer) other).getHandle().playerConnection.sendPacket(statusPacket);
+        }
+
+        TaskUtil.runScheduled(() -> players.forEach(other -> {
+            ((CraftPlayer) other).getHandle().playerConnection.fakeEntities.remove(i);
+            ((CraftPlayer) other).getHandle().playerConnection.sendPacket(destoryPacket);
+        }), 20L);
     }
 
 }
