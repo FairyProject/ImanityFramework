@@ -20,20 +20,24 @@ public class LocaleMessage {
         this.replaceValues = new ArrayList<>();
     }
 
-    public void appendReplacement(String target, String replacement) {
+    public LocaleMessage appendReplacement(String target, String replacement) {
         this.replaceValues.add(LocaleRV.o(target, replacement));
+        return this;
     }
 
-    public void appendReplacement(String target, Object replacement) {
+    public LocaleMessage appendReplacement(String target, Object replacement) {
         this.replaceValues.add(LocaleRV.o(target, replacement));
+        return this;
     }
 
-    public void appendReplacement(String target, Function<Player, String> replacement) {
+    public LocaleMessage appendReplacement(String target, Function<Player, String> replacement) {
         this.replaceValues.add(LocaleRV.o(target, replacement));
+        return this;
     }
 
-    public void appendLocaleReplacement(String target, String localeReplacement) {
+    public LocaleMessage appendLocaleReplacement(String target, String localeReplacement) {
         this.replaceValues.add(LocaleRV.oT(target, localeReplacement));
+        return this;
     }
 
     public void send(Player player) {

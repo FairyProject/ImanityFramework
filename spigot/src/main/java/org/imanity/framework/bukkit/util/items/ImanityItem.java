@@ -62,6 +62,10 @@ public class ImanityItem {
 
     private final Map<String, Object> metadata = new HashMap<>();
 
+    public  Object getMetadata(String key) {
+        return this.metadata.get(key);
+    }
+
     public ImanityItem item(ItemBuilder itemBuilder) {
         this.itemBuilder = itemBuilder;
         return this;
