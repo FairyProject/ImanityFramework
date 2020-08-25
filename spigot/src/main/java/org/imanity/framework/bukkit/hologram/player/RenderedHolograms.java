@@ -8,11 +8,14 @@ import org.imanity.framework.bukkit.hologram.Hologram;
 import org.imanity.framework.bukkit.hologram.HologramHandler;
 import org.imanity.framework.bukkit.util.SpigotUtil;
 
+import java.util.ArrayList;
+import java.util.List;
+
 @Getter
 public class RenderedHolograms {
 
     private int worldId;
-    private IntList holograms = new IntArrayList();
+    private final ArrayList<Integer> holograms = new ArrayList<>();
 
     public RenderedHolograms(Player player) {
         this.worldId = SpigotUtil.getWorldId(player.getWorld());
@@ -47,7 +50,7 @@ public class RenderedHolograms {
 
     public void removeHologram(Player player, Hologram hologram) {
         hologram.removePlayer(player);
-        this.holograms.remove(hologram.getId());
+        this.holograms.remove((Integer) hologram.getId());
     }
 
     public void reset(Player player, HologramHandler hologramHandler) {

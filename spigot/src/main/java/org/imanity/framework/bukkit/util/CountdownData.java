@@ -31,11 +31,11 @@ public class CountdownData {
     public CountdownData(int startCount) {
         for (int i = 0; i < COUNTDOWNS.length; i++) {
             if (COUNTDOWNS[i] <= startCount) {
-                this.currentCount = i;
-                break;
+                this.currentCount = i + 1;
+                return;
             }
         }
-        throw new IllegalStateException("The count " + startCount + "does not match to any of the COUNTDOWN we listed!");
+        throw new IllegalStateException("The count " + startCount + " does not match to any of the COUNTDOWN we listed!");
     }
 
     public boolean isEnded() {
@@ -52,8 +52,8 @@ public class CountdownData {
     }
 
     public void validCount(int count) {
-        if (count > COUNTDOWNS[this.currentCount]) {
-            for (int i = this.currentCount; i > 0; i++) {
+        if (count > COUNTDOWNS[this.currentCount - 1]) {
+            for (int i = this.currentCount; i > 0; i--) {
                 if (count <= COUNTDOWNS[i]) {
                     this.currentCount = i;
                     break;

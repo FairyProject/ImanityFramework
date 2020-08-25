@@ -784,7 +784,7 @@ public final class NBTEditor {
      */
     public static int getInt( Object object, Object... keys ) {
         Object result = getValue( object, keys );
-        return result instanceof Integer ? ( int ) result : 0;
+        return result instanceof Integer ? ( int ) result : -1;
     }
 
     /**

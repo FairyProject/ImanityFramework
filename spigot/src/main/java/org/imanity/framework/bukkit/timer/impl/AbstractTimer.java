@@ -28,6 +28,7 @@ public abstract class AbstractTimer implements Timer {
     public AbstractTimer(long beginTime, long duration) {
         this.beginTime = beginTime;
         this.duration = duration;
+        this.elapsedTime = this.beginTime + this.duration;
     }
 
     public AbstractTimer(long duration) {
@@ -57,7 +58,7 @@ public abstract class AbstractTimer implements Timer {
 
     @Override
     public int secondsRemaining() {
-        return (int) TimeUnit.MILLISECONDS.toSeconds(this.timeRemaining());
+        return (int) Math.ceil(this.timeRemaining() / 1000D);
     }
 
     @Override
@@ -92,6 +93,14 @@ public abstract class AbstractTimer implements Timer {
         return "Time Remaining: <seconds>";
     }
 
+    public void sendMessage(Player player, String message, int seconds) {
+        player.sendMessage(message);
+    }
+
+    public String getScoreboardText(Player player) {
+        return "&fTimer: &e" + this.secondsRemaining() + "s";
+    }
+
     public void clear() {
         Imanity.TIMER_HANDLER.clear(this);
     }
@@ -100,15 +109,16 @@ public abstract class AbstractTimer implements Timer {
     public void tick() {
 
         int seconds = this.secondsRemaining();
-        if (!this.countdownData.isEnded()
+        if (countdownData != null &&
+                !this.countdownData.isEnded()
             && this.countdownData.canAnnounce(seconds)) {
 
             Collection<? extends Player> players = this.getReceivers();
             if (players != null) {
-                players.forEach(player -> player.sendMessage(Utility.replace(this.announceMessage(player, seconds),
+                players.forEach(player -> this.sendMessage(player, Utility.replace(this.announceMessage(player, seconds),
                         RV.o("<player>", player.getName()),
                         RV.o("<seconds>", seconds)
-                )));
+                ), seconds));
             }
 
         }

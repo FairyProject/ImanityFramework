@@ -30,7 +30,13 @@ public class PlayerListener implements Listener {
                         if (!database.autoLoad()) {
                             return;
                         }
-                        PlayerData playerData = (PlayerData) database.load(player);
+
+                        PlayerData playerData = (PlayerData) database.getByUuid(player.getUniqueId());
+
+                        if (playerData == null) {
+                            playerData = (PlayerData) database.load(player);
+                        }
+
                         player.setMetadata(database.getMetadataTag(), new SampleMetadata(playerData));
 
                         PlayerDataLoadEvent.callEvent(player, playerData);

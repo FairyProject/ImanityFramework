@@ -119,7 +119,9 @@ public class ImanityBoard {
             } else
                 suffix = lastColor + value.substring(16);
 
-            suffix = suffix.substring(0, 16);
+            if (suffix.length() > 16) {
+                suffix = suffix.substring(0, 16);
+            }
         }
 
         packet.setC(prefix);

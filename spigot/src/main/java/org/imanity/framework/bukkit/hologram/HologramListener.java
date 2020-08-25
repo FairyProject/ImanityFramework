@@ -38,7 +38,7 @@ public class HologramListener implements Listener {
             public void handleUpdateRotation(Player player, Location location, Location location1, PacketPlayInFlying packetPlayInFlying) {}
         });
 
-        TaskUtil.runAsyncRepeated(() -> {
+        TaskUtil.runRepeated(() -> {
             if (Imanity.SHUTTING_DOWN) {
                 return;
             }
@@ -46,7 +46,7 @@ public class HologramListener implements Listener {
                 this.update(player);
                 return true;
             });
-        }, 20 * 5L);
+        }, 20L);
     }
 
     @EventHandler

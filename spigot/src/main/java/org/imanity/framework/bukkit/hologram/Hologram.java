@@ -4,6 +4,7 @@ import lombok.Getter;
 import lombok.NonNull;
 import lombok.Setter;
 import net.minecraft.server.v1_8_R3.EntityPlayer;
+import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.World;
 import org.bukkit.craftbukkit.v1_8_R3.CraftWorld;
@@ -36,7 +37,7 @@ public class Hologram {
     private Entity attachedTo;
 
     private List<HologramSingle> lines = new ArrayList<>();
-    private List<Player> renderedPlayers = new ArrayList<>();
+    private List<Player> renderedPlayers = Collections.synchronizedList(new ArrayList<>());
 
     public Hologram(Location location, HologramHandler hologramHandler) {
         this.id = NEW_ID++;
@@ -81,14 +82,18 @@ public class Hologram {
     }
 
     public void update() {
+        this.validateMainThread();
         this.lines.forEach(hologram -> {
+            if (!hologram.isPacketsBuilt()) {
+                return;
+            }
             hologram.build(true);
             hologram.sendNamePackets(this.renderedPlayers);
         });
     }
 
     public void setView(int index, ViewHandler viewHandler) {
-
+        this.validateMainThread();
         if (index >= this.lines.size()) {
             HologramSingle single = new HologramSingle(this, viewHandler, -Y_PER_LINE * index, index);
             this.lines.add(index, single);
@@ -106,13 +111,19 @@ public class Hologram {
             }
 
             single.setViewHandler(viewHandler);
-            single.build(true);
+            if (!single.isPacketsBuilt()) {
+                single.build(false);
+                single.setPacketsBuilt(true);
+            } else {
+                single.build(true);
+            }
             single.sendNamePackets(this.renderedPlayers);
         }
 
     }
 
     public void removeView(int index) {
+        this.validateMainThread();
         if (lines.size() > index) {
             HologramSingle single = this.lines.get(index);
             single.sendRemove(this.renderedPlayers);
@@ -125,6 +136,7 @@ public class Hologram {
     }
 
     private void move(@NonNull Location location) {
+        this.validateMainThread();
         if (this.location.equals(location)) {
             return;
         }
@@ -151,6 +163,7 @@ public class Hologram {
     }
 
     public void spawnPlayer(Player player) {
+        this.validateMainThread();
         this.lines.forEach(hologram -> {
             if (!hologram.isPacketsBuilt()) {
                 hologram.build(false);
@@ -163,6 +176,7 @@ public class Hologram {
     }
 
     protected List<Player> getNearbyPlayers() {
+        this.validateMainThread();
         return ((CraftWorld) this.getWorld()).getHandle()
                 .playerMap
                 .getNearbyPlayersIgnoreHeight(this.getX(), 0, this.getZ(), HologramHandler.DISTANCE_TO_RENDER)
@@ -172,6 +186,7 @@ public class Hologram {
     }
 
     public void spawn() {
+        this.validateMainThread();
         this.validateDespawned();
 
         this.getNearbyPlayers()
@@ -181,18 +196,19 @@ public class Hologram {
     }
 
     public void removePlayer(Player player) {
+        this.validateMainThread();
         this.lines.forEach(hologram -> hologram.sendRemove(Collections.singleton(player)));
         this.renderedPlayers.remove(player);
     }
 
     public boolean remove() {
+        this.validateMainThread();
         this.validateSpawned();
 
-        this.renderedPlayers
-                .forEach(player -> {
-                    RenderedHolograms holograms = this.hologramHandler.getRenderedHolograms(player);
-                    holograms.removeHologram(player, this);
-                });
+        for (Player player : new ArrayList<>(this.renderedPlayers)) {
+            RenderedHolograms holograms = this.hologramHandler.getRenderedHolograms(player);
+            holograms.removeHologram(player, this);
+        }
         this.renderedPlayers.clear();
 
         this.hologramHandler.removeHologram(this);
@@ -214,6 +230,12 @@ public class Hologram {
     private void validateDespawned() {
         if (this.spawned)
             throw new IllegalStateException("Already spawned");
+    }
+
+    private void validateMainThread() {
+        if (!Bukkit.isPrimaryThread()) {
+            throw new IllegalStateException("Hologram doesn't support async");
+        }
     }
 
 }

@@ -18,8 +18,22 @@ public class DataHandler {
         return DATABASES.get(dataClass);
     }
 
+    public static <T extends PlayerData> boolean hasData(Object player, Class<T> dataClass) {
+        return hasData(player, DataHandler.getDatabase(dataClass));
+    }
+
+    public static boolean hasData(Object player, StoreDatabase database) {
+        return PlayerData.PLAYER_BRIDGE.hasData(player, database);
+    }
+
+
     public static <T extends PlayerData> T getPlayerData(Object player, Class<T> dataClass) {
         StoreDatabase database = DataHandler.getDatabase(dataClass);
+
+        if (!DataHandler.hasData(player, database)) {
+            return null;
+        }
+
         return (T) database.getByPlayer(player);
     }
 

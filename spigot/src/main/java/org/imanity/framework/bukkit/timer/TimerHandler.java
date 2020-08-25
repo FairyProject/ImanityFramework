@@ -5,6 +5,7 @@ import org.imanity.framework.bukkit.timer.event.TimerStartEvent;
 import org.imanity.framework.bukkit.util.TaskUtil;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 
 public class TimerHandler implements Runnable {
@@ -45,12 +46,16 @@ public class TimerHandler implements Runnable {
 
     @Override
     public void run() {
-        for (Timer timer : this.timers) {
+
+        Iterator<Timer> iterator = this.timers.iterator();
+
+        while (iterator.hasNext()) {
+            Timer timer = iterator.next();
             if (!timer.isPaused()) {
 
                 timer.tick();
                 if (timer.isTimerElapsed() && timer.finish()) {
-                    this.timers.remove(timer);
+                    iterator.remove();
                 }
 
             }

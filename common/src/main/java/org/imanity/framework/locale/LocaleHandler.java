@@ -8,8 +8,11 @@ import org.imanity.framework.data.PlayerDataBuilder;
 import org.imanity.framework.data.type.DataConverterType;
 
 import java.io.File;
+import java.io.InputStream;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 public class LocaleHandler {
 
@@ -59,6 +62,28 @@ public class LocaleHandler {
 
         return locale;
 
+    }
+
+    public Locale registerFromYml(InputStream inputStream) {
+        Map<String, Object> map = ImanityCommon.BRIDGE.loadYaml(inputStream);
+        String name = map.get("locale").toString();
+
+        Locale locale = this.registerLocale(name);
+
+        for (Map.Entry<String, Object> entry : map.entrySet()) {
+            if (entry.getKey().equals("locale")) {
+                continue;
+            }
+
+            if (entry.getValue() instanceof List) {
+                List list = (List) entry.getValue();
+                locale.registerEntry(entry.getKey(), (String[]) list.stream().map(Object::toString).toArray(String[]::new));
+            } else if (entry.getValue() instanceof String) {
+                locale.registerEntry(entry.getKey(), entry.getValue().toString());
+            }
+        }
+
+        return locale;
     }
 
     public void unregisterLocale(String name) {

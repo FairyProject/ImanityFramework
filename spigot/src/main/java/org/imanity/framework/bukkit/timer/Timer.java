@@ -26,6 +26,8 @@ public interface Timer {
         return null;
     }
 
+    String getScoreboardText(Player player);
+
     long timeRemaining();
 
     int secondsRemaining();

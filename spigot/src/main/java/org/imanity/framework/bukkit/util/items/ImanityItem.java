@@ -23,7 +23,7 @@ import java.util.function.Function;
 public class ImanityItem {
 
     private static final Int2ObjectMap<ImanityItem> REGISTERED_ITEM = new Int2ObjectOpenHashMap<>();
-    private static final AtomicInteger ITEM_COUNTER = new AtomicInteger();
+    private static final AtomicInteger ITEM_COUNTER = new AtomicInteger(0);
 
     public static ImanityItem getItem(int id) {
         return REGISTERED_ITEM.get(id);
@@ -39,14 +39,13 @@ public class ImanityItem {
             return null;
         }
 
-        String value = NBTEditor.getString(itemStack, "imanity", "item", "id");
+        int value = NBTEditor.getInt(itemStack, "imanity", "item", "id");
 
-        if (value == null) {
+        if (value == -1) {
             return null;
         }
 
-        int id = Integer.parseInt(value);
-        return REGISTERED_ITEM.get(id);
+        return REGISTERED_ITEM.get(value);
     }
 
     private int id;

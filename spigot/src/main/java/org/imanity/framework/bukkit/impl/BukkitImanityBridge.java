@@ -6,6 +6,7 @@ import org.imanity.framework.ImanityBridge;
 import org.imanity.framework.bukkit.Imanity;
 
 import java.io.File;
+import java.io.InputStream;
 import java.util.Map;
 
 public class BukkitImanityBridge implements ImanityBridge {
@@ -24,6 +25,13 @@ public class BukkitImanityBridge implements ImanityBridge {
         YamlConfiguration configuration = YamlConfiguration.loadConfiguration(file);
         return configuration.getValues(true);
     }
+
+    @Override
+    public Map<String, Object> loadYaml(InputStream inputStream) {
+        YamlConfiguration configuration = YamlConfiguration.loadConfiguration(inputStream);
+        return configuration.getValues(true);
+    }
+
     @Override
     public void saveResources(String name, boolean replace) {
         Imanity.PLUGIN.saveResource(name, replace);

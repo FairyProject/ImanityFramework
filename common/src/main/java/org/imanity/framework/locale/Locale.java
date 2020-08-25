@@ -60,10 +60,13 @@ public class Locale {
         if (this.translateEntries.containsKey(c)) {
             Map<String, String> subEntries = this.translateEntries.get(c);
 
-            return subEntries.get(key);
+            if (subEntries.containsKey(key)) {
+                return subEntries.get(key);
+            }
+            return key;
         }
 
-        return null;
+        return key;
     }
 
     public char getEntry(String key) {

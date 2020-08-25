@@ -1,9 +1,9 @@
 package org.imanity.framework.bukkit.util.nms;
 
-import net.minecraft.server.v1_8_R3.BlockPosition;
-import net.minecraft.server.v1_8_R3.DataWatcher;
-import net.minecraft.server.v1_8_R3.ItemStack;
-import net.minecraft.server.v1_8_R3.Vector3f;
+import net.minecraft.server.v1_8_R3.*;
+
+import java.lang.reflect.Field;
+import java.util.Map;
 
 public class NMSUtil {
 
@@ -36,6 +36,46 @@ public class NMSUtil {
         }
 
         return type;
+    }
+
+    private static Object getPrivateField(final String fieldName, final Class<EntityTypes> oclass)
+            throws IllegalArgumentException, IllegalAccessException, NoSuchFieldException, SecurityException
+    {
+        final Field field = oclass.getDeclaredField(fieldName);
+        field.setAccessible(true);
+        return field.get(null);
+    }
+
+    public static void registerCustomEntity(final Class<? extends Entity> entityClass, final int entityId, String name)
+    {
+        try
+        {
+            ((Map) getPrivateField("c", EntityTypes.class)).put(name, entityClass);
+        } catch (IllegalAccessException | NoSuchFieldException e)
+        {
+            e.printStackTrace();
+        }
+        try
+        {
+            ((Map) getPrivateField("d", EntityTypes.class)).put(entityClass, name);
+        } catch (IllegalAccessException | NoSuchFieldException e)
+        {
+            e.printStackTrace();
+        }
+        try
+        {
+            ((Map) getPrivateField("f", EntityTypes.class)).put(entityClass, entityId);
+        } catch (IllegalAccessException | NoSuchFieldException e)
+        {
+            e.printStackTrace();
+        }
+        try
+        {
+            ((Map) getPrivateField("g", EntityTypes.class)).put(name, entityId);
+        } catch (IllegalAccessException | NoSuchFieldException e)
+        {
+            e.printStackTrace();
+        }
     }
 
 }

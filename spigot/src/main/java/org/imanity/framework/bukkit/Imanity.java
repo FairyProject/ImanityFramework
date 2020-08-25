@@ -24,6 +24,7 @@ import org.imanity.framework.bukkit.impl.BukkitCommandExecutor;
 import org.imanity.framework.bukkit.impl.BukkitEventHandler;
 import org.imanity.framework.bukkit.impl.BukkitImanityBridge;
 import org.imanity.framework.bukkit.impl.BukkitPlayerBridge;
+import org.imanity.framework.bukkit.menu.ButtonListener;
 import org.imanity.framework.bukkit.menu.task.MenuUpdateTask;
 import org.imanity.framework.bukkit.player.BukkitPlayerData;
 import org.imanity.framework.bukkit.player.PlayerListener;
@@ -70,7 +71,8 @@ public class Imanity {
                 new CacheBlockSetListener(),
                 new HologramListener(),
                 new ItemListener(),
-                new CallEventListener()
+                new CallEventListener(),
+                new ButtonListener()
         );
     }
 

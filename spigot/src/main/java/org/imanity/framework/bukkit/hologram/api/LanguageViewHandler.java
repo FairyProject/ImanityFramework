@@ -13,6 +13,9 @@ public class LanguageViewHandler implements ViewHandler {
 
     @Override
     public String view(@Nullable Player player) {
+        if (player == null) {
+            return key;
+        }
         return Imanity.translate(player, key);
     }
 }

@@ -3,6 +3,9 @@ package org.imanity.framework.bukkit.timer.impl;
 import lombok.Getter;
 import org.bukkit.entity.Player;
 
+import java.util.Collection;
+import java.util.Collections;
+
 @Getter
 public class PlayerTimer extends AbstractTimer {
 
@@ -18,4 +21,8 @@ public class PlayerTimer extends AbstractTimer {
         this(player, System.currentTimeMillis(), duration);
     }
 
+    @Override
+    public Collection<? extends Player> getReceivers() {
+        return Collections.singleton(player);
+    }
 }

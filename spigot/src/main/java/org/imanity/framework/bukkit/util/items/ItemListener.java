@@ -26,6 +26,7 @@ public class ItemListener implements Listener {
         }
 
         event.setCancelled(true);
+        item.remove();
 
         ItemStack resultItem = imanityItem.build(player);
         resultItem.setAmount(itemStack.getAmount());
@@ -56,7 +57,8 @@ public class ItemListener implements Listener {
             return;
         }
 
-        if (!imanityItem.getClickCallback().onClick(player, itemStack, action)) {
+        if (imanityItem.getClickCallback() != null &&
+                !imanityItem.getClickCallback().onClick(player, itemStack, action)) {
             event.setCancelled(true);
         }
     }
