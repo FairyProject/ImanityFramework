@@ -33,6 +33,8 @@ import org.imanity.framework.bukkit.scoreboard.ImanityBoardHandler;
 import org.imanity.framework.bukkit.timer.TimerHandler;
 import org.imanity.framework.bukkit.util.*;
 import org.imanity.framework.bukkit.util.items.ItemListener;
+import org.imanity.framework.bukkit.zigguart.ImanityTabAdapter;
+import org.imanity.framework.bukkit.zigguart.ImanityTabHandler;
 import org.imanity.framework.util.FastRandom;
 
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
@@ -41,6 +43,7 @@ public class Imanity {
     public static final Logger LOGGER = LogManager.getLogger("Imanity");
     public static FastRandom RANDOM;
     public static ImanityBoardHandler BOARD_HANDLER;
+    public static ImanityTabHandler TAB_HANDLER;
     public static KeepChunkHandler KEEP_CHUNK_HANDLER;
     public static BossBarHandler BOSS_BAR_HANDLER;
     public static TimerHandler TIMER_HANDLER;
@@ -108,6 +111,10 @@ public class Imanity {
 
     public static void registerBoardHandler(ImanityBoardAdapter adapter) {
         Imanity.BOARD_HANDLER = new ImanityBoardHandler(adapter);
+    }
+
+    public static void registerTablistHandler(ImanityTabAdapter adapter) {
+        Imanity.TAB_HANDLER = new ImanityTabHandler(adapter);
     }
 
     public static void registerBossBarHandler(BossBarAdapter adapter, long tick) {

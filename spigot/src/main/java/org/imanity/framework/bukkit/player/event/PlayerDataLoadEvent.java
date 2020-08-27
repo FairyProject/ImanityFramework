@@ -29,7 +29,7 @@ public class PlayerDataLoadEvent extends PlayerEvent {
     private final PlayerData playerData;
 
     public PlayerDataLoadEvent(Player player, PlayerData playerData) {
-        super(player, true);
+        super(player);
 
         this.playerData = playerData;
     }

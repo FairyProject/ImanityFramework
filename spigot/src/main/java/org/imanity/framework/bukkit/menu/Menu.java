@@ -7,17 +7,35 @@ import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
+import org.imanity.framework.util.entry.Entry;
 import spg.lgdev.util.triemap.TrieMap;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
 
 @Getter
 @Setter
 public abstract class Menu {
 
-	public static Map<UUID, Menu> currentlyOpenedMenus = TrieMap.create();
+	public static final Map<UUID, Menu> MENUS = TrieMap.create();
+
+	public static <T extends Menu> List<Entry<Player, T>> getMenusByType(Class<T> type) {
+		List<Entry<Player, T>> menus = new ArrayList<>();
+
+		for (Map.Entry<UUID, Menu> entry : MENUS.entrySet()) {
+			if (type.isInstance(entry.getValue())) {
+				Player player = Bukkit.getPlayer(entry.getKey());
+
+				if (player == null) {
+					continue;
+				}
+
+				menus.add(new Entry<>(player, (T) entry.getValue()));
+			}
+		}
+
+		return menus;
+	}
+
 	@Getter
 	private Map<Integer, org.imanity.framework.bukkit.menu.Button> buttons = new HashMap<>();
 	private boolean autoUpdate = true;
@@ -41,7 +59,7 @@ public abstract class Menu {
 	public void openMenu(final Player player, boolean update) {
 		this.buttons = this.getButtons(player);
 
-		final org.imanity.framework.bukkit.menu.Menu previousMenu = org.imanity.framework.bukkit.menu.Menu.currentlyOpenedMenus.get(player.getUniqueId());
+		final org.imanity.framework.bukkit.menu.Menu previousMenu = org.imanity.framework.bukkit.menu.Menu.MENUS.get(player.getUniqueId());
 		Inventory inventory = null;
 		final int size = this.getSize() == -1 ? this.size(this.buttons) : this.getSize();
 		String title = this.getTitle(player);
@@ -72,7 +90,7 @@ public abstract class Menu {
 
 		inventory.setContents(new ItemStack[inventory.getSize()]);
 
-		currentlyOpenedMenus.put(player.getUniqueId(), this);
+		MENUS.put(player.getUniqueId(), this);
 
 		for (final Map.Entry<Integer, org.imanity.framework.bukkit.menu.Button> buttonEntry : this.buttons.entrySet()) {
 			inventory.setItem(buttonEntry.getKey(), createItemStack(player, buttonEntry.getValue()));
@@ -95,6 +113,38 @@ public abstract class Menu {
 
 		this.onOpen(player);
 		this.setClosedByMenu(false);
+	}
+
+	public Map<Integer, Button> getButtonsUpdatable(Player player) {
+		return this.getButtons(player);
+	}
+
+	public void update(Player player, boolean removingOld) {
+		this.buttons = this.getButtonsUpdatable(player);
+		int size = this.getSize() == -1 ? this.size(this.buttons) : this.getSize();
+		Inventory inventory = player.getOpenInventory().getTopInventory();
+		if (inventory != null) {
+			if (removingOld) {
+				inventory.setContents(new ItemStack[inventory.getSize()]);
+			}
+			Iterator var4 = this.buttons.entrySet().iterator();
+
+			while(var4.hasNext()) {
+				Map.Entry<Integer, Button> buttonEntry = (Map.Entry)var4.next();
+				inventory.setItem((Integer)buttonEntry.getKey(), this.createItemStack(player, (Button)buttonEntry.getValue()));
+			}
+
+			if (this.isPlaceholder()) {
+				for(int index = 0; index < size; ++index) {
+					if (this.buttons.get(index) == null) {
+						this.buttons.put(index, this.placeholderButton);
+						inventory.setItem(index, this.placeholderButton.getButtonItem(player));
+					}
+				}
+			}
+
+			player.updateInventory();
+		}
 	}
 
 	public int size(final Map<Integer, org.imanity.framework.bukkit.menu.Button> buttons) {

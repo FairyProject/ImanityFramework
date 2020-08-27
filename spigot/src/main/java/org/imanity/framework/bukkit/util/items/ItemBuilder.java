@@ -129,6 +129,7 @@ public class ItemBuilder implements Listener, Cloneable {
 		if (itemStack.getType() == Material.SKULL_ITEM && itemStack.getData().getData() == (byte) 3) {
 			SkullMeta skullMeta = (SkullMeta) itemStack.getItemMeta();
 			skullMeta.setOwner(owner);
+			itemStack.setItemMeta(skullMeta);
 			return this;
 		} else {
 			throw new IllegalArgumentException("skull() only applicable for human skull item!");

@@ -37,9 +37,12 @@ public class PlayerListener implements Listener {
                             playerData = (PlayerData) database.load(player);
                         }
 
-                        player.setMetadata(database.getMetadataTag(), new SampleMetadata(playerData));
+                        PlayerData finalPlayerData = playerData;
+                        TaskUtil.runSync(() -> {
+                            player.setMetadata(database.getMetadataTag(), new SampleMetadata(finalPlayerData));
 
-                        PlayerDataLoadEvent.callEvent(player, playerData);
+                            PlayerDataLoadEvent.callEvent(player, finalPlayerData);
+                        });
                     });
         };
 
@@ -66,12 +69,18 @@ public class PlayerListener implements Listener {
                     }
                     PlayerData playerData = database.getByPlayer(player);
                     database.save(playerData);
-                    database.delete(player.getUniqueId());
                 });
 
             Runnable finalRunnable = () -> {
                 DataHandler.getPlayerDatabases()
-                        .forEach(database -> player.removeMetadata(database.getMetadataTag(), Imanity.PLUGIN));
+                        .forEach(database -> {
+                            player.removeMetadata(database.getMetadataTag(), Imanity.PLUGIN);
+
+                            if (!database.autoSave()) {
+                                return;
+                            }
+                            database.delete(player.getUniqueId());
+                        });
             };
 
             if (!SpigotUtil.isServerThread()) {

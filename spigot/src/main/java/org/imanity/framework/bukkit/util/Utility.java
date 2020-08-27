@@ -134,7 +134,7 @@ public class Utility {
         return text;
     }
 
-    public static List<Player> getPlayersFromUuids(List<UUID> uuids) {
+    public static List<Player> getPlayersFromUuids(Collection<UUID> uuids) {
         return uuids
                 .stream()
                 .map(Bukkit::getPlayer)
@@ -198,12 +198,11 @@ public class Utility {
 
     public static void showDyingNPC(Player player) {
         Location loc = player.getLocation();
-        final List<Player> players = new ArrayList<>();
-        for (Player other : Bukkit.getOnlinePlayers()) {
-            if (other != player && other.getWorld() == player.getWorld() && other.getLocation().distanceSquared(loc) < 32 * 32) {
-                players.add(other);
-            }
-        }
+        final List<Player> players = ((CraftWorld) player.getWorld()).getHandle().playerMap
+                .getNearbyPlayersIgnoreHeight(loc.getX(), loc.getY(), loc.getZ(), 32)
+                .stream().map(EntityPlayer::getBukkitEntity)
+                .collect(Collectors.toList());
+
         EntityPlayer entityPlayer = ((CraftPlayer) player).getHandle();
         PacketPlayOutNamedEntitySpawn packet = new PacketPlayOutNamedEntitySpawn(entityPlayer);
         int i = net.minecraft.server.v1_8_R3.Entity.getEntityCount() + 1;
@@ -212,11 +211,13 @@ public class Utility {
         PacketPlayOutEntityStatus statusPacket = new PacketPlayOutEntityStatus();
         statusPacket.setA(i);
         statusPacket.setB((byte) 3);
+        PacketPlayOutEntityVelocity velocityPacket = new PacketPlayOutEntityVelocity(i, entityPlayer.motX, entityPlayer.motY, entityPlayer.motZ);
         PacketPlayOutEntityDestroy destoryPacket = new PacketPlayOutEntityDestroy(i);
 
         for (Player other : players) {
             ((CraftPlayer) other).getHandle().playerConnection.fakeEntities.add(i);
             ((CraftPlayer) other).getHandle().playerConnection.sendPacket(packet);
+            ((CraftPlayer) other).getHandle().playerConnection.sendPacket(velocityPacket);
             ((CraftPlayer) other).getHandle().playerConnection.sendPacket(statusPacket);
         }
 

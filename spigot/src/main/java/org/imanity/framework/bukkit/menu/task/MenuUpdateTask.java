@@ -9,22 +9,24 @@ import java.util.concurrent.TimeUnit;
 
 public class MenuUpdateTask implements Runnable {
 
-	private long autoCloseMillis = TimeUnit.SECONDS.toMillis(30L);
+	private static final long AUTO_CLOSE_MILLIS = TimeUnit.SECONDS.toMillis(30L);
 
 	public static void init() {
-		TaskUtil.runAsyncRepeated(new MenuUpdateTask(), 20 * 5L);
+		TaskUtil.runRepeated(new MenuUpdateTask(), 20 * 5L);
 	}
 
 	@Override
 	public void run() {
-		Menu.currentlyOpenedMenus.forEach((uuid, menu) -> {
+		Menu.MENUS.forEach((uuid, menu) -> {
 			final Player player = Bukkit.getPlayer(uuid);
-			if (player == null)
+			if (player == null) {
 				return;
+			}
 			if (menu.isAutoUpdate()) {
 				menu.openMenu(player, true);
 			}
-			if (menu.isAutoClose() && System.currentTimeMillis() - menu.getLastAccessMillis() > autoCloseMillis) {
+			long openMillis = System.currentTimeMillis() - menu.getLastAccessMillis();
+			if (menu.isAutoClose() && openMillis > AUTO_CLOSE_MILLIS) {
 				player.closeInventory();
 			}
 		});

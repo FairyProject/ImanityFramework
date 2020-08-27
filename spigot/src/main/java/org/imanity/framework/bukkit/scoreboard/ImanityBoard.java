@@ -1,13 +1,18 @@
 package org.imanity.framework.bukkit.scoreboard;
 
+import lombok.Getter;
+import lombok.Setter;
 import net.minecraft.server.v1_8_R3.*;
 import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
 import org.imanity.framework.bukkit.util.ReflectionUtil;
+import org.imanity.framework.bukkit.util.SampleMetadata;
 import org.imanity.framework.bukkit.util.Utility;
 
 import java.lang.reflect.Field;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class ImanityBoard {
 
@@ -25,14 +30,22 @@ public class ImanityBoard {
     public static final String METADATA_TAG = "Imanity-Scoreboard";
 
     private final Player player;
+    private final Map<String, ImanityTeamData> teamDatas = new HashMap<>();
 
     private String title;
     private final String[] teams;
 
-    public ImanityBoard(Player player) {
+    private final ImanityBoardAdapter adapter;
+
+    @Getter
+    @Setter
+    private boolean tagUpdated;
+
+    public ImanityBoard(Player player, ImanityBoardAdapter adapter) {
 
         this.player = player;
         this.teams = new String[16];
+        this.adapter = adapter;
 
         PacketPlayOutScoreboardObjective packetA = new PacketPlayOutScoreboardObjective();
 
@@ -49,6 +62,73 @@ public class ImanityBoard {
         ReflectionUtil.sendPacket(player, packetA);
         ReflectionUtil.sendPacket(player, packetB);
 
+    }
+
+    public void registerTeam(ImanityTeamData data) {
+        this.teamDatas.put(data.getName(), data);
+
+        PacketPlayOutScoreboardTeam packet = new PacketPlayOutScoreboardTeam();
+
+        packet.setE(ScoreboardTeamBase.EnumNameTagVisibility.ALWAYS.e);
+        packet.setF(-1);
+        packet.setG(data.getNameSet());
+        packet.setA(data.getName());
+        packet.setH(0);
+        packet.setB(data.getName());
+        packet.setC(data.getPrefix());
+        packet.setD("");
+
+
+        int d = 0;
+
+        if (data.isFriendlyFire()) {
+            d |= 1;
+        }
+        if (data.isFriendlyInvisibles()) {
+            d |= 2;
+        }
+
+        packet.setI(d);
+
+        ReflectionUtil.sendPacket(player, packet);
+    }
+
+    public void updatePlayer(Player target) {
+        String name = this.adapter.getTeam(player, target);
+
+        if (name == null) {
+            return;
+        }
+
+        ImanityTeamData data = this.teamDatas.get(name);
+        data.addName(target.getName());
+
+        this.updateTeam(data);
+    }
+
+    public void removePlayer(Player target) {
+
+        for (ImanityTeamData team : this.teamDatas.values()) {
+
+            if (team.getNameSet().contains(target.getName())) {
+
+                team.removeName(target.getName());
+                this.updateTeam(team);
+
+            }
+
+        }
+
+    }
+
+    public void updateTeam(ImanityTeamData data) {
+        PacketPlayOutScoreboardTeam packet = new PacketPlayOutScoreboardTeam();
+        packet.setE(ScoreboardTeamBase.EnumNameTagVisibility.ALWAYS.e);
+        packet.setF(-1);
+        packet.setG(data.getNameSet());
+        packet.setH(3);
+        packet.setA(data.getName());
+        ReflectionUtil.sendPacket(player, packet);
     }
 
     public void setTitle(String title) {

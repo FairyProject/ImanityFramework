@@ -5,19 +5,30 @@ import org.bukkit.Sound;
 import org.bukkit.entity.Item;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
+import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.Action;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerPickupItemEvent;
 import org.bukkit.inventory.ItemStack;
+import org.imanity.framework.ImanityCommon;
+import org.imanity.framework.bukkit.Imanity;
+import org.imanity.framework.bukkit.util.SampleMetadata;
 
 public class ItemListener implements Listener {
 
-    @EventHandler
+    private static final String SET_ITEM_METADATA = ImanityCommon.METADATA_PREFIX + "SetItem";
+
+    @EventHandler(ignoreCancelled = true, priority = EventPriority.MONITOR)
     public void onPlayerPickupItem(PlayerPickupItemEvent event) {
         Player player = event.getPlayer();
 
         Item item = event.getItem();
+
+        if (item.hasMetadata(SET_ITEM_METADATA)) {
+            return;
+        }
+
         ItemStack itemStack = item.getItemStack();
         ImanityItem imanityItem = ImanityItem.getItemFromBukkit(itemStack);
 
@@ -25,15 +36,13 @@ public class ItemListener implements Listener {
             return;
         }
 
-        event.setCancelled(true);
-        item.remove();
-
         ItemStack resultItem = imanityItem.build(player);
         resultItem.setAmount(itemStack.getAmount());
         resultItem.setDurability(itemStack.getDurability());
 
-        player.getInventory().addItem(resultItem);
-        player.playSound(player.getLocation(), Sound.ITEM_PICKUP, 1f, 1f);
+        item.setItemStack(resultItem);
+        item.setMetadata(SET_ITEM_METADATA, new SampleMetadata(SET_ITEM_METADATA));
+        event.setCancelled(true);
     }
 
     @EventHandler

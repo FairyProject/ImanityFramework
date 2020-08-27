@@ -6,8 +6,17 @@ import java.util.List;
 
 public interface ImanityBoardAdapter {
 
+    default void onBoardCreate(Player player, ImanityBoard board) {
+
+    }
+
+
     String getTitle(Player player);
 
     List<String> getLines(Player player);
+
+    default String getTeam(Player player, Player target) {
+        return null;
+    }
 
 }
