@@ -20,22 +20,25 @@ import org.imanity.framework.bukkit.command.CommandHandler;
 import org.imanity.framework.bukkit.events.player.CallEventListener;
 import org.imanity.framework.bukkit.hologram.HologramHandler;
 import org.imanity.framework.bukkit.hologram.HologramListener;
-import org.imanity.framework.bukkit.impl.BukkitCommandExecutor;
-import org.imanity.framework.bukkit.impl.BukkitEventHandler;
-import org.imanity.framework.bukkit.impl.BukkitImanityBridge;
-import org.imanity.framework.bukkit.impl.BukkitPlayerBridge;
+import org.imanity.framework.bukkit.impl.*;
 import org.imanity.framework.bukkit.menu.ButtonListener;
 import org.imanity.framework.bukkit.menu.task.MenuUpdateTask;
 import org.imanity.framework.bukkit.player.BukkitPlayerData;
 import org.imanity.framework.bukkit.player.PlayerListener;
+import org.imanity.framework.bukkit.plugin.ImanityPlugin;
 import org.imanity.framework.bukkit.scoreboard.ImanityBoardAdapter;
 import org.imanity.framework.bukkit.scoreboard.ImanityBoardHandler;
 import org.imanity.framework.bukkit.timer.TimerHandler;
 import org.imanity.framework.bukkit.util.*;
 import org.imanity.framework.bukkit.util.items.ItemListener;
-import org.imanity.framework.bukkit.zigguart.ImanityTabAdapter;
-import org.imanity.framework.bukkit.zigguart.ImanityTabHandler;
+import org.imanity.framework.bukkit.tablist.ImanityTabAdapter;
+import org.imanity.framework.bukkit.tablist.ImanityTabHandler;
+import org.imanity.framework.libraries.classloader.PluginClassLoader;
 import org.imanity.framework.util.FastRandom;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class Imanity {
@@ -49,11 +52,16 @@ public class Imanity {
     public static TimerHandler TIMER_HANDLER;
     public static Plugin PLUGIN;
 
+    public static PluginClassLoader CLASS_LOADER;
+
+    public static List<ImanityPlugin> PLUGINS = new ArrayList<>();
+
     public static boolean SHUTTING_DOWN = false;
 
     public static void init(Plugin plugin) {
         Imanity.PLUGIN = plugin;
         Imanity.RANDOM = new FastRandom();
+        Imanity.CLASS_LOADER = new PluginClassLoader(plugin.getClass().getClassLoader());
         Imanity.initCommon();
 
         BukkitPlayerData.init();

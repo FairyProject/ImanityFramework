@@ -1,0 +1,5 @@
+name: ImanityFramework
+version: ${project.version}
+main: org.imanity.framework.bukkit.ImanityBukkitPlugin
+author: LeeGod, MUGICON
+load: STARTUP

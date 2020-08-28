@@ -2,6 +2,7 @@ package org.imanity.framework;
 
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
+import org.apache.logging.log4j.Logger;
 import org.imanity.framework.command.ICommandExecutor;
 import org.imanity.framework.config.CoreConfig;
 import org.imanity.framework.data.DataHandler;
@@ -10,6 +11,8 @@ import org.imanity.framework.database.Mongo;
 import org.imanity.framework.database.MySQL;
 import org.imanity.framework.events.IEventHandler;
 import org.imanity.framework.exception.OptionNotEnabledException;
+import org.imanity.framework.libraries.Library;
+import org.imanity.framework.libraries.LibraryHandler;
 import org.imanity.framework.locale.Locale;
 import org.imanity.framework.locale.LocaleHandler;
 import org.imanity.framework.locale.player.LocaleData;
@@ -17,18 +20,26 @@ import org.imanity.framework.player.IPlayerBridge;
 import org.imanity.framework.data.PlayerData;
 import org.imanity.framework.redis.ImanityRedis;
 import org.imanity.framework.redis.server.enums.ServerState;
+import org.imanity.framework.task.ITaskScheduler;
+
+import java.util.EnumSet;
+import java.util.Set;
 
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class ImanityCommon {
 
+    private static final Set<Library> GLOBAL_LIBRARIES = EnumSet.of(Library.REDISSON, Library.MONGO_DB, Library.HIKARI_CP, Library.YAML);
+
     public static ImanityBridge BRIDGE;
     public static CoreConfig CORE_CONFIG;
     public static LocaleHandler LOCALE_HANDLER;
+    public static LibraryHandler LIBRARY_HANDLER;
     public static String METADATA_PREFIX = "Imanity_";
 
     public static ImanityRedis REDIS;
     public static ICommandExecutor COMMAND_EXECUTOR;
     public static IEventHandler EVENT_HANDLER;
+    public static ITaskScheduler TASK_SCHEDULER;
 
     public static final MySQL SQL = new MySQL();
     public static final Mongo MONGO = new Mongo();
@@ -38,6 +49,10 @@ public class ImanityCommon {
 
         ImanityCommon.CORE_CONFIG = new CoreConfig();
         ImanityCommon.CORE_CONFIG.loadAndSave();
+
+        ImanityCommon.TASK_SCHEDULER = bridge.getTaskScheduler();
+
+        ImanityCommon.loadLibraries();
 
         ImanityCommon.SQL.generateConfig();
         if (CORE_CONFIG.isDatabaseTypeUsed(DatabaseType.MYSQL)) {
@@ -60,6 +75,19 @@ public class ImanityCommon {
         if (ImanityCommon.CORE_CONFIG.USE_REDIS) {
             REDIS.init();
         }
+    }
+
+    private static void loadLibraries() {
+
+        getLogger().info("Loading Libraries");
+
+        ImanityCommon.LIBRARY_HANDLER = new LibraryHandler();
+        ImanityCommon.LIBRARY_HANDLER.downloadLibraries(GLOBAL_LIBRARIES);
+        ImanityCommon.LIBRARY_HANDLER.obtainClassLoaderWith(GLOBAL_LIBRARIES);
+    }
+
+    public static Logger getLogger() {
+        return ImanityCommon.BRIDGE.getLogger();
     }
 
     public static void shutdown() {

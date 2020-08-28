@@ -92,25 +92,19 @@ public class ImanityBoardHandler implements Runnable {
     }
 
     public void updatePlayer(Player player, boolean doSelf) {
-        this.runnables.add(() -> {
-            if (!player.isOnline()) {
-                return;
+        ImanityBoard board = this.getOrCreateScoreboard(player);
+
+        board.setTagUpdated(true);
+
+        for (Player other : Imanity.PLUGIN.getServer().getOnlinePlayers()) {
+            ImanityBoard otherBoard = this.getOrCreateScoreboard(other);
+
+            otherBoard.updatePlayer(player);
+
+            if (doSelf) {
+                board.updatePlayer(other);
             }
-
-            ImanityBoard board = this.getOrCreateScoreboard(player);
-
-            board.setTagUpdated(true);
-
-            for (Player other : Imanity.PLUGIN.getServer().getOnlinePlayers()) {
-                ImanityBoard otherBoard = this.getOrCreateScoreboard(other);
-
-                otherBoard.updatePlayer(player);
-
-                if (doSelf) {
-                    board.updatePlayer(other);
-                }
-            }
-        });
+        }
     }
 
     public void remove(Player player) {

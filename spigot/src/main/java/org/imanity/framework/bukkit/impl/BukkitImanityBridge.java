@@ -4,6 +4,8 @@ import org.apache.logging.log4j.Logger;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.imanity.framework.ImanityBridge;
 import org.imanity.framework.bukkit.Imanity;
+import org.imanity.framework.libraries.classloader.PluginClassLoader;
+import org.imanity.framework.task.ITaskScheduler;
 
 import java.io.File;
 import java.io.InputStream;
@@ -18,6 +20,16 @@ public class BukkitImanityBridge implements ImanityBridge {
     @Override
     public Logger getLogger() {
         return Imanity.LOGGER;
+    }
+
+    @Override
+    public PluginClassLoader getClassLoader() {
+        return Imanity.CLASS_LOADER;
+    }
+
+    @Override
+    public ITaskScheduler getTaskScheduler() {
+        return new BukkitTaskScheduler();
     }
 
     @Override

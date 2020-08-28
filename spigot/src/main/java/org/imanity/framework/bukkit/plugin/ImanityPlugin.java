@@ -11,25 +11,18 @@ public abstract class ImanityPlugin extends JavaPlugin {
         if (this.getDescription().getLoad() != PluginLoadOrder.STARTUP) {
             new IllegalStateException("The ImanityFramework requires the plugin to be load on startup, please add [load: STARTUP] into your plugin.yml!").printStackTrace();
             this.getServer().getPluginManager().disablePlugin(this);
+            return;
         }
+
+        Imanity.PLUGINS.add(this);
     }
 
     @Override
     public final void onEnable() {
-        this.preEnable();
-
-        Imanity.init(this);
-
-        this.postEnable();
     }
 
     @Override
     public final void onDisable() {
-        this.preDisable();
-
-        Imanity.shutdown();
-
-        this.postDisable();
     }
 
     public void preEnable() {
