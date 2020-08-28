@@ -33,6 +33,12 @@ public enum Library {
             "mongo-java-driver",
             "3.12.2",
             "eMxHcEtasb/ubFCv99kE5rVZMPGmBei674ZTdjYe58w="
+    ),
+    CAFFEINE(
+            "com{}github{}ben-manes{}caffeine",
+            "caffeine",
+            "2.8.4",
+            "KV9YN5gQj6b507VJApJpPF5PkCon0DZqAi0T7Ln0lag="
     );
 
     private final String mavenRepoPath;

@@ -75,6 +75,7 @@ public class LibraryHandler {
             EXECUTOR.execute(() -> {
                 try {
                     loadLibrary(library);
+                    ImanityCommon.getLogger().info("Loaded Library " + library.name() + " v" + library.getVersion());
                 } catch (Throwable throwable) {
                     ImanityCommon.getLogger().warn("Unable to load library " + library.getFileName() + ".", throwable);
                 } finally {

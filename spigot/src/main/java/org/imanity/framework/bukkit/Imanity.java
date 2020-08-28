@@ -1,5 +1,6 @@
 package org.imanity.framework.bukkit;
 
+import com.google.common.collect.ImmutableSet;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 import org.apache.logging.log4j.LogManager;
@@ -33,12 +34,15 @@ import org.imanity.framework.bukkit.util.*;
 import org.imanity.framework.bukkit.util.items.ItemListener;
 import org.imanity.framework.bukkit.tablist.ImanityTabAdapter;
 import org.imanity.framework.bukkit.tablist.ImanityTabHandler;
+import org.imanity.framework.bukkit.visual.VisualBlockHandler;
+import org.imanity.framework.libraries.Library;
 import org.imanity.framework.libraries.classloader.PluginClassLoader;
 import org.imanity.framework.util.FastRandom;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class Imanity {
@@ -53,6 +57,8 @@ public class Imanity {
     public static Plugin PLUGIN;
 
     public static PluginClassLoader CLASS_LOADER;
+
+    private static VisualBlockHandler VISUAL_BLOCK_HANDLER;
 
     public static List<ImanityPlugin> PLUGINS = new ArrayList<>();
 
@@ -91,6 +97,20 @@ public class Imanity {
         ImanityCommon.init(new BukkitImanityBridge(), new BukkitPlayerBridge());
         ImanityCommon.COMMAND_EXECUTOR = new BukkitCommandExecutor();
         ImanityCommon.EVENT_HANDLER = new BukkitEventHandler();
+    }
+
+    public static VisualBlockHandler getVisualBlockHandler() {
+        if (VISUAL_BLOCK_HANDLER == null) {
+
+            Set<Library> libraries = ImmutableSet.of(Library.CAFFEINE);
+            ImanityCommon.LIBRARY_HANDLER.downloadLibraries(libraries);
+            ImanityCommon.LIBRARY_HANDLER.obtainClassLoaderWith(libraries);
+
+            VISUAL_BLOCK_HANDLER = new VisualBlockHandler();
+
+        }
+
+        return VISUAL_BLOCK_HANDLER;
     }
 
     public static CacheBlockSetHandler getBlockSetHandler(World world) {
