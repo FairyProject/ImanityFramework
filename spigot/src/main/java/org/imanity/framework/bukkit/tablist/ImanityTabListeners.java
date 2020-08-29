@@ -13,7 +13,7 @@ import org.bukkit.scoreboard.Team;
 public class ImanityTabListeners implements Listener {
 
     @EventHandler(
-        priority = EventPriority.LOWEST
+        priority = EventPriority.LOW
     )
     public void onJoin(PlayerJoinEvent event) {
         final Player player = event.getPlayer();

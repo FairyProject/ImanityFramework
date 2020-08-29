@@ -1,5 +1,6 @@
 package org.imanity.framework.bukkit.tablist;
 
+import org.bukkit.Bukkit;
 import org.imanity.framework.bukkit.Imanity;
 import org.imanity.framework.bukkit.tablist.utils.IImanityTabImpl;
 import lombok.Getter;
@@ -23,6 +24,8 @@ public class ImanityTabHandler {
     private ImanityTabThread thread;
     private IImanityTabImpl implementation;
     private ProtocolCheck protocolCheck;
+
+    private boolean done;
 
     //Tablist Ticks
     @Setter private long ticks = 20;

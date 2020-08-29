@@ -6,10 +6,10 @@ import net.minecraft.server.v1_8_R3.*;
 import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
 import org.imanity.framework.bukkit.util.ReflectionUtil;
-import org.imanity.framework.bukkit.util.SampleMetadata;
 import org.imanity.framework.bukkit.util.Utility;
 
 import java.lang.reflect.Field;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -103,7 +103,7 @@ public class ImanityBoard {
         ImanityTeamData data = this.teamDatas.get(name);
         data.addName(target.getName());
 
-        this.updateTeam(data);
+        this.addToTeam(data, target.getName());
     }
 
     public void removePlayer(Player target) {
@@ -113,7 +113,7 @@ public class ImanityBoard {
             if (team.getNameSet().contains(target.getName())) {
 
                 team.removeName(target.getName());
-                this.updateTeam(team);
+                this.removeToTeam(team, target.getName());
 
             }
 
@@ -121,12 +121,22 @@ public class ImanityBoard {
 
     }
 
-    public void updateTeam(ImanityTeamData data) {
+    public void addToTeam(ImanityTeamData data, String name) {
         PacketPlayOutScoreboardTeam packet = new PacketPlayOutScoreboardTeam();
         packet.setE(ScoreboardTeamBase.EnumNameTagVisibility.ALWAYS.e);
         packet.setF(-1);
-        packet.setG(data.getNameSet());
+        packet.setG(Collections.singleton(name));
         packet.setH(3);
+        packet.setA(data.getName());
+        ReflectionUtil.sendPacket(player, packet);
+    }
+
+    public void removeToTeam(ImanityTeamData data, String name) {
+        PacketPlayOutScoreboardTeam packet = new PacketPlayOutScoreboardTeam();
+        packet.setE(ScoreboardTeamBase.EnumNameTagVisibility.ALWAYS.e);
+        packet.setF(-1);
+        packet.setG(Collections.singleton(name));
+        packet.setH(4);
         packet.setA(data.getName());
         ReflectionUtil.sendPacket(player, packet);
     }

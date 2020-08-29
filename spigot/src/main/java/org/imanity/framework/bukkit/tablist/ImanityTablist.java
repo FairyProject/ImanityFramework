@@ -1,6 +1,7 @@
 package org.imanity.framework.bukkit.tablist;
 
 import lombok.Getter;
+import net.md_5.bungee.api.chat.TextComponent;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
@@ -19,6 +20,8 @@ public class ImanityTablist {
 
     private Player player;
 
+    private String header;
+    private String footer;
     private Set<TabEntry> currentEntries = new HashSet<>();
 
     public ImanityTablist(Player player) {
@@ -73,8 +76,10 @@ public class ImanityTablist {
     }
 
     public void update() {
+        ImanityTabAdapter adapter = ImanityTabHandler.getInstance().getAdapter();
+
         Set<TabEntry> previous = new HashSet<>(currentEntries);
-        Set<BufferedTabObject> processedObjects = ImanityTabHandler.getInstance().getAdapter().getSlots(player);
+        Set<BufferedTabObject> processedObjects = adapter.getSlots(player);
         for (BufferedTabObject scoreObject : processedObjects) {
             TabEntry tabEntry = getEntry(scoreObject.getColumn(), scoreObject.getSlot());
             if (tabEntry != null) {
@@ -96,6 +101,21 @@ public class ImanityTablist {
             }
         }
         previous.clear();
+
+//        String headerNow = adapter.getHeader(player);
+//        String footerNow = adapter.getFooter(player);
+//
+//        if (headerNow == null)
+//            headerNow = "";
+//
+//        if (footerNow == null)
+//            footerNow = "";
+//
+//        if (!headerNow.equals(this.header) || !footerNow.equals(this.footer)) {
+//            player.setPlayerListHeaderFooter(headerNow.isEmpty() ? null : new TextComponent(headerNow), footerNow.isEmpty() ? null : new TextComponent(footerNow));
+//            this.header = headerNow;
+//            this.footer = footerNow;
+//        }
     }
 
     public TabEntry getEntry(TabColumn column, Integer slot){
@@ -114,10 +134,10 @@ public class ImanityTablist {
 
             if (prefix.charAt(15) == ChatColor.COLOR_CHAR || prefix.charAt(15) == '&') {
                 prefix = prefix.substring(0, 15);
-                suffix = text.substring(15, text.length());
+                suffix = text.substring(15);
             } else if (prefix.charAt(14) == ChatColor.COLOR_CHAR || prefix.charAt(14) == '&') {
                 prefix = prefix.substring(0, 14);
-                suffix = text.substring(14, text.length());
+                suffix = text.substring(14);
             } else {
                 suffix = ChatColor.getLastColors(ChatColor.translateAlternateColorCodes('&',prefix)) + text.substring(16, text.length());
             }

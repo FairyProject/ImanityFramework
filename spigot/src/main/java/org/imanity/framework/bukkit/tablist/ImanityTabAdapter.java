@@ -9,8 +9,8 @@ public interface ImanityTabAdapter {
 
     Set<BufferedTabObject> getSlots(Player player);
 
-    String getFooter();
+    String getFooter(Player player);
 
-    String getHeader();
+    String getHeader(Player player);
 
 }
