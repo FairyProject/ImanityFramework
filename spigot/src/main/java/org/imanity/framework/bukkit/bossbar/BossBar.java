@@ -1,11 +1,14 @@
 package org.imanity.framework.bukkit.bossbar;
 
 import lombok.Getter;
-import net.minecraft.server.v1_8_R3.*;
 import org.bukkit.Location;
 import org.bukkit.entity.Player;
-import org.imanity.framework.bukkit.util.ReflectionUtil;
-import org.imanity.framework.bukkit.util.nms.NMSUtil;
+import org.imanity.framework.bukkit.util.reflection.MinecraftReflection;
+import org.imanity.framework.bukkit.util.reflection.minecraft.DataWatcher;
+import org.imanity.framework.bukkit.util.reflection.resolver.ConstructorResolver;
+import org.imanity.framework.bukkit.util.reflection.resolver.wrapper.DataWatcherWrapper;
+import org.imanity.framework.bukkit.util.reflection.resolver.wrapper.PacketWrapper;
+import static org.imanity.framework.bukkit.util.reflection.minecraft.DataWatcher.V1_9.ValueType.*;
 
 import java.util.concurrent.atomic.AtomicBoolean;
 
@@ -17,21 +20,20 @@ public class BossBar {
 
     private final int entityId;
 
-    private Player player;
+    private final Player player;
 
     private boolean visible;
     private String previousText;
     private float previousHealth;
-    private DataWatcher dataWatcher;
+    private DataWatcherWrapper dataWatcher;
 
     @Getter
-    private AtomicBoolean moved = new AtomicBoolean(false);
+    private final AtomicBoolean moved = new AtomicBoolean(false);
 
     public BossBar(Player player) {
         this.player = player;
 
-        this.entityId = Entity.getEntityCount() + 1;
-        Entity.setEntityCount(this.entityId);
+        this.entityId = MinecraftReflection.getNewEntityId();
 
         this.buildPackets();
     }
@@ -40,32 +42,32 @@ public class BossBar {
         return base.getDirection().multiply(ENTITY_DISTANCE).add(base.toVector()).toLocation(base.getWorld());
     }
 
-    private PacketPlayOutSpawnEntityLiving packetWither;
+    private PacketWrapper packetWither;
 
     private void buildPackets() {
-        this.packetWither = new PacketPlayOutSpawnEntityLiving();
-        this.packetWither.setA(this.entityId);
-        this.packetWither.setB(64);
+        this.packetWither = PacketWrapper.createByPacketName("PacketPlayOutSpawnEntityLiving");
+        this.packetWither.setPacketValue("a", this.entityId);
+        this.packetWither.setPacketValue("b", 64);
 
-        this.packetWither.setC(0);
-        this.packetWither.setD(0);
-        this.packetWither.setE(0);
+        this.packetWither.setPacketValue("c", 0);
+        this.packetWither.setPacketValue("d", 0);
+        this.packetWither.setPacketValue("e", 0);
 
-        this.packetWither.setI((byte) 0);
-        this.packetWither.setJ((byte) 0);
-        this.packetWither.setK((byte) 0);
-        this.packetWither.setL(dataWatcher);
+        this.packetWither.setPacketValue("i", (byte) 0);
+        this.packetWither.setPacketValue("j", (byte) 0);
+        this.packetWither.setPacketValue("k", (byte) 0);
+        this.packetWither.setPacketValue("l", dataWatcher);
     }
 
     private void buildDataWatcher() {
-        this.dataWatcher = new DataWatcher((Entity) null);
+        this.dataWatcher = DataWatcherWrapper.create(null);
 
-        NMSUtil.setDataWatcher(dataWatcher, 17, 0);
-        NMSUtil.setDataWatcher(dataWatcher, 18, 0);
-        NMSUtil.setDataWatcher(dataWatcher, 19, 0);
+        this.dataWatcher.setValue(17, ENTITY_WITHER_a, 0);
+        this.dataWatcher.setValue(18, ENTITY_WIHER_b, 0);
+        this.dataWatcher.setValue(19, ENTITY_WITHER_c, 0);
 
-        NMSUtil.setDataWatcher(dataWatcher, 20, 1000);
-        NMSUtil.setDataWatcher(dataWatcher, 0, (byte) (0 | 1 << 5));
+        this.dataWatcher.setValue(20, ENTITY_WITHER_bw, 1000);
+        this.dataWatcher.setValue(0, ENTITY_FLAG, (byte) (0 | 1 << 5));
     }
 
     private void updateDataWatcher(BossBarData bossBarData) {
@@ -73,42 +75,49 @@ public class BossBar {
             this.buildDataWatcher();
         }
 
-        NMSUtil.setDataWatcher(this.dataWatcher, 6, bossBarData.getHealth() / 100.0F * MAX_HEALTH);
-        NMSUtil.setDataWatcher(this.dataWatcher, 10, bossBarData.getText());
-        NMSUtil.setDataWatcher(this.dataWatcher, 2, bossBarData.getText());
-        NMSUtil.setDataWatcher(this.dataWatcher, 11, (byte) 1);
-        NMSUtil.setDataWatcher(this.dataWatcher, 3, (byte) 1);
+        this.dataWatcher.setValue(6, ENTITY_LIVING_HEALTH, bossBarData.getHealth() / 100.0F * MAX_HEALTH);
+        this.dataWatcher.setValue(10, ENTITY_NAME, bossBarData.getText());
+        this.dataWatcher.setValue(2, ENTITY_NAME, bossBarData.getText());
+        this.dataWatcher.setValue(11, ENTITY_NAME_VISIBLE, (byte) 1);
+        this.dataWatcher.setValue(3, ENTITY_NAME_VISIBLE, (byte) 1);
     }
 
     private void sendMetadata(BossBarData bossBarData) {
-        DataWatcher dataWatcher = this.dataWatcher.clone();
-
         if (bossBarData.getText().equals(this.previousText)
             && bossBarData.getHealth() == this.previousHealth) {
             return;
         }
 
+        Object dataWatcher = this.dataWatcher.getDataWatcherObject();
+
         this.previousText = bossBarData.getText();
         this.previousHealth = bossBarData.getHealth();
 
-        PacketPlayOutEntityMetadata packetMetadata = new PacketPlayOutEntityMetadata(this.entityId, dataWatcher, true);
-        ReflectionUtil.sendPacket(player, packetMetadata);
+        try {
+            ConstructorResolver constructorResolver = new ConstructorResolver("PacketPlayOutEntityMetadata");
+            Object packetMetadata = constructorResolver
+                    .resolveWrapper(new Class[] {int.class, DataWatcher.TYPE, boolean.class})
+                    .newInstanceSilent(this.entityId, dataWatcher, true);
+            MinecraftReflection.sendPacket(player, packetMetadata);
+        } catch (Throwable throwable) {
+            throw new RuntimeException(throwable);
+        }
     }
 
     private void sendMovement() {
         Location location = this.makeLocation(player.getLocation());
 
-        PacketPlayOutEntityTeleport packetTeleport = new PacketPlayOutEntityTeleport();
-        packetTeleport.setA(this.entityId);
+        PacketWrapper packetTeleport = PacketWrapper.createByPacketName("PacketPlayOutEntityTeleport");
+        packetTeleport.setPacketValue("a", this.entityId);
 
-        packetTeleport.setB((int) (location.getX() * 32D));
-        packetTeleport.setC((int) (location.getY() * 32D));
-        packetTeleport.setD((int) (location.getZ() * 32D));
+        packetTeleport.setPacketValue("b", (int) (location.getX() * 32D));
+        packetTeleport.setPacketValue("c", (int) (location.getY() * 32D));
+        packetTeleport.setPacketValue("d", (int) (location.getZ() * 32D));
 
-        packetTeleport.setE((byte) (int) (location.getYaw() * 256F / 360F));
-        packetTeleport.setF((byte) (int) (location.getPitch() * 256F / 360F));
+        packetTeleport.setPacketValue("e", (byte) (int) (location.getYaw() * 256F / 360F));
+        packetTeleport.setPacketValue("f", (byte) (int) (location.getPitch() * 256F / 360F));
 
-        ReflectionUtil.sendPacket(player, packetTeleport);
+        MinecraftReflection.sendPacket(player, packetTeleport);
     }
 
     public void send(BossBarData bossBarData) {
@@ -120,7 +129,7 @@ public class BossBar {
             this.updateDataWatcher(bossBarData);
             this.buildPackets();
 
-            ReflectionUtil.sendPacket(player, this.packetWither);
+            MinecraftReflection.sendPacket(player, this.packetWither);
 
             movement = true;
         } else {
@@ -139,8 +148,9 @@ public class BossBar {
             return;
         }
 
-        PacketPlayOutEntityDestroy packetDestroy = new PacketPlayOutEntityDestroy(this.entityId);
-        ReflectionUtil.sendPacket(player, packetDestroy);
+        PacketWrapper packetDestroy = PacketWrapper.createByPacketName("PacketPlayOutEntityDestroy");
+        packetDestroy.setPacketValue("a", this.entityId);
+        MinecraftReflection.sendPacket(player, packetDestroy);
         this.visible = false;
     }
 

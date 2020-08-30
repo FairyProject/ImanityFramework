@@ -73,7 +73,6 @@ public class Imanity {
         BukkitPlayerData.init();
 
         SpigotUtil.init();
-        ReflectionUtil.init();
 
         Imanity.TIMER_HANDLER = new TimerHandler();
         Imanity.TIMER_HANDLER.init();

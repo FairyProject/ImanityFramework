@@ -10,9 +10,9 @@ import org.bukkit.craftbukkit.v1_8_R3.CraftWorld;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
 import org.imanity.framework.bukkit.hologram.api.ViewHandler;
-import org.imanity.framework.bukkit.util.ReflectionUtil;
 import org.imanity.framework.bukkit.util.SpigotUtil;
 import org.imanity.framework.bukkit.util.nms.NMSUtil;
+import org.imanity.framework.bukkit.util.reflection.MinecraftReflection;
 
 import java.lang.reflect.Field;
 import java.util.Collection;
@@ -188,11 +188,11 @@ public class HologramSingle {
         players.forEach(player -> {
 
             if (SpigotUtil.getProtocolVersion(player) > 5) {
-                ReflectionUtil.sendPacket(player, this.packetHorse1_8);
+                MinecraftReflection.sendPacket(player, this.packetHorse1_8);
             } else {
-                ReflectionUtil.sendPacket(player, this.packetHorse1_7);
-                ReflectionUtil.sendPacket(player, this.packetWitherSkull);
-                ReflectionUtil.sendPacket(player, this.attachPacket);
+                MinecraftReflection.sendPacket(player, this.packetHorse1_7);
+                MinecraftReflection.sendPacket(player, this.packetWitherSkull);
+                MinecraftReflection.sendPacket(player, this.attachPacket);
             }
 
         });
@@ -203,10 +203,10 @@ public class HologramSingle {
         players.forEach(player -> {
 
             if (SpigotUtil.getProtocolVersion(player) > 5) {
-                ReflectionUtil.sendPacket(player,  packetTeleportHorse1_8);
+                MinecraftReflection.sendPacket(player,  packetTeleportHorse1_8);
             } else {
-                ReflectionUtil.sendPacket(player, this.packetTeleportHorse1_7);
-                ReflectionUtil.sendPacket(player, this.packetTeleportSkull);
+                MinecraftReflection.sendPacket(player, this.packetTeleportHorse1_7);
+                MinecraftReflection.sendPacket(player, this.packetTeleportSkull);
             }
 
         });
@@ -222,27 +222,27 @@ public class HologramSingle {
             String name = this.viewHandler.view(player);
             PacketPlayOutEntityMetadata packet = this.buildNamePacket(id, dataWatcher, 2, 3, name);
 
-            ReflectionUtil.sendPacket(player, packet);
+            MinecraftReflection.sendPacket(player, packet);
 
             if (protocol <= 5
                 && this.entityIds.length > 1) {
 
-                ReflectionUtil.sendPacket(player, this.buildNamePacket(this.entityIds[1], this.horseDataWatcher1_7, 10, 11, name));
+                MinecraftReflection.sendPacket(player, this.buildNamePacket(this.entityIds[1], this.horseDataWatcher1_7, 10, 11, name));
 
             }
         });
     }
 
     protected void sendDestroyPacket(Collection<? extends Player> players) {
-        players.forEach(player -> ReflectionUtil.sendPacket(player, this.packetDestroy));
+        players.forEach(player -> MinecraftReflection.sendPacket(player, this.packetDestroy));
     }
 
     protected void sendAttachPacket(Collection<? extends Player> players) {
         players.forEach(player -> {
             if (this.hologram.isAttached()) {
-                ReflectionUtil.sendPacket(player, this.ridingEjectPacket);
+                MinecraftReflection.sendPacket(player, this.ridingEjectPacket);
             } else {
-                ReflectionUtil.sendPacket(player, this.ridingAttachPacket);
+                MinecraftReflection.sendPacket(player, this.ridingAttachPacket);
             }
         });
     }

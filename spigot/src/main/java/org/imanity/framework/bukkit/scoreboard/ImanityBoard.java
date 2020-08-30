@@ -5,8 +5,8 @@ import lombok.Setter;
 import net.minecraft.server.v1_8_R3.*;
 import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
-import org.imanity.framework.bukkit.util.ReflectionUtil;
 import org.imanity.framework.bukkit.util.Utility;
+import org.imanity.framework.bukkit.util.reflection.MinecraftReflection;
 
 import java.lang.reflect.Field;
 import java.util.Collections;
@@ -59,8 +59,8 @@ public class ImanityBoard {
         packetB.setA(1);
         packetB.setB(player.getName());
 
-        ReflectionUtil.sendPacket(player, packetA);
-        ReflectionUtil.sendPacket(player, packetB);
+        MinecraftReflection.sendPacket(player, packetA);
+        MinecraftReflection.sendPacket(player, packetB);
 
     }
 
@@ -90,7 +90,7 @@ public class ImanityBoard {
 
         packet.setI(d);
 
-        ReflectionUtil.sendPacket(player, packet);
+        MinecraftReflection.sendPacket(player, packet);
     }
 
     public void updatePlayer(Player target) {
@@ -128,7 +128,7 @@ public class ImanityBoard {
         packet.setG(Collections.singleton(name));
         packet.setH(3);
         packet.setA(data.getName());
-        ReflectionUtil.sendPacket(player, packet);
+        MinecraftReflection.sendPacket(player, packet);
     }
 
     public void removeToTeam(ImanityTeamData data, String name) {
@@ -138,7 +138,7 @@ public class ImanityBoard {
         packet.setG(Collections.singleton(name));
         packet.setH(4);
         packet.setA(data.getName());
-        ReflectionUtil.sendPacket(player, packet);
+        MinecraftReflection.sendPacket(player, packet);
     }
 
     public void setTitle(String title) {
@@ -155,7 +155,7 @@ public class ImanityBoard {
         packet.setC(IScoreboardCriteria.EnumScoreboardHealthDisplay.INTEGER);
         packet.setD(2);
 
-        ReflectionUtil.sendPacket(player, packet);
+        MinecraftReflection.sendPacket(player, packet);
 
     }
 
@@ -219,7 +219,7 @@ public class ImanityBoard {
 
         teams[line] = value;
 
-        ReflectionUtil.sendPacket(player, packet);
+        MinecraftReflection.sendPacket(player, packet);
     }
 
     public void clear(int line) {
@@ -236,8 +236,8 @@ public class ImanityBoard {
 
                 teams[line] = null;
 
-                ReflectionUtil.sendPacket(player, packetA);
-                ReflectionUtil.sendPacket(player, packetB);
+                MinecraftReflection.sendPacket(player, packetA);
+                MinecraftReflection.sendPacket(player, packetB);
             }
         }
     }
@@ -292,7 +292,7 @@ public class ImanityBoard {
                 Utility.error(e, "An error occurred while creating new fake team");
             }
 
-            ReflectionUtil.sendPacket(player, packetA);
+            MinecraftReflection.sendPacket(player, packetA);
 
             return packetB;
         }
