@@ -6,8 +6,10 @@ import org.imanity.framework.bukkit.tablist.utils.IImanityTabImpl;
 import lombok.Getter;
 import lombok.Setter;
 import org.imanity.framework.bukkit.tablist.utils.impl.NMS1_8TabImpl;
-import org.imanity.framework.bukkit.tablist.utils.version.protocol.ProtocolCheck;
-import org.imanity.framework.bukkit.tablist.utils.version.protocol.ProtocolCheckImanitySpigot;
+import org.imanity.framework.bukkit.tablist.utils.impl.ProtocolLibTabImpl;
+import org.imanity.framework.bukkit.util.reflection.version.protocol.ProtocolCheck;
+import org.imanity.framework.bukkit.util.reflection.version.protocol.ProtocolCheckImanitySpigot;
+import org.imanity.framework.bukkit.util.reflection.MinecraftReflection;
 
 import java.util.Map;
 import java.util.UUID;
@@ -23,7 +25,6 @@ public class ImanityTabHandler {
     private Map<UUID, ImanityTablist> tablists;
     private ImanityTabThread thread;
     private IImanityTabImpl implementation;
-    private ProtocolCheck protocolCheck;
 
     private boolean done;
 
@@ -40,25 +41,23 @@ public class ImanityTabHandler {
         this.adapter = adapter;
         this.tablists = new ConcurrentHashMap<>();
 
-        this.protocolCheck = new ProtocolCheckImanitySpigot();
-
         this.registerImplementation();
 
         this.setup();
     }
 
     private void registerImplementation() {
-        /*
         if (Bukkit.getPluginManager().getPlugin("ProtocolLib") != null) {
             this.implementation = new ProtocolLibTabImpl();
-            plugin.getLogger().info("Registered Implementation with ProtocolLib");
+            Imanity.PLUGIN.getLogger().info("Registered Tablist Implementation with ProtocolLib");
             return;
         }
 
-         */
-
-        this.implementation = new NMS1_8TabImpl();
-//        plugin.getLogger().info("Unable to register ImanityTablist with a proper implementation");
+        if (MinecraftReflection.VERSION == MinecraftReflection.Version.v1_8_R3) {
+            this.implementation = new NMS1_8TabImpl();
+            return;
+        }
+        Imanity.PLUGIN.getLogger().info("Unable to register ImanityTablist with a proper implementation");
     }
 
     private void setup() {

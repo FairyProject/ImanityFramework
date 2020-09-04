@@ -2,9 +2,9 @@ package org.imanity.framework.bukkit.visual.type;
 
 import lombok.Builder;
 import lombok.Getter;
-import net.minecraft.server.v1_8_R3.BlockPosition;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
+import org.imanity.framework.bukkit.util.BlockPosition;
 import org.imanity.framework.bukkit.visual.VisualBlockData;
 
 @Getter

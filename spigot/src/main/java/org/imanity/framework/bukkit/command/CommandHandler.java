@@ -291,12 +291,12 @@ public final class CommandHandler implements Listener {
 	 *
 	 * @return A List<String> of available tab completions. (empty if none)
 	 */
-	protected static List<String> tabCompleteParameter(final Player sender, final String parameter, final Class<?> transformTo,
+	protected static List<String> tabCompleteParameter(final Player sender, final String[] parameters, final String parameter, final Class<?> transformTo,
 			final String[] tabCompleteFlags) {
 		if (!parameterTypes.containsKey(transformTo))
 			return (new ArrayList<>());
 
-		return (parameterTypes.get(transformTo).tabComplete(sender, ImmutableSet.copyOf(tabCompleteFlags), parameter));
+		return (parameterTypes.get(transformTo).tabComplete(sender, parameters, ImmutableSet.copyOf(tabCompleteFlags), parameter));
 	}
 
 	/**

@@ -11,31 +11,31 @@ import java.util.Base64;
 public enum Library {
 
     REDISSON(
-            "org{}redisson",
+            "org.redisson",
             "redisson",
             "3.13.3",
             "Wx16na9jIrQP0ezbW0W8ATDP0fBlID8GXnosT4QGU4w="
     ),
     YAML(
-            "org{}yaml",
+            "org.yaml",
             "snakeyaml",
             "1.20",
             "HOWEuJiOSesajRuXIHGgsg9eyONxV7xakRNP3ZDGEjw="
     ),
     HIKARI_CP(
-            "com{}zaxxer",
+            "com.zaxxer",
             "HikariCP",
             "3.1.0",
             "TBo58lIW2Ukyh3VYKUwOliccAeRx+y9FxdDzsD8UUUw="
     ),
     MONGO_DB(
-            "org{}mongodb",
+            "org.mongodb",
             "mongo-java-driver",
             "3.12.2",
             "eMxHcEtasb/ubFCv99kE5rVZMPGmBei674ZTdjYe58w="
     ),
     CAFFEINE(
-            "com{}github{}ben-manes{}caffeine",
+            "com.github.ben-manes.caffeine",
             "caffeine",
             "2.8.4",
             "KV9YN5gQj6b507VJApJpPF5PkCon0DZqAi0T7Ln0lag="
@@ -49,14 +49,18 @@ public enum Library {
 
     Library(String groupId, String artifactId, String version, String checksum) {
         this.mavenRepoPath = String.format(MAVEN_FORMAT,
-                rewriteEscaping(groupId).replace(".", "/"),
-                rewriteEscaping(artifactId),
+                groupId.replace(".", "/"),
+                artifactId,
                 version,
-                rewriteEscaping(artifactId),
+                artifactId,
                 version
         );
         this.version = version;
-        this.checksum = Base64.getDecoder().decode(checksum);
+        if (checksum != null) {
+            this.checksum = Base64.getDecoder().decode(checksum);
+        } else {
+            this.checksum = null;
+        }
     }
 
 
@@ -65,11 +69,10 @@ public enum Library {
         return name().toLowerCase().replace('_', '-') + "-" + this.version;
     }
 
-    private static String rewriteEscaping(String s) {
-        return s.replace("{}", ".");
-    }
-
     public boolean checksumMatches(byte[] hash) {
+        if (this.checksum == null) {
+            return true;
+        }
         return Arrays.equals(this.checksum, hash);
     }
 

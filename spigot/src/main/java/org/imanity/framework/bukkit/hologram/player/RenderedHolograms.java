@@ -1,7 +1,5 @@
 package org.imanity.framework.bukkit.hologram.player;
 
-import it.unimi.dsi.fastutil.ints.IntArrayList;
-import it.unimi.dsi.fastutil.ints.IntList;
 import lombok.Getter;
 import org.bukkit.entity.Player;
 import org.imanity.framework.bukkit.hologram.Hologram;
@@ -15,7 +13,7 @@ import java.util.List;
 public class RenderedHolograms {
 
     private int worldId;
-    private final ArrayList<Integer> holograms = new ArrayList<>();
+    private final List<Integer> holograms = new ArrayList<>();
 
     public RenderedHolograms(Player player) {
         this.worldId = SpigotUtil.getWorldId(player.getWorld());

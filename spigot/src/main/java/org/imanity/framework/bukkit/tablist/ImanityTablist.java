@@ -1,7 +1,6 @@
 package org.imanity.framework.bukkit.tablist;
 
 import lombok.Getter;
-import net.md_5.bungee.api.chat.TextComponent;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
@@ -10,8 +9,8 @@ import org.imanity.framework.bukkit.tablist.utils.BufferedTabObject;
 import org.imanity.framework.bukkit.tablist.utils.LegacyClientUtils;
 import org.imanity.framework.bukkit.tablist.utils.TabColumn;
 import org.imanity.framework.bukkit.tablist.utils.TabEntry;
-import org.imanity.framework.bukkit.tablist.utils.player.PlayerUtil;
-import org.imanity.framework.bukkit.tablist.utils.version.PlayerVersion;
+import org.imanity.framework.bukkit.util.reflection.MinecraftReflection;
+import org.imanity.framework.bukkit.util.reflection.version.PlayerVersion;
 
 import java.util.*;
 
@@ -45,7 +44,7 @@ public class ImanityTablist {
     }
 
     private void setup() {
-        final int possibleSlots = (PlayerUtil.getPlayerVersion(player) == PlayerVersion.v1_7 ? 60 : 80);
+        final int possibleSlots = (MinecraftReflection.getProtocol(player) == PlayerVersion.v1_7 ? 60 : 80);
         for (int i = 1; i <= possibleSlots; i++) {
             final TabColumn tabColumn = TabColumn.getFromSlot(player, i);
             if (tabColumn == null) {
@@ -60,7 +59,7 @@ public class ImanityTablist {
                     tabColumn.getNumb(player, i),
                     i
             );
-            if ((PlayerUtil.getPlayerVersion(player) == PlayerVersion.v1_7)) {
+            if ((MinecraftReflection.getProtocol(player) == PlayerVersion.v1_7)) {
                 Team team = player.getScoreboard().getTeam(LegacyClientUtils.teamNames.get(i - 1));
                 if (team != null) {
                     team.unregister();
@@ -86,7 +85,7 @@ public class ImanityTablist {
                 previous.remove(tabEntry);
                 ImanityTabHandler.getInstance().getImplementation().updateFakeName(this, tabEntry, scoreObject.getText());
                 ImanityTabHandler.getInstance().getImplementation().updateFakeLatency(this, tabEntry, scoreObject.getPing());
-                if (PlayerUtil.getPlayerVersion(player) != PlayerVersion.v1_7) {
+                if (MinecraftReflection.getProtocol(player) != PlayerVersion.v1_7) {
                     if (!tabEntry.getTexture().toString().equals(scoreObject.getSkinTexture().toString())) {
                         ImanityTabHandler.getInstance().getImplementation().updateFakeSkin(this, tabEntry, scoreObject.getSkinTexture());
                     }
@@ -96,7 +95,7 @@ public class ImanityTablist {
         for (TabEntry tabEntry : previous) {
             ImanityTabHandler.getInstance().getImplementation().updateFakeName(this, tabEntry, "");
             ImanityTabHandler.getInstance().getImplementation().updateFakeLatency(this, tabEntry, 0);
-            if (PlayerUtil.getPlayerVersion(player) != PlayerVersion.v1_7) {
+            if (MinecraftReflection.getProtocol(player) != PlayerVersion.v1_7) {
                 ImanityTabHandler.getInstance().getImplementation().updateFakeSkin(this, tabEntry, ImanityTabCommons.defaultTexture);
             }
         }

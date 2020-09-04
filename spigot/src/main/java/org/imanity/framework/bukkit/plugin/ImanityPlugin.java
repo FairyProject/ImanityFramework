@@ -7,18 +7,18 @@ import org.imanity.framework.bukkit.Imanity;
 public abstract class ImanityPlugin extends JavaPlugin {
 
     @Override
-    public void onLoad() {
-        if (this.getDescription().getLoad() != PluginLoadOrder.STARTUP) {
-            new IllegalStateException("The ImanityFramework requires the plugin to be load on startup, please add [load: STARTUP] into your plugin.yml!").printStackTrace();
-            this.getServer().getPluginManager().disablePlugin(this);
-            return;
-        }
-
+    public final void onLoad() {
         Imanity.PLUGINS.add(this);
+        this.load();
+    }
+
+    public void load() {
+
     }
 
     @Override
     public final void onEnable() {
+        this.postEnable();
     }
 
     @Override

@@ -2,6 +2,7 @@ package org.imanity.framework.bukkit.util.reflection.resolver;
 
 import org.imanity.framework.bukkit.util.reflection.resolver.wrapper.MethodWrapper;
 import org.imanity.framework.bukkit.util.AccessUtil;
+import org.imanity.framework.util.CommonUtility;
 
 import java.lang.reflect.Method;
 
@@ -118,7 +119,7 @@ public class MethodResolver extends MemberResolver<Method> {
 		boolean equal = true;
 		if (l1.length != l2.length) { return false; }
 		for (int i = 0; i < l1.length; i++) {
-			if (l1[i] != l2[i]) {
+			if (CommonUtility.wrapPrimitiveToObject(l1[i]) != CommonUtility.wrapPrimitiveToObject(l2[i])) {
 				equal = false;
 				break;
 			}

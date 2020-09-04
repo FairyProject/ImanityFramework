@@ -4,10 +4,12 @@ import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
+import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.metadata.MetadataValue;
 import org.imanity.framework.bukkit.Imanity;
 import org.imanity.framework.bukkit.util.SampleMetadata;
+import org.imanity.framework.bukkit.util.TaskUtil;
 import org.imanity.framework.bukkit.util.Utility;
 
 import java.util.List;
@@ -29,6 +31,13 @@ public class ImanityBoardHandler implements Runnable {
         thread.start();
 
         Imanity.PLUGIN.getServer().getPluginManager().registerEvents(new Listener() {
+
+            @EventHandler
+            public void onPlayerJoin(PlayerJoinEvent event) {
+                Player player = event.getPlayer();
+
+                TaskUtil.runScheduled(() -> getOrCreateScoreboard(player), 1L);
+            }
 
             @EventHandler
             public void onPlayerQuit(PlayerQuitEvent event) {
@@ -73,7 +82,10 @@ public class ImanityBoardHandler implements Runnable {
                 break;
             }
 
-            ImanityBoard board = this.getOrCreateScoreboard(player);
+            ImanityBoard board = this.get(player);
+            if (board == null) {
+                continue;
+            }
 
             String title = Utility.color(adapter.getTitle(player));
 
@@ -120,7 +132,6 @@ public class ImanityBoardHandler implements Runnable {
 
                         ImanityBoard otherBoard = this.getOrCreateScoreboard(other);
                         otherBoard.removePlayer(player);
-
                     }
                 });
             }
@@ -128,10 +139,7 @@ public class ImanityBoardHandler implements Runnable {
     }
 
     public ImanityBoard get(Player player) {
-        if (player.hasMetadata(ImanityBoard.METADATA_TAG)) {
-            return (ImanityBoard) player.getMetadata(ImanityBoard.METADATA_TAG).get(0).value();
-        }
-        return null;
+        return Utility.metadata(player, ImanityBoard.METADATA_TAG);
     }
 
     public ImanityBoard getOrCreateScoreboard(Player player) {
@@ -139,7 +147,7 @@ public class ImanityBoardHandler implements Runnable {
 
         if (board == null) {
             board = new ImanityBoard(player, this.adapter);
-            player.setMetadata(ImanityBoard.METADATA_TAG, new SampleMetadata(board));
+            Utility.metadata(player, ImanityBoard.METADATA_TAG, board);
 
             this.adapter.onBoardCreate(player, board);
         }

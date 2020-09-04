@@ -11,6 +11,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.Event;
 import org.bukkit.event.Listener;
 import org.bukkit.plugin.Plugin;
+import org.bukkit.plugin.java.JavaPlugin;
 import org.imanity.framework.ImanityCommon;
 import org.imanity.framework.bukkit.bossbar.BossBarAdapter;
 import org.imanity.framework.bukkit.bossbar.BossBarHandler;
@@ -22,13 +23,19 @@ import org.imanity.framework.bukkit.events.player.CallEventListener;
 import org.imanity.framework.bukkit.hologram.HologramHandler;
 import org.imanity.framework.bukkit.hologram.HologramListener;
 import org.imanity.framework.bukkit.impl.*;
+import org.imanity.framework.bukkit.impl.server.ServerImplementation;
 import org.imanity.framework.bukkit.menu.ButtonListener;
 import org.imanity.framework.bukkit.menu.task.MenuUpdateTask;
 import org.imanity.framework.bukkit.player.BukkitPlayerData;
 import org.imanity.framework.bukkit.player.PlayerListener;
+import org.imanity.framework.bukkit.player.movement.MovementListener;
+import org.imanity.framework.bukkit.player.movement.impl.AbstractMovementImplementation;
+import org.imanity.framework.bukkit.player.movement.impl.BukkitMovementImplementation;
+import org.imanity.framework.bukkit.player.movement.impl.ImanityMovementImplementation;
 import org.imanity.framework.bukkit.plugin.ImanityPlugin;
 import org.imanity.framework.bukkit.scoreboard.ImanityBoardAdapter;
 import org.imanity.framework.bukkit.scoreboard.ImanityBoardHandler;
+import org.imanity.framework.bukkit.task.BukkitTaskChainFactory;
 import org.imanity.framework.bukkit.timer.TimerHandler;
 import org.imanity.framework.bukkit.util.*;
 import org.imanity.framework.bukkit.util.items.ItemListener;
@@ -37,6 +44,7 @@ import org.imanity.framework.bukkit.tablist.ImanityTabHandler;
 import org.imanity.framework.bukkit.visual.VisualBlockHandler;
 import org.imanity.framework.libraries.Library;
 import org.imanity.framework.libraries.classloader.PluginClassLoader;
+import org.imanity.framework.task.chain.TaskChainFactory;
 import org.imanity.framework.util.FastRandom;
 
 import java.util.ArrayList;
@@ -56,7 +64,10 @@ public class Imanity {
     public static TimerHandler TIMER_HANDLER;
     public static Plugin PLUGIN;
 
+    public static ServerImplementation IMPLEMENTATION;
+
     public static PluginClassLoader CLASS_LOADER;
+    public static TaskChainFactory TASK_CHAIN_FACTORY;
 
     private static VisualBlockHandler VISUAL_BLOCK_HANDLER;
 
@@ -68,12 +79,15 @@ public class Imanity {
         Imanity.PLUGIN = plugin;
         Imanity.RANDOM = new FastRandom();
         Imanity.CLASS_LOADER = new PluginClassLoader(plugin.getClass().getClassLoader());
+
+        SpigotUtil.init();
+        Imanity.IMPLEMENTATION = ServerImplementation.load();
+
         Imanity.initCommon();
 
         BukkitPlayerData.init();
 
-        SpigotUtil.init();
-
+        Imanity.TASK_CHAIN_FACTORY = BukkitTaskChainFactory.create(plugin);
         Imanity.TIMER_HANDLER = new TimerHandler();
         Imanity.TIMER_HANDLER.init();
 
@@ -93,9 +107,13 @@ public class Imanity {
     }
 
     private static void initCommon() {
-        ImanityCommon.init(new BukkitImanityBridge(), new BukkitPlayerBridge());
-        ImanityCommon.COMMAND_EXECUTOR = new BukkitCommandExecutor();
-        ImanityCommon.EVENT_HANDLER = new BukkitEventHandler();
+        ImanityCommon.builder()
+                .bridge(new BukkitImanityBridge())
+                .playerBridge(new BukkitPlayerBridge())
+                .commandExecutor(new BukkitCommandExecutor())
+                .eventHandler(new BukkitEventHandler())
+                .taskScheduler(new BukkitTaskScheduler())
+        .init();
     }
 
     public static VisualBlockHandler getVisualBlockHandler() {
@@ -126,9 +144,44 @@ public class Imanity {
         throw new RuntimeException("Something wrong");
     }
 
+    public static AbstractMovementImplementation registerMovementListener(MovementListener movementListener) {
+
+        AbstractMovementImplementation implementation;
+
+        switch (SpigotUtil.SPIGOT_TYPE) {
+
+            case IMANITY:
+                implementation = new ImanityMovementImplementation(movementListener);
+                break;
+            default:
+                implementation = new BukkitMovementImplementation(movementListener);
+                break;
+
+        }
+
+        implementation.register();
+        return implementation;
+
+    }
+
     public static void registerEvents(Listener... listeners) {
+
+        Plugin plugin = null;
+
+        try {
+            String typeName = Thread.currentThread().getStackTrace()[2].getClassName();
+            Class<?> type = Class.forName(typeName);
+
+            plugin = JavaPlugin.getProvidingPlugin(type);
+        } catch (Throwable throwable) {}
+
+        if (plugin == null) {
+            plugin = Imanity.PLUGIN;
+        }
+
         for (Listener listener : listeners) {
-            PLUGIN.getServer().getPluginManager().registerEvents(listener, PLUGIN);
+            PLUGIN.getServer().getPluginManager().registerEvents(listener, plugin);
+            LOGGER.info("Registering Listener " + listener.getClass().getSimpleName() + " providing plugin by " + plugin.getName());
         }
     }
 

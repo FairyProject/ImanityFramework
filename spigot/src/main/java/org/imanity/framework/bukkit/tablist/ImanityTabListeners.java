@@ -1,6 +1,7 @@
 package org.imanity.framework.bukkit.tablist;
 
 import org.bukkit.Bukkit;
+import org.bukkit.craftbukkit.v1_8_R3.entity.CraftPlayer;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
@@ -9,6 +10,7 @@ import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.event.server.PluginDisableEvent;
 import org.bukkit.scoreboard.Team;
+import org.imanity.framework.bukkit.util.reflection.MinecraftReflection;
 
 public class ImanityTabListeners implements Listener {
 
@@ -17,6 +19,9 @@ public class ImanityTabListeners implements Listener {
     )
     public void onJoin(PlayerJoinEvent event) {
         final Player player = event.getPlayer();
+
+        System.out.println(MinecraftReflection.getProtocol(player) + " " + ((CraftPlayer) player).getHandle().playerConnection.networkManager.getVersion());
+
 //        new BukkitRunnable() {
 //            @Override
 //            public void run() {

@@ -37,12 +37,23 @@ public class PacketWrapper extends WrapperAbstract {
         MinecraftReflection.sendPacket(player, this.packetObject);
     }
 
-    public void setPacketValue(String field, Object value) {
+    public PacketWrapper setPacketValueByType(Class<?> type, Object value) {
+        try {
+            FieldWrapper<Object> fieldWrapper = fieldResolver.resolveByFirstTypeWrapper(type);
+            fieldWrapper.set(this.getPacket(), value);
+        } catch (Throwable throwable) {
+            throw new RuntimeException(throwable);
+        }
+        return this;
+    }
+
+    public PacketWrapper setPacketValue(String field, Object value) {
         try {
             fieldResolver.resolve(field).set(getPacket(), value);
         } catch (Exception e) {
-            e.printStackTrace();
+            throw new RuntimeException(e);
         }
+        return this;
     }
 
     public Object getPacketValue(String field) {

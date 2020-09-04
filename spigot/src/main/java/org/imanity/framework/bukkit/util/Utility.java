@@ -4,23 +4,21 @@ import net.minecraft.server.v1_8_R3.*;
 import org.bukkit.*;
 import org.bukkit.World;
 import org.bukkit.craftbukkit.v1_8_R3.CraftWorld;
-import org.bukkit.craftbukkit.v1_8_R3.entity.CraftPlayer;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 import org.bukkit.entity.Projectile;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
+import org.bukkit.metadata.Metadatable;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.projectiles.ProjectileSource;
 import org.imanity.framework.bukkit.Imanity;
-import spg.lgdev.knockback.impl.RegularKnockback;
+import org.imanity.framework.bukkit.util.reflection.resolver.MethodResolver;
 
 import javax.annotation.Nullable;
 import java.io.File;
 import java.io.IOException;
-import java.io.InputStream;
-import java.lang.reflect.Field;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.net.URLDecoder;
@@ -197,34 +195,35 @@ public class Utility {
     }
 
     public static void showDyingNPC(Player player) {
-        Location loc = player.getLocation();
-        final List<Player> players = ((CraftWorld) player.getWorld()).getHandle().playerMap
-                .getNearbyPlayersIgnoreHeight(loc.getX(), loc.getY(), loc.getZ(), 32)
-                .stream().map(EntityPlayer::getBukkitEntity)
-                .collect(Collectors.toList());
-
-        EntityPlayer entityPlayer = ((CraftPlayer) player).getHandle();
-        PacketPlayOutNamedEntitySpawn packet = new PacketPlayOutNamedEntitySpawn(entityPlayer);
-        int i = net.minecraft.server.v1_8_R3.Entity.getEntityCount() + 1;
-        net.minecraft.server.v1_8_R3.Entity.setEntityCount(i);
-        packet.setA(i);
-        PacketPlayOutEntityStatus statusPacket = new PacketPlayOutEntityStatus();
-        statusPacket.setA(i);
-        statusPacket.setB((byte) 3);
-        PacketPlayOutEntityVelocity velocityPacket = new PacketPlayOutEntityVelocity(i, entityPlayer.motX, entityPlayer.motY, entityPlayer.motZ);
-        PacketPlayOutEntityDestroy destoryPacket = new PacketPlayOutEntityDestroy(i);
-
-        for (Player other : players) {
-            ((CraftPlayer) other).getHandle().playerConnection.fakeEntities.add(i);
-            ((CraftPlayer) other).getHandle().playerConnection.sendPacket(packet);
-            ((CraftPlayer) other).getHandle().playerConnection.sendPacket(velocityPacket);
-            ((CraftPlayer) other).getHandle().playerConnection.sendPacket(statusPacket);
-        }
-
-        TaskUtil.runScheduled(() -> players.forEach(other -> {
-            ((CraftPlayer) other).getHandle().playerConnection.fakeEntities.remove(i);
-            ((CraftPlayer) other).getHandle().playerConnection.sendPacket(destoryPacket);
-        }), 20L);
+        Imanity.IMPLEMENTATION.showDyingNPC(player);
+//        Location loc = player.getLocation();
+//        final List<Player> players = ((CraftWorld) player.getWorld()).getHandle().playerMap
+//                .getNearbyPlayersIgnoreHeight(loc.getX(), loc.getY(), loc.getZ(), 32)
+//                .stream().map(EntityPlayer::getBukkitEntity)
+//                .collect(Collectors.toList());
+//
+//        EntityPlayer entityPlayer = ((CraftPlayer) player).getHandle();
+//        PacketPlayOutNamedEntitySpawn packet = new PacketPlayOutNamedEntitySpawn(entityPlayer);
+//        int i = net.minecraft.server.v1_8_R3.Entity.getEntityCount() + 1;
+//        net.minecraft.server.v1_8_R3.Entity.setEntityCount(i);
+//        packet.setA(i);
+//        PacketPlayOutEntityStatus statusPacket = new PacketPlayOutEntityStatus();
+//        statusPacket.setA(i);
+//        statusPacket.setB((byte) 3);
+//        PacketPlayOutEntityVelocity velocityPacket = new PacketPlayOutEntityVelocity(i, entityPlayer.motX, entityPlayer.motY, entityPlayer.motZ);
+//        PacketPlayOutEntityDestroy destoryPacket = new PacketPlayOutEntityDestroy(i);
+//
+//        for (Player other : players) {
+//            ((CraftPlayer) other).getHandle().playerConnection.fakeEntities.add(i);
+//            ((CraftPlayer) other).getHandle().playerConnection.sendPacket(packet);
+//            ((CraftPlayer) other).getHandle().playerConnection.sendPacket(velocityPacket);
+//            ((CraftPlayer) other).getHandle().playerConnection.sendPacket(statusPacket);
+//        }
+//
+//        TaskUtil.runScheduled(() -> players.forEach(other -> {
+//            ((CraftPlayer) other).getHandle().playerConnection.fakeEntities.remove(i);
+//            ((CraftPlayer) other).getHandle().playerConnection.sendPacket(destoryPacket);
+//        }), 20L);
     }
 
     public static void sendMessages(Player player, Iterable<String> iterable) {
@@ -271,6 +270,32 @@ public class Utility {
         }
 
         throw new UnsupportedOperationException("Cannot list files for URL "+dirURL);
+    }
+
+    public static File getPluginJar(JavaPlugin plugin) {
+
+        MethodResolver resolver = new MethodResolver(JavaPlugin.class);
+        return (File) resolver.resolveWrapper("getFile").invoke(plugin);
+
+    }
+
+    public static <T> T metadata(Metadatable metadatable, String key) {
+        if (!metadatable.hasMetadata(key)) {
+            return null;
+        }
+        return (T) metadatable.getMetadata(key).get(0).value();
+    }
+
+    public static <T> void metadata(Metadatable metadatable, String key, T value) {
+        metadatable.setMetadata(key, new SampleMetadata(value));
+    }
+
+    public static void delayedUpdateInventory(Player player) {
+        TaskUtil.runScheduled(() -> {
+            if (player.isOnline()) {
+                player.updateInventory();
+            }
+        }, 1L);
     }
 
 }

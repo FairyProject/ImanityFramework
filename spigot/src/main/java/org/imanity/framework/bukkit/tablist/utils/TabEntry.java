@@ -8,11 +8,13 @@ import net.minecraft.server.v1_8_R3.EntityPlayer;
 import org.bukkit.OfflinePlayer;
 import org.imanity.framework.bukkit.tablist.ImanityTablist;
 
+import java.util.UUID;
+
 @Getter @Setter @AllArgsConstructor
 public class TabEntry {
 
     private String id;
-    private GameProfile gameProfile;
+    private UUID uuid;
     private String text;
     private ImanityTablist tab;
     private SkinTexture texture;

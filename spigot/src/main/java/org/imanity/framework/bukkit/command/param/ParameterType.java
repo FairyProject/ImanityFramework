@@ -12,4 +12,8 @@ public interface ParameterType<T> {
 
 	List<String> tabComplete(Player sender, Set<String> flags, String source);
 
+	default List<String> tabComplete(Player sender, String[] parameters, Set<String> flags, String source) {
+		return this.tabComplete(sender, flags, source);
+	}
+
 }

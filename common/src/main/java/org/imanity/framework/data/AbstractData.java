@@ -3,7 +3,8 @@ package org.imanity.framework.data;
 import lombok.Getter;
 import org.bson.Document;
 import org.imanity.framework.ImanityCommon;
-import org.imanity.framework.data.annotation.StoreData;
+import org.imanity.framework.data.annotation.StoreDataConverter;
+import org.imanity.framework.data.annotation.StoreDataElement;
 import org.imanity.framework.data.store.StoreDatabase;
 import org.imanity.framework.data.type.DataConverter;
 import org.imanity.framework.data.type.DataConverterType;
@@ -16,7 +17,7 @@ import java.util.*;
 
 public abstract class AbstractData {
 
-    @StoreData
+    @StoreDataElement
     @Getter
     private UUID uuid;
 
@@ -74,7 +75,10 @@ public abstract class AbstractData {
         for (Field field : CommonUtility.getAllFields(playerDataClass)) {
 
             field.setAccessible(true);
-            if (field.getAnnotation(StoreData.class) == null) {
+
+            StoreDataElement annotation = field.getAnnotation(StoreDataElement.class);
+
+            if (annotation == null) {
                 continue;
             }
 
@@ -88,14 +92,27 @@ public abstract class AbstractData {
                 continue;
             }
 
-            DataConverterType dataConverterType = DataConverterType.getType(field);
+            DataConverterType dataConverterType;
+
+            StoreDataConverter converter = field.getAnnotation(StoreDataConverter.class);
+            if (converter != null) {
+                dataConverterType = DataConverterType.getType(converter.type());
+            } else {
+                dataConverterType = DataConverterType.getType(field);
+            }
 
             if (dataConverterType == null) {
                 ImanityCommon.BRIDGE.getLogger().error("The data type " + field.getType().getSimpleName() + " does not exists!");
                 continue;
             }
 
-            types.add(new DataFieldConvert(field.getName(), dataConverterType, field));
+            String name = annotation.name();
+
+            if (name.isEmpty()) {
+                name = field.getName();
+            }
+
+            types.add(new DataFieldConvert(name, dataConverterType, field));
 
         }
 

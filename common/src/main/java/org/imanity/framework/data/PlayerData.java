@@ -2,19 +2,9 @@ package org.imanity.framework.data;
 
 import lombok.Getter;
 import lombok.Setter;
-import org.bson.Document;
-import org.imanity.framework.ImanityCommon;
-import org.imanity.framework.data.store.StoreType;
 import org.imanity.framework.player.IPlayerBridge;
-import org.imanity.framework.player.PlayerInfo;
-import org.imanity.framework.data.annotation.StoreData;
-import org.imanity.framework.data.store.StoreDatabase;
-import org.imanity.framework.data.type.DataConverter;
-import org.imanity.framework.data.type.DataConverterType;
-import org.imanity.framework.util.entry.EntryArrayList;
+import org.imanity.framework.data.annotation.StoreDataElement;
 
-import java.lang.reflect.Field;
-import java.lang.reflect.Modifier;
 import java.util.*;
 
 @Getter
@@ -28,7 +18,7 @@ public class PlayerData extends AbstractData {
                 PlayerData.PLAYER_BRIDGE.getName(player));
     }
 
-    @StoreData
+    @StoreDataElement
     private String name;
 
     public PlayerData(UUID uuid, String name) {

@@ -1,6 +1,5 @@
 package org.imanity.framework.bukkit.chunk;
 
-import it.unimi.dsi.fastutil.longs.LongOpenHashSet;
 import org.bukkit.Chunk;
 import org.bukkit.craftbukkit.v1_8_R3.util.LongHash;
 import org.bukkit.event.EventHandler;
@@ -8,11 +7,12 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.world.ChunkUnloadEvent;
 import org.imanity.framework.bukkit.Imanity;
 
+import java.util.HashSet;
 import java.util.Set;
 
 public class KeepChunkHandler {
 
-    private Set<Long> chunksToKeep = new LongOpenHashSet();
+    private Set<Long> chunksToKeep = new HashSet<>();
 
     public KeepChunkHandler() {
         Imanity.registerEvents(new Listener() {

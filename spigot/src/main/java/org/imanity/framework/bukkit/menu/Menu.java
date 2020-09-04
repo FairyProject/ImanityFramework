@@ -8,15 +8,15 @@ import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.imanity.framework.util.entry.Entry;
-import spg.lgdev.util.triemap.TrieMap;
 
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 
 @Getter
 @Setter
 public abstract class Menu {
 
-	public static final Map<UUID, Menu> MENUS = TrieMap.create();
+	public static final Map<UUID, Menu> MENUS = new ConcurrentHashMap<>();
 
 	public static <T extends Menu> List<Entry<Player, T>> getMenusByType(Class<T> type) {
 		List<Entry<Player, T>> menus = new ArrayList<>();

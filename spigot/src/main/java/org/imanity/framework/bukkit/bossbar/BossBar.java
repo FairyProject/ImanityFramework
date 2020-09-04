@@ -8,6 +8,8 @@ import org.imanity.framework.bukkit.util.reflection.minecraft.DataWatcher;
 import org.imanity.framework.bukkit.util.reflection.resolver.ConstructorResolver;
 import org.imanity.framework.bukkit.util.reflection.resolver.wrapper.DataWatcherWrapper;
 import org.imanity.framework.bukkit.util.reflection.resolver.wrapper.PacketWrapper;
+import org.imanity.framework.util.CommonUtility;
+
 import static org.imanity.framework.bukkit.util.reflection.minecraft.DataWatcher.V1_9.ValueType.*;
 
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -93,15 +95,13 @@ public class BossBar {
         this.previousText = bossBarData.getText();
         this.previousHealth = bossBarData.getHealth();
 
-        try {
+        CommonUtility.tryCatch(() -> {
             ConstructorResolver constructorResolver = new ConstructorResolver("PacketPlayOutEntityMetadata");
             Object packetMetadata = constructorResolver
                     .resolveWrapper(new Class[] {int.class, DataWatcher.TYPE, boolean.class})
                     .newInstanceSilent(this.entityId, dataWatcher, true);
             MinecraftReflection.sendPacket(player, packetMetadata);
-        } catch (Throwable throwable) {
-            throw new RuntimeException(throwable);
-        }
+        });
     }
 
     private void sendMovement() {

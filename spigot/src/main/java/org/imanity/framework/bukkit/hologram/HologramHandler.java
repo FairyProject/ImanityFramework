@@ -1,7 +1,5 @@
 package org.imanity.framework.bukkit.hologram;
 
-import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
-import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
 import org.bukkit.Location;
 import org.bukkit.entity.Player;
 import org.imanity.framework.bukkit.Imanity;
@@ -10,13 +8,15 @@ import org.imanity.framework.bukkit.hologram.player.RenderedHolograms;
 import org.imanity.framework.bukkit.util.SampleMetadata;
 
 import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
 
 public class HologramHandler {
 
     public static final int DISTANCE_TO_RENDER = 60;
     public static final String WORLD_METADATA = ImanityCommon.METADATA_PREFIX + "WorldHolograms";
     public static final String HOLOGRAM_METADATA = ImanityCommon.METADATA_PREFIX + "Holograms";
-    private Int2ObjectMap<Hologram> holograms = new Int2ObjectOpenHashMap<>();
+    private Map<Integer, Hologram> holograms = new HashMap<>();
 
     public Hologram addHologram(Location location, String... texts) {
         Hologram hologram = new Hologram(location, this);

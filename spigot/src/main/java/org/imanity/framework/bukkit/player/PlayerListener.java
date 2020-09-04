@@ -13,6 +13,7 @@ import org.imanity.framework.data.PlayerData;
 import org.imanity.framework.bukkit.util.SampleMetadata;
 import org.imanity.framework.bukkit.util.SpigotUtil;
 import org.imanity.framework.bukkit.util.TaskUtil;
+import org.imanity.framework.util.thread.ServerThreadLock;
 
 public class PlayerListener implements Listener {
 
@@ -38,11 +39,11 @@ public class PlayerListener implements Listener {
                         }
 
                         PlayerData finalPlayerData = playerData;
-                        TaskUtil.runSync(() -> {
+                        try (ServerThreadLock lock = ServerThreadLock.obtain()) {
                             player.setMetadata(database.getMetadataTag(), new SampleMetadata(finalPlayerData));
 
                             PlayerDataLoadEvent.callEvent(player, finalPlayerData);
-                        });
+                        }
                     });
         };
 
@@ -71,7 +72,7 @@ public class PlayerListener implements Listener {
                     database.save(playerData);
                 });
 
-            Runnable finalRunnable = () -> {
+            try (ServerThreadLock lock = ServerThreadLock.obtain()) {
                 DataHandler.getPlayerDatabases()
                         .forEach(database -> {
                             player.removeMetadata(database.getMetadataTag(), Imanity.PLUGIN);
@@ -81,12 +82,6 @@ public class PlayerListener implements Listener {
                             }
                             database.delete(player.getUniqueId());
                         });
-            };
-
-            if (!SpigotUtil.isServerThread()) {
-                TaskUtil.runSync(finalRunnable);
-            } else {
-                finalRunnable.run();
             }
         };
 

@@ -1,5 +1,7 @@
-name: ImanityFramework
+name: framework
 version: ${project.version}
-main: org.imanity.framework.bukkit.ImanityBukkitPlugin
+main: org.imanity.framework.bukkit.plugin.ImanityStandalonePlugin
 author: LeeGod, MUGICON
 load: STARTUP
+softdepend:
+  - ProtocolLib

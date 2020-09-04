@@ -4,12 +4,16 @@ import org.apache.logging.log4j.Logger;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.imanity.framework.ImanityBridge;
 import org.imanity.framework.bukkit.Imanity;
+import org.imanity.framework.bukkit.util.SpigotUtil;
+import org.imanity.framework.bukkit.util.Utility;
 import org.imanity.framework.libraries.classloader.PluginClassLoader;
 import org.imanity.framework.task.ITaskScheduler;
 
 import java.io.File;
 import java.io.InputStream;
+import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 public class BukkitImanityBridge implements ImanityBridge {
     @Override
@@ -25,11 +29,6 @@ public class BukkitImanityBridge implements ImanityBridge {
     @Override
     public PluginClassLoader getClassLoader() {
         return Imanity.CLASS_LOADER;
-    }
-
-    @Override
-    public ITaskScheduler getTaskScheduler() {
-        return new BukkitTaskScheduler();
     }
 
     @Override
@@ -52,5 +51,18 @@ public class BukkitImanityBridge implements ImanityBridge {
     @Override
     public boolean isShuttingDown() {
         return Imanity.SHUTTING_DOWN;
+    }
+
+    @Override
+    public List<File> getPluginFiles() {
+        return Imanity.PLUGINS
+                .stream()
+                .map(Utility::getPluginJar)
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public boolean isServerThread() {
+        return SpigotUtil.isServerThread();
     }
 }

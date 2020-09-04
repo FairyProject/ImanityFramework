@@ -2,13 +2,16 @@ package org.imanity.framework.bukkit.scoreboard;
 
 import lombok.Getter;
 import lombok.Setter;
-import net.minecraft.server.v1_8_R3.*;
 import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
 import org.imanity.framework.bukkit.util.Utility;
 import org.imanity.framework.bukkit.util.reflection.MinecraftReflection;
+import org.imanity.framework.bukkit.util.reflection.resolver.FieldResolver;
+import org.imanity.framework.bukkit.util.reflection.resolver.minecraft.NMSClassResolver;
+import org.imanity.framework.bukkit.util.reflection.resolver.wrapper.EnumWrapper;
+import org.imanity.framework.bukkit.util.reflection.resolver.wrapper.FieldWrapper;
+import org.imanity.framework.bukkit.util.reflection.resolver.wrapper.PacketWrapper;
 
-import java.lang.reflect.Field;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -16,12 +19,27 @@ import java.util.Map;
 
 public class ImanityBoard {
 
-    private static Field PACKET_G_FIELD;
+    private static EnumWrapper SCOREBOARD_HEALTH_DISPLAY;
+
+    private static EnumWrapper NAME_TAG_VISIBILITY;
+    private static FieldWrapper FIELD_NAME_TAG_VISIBILITY_E;
+
+    private static EnumWrapper SCOREBOARD_ACTION;
+
+    private static final NMSClassResolver CLASS_RESOLVER = new NMSClassResolver();
 
     static {
         try {
-            PACKET_G_FIELD = PacketPlayOutScoreboardTeam.class.getDeclaredField("g");
-            PACKET_G_FIELD.setAccessible(true);
+            Class<?> enumScoreboardHealthDisplay = CLASS_RESOLVER.resolveSilent("IScoreboardCriteria$EnumScoreboardHealthDisplay");
+            SCOREBOARD_HEALTH_DISPLAY = new EnumWrapper(enumScoreboardHealthDisplay);
+
+            Class<?> TYPE_NAME_TAG_VISIBILITY = CLASS_RESOLVER.resolveSilent("ScoreboardTeamBase$EnumNameTagVisibility");
+            NAME_TAG_VISIBILITY = new EnumWrapper(TYPE_NAME_TAG_VISIBILITY);
+
+            FIELD_NAME_TAG_VISIBILITY_E = new FieldResolver(TYPE_NAME_TAG_VISIBILITY).resolveWrapper("e");
+
+            Class<?> TYPE_SCOREBOARD_ACTION = CLASS_RESOLVER.resolveSilent("PacketPlayOutScoreboardScore$EnumScoreboardAction");
+            SCOREBOARD_ACTION = new EnumWrapper(TYPE_SCOREBOARD_ACTION);
         } catch (Exception ex) {
             ex.printStackTrace();
         }
@@ -47,17 +65,15 @@ public class ImanityBoard {
         this.teams = new String[16];
         this.adapter = adapter;
 
-        PacketPlayOutScoreboardObjective packetA = new PacketPlayOutScoreboardObjective();
+        PacketWrapper packetA = PacketWrapper.createByPacketName("PacketPlayOutScoreboardObjective")
+                .setPacketValue("b", "Objective")
+                .setPacketValue("a", player.getName())
+                .setPacketValue("c", SCOREBOARD_HEALTH_DISPLAY.getType("INTEGER"))
+                .setPacketValue("d", 0);
 
-        packetA.setB("Objective");
-        packetA.setA(player.getName());
-        packetA.setC(IScoreboardCriteria.EnumScoreboardHealthDisplay.INTEGER);
-        packetA.setD(0);
-
-        PacketPlayOutScoreboardDisplayObjective packetB = new PacketPlayOutScoreboardDisplayObjective();
-
-        packetB.setA(1);
-        packetB.setB(player.getName());
+        PacketWrapper packetB = PacketWrapper.createByPacketName("PacketPlayOutScoreboardDisplayObjective")
+                .setPacketValue("a", 1)
+                .setPacketValue("b", player.getName());
 
         MinecraftReflection.sendPacket(player, packetA);
         MinecraftReflection.sendPacket(player, packetB);
@@ -67,17 +83,15 @@ public class ImanityBoard {
     public void registerTeam(ImanityTeamData data) {
         this.teamDatas.put(data.getName(), data);
 
-        PacketPlayOutScoreboardTeam packet = new PacketPlayOutScoreboardTeam();
-
-        packet.setE(ScoreboardTeamBase.EnumNameTagVisibility.ALWAYS.e);
-        packet.setF(-1);
-        packet.setG(data.getNameSet());
-        packet.setA(data.getName());
-        packet.setH(0);
-        packet.setB(data.getName());
-        packet.setC(data.getPrefix());
-        packet.setD("");
-
+        PacketWrapper packet = PacketWrapper.createByPacketName("PacketPlayOutScoreboardTeam")
+                .setPacketValue("e", FIELD_NAME_TAG_VISIBILITY_E.get(NAME_TAG_VISIBILITY.getType("ALWAYS")))
+                .setPacketValue("f", -1)
+                .setPacketValue("g", data.getNameSet())
+                .setPacketValue("a", data.getName())
+                .setPacketValue("h", 0)
+                .setPacketValue("b", data.getName())
+                .setPacketValue("c", data.getPrefix())
+                .setPacketValue("d", "");
 
         int d = 0;
 
@@ -88,7 +102,7 @@ public class ImanityBoard {
             d |= 2;
         }
 
-        packet.setI(d);
+        packet.setPacketValue("i", d);
 
         MinecraftReflection.sendPacket(player, packet);
     }
@@ -122,23 +136,21 @@ public class ImanityBoard {
     }
 
     public void addToTeam(ImanityTeamData data, String name) {
-        PacketPlayOutScoreboardTeam packet = new PacketPlayOutScoreboardTeam();
-        packet.setE(ScoreboardTeamBase.EnumNameTagVisibility.ALWAYS.e);
-        packet.setF(-1);
-        packet.setG(Collections.singleton(name));
-        packet.setH(3);
-        packet.setA(data.getName());
-        MinecraftReflection.sendPacket(player, packet);
+        MinecraftReflection.sendPacket(player, PacketWrapper.createByPacketName("PacketPlayOutScoreboardTeam")
+            .setPacketValue("e", FIELD_NAME_TAG_VISIBILITY_E.get(NAME_TAG_VISIBILITY.getType("ALWAYS")))
+            .setPacketValue("f", -1)
+            .setPacketValue("g", Collections.singleton(name))
+            .setPacketValue("h", 3)
+            .setPacketValue("a", data.getName()));
     }
 
     public void removeToTeam(ImanityTeamData data, String name) {
-        PacketPlayOutScoreboardTeam packet = new PacketPlayOutScoreboardTeam();
-        packet.setE(ScoreboardTeamBase.EnumNameTagVisibility.ALWAYS.e);
-        packet.setF(-1);
-        packet.setG(Collections.singleton(name));
-        packet.setH(4);
-        packet.setA(data.getName());
-        MinecraftReflection.sendPacket(player, packet);
+        MinecraftReflection.sendPacket(player, PacketWrapper.createByPacketName("PacketPlayOutScoreboardTeam")
+                .setPacketValue("e", FIELD_NAME_TAG_VISIBILITY_E.get(NAME_TAG_VISIBILITY.getType("ALWAYS")))
+                .setPacketValue("f", -1)
+                .setPacketValue("g", Collections.singleton(name))
+                .setPacketValue("h", 4)
+                .setPacketValue("a", data.getName()));
     }
 
     public void setTitle(String title) {
@@ -149,13 +161,11 @@ public class ImanityBoard {
 
         this.title = title;
 
-        PacketPlayOutScoreboardObjective packet = new PacketPlayOutScoreboardObjective();
-        packet.setA(player.getName());
-        packet.setB(title);
-        packet.setC(IScoreboardCriteria.EnumScoreboardHealthDisplay.INTEGER);
-        packet.setD(2);
-
-        MinecraftReflection.sendPacket(player, packet);
+        MinecraftReflection.sendPacket(player, PacketWrapper.createByPacketName("PacketPlayOutScoreboardObjective")
+        .setPacketValue("a", player.getName())
+        .setPacketValue("b", title)
+        .setPacketValue("c", SCOREBOARD_HEALTH_DISPLAY.getType("INTEGER"))
+        .setPacketValue("d", 2));
 
     }
 
@@ -188,7 +198,7 @@ public class ImanityBoard {
             return;
         }
 
-        PacketPlayOutScoreboardTeam packet = getOrRegisterTeam(line);
+        PacketWrapper packet = getOrRegisterTeam(line);
         String prefix = "";
         String suffix = "";
 
@@ -214,8 +224,8 @@ public class ImanityBoard {
             }
         }
 
-        packet.setC(prefix);
-        packet.setD(suffix);
+        packet.setPacketValue("c", prefix);
+        packet.setPacketValue("d", suffix);
 
         teams[line] = value;
 
@@ -226,13 +236,13 @@ public class ImanityBoard {
         if (line > 0 && line < 16) {
             if (teams[line] != null) {
 
-                PacketPlayOutScoreboardScore packetA = new PacketPlayOutScoreboardScore(this.getEntry(line));
-                PacketPlayOutScoreboardTeam packetB = getOrRegisterTeam(line);
-
-                packetB.setH(1);
-                packetA.setB(player.getName());
-                packetA.setC(line);
-                packetA.setD(PacketPlayOutScoreboardScore.EnumScoreboardAction.REMOVE);
+                PacketWrapper packetA = PacketWrapper.createByPacketName("PacketPlayOutScoreboardScore")
+                        .setPacketValue("a", this.getEntry(line))
+                        .setPacketValue("b", player.getName())
+                        .setPacketValue("c", line)
+                        .setPacketValue("d", SCOREBOARD_ACTION.getType("REMOVE"));
+                PacketWrapper packetB = getOrRegisterTeam(line)
+                        .setPacketValue("h", 1);
 
                 teams[line] = null;
 
@@ -248,49 +258,34 @@ public class ImanityBoard {
         }
     }
 
-    private PacketPlayOutScoreboardTeam getOrRegisterTeam(int line) {
+    private PacketWrapper getOrRegisterTeam(int line) {
         if (line <= 0 || line >= 16)
             return null;
 
+        PacketWrapper packetB = PacketWrapper.createByPacketName("PacketPlayOutScoreboardTeam")
+                .setPacketValue("a", "-sb" + line)
+                .setPacketValue("b", "")
+                .setPacketValue("c", "")
+                .setPacketValue("d", "")
+                .setPacketValue("i", 0)
+                .setPacketValue("e", "always")
+                .setPacketValue("f", 0);
+
         if (teams[line] != null) {
-            PacketPlayOutScoreboardTeam packet = new PacketPlayOutScoreboardTeam();
+            packetB.setPacketValue("h", 2);
 
-            packet.setA("-sb" + line);
-            packet.setB("");
-            packet.setC("");
-            packet.setD("");
-            packet.setI(0);
-            packet.setE("always");
-            packet.setF(0);
-            packet.setH(2);
-
-            return packet;
+            return packetB;
         } else {
             teams[line] = "";
 
-            PacketPlayOutScoreboardScore packetA = new PacketPlayOutScoreboardScore();
+            PacketWrapper packetA = PacketWrapper.createByPacketName("PacketPlayOutScoreboardScore")
+                    .setPacketValue("a", getEntry(line))
+                    .setPacketValue("b", player.getName())
+                    .setPacketValue("c", line)
+                    .setPacketValue("d", SCOREBOARD_ACTION.getType("CHANGE"));
 
-            packetA.setA(getEntry(line));
-            packetA.setB(player.getName());
-            packetA.setC(line);
-            packetA.setD(PacketPlayOutScoreboardScore.EnumScoreboardAction.CHANGE);
-
-            PacketPlayOutScoreboardTeam packetB = new PacketPlayOutScoreboardTeam();
-
-            packetB.setA("-sb" + line);
-            packetB.setB("");
-            packetB.setC("");
-            packetB.setD("");
-            packetB.setI(0);
-            packetB.setE("always");
-            packetB.setF(0);
-            packetB.setH(0);
-
-            try {
-                ((List<String>) PACKET_G_FIELD.get(packetB)).add(getEntry(line));
-            } catch (IllegalAccessException e) {
-                Utility.error(e, "An error occurred while creating new fake team");
-            }
+            packetB.setPacketValue("h", 0);
+            ((List<String>) packetB.getPacketValue("g")).add(getEntry(line));
 
             MinecraftReflection.sendPacket(player, packetA);
 

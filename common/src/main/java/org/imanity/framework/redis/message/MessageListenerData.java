@@ -2,7 +2,7 @@ package org.imanity.framework.redis.message;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
-import lombok.Setter;
+import org.imanity.framework.redis.message.annotation.AutoWiredMessageListener;
 
 import java.lang.reflect.Method;
 
@@ -10,7 +10,7 @@ import java.lang.reflect.Method;
 @Getter
 public class MessageListenerData {
 
-    private final MessageListener instance;
+    private final Object instance;
     private final Method method;
     private final Class<? extends Message> messageClass;
 

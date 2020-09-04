@@ -6,6 +6,7 @@ import org.imanity.framework.task.ITaskScheduler;
 
 import java.io.File;
 import java.io.InputStream;
+import java.util.List;
 import java.util.Map;
 
 public interface ImanityBridge {
@@ -13,8 +14,6 @@ public interface ImanityBridge {
     void saveResources(String name, boolean replace);
 
     PluginClassLoader getClassLoader();
-
-    ITaskScheduler getTaskScheduler();
 
     File getDataFolder();
 
@@ -24,6 +23,10 @@ public interface ImanityBridge {
 
     Map<String, Object> loadYaml(InputStream inputStream);
 
+    List<File> getPluginFiles();
+
     boolean isShuttingDown();
+
+    boolean isServerThread();
 
 }

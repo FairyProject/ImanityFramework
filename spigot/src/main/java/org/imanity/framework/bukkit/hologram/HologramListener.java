@@ -1,6 +1,5 @@
 package org.imanity.framework.bukkit.hologram;
 
-import net.minecraft.server.v1_8_R3.PacketPlayInFlying;
 import org.bukkit.Location;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -8,13 +7,11 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.event.player.PlayerTeleportEvent;
-import org.bukkit.event.world.WorldInitEvent;
 import org.bukkit.event.world.WorldLoadEvent;
 import org.imanity.framework.bukkit.Imanity;
+import org.imanity.framework.bukkit.player.movement.MovementListener;
 import org.imanity.framework.bukkit.util.SampleMetadata;
 import org.imanity.framework.bukkit.util.TaskUtil;
-import spg.lgdev.handler.MovementHandler;
-import spg.lgdev.iSpigot;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -24,19 +21,18 @@ public class HologramListener implements Listener {
     private final Set<Player> toUpdate = new HashSet<>();
 
     public HologramListener() {
-        iSpigot.INSTANCE.addMovementHandler(new MovementHandler() {
+        Imanity.registerMovementListener(new MovementListener() {
             @Override
-            public void handleUpdateLocation(Player player, Location to, Location from, PacketPlayInFlying packetPlayInFlying) {
-                if (from.getBlockX() == to.getBlockX() && from.getBlockZ() == to.getBlockZ()) {
-                    return;
-                }
-
+            public void handleUpdateLocation(Player player, Location from, Location to) {
                 toUpdate.add(player);
             }
 
             @Override
-            public void handleUpdateRotation(Player player, Location location, Location location1, PacketPlayInFlying packetPlayInFlying) {}
-        });
+            public void handleUpdateRotation(Player player, Location from, Location to) {
+
+            }
+        })
+                .ignoreSameBlockAndY();
 
         TaskUtil.runRepeated(() -> {
             if (Imanity.SHUTTING_DOWN) {

@@ -20,6 +20,11 @@ public class BukkitTaskScheduler implements ITaskScheduler {
     }
 
     @Override
+    public int runAsyncRepeated(Runnable runnable, long delay, long time) {
+        return Imanity.PLUGIN.getServer().getScheduler().runTaskTimerAsynchronously(Imanity.PLUGIN, runnable, delay, time).getTaskId();
+    }
+
+    @Override
     public int runSync(Runnable runnable) {
         return Imanity.PLUGIN.getServer().getScheduler().runTask(Imanity.PLUGIN, runnable).getTaskId();
     }
@@ -32,6 +37,11 @@ public class BukkitTaskScheduler implements ITaskScheduler {
     @Override
     public int runRepeated(Runnable runnable, long time) {
         return Imanity.PLUGIN.getServer().getScheduler().runTaskTimer(Imanity.PLUGIN, runnable, time, time).getTaskId();
+    }
+
+    @Override
+    public int runRepeated(Runnable runnable, long delay, long time) {
+        return Imanity.PLUGIN.getServer().getScheduler().runTaskTimer(Imanity.PLUGIN, runnable, delay, time).getTaskId();
     }
 
     @Override

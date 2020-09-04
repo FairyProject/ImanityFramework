@@ -31,6 +31,19 @@ public class ConstructorWrapper<R> extends WrapperAbstract {
 		return null;
 	}
 
+	public R resolveBunch(Object[]... args) {
+
+		for (Object[] objects : args) {
+			R r = this.newInstanceSilent(objects);
+			if (r != null) {
+				return r;
+			}
+		}
+
+		throw new IllegalStateException("No Args Constructor found!");
+
+	}
+
 	public Class<?>[] getParameterTypes() {
 		return this.constructor.getParameterTypes();
 	}

@@ -404,6 +404,11 @@ public class DataWatcher {
 			return WatchableObjectFieldResolver.resolve("c").get(object);
 		}
 
+		public static void setWatchableObjectValue(Object object, Object objectValue) throws ReflectiveOperationException {
+			if (WatchableObjectFieldResolver == null) { WatchableObjectFieldResolver = new FieldResolver(WatchableObject); }
+			WatchableObjectFieldResolver.resolve("c").set(object, objectValue);
+		}
+
 	}
 
 	private DataWatcher() {

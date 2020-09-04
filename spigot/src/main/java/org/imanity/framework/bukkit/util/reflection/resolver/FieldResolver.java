@@ -4,6 +4,7 @@ import org.imanity.framework.bukkit.util.reflection.resolver.wrapper.FieldWrappe
 import org.imanity.framework.bukkit.util.AccessUtil;
 
 import java.lang.reflect.Field;
+import java.lang.reflect.Modifier;
 
 /**
  * Resolver for fields
@@ -111,6 +112,19 @@ public class FieldResolver extends MemberResolver<Field> {
 		throw new NoSuchFieldException("Could not resolve field of type '" + type.toString() + "' in class " + this.clazz);
 	}
 
+	public FieldWrapper resolveByFirstTypeWrapper(Class<?> type) throws ReflectiveOperationException {
+		return new FieldWrapper(this.resolveByFirstType(type));
+	}
+
+	public FieldWrapper resolveByFirstTypeDynamic(Class<?> type) throws ReflectiveOperationException {
+		for (Field field : this.clazz.getDeclaredFields()) {
+			if (field.getType().equals(type) && !Modifier.isStatic(field.getModifiers())) {
+				return new FieldWrapper(AccessUtil.setAccessible(field));
+			}
+		}
+		throw new NoSuchFieldException("Could not resolve field of type '" + type.toString() + "' in class " + this.clazz);
+	}
+
 	/**
 	 * Attempts to find the first field of the specified type
 	 *
@@ -176,6 +190,10 @@ public class FieldResolver extends MemberResolver<Field> {
 		}
 		if (field == null) { throw new NoSuchFieldException("Could not resolve field of type '" + type.toString() + "' in class " + this.clazz); }
 		return AccessUtil.setAccessible(field);
+	}
+
+	public FieldWrapper resolveByLastTypeWrapper(Class<?> type) throws ReflectiveOperationException {
+		return new FieldWrapper(this.resolveByLastType(type));
 	}
 
 	public Field resolveByLastTypeSilent(Class<?> type) {

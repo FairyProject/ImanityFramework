@@ -3,16 +3,21 @@ package org.imanity.framework.bukkit.util.reflection;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
+import org.imanity.framework.bukkit.Imanity;
+import org.imanity.framework.bukkit.util.SpigotUtil;
 import org.imanity.framework.bukkit.util.reflection.minecraft.MinecraftVersion;
 import org.imanity.framework.bukkit.util.reflection.resolver.ConstructorResolver;
 import org.imanity.framework.bukkit.util.reflection.resolver.FieldResolver;
 import org.imanity.framework.bukkit.util.reflection.resolver.MethodResolver;
+import org.imanity.framework.bukkit.util.reflection.resolver.ResolverQuery;
 import org.imanity.framework.bukkit.util.reflection.resolver.minecraft.NMSClassResolver;
 import org.imanity.framework.bukkit.util.reflection.resolver.minecraft.OBCClassResolver;
 import org.imanity.framework.bukkit.util.reflection.resolver.wrapper.FieldWrapper;
 import org.imanity.framework.bukkit.util.reflection.resolver.wrapper.MethodWrapper;
 import org.imanity.framework.bukkit.util.AccessUtil;
 import org.imanity.framework.bukkit.util.reflection.resolver.wrapper.PacketWrapper;
+import org.imanity.framework.bukkit.util.reflection.version.PlayerVersion;
+import org.imanity.framework.bukkit.util.reflection.version.protocol.*;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
@@ -26,10 +31,6 @@ import java.util.regex.Pattern;
 public class MinecraftReflection {
     public static final Pattern NUMERIC_VERSION_PATTERN = Pattern.compile("v([0-9])_([0-9]*)_R([0-9])");
 
-    /**
-     * @deprecated use {@link MinecraftVersion#VERSION} instead
-     */
-    @Deprecated
     public static final Version VERSION;
     public static final MinecraftVersion MINECRAFT_VERSION = MinecraftVersion.VERSION;
 
@@ -53,6 +54,12 @@ public class MinecraftReflection {
      */
     private static MethodWrapper<Void> sendPacket;
 
+    private static ProtocolCheck protocolCheck;
+
+    public static PlayerVersion getProtocol(Player player) {
+        return PlayerVersion.getVersionFromRaw(protocolCheck.getVersion(player));
+    }
+
     static {
         Version tempVersion = Version.UNKNOWN;
         try {
@@ -74,6 +81,64 @@ public class MinecraftReflection {
         } catch (ReflectiveOperationException e) {
             throw new RuntimeException(e);
         }
+
+        MinecraftReflection.initProtocolCheck();
+    }
+
+    private static void initProtocolCheck() {
+        if (SpigotUtil.SPIGOT_TYPE == SpigotUtil.SpigotType.IMANITY) {
+            protocolCheck = new ProtocolCheckImanitySpigot();
+            Imanity.LOGGER.info("Initialized Protocol Check with ImanitySpigotCheck.");
+            return;
+        }
+
+        try {
+            Class<?> networkManager = nmsClassResolver.resolve("NetworkManager");
+            MethodResolver resolver = new MethodResolver(networkManager);
+
+            Method method = resolver.resolve(new ResolverQuery("getVersion", new Class[0]));
+
+            if (method != null && (method.getReturnType() == int.class || method.getReturnType() == Integer.class)) {
+                protocolCheck = new ProtocolCheckMethodVersion();
+                Imanity.LOGGER.info("Initialized Protocol Check with NetworkManager-getVersion SpigotCheck.");
+                return;
+            }
+        } catch (ClassNotFoundException | NoSuchMethodException e) {
+        }
+
+        try {
+            Class<?> networkManager = nmsClassResolver.resolve("NetworkManager");
+            FieldResolver resolver = new FieldResolver(networkManager);
+
+            Field field = resolver.resolve(new ResolverQuery("version", Integer.class, int.class));
+
+            if (field != null) {
+                protocolCheck = new ProtocolCheckMethodVersion();
+                Imanity.LOGGER.info("Initialized Protocol Check with NetworkManager-version-field SpigotCheck.");
+                return;
+            }
+        } catch (ClassNotFoundException | NoSuchFieldException e) {
+        }
+
+        if (Bukkit.getPluginManager().getPlugin("ViaVersion") != null) {
+            protocolCheck = new ProtocolCheckViaVersion();
+            Imanity.LOGGER.info("Initialized Protocol Check with ViaVersionSpigotCheck.");
+            return;
+        }
+
+        if (Bukkit.getPluginManager().getPlugin("ProtocolSupport") != null) {
+            protocolCheck = new ProtocolCheckProtocolSupport();
+            Imanity.LOGGER.info("Initialized Protocol Check with ProtocolSupportSpigotCheck.");
+            return;
+        }
+
+        if (Bukkit.getPluginManager().getPlugin("ProtocolLib") != null) {
+            protocolCheck = new ProtocolCheckProtocolLib();
+            Imanity.LOGGER.info("Initialized Protocol Check with ProtocolLibSpigotCheck.");
+            return;
+        }
+
+        protocolCheck = new ProtocolCheckNone();
     }
 
     /**
@@ -105,12 +170,16 @@ public class MinecraftReflection {
     private static FieldWrapper<Integer> ENTITY_ID_RESOLVER;
 
     public static int getNewEntityId() {
+        return MinecraftReflection.setEntityId(1);
+    }
+
+    public static int setEntityId(int newIds) {
         if (ENTITY_ID_RESOLVER == null) {
             ENTITY_ID_RESOLVER = new FieldResolver(nmsClassResolver.resolveSilent("Entity"))
-                .resolveWrapper("entityCount");
+                    .resolveWrapper("entityCount");
         }
 
-        int id = ENTITY_ID_RESOLVER.get(null) + 1;
+        int id = ENTITY_ID_RESOLVER.get(null) + newIds;
         ENTITY_ID_RESOLVER.setSilent(null, id);
         return id;
     }

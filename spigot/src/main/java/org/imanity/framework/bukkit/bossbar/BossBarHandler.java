@@ -1,9 +1,6 @@
 package org.imanity.framework.bukkit.bossbar;
 
-import net.minecraft.server.v1_8_R3.PacketPlayInFlying;
-import net.minecraft.server.v1_8_R3.PlayerConnection;
 import org.bukkit.Location;
-import org.bukkit.craftbukkit.v1_8_R3.entity.CraftPlayer;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -11,10 +8,9 @@ import org.bukkit.event.player.PlayerChangedWorldEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.imanity.framework.bukkit.Imanity;
 import org.imanity.framework.ImanityCommon;
+import org.imanity.framework.bukkit.player.movement.MovementListener;
 import org.imanity.framework.bukkit.util.SampleMetadata;
 import org.imanity.framework.bukkit.util.Utility;
-import spg.lgdev.handler.MovementHandler;
-import spg.lgdev.iSpigot;
 
 public class BossBarHandler implements Runnable {
 
@@ -28,32 +24,21 @@ public class BossBarHandler implements Runnable {
         this.adapter = adapter;
         this.tick = tick;
 
-        iSpigot.INSTANCE.addMovementHandler(new MovementHandler() {
+        Imanity.registerMovementListener(new MovementListener() {
             @Override
-            public void handleUpdateLocation(Player player, Location to, Location from, PacketPlayInFlying packet) {
-                if (to.getBlockX() == from.getBlockX()
-                    && to.getBlockY() == from.getBlockY()
-                    && to.getBlockZ() == from.getBlockZ()) {
-                    return;
-                }
-
+            public void handleUpdateLocation(Player player, Location from, Location to) {
                 BossBar bossBar = getOrCreate(player);
                 bossBar.getMoved().set(true);
             }
 
             @Override
-            public void handleUpdateRotation(Player player, Location to, Location from, PacketPlayInFlying packet) {
-                PlayerConnection connection = ((CraftPlayer) player).getHandle().playerConnection;
-
-                float deltaAngle = Math.abs(connection.lastYaw - to.getYaw()) + Math.abs(connection.lastPitch - to.getPitch());
-                if (deltaAngle < 7.5F) {
-                    return;
-                }
-
+            public void handleUpdateRotation(Player player, Location from, Location to) {
                 BossBar bossBar = getOrCreate(player);
                 bossBar.getMoved().set(true);
             }
-        });
+        })
+                .ignoreSameBlock()
+                .register();
 
         Imanity.registerEvents(new Listener() {
 

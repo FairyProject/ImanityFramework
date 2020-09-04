@@ -10,6 +10,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.util.NumberConversions;
 import org.imanity.framework.bukkit.Imanity;
 
+import java.util.Objects;
 import java.util.StringJoiner;
 
 
@@ -17,8 +18,6 @@ import java.util.StringJoiner;
 @Setter
 @AllArgsConstructor
 public class CustomLocation {
-
-	private final long timestamp = System.currentTimeMillis();
 
 	private String world;
 
@@ -112,13 +111,34 @@ public class CustomLocation {
 	}
 
 	@Override
-	public boolean equals(final Object obj) {
-		if (!(obj instanceof CustomLocation))
-			return false;
+	public boolean equals(Object o) {
+		if (this == o) return true;
+		if (o == null || getClass() != o.getClass()) return false;
 
-		final CustomLocation location = (CustomLocation) obj;
-		return location.x == this.x && location.y == this.y && location.z == this.z
-				&& location.pitch == this.pitch && location.yaw == this.yaw;
+		CustomLocation location = (CustomLocation) o;
+
+		if (Double.compare(location.x, x) != 0) return false;
+		if (Double.compare(location.y, y) != 0) return false;
+		if (Double.compare(location.z, z) != 0) return false;
+		if (Float.compare(location.yaw, yaw) != 0) return false;
+		if (Float.compare(location.pitch, pitch) != 0) return false;
+		return Objects.equals(world, location.world);
+	}
+
+	@Override
+	public int hashCode() {
+		int result;
+		long temp;
+		result = world != null ? world.hashCode() : 0;
+		temp = Double.doubleToLongBits(x);
+		result = 31 * result + (int) (temp ^ (temp >>> 32));
+		temp = Double.doubleToLongBits(y);
+		result = 31 * result + (int) (temp ^ (temp >>> 32));
+		temp = Double.doubleToLongBits(z);
+		result = 31 * result + (int) (temp ^ (temp >>> 32));
+		result = 31 * result + (yaw != +0.0f ? Float.floatToIntBits(yaw) : 0);
+		result = 31 * result + (pitch != +0.0f ? Float.floatToIntBits(pitch) : 0);
+		return result;
 	}
 
 	@Override

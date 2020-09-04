@@ -1,6 +1,5 @@
 package org.imanity.framework.bukkit.chunk.block;
 
-import it.unimi.dsi.fastutil.longs.Long2ObjectOpenHashMap;
 import lombok.RequiredArgsConstructor;
 import net.minecraft.server.v1_8_R3.BlockPosition;
 import net.minecraft.server.v1_8_R3.Chunk;
@@ -14,13 +13,16 @@ import org.imanity.framework.ImanityCommon;
 import org.imanity.framework.bukkit.chunk.block.location.YLocationFixed;
 import org.imanity.framework.bukkit.chunk.block.location.YLocationHighest;
 
+import java.util.HashMap;
+import java.util.Map;
+
 @RequiredArgsConstructor
 public class CacheBlockSetHandler {
 
     public static final String METADATA = ImanityCommon.METADATA_PREFIX + "BlockSetHandler";
 
     private final World world;
-    private Long2ObjectOpenHashMap<CacheChunkChanges> cachedChanges = new Long2ObjectOpenHashMap<>();
+    private Map<Long, CacheChunkChanges> cachedChanges = new HashMap<>();
 
     public void setTypeAtHighest(Location location, Material material) {
         this.setTypeAtHighest(location.getBlockX(), location.getBlockZ(), material);

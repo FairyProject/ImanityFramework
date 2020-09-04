@@ -1,7 +1,6 @@
 package org.imanity.framework.bukkit.visual;
 
-
-import net.minecraft.server.v1_8_R3.BlockPosition;
+import org.imanity.framework.bukkit.util.BlockPosition;
 import org.imanity.framework.bukkit.visual.type.VisualType;
 
 public class VisualBlock {

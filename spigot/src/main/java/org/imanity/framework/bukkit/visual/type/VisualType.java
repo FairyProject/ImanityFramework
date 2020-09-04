@@ -1,13 +1,8 @@
 package org.imanity.framework.bukkit.visual.type;
 
-import com.google.common.collect.Iterables;
-import net.minecraft.server.v1_8_R3.BlockPosition;
 import org.bukkit.entity.Player;
+import org.imanity.framework.bukkit.util.BlockPosition;
 import org.imanity.framework.bukkit.visual.VisualBlockData;
-
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
 
 public abstract class VisualType {
 	@Deprecated

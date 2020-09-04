@@ -72,7 +72,7 @@ final class CommandMap extends SimpleCommandMap {
 							ParameterData paramData = command.getParameters().get(paramIndex);
 							String[] params = cmdLine.split(" ");
 
-							for (String completion : CommandHandler.tabCompleteParameter(player,
+							for (String completion : CommandHandler.tabCompleteParameter(player, params,
 									cmdLine.endsWith(" ") ? "" : params[params.length - 1],
 									paramData.getParameterClass(), paramData.getTabCompleteFlags()
 							)) {

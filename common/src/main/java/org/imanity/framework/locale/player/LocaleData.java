@@ -5,7 +5,7 @@ import lombok.Setter;
 import org.imanity.framework.ImanityCommon;
 import org.imanity.framework.locale.Locale;
 import org.imanity.framework.data.PlayerData;
-import org.imanity.framework.data.annotation.StoreData;
+import org.imanity.framework.data.annotation.StoreDataElement;
 
 import java.util.UUID;
 
@@ -13,7 +13,7 @@ import java.util.UUID;
 @Setter
 public class LocaleData extends PlayerData {
 
-    @StoreData
+    @StoreDataElement
     private Locale locale = ImanityCommon.LOCALE_HANDLER.getDefaultLocale();
 
     public LocaleData(UUID uuid, String name) {

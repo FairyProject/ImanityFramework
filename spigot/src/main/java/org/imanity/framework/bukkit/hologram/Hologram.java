@@ -10,6 +10,7 @@ import org.bukkit.World;
 import org.bukkit.craftbukkit.v1_8_R3.CraftWorld;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
+import org.imanity.framework.bukkit.Imanity;
 import org.imanity.framework.bukkit.hologram.api.PlaceholderViewHandler;
 import org.imanity.framework.bukkit.hologram.api.TextViewHandler;
 import org.imanity.framework.bukkit.hologram.api.ViewHandler;
@@ -177,12 +178,7 @@ public class Hologram {
 
     protected List<Player> getNearbyPlayers() {
         this.validateMainThread();
-        return ((CraftWorld) this.getWorld()).getHandle()
-                .playerMap
-                .getNearbyPlayersIgnoreHeight(this.getX(), 0, this.getZ(), HologramHandler.DISTANCE_TO_RENDER)
-                .stream()
-                .map(EntityPlayer::getBukkitEntity)
-                .collect(Collectors.toList());
+        return Imanity.IMPLEMENTATION.getPlayerRadius(this.location, HologramHandler.DISTANCE_TO_RENDER);
     }
 
     public void spawn() {

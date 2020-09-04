@@ -5,8 +5,6 @@ import com.github.benmanes.caffeine.cache.LoadingCache;
 import com.google.common.base.Predicate;
 import com.google.common.collect.HashBasedTable;
 import com.google.common.collect.Table;
-import net.minecraft.server.v1_8_R3.BlockPosition;
-import net.minecraft.server.v1_8_R3.PacketPlayInFlying;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -15,18 +13,16 @@ import org.bukkit.block.Block;
 import org.bukkit.craftbukkit.v1_8_R3.entity.CraftPlayer;
 import org.bukkit.entity.Player;
 import org.bukkit.material.MaterialData;
-import org.bukkit.scoreboard.Team;
 import org.bukkit.util.Vector;
 import org.imanity.framework.bukkit.Imanity;
+import org.imanity.framework.bukkit.player.movement.MovementListener;
+import org.imanity.framework.bukkit.util.BlockPosition;
 import org.imanity.framework.bukkit.util.CoordXZ;
 import org.imanity.framework.bukkit.util.CoordinatePair;
 import org.imanity.framework.bukkit.util.TaskUtil;
 import org.imanity.framework.bukkit.visual.event.PreHandleVisualClaimEvent;
 import org.imanity.framework.bukkit.visual.event.PreHandleVisualEvent;
 import org.imanity.framework.bukkit.visual.type.VisualType;
-import org.imanity.framework.data.PlayerData;
-import spg.lgdev.handler.MovementHandler;
-import spg.lgdev.iSpigot;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentLinkedQueue;
@@ -52,23 +48,18 @@ public class VisualBlockHandler implements Runnable {
                     }
                 });
         TaskUtil.runAsyncRepeated(this, 1L);
-        iSpigot.INSTANCE.addMovementHandler(new MovementHandler() {
+        Imanity.registerMovementListener(new MovementListener() {
             @Override
-            public void handleUpdateLocation(Player player, Location to, Location from, PacketPlayInFlying packetPlayInFlying) {
-                if (to.getBlockX() == from.getBlockX()
-                    && to.getBlockY() == from.getBlockY()
-                    && to.getBlockZ() == from.getBlockZ()) {
-                    return;
-                }
-
+            public void handleUpdateLocation(Player player, Location from, Location to) {
                 handlePositionChanged(player, to);
             }
 
             @Override
-            public void handleUpdateRotation(Player player, Location location, Location location1, PacketPlayInFlying packetPlayInFlying) {
+            public void handleUpdateRotation(Player player, Location from, Location to) {
 
             }
-        });
+        })
+        .ignoreSameBlock();
     }
 
     public void cacheClaim(VisualBlockClaim claim) {
@@ -92,7 +83,7 @@ public class VisualBlockHandler implements Runnable {
 
     public void clearAll(final Player player, final boolean send) {
         table.rowMap().remove(player.getUniqueId());
-        ((CraftPlayer) player).getHandle().clearFakeBlocks(send);
+        Imanity.IMPLEMENTATION.clearFakeBlocks(player, send);
     }
 
     public void clearVisualType(final Player player, final VisualType visualType, final boolean send) {
@@ -113,7 +104,7 @@ public class VisualBlockHandler implements Runnable {
                 }
             }
         }
-        ((CraftPlayer) player).getHandle().setFakeBlocks(Collections.emptyMap(), removeFromClient, send);
+        Imanity.IMPLEMENTATION.setFakeBlocks(player, Collections.emptyMap(), removeFromClient, send);
     }
 
     public Map<BlockPosition, MaterialData> addVisualType(final Player player, final Collection<VisualPosition> locations, final boolean send) {
@@ -133,7 +124,7 @@ public class VisualBlockHandler implements Runnable {
                 table.put(player.getUniqueId(), blockPosition, new VisualBlock(visualType, visualBlockData, blockPosition));
             }
         }
-        ((CraftPlayer) player).getHandle().setFakeBlocks(sendToClient, Collections.emptyList(), send);
+        Imanity.IMPLEMENTATION.setFakeBlocks(player, sendToClient, Collections.emptyList(), send);
         return sendToClient;
     }
 
@@ -166,7 +157,7 @@ public class VisualBlockHandler implements Runnable {
                 table.put(player.getUniqueId(), blockPosition, new VisualBlock(visualType, visualBlockData, blockPosition));
             }
         }
-        ((CraftPlayer) player).getHandle().setFakeBlocks(sendToClient, removeFromClient, send);
+        Imanity.IMPLEMENTATION.setFakeBlocks(player, sendToClient, removeFromClient, send);
         return sendToClient;
     }
 
