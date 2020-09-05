@@ -1,11 +1,13 @@
 package org.imanity.framework.bukkit.listener.events;
 
 import lombok.Getter;
+import org.bukkit.entity.Player;
 import org.bukkit.event.*;
 import org.bukkit.plugin.EventExecutor;
 import org.bukkit.plugin.Plugin;
 import org.imanity.framework.bukkit.Imanity;
 import org.imanity.framework.bukkit.plugin.ImanityPlugin;
+import org.imanity.framework.bukkit.util.Utility;
 import org.imanity.framework.util.Terminable;
 
 import java.lang.reflect.Method;
@@ -34,6 +36,9 @@ public class EventSubscription<T extends Event> implements Listener, EventExecut
     private final AtomicLong callCount = new AtomicLong(0);
     private final AtomicBoolean active = new AtomicBoolean(true);
 
+    private final Player activePlayer;
+    private final String activeMetadata;
+
     EventSubscription(EventSubscribeBuilder<T> subscribe) {
 
         this.type = subscribe.getEventType();
@@ -50,6 +55,8 @@ public class EventSubscription<T extends Event> implements Listener, EventExecut
         this.midExpiryTest = subscribe.getMidExpiryTest().toArray(new BiPredicate[0]);
         this.postExpiryTest = subscribe.getPostExpiryTest().toArray(new BiPredicate[0]);
 
+        this.activePlayer = subscribe.getPlayer();
+        this.activeMetadata = subscribe.getMetadata();
     }
 
     public int getAccessCount() {
@@ -152,6 +159,9 @@ public class EventSubscription<T extends Event> implements Listener, EventExecut
         }
 
         unregisterListener(this.type, this);
+        if (this.activePlayer != null && this.activeMetadata != null) {
+            Utility.removeMetadata(this.activePlayer, this.activeMetadata);
+        }
 
         return true;
     }

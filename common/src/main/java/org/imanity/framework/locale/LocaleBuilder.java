@@ -46,7 +46,7 @@ public class LocaleBuilder {
     }
 
     public Locale build() {
-        Locale locale = ImanityCommon.LOCALE_HANDLER.registerLocale(name);
+        Locale locale = ImanityCommon.LOCALE_HANDLER.getOrRegister(name);
         for (Entry<String, String> entry : this.entries) {
             locale.registerEntry(entry.getKey(), entry.getValue());
         }

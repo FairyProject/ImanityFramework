@@ -24,7 +24,7 @@ public class LocaleTypeDataConverter extends AbstractDataConverter<Locale> {
         if (object instanceof String) {
             this.locale = ImanityCommon.LOCALE_HANDLER.getLocale((String) object);
             if (this.locale == null) {
-                this.locale = ImanityCommon.LOCALE_HANDLER.registerLocale((String) object);
+                this.locale = ImanityCommon.LOCALE_HANDLER.getOrRegister((String) object);
             }
         }
     }

@@ -12,7 +12,6 @@ import java.io.InputStream;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 public class LocaleHandler {
 
@@ -23,7 +22,7 @@ public class LocaleHandler {
     public void init() {
         DataConverterType.register(LocaleTypeDataConverter.class, Locale.class);
 
-        this.defaultLocale = this.registerLocale(ImanityCommon.CORE_CONFIG.DEFAULT_LOCALE);
+        this.defaultLocale = this.getOrRegister(ImanityCommon.CORE_CONFIG.DEFAULT_LOCALE);
 
         new PlayerDataBuilder()
                 .loadOnJoin(true)
@@ -33,7 +32,7 @@ public class LocaleHandler {
                 .build();
     }
 
-    public Locale registerLocale(String name) {
+    public Locale getOrRegister(String name) {
         Locale locale;
 
         if (this.locales.containsKey(name)) {
@@ -51,7 +50,7 @@ public class LocaleHandler {
         Map<String, Object> map = ImanityCommon.BRIDGE.loadYaml(file);
         String name = map.get("locale").toString();
 
-        Locale locale = this.registerLocale(name);
+        Locale locale = this.getOrRegister(name);
 
         for (Map.Entry<String, Object> entry : map.entrySet()) {
             if (entry.getKey().equals("locale")) {
@@ -68,7 +67,7 @@ public class LocaleHandler {
         Map<String, Object> map = ImanityCommon.BRIDGE.loadYaml(inputStream);
         String name = map.get("locale").toString();
 
-        Locale locale = this.registerLocale(name);
+        Locale locale = this.getOrRegister(name);
 
         for (Map.Entry<String, Object> entry : map.entrySet()) {
             if (entry.getKey().equals("locale")) {

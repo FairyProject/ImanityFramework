@@ -9,6 +9,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.entity.Projectile;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
+import org.bukkit.event.player.PlayerEvent;
 import org.bukkit.metadata.Metadatable;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.potion.PotionEffect;
@@ -290,12 +291,27 @@ public class Utility {
         metadatable.setMetadata(key, new SampleMetadata(value));
     }
 
+    public static void removeMetadata(Metadatable metadatable, String key) {
+        metadatable.removeMetadata(key, Imanity.PLUGIN);
+    }
+
     public static void delayedUpdateInventory(Player player) {
         TaskUtil.runScheduled(() -> {
             if (player.isOnline()) {
                 player.updateInventory();
             }
         }, 1L);
+    }
+
+    public static boolean isPlayerEvent(Class<?> event) {
+
+        if (PlayerEvent.class.isAssignableFrom(event)) {
+            return true;
+        }
+
+        MethodResolver resolver = new MethodResolver(event);
+        return resolver.resolveWrapper("getPlayer").exists();
+
     }
 
 }

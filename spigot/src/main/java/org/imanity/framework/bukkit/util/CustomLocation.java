@@ -2,6 +2,7 @@ package org.imanity.framework.bukkit.util;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
@@ -9,6 +10,7 @@ import org.bukkit.World;
 import org.bukkit.entity.Player;
 import org.bukkit.util.NumberConversions;
 import org.imanity.framework.bukkit.Imanity;
+import org.imanity.framework.config.annotation.ConfigurationElement;
 
 import java.util.Objects;
 import java.util.StringJoiner;
@@ -17,16 +19,18 @@ import java.util.StringJoiner;
 @Getter
 @Setter
 @AllArgsConstructor
+@NoArgsConstructor
+@ConfigurationElement
 public class CustomLocation {
 
-	private String world;
+	private String world = "world";
 
-	private double x;
-	private double y;
-	private double z;
+	private double x = 0.0;
+	private double y = 0.0;
+	private double z = 0.0;
 
-	private float yaw;
-	private float pitch;
+	private float yaw = 0.0F;
+	private float pitch = 0.0F;
 
 	public CustomLocation(final double x, final double y, final double z) {
 		this(x, y, z, 0.0F, 0.0F);

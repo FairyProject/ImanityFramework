@@ -137,9 +137,9 @@ public class HologramSingle {
             if (rebuild) {
 
                 try {
-                    ENTITY_ID_FIELD.set(witherSkull, this.entityIds[0]);
-                    ENTITY_ID_FIELD.set(horse1_7, this.entityIds[1]);
-                    ENTITY_ID_FIELD.set(horse1_8, this.entityIds[2]);
+                    ENTITY_ID_FIELD.set(witherSkull.getObject(), this.entityIds[0]);
+                    ENTITY_ID_FIELD.set(horse1_7.getObject(), this.entityIds[1]);
+                    ENTITY_ID_FIELD.set(horse1_8.getObject(), this.entityIds[2]);
                 } catch (Exception ex) {
                     throw new RuntimeException("Something wrong while building packets for hologram", ex);
                 }

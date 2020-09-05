@@ -1,20 +1,22 @@
 package org.imanity.framework.bukkit.player;
 
+import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.imanity.framework.bukkit.Imanity;
-import org.imanity.framework.ImanityCommon;
 import org.imanity.framework.bukkit.player.event.PlayerDataLoadEvent;
 import org.imanity.framework.data.DataHandler;
 import org.imanity.framework.data.PlayerData;
 import org.imanity.framework.bukkit.util.SampleMetadata;
-import org.imanity.framework.bukkit.util.SpigotUtil;
-import org.imanity.framework.bukkit.util.TaskUtil;
-import org.imanity.framework.util.thread.ServerThreadLock;
+import org.imanity.framework.data.store.StoreDatabase;
+import org.imanity.framework.events.annotation.AutoWiredListener;
+import org.imanity.framework.util.entry.Entry;
+import org.imanity.framework.util.entry.EntryArrayList;
 
+@AutoWiredListener
 public class PlayerListener implements Listener {
 
     @EventHandler
@@ -25,11 +27,15 @@ public class PlayerListener implements Listener {
 
         Player player = event.getPlayer();
 
-        Runnable runnable = () -> {
-            DataHandler.getPlayerDatabases()
-                    .forEach(database -> {
+        long time = System.currentTimeMillis();
+        Imanity.TASK_CHAIN_FACTORY
+                .newChain()
+                .abortIf(ignored -> !player.isOnline())
+                .async(object -> {
+                    EntryArrayList<PlayerData, StoreDatabase> list = new EntryArrayList<>();
+                    for (StoreDatabase database : DataHandler.getPlayerDatabases()) {
                         if (!database.autoLoad()) {
-                            return;
+                            continue;
                         }
 
                         PlayerData playerData = (PlayerData) database.getByUuid(player.getUniqueId());
@@ -38,20 +44,36 @@ public class PlayerListener implements Listener {
                             playerData = (PlayerData) database.load(player);
                         }
 
-                        PlayerData finalPlayerData = playerData;
-                        try (ServerThreadLock lock = ServerThreadLock.obtain()) {
-                            player.setMetadata(database.getMetadataTag(), new SampleMetadata(finalPlayerData));
+                        list.add(playerData, database);
+                    }
 
-                            PlayerDataLoadEvent.callEvent(player, finalPlayerData);
-                        }
-                    });
-        };
+                    return list;
+                })
+                .abortIf(ignored -> !player.isOnline())
+                .sync(list -> {
+                    for (Entry<PlayerData, StoreDatabase> entry : list) {
+                        player.setMetadata(entry.getValue().getMetadataTag(), new SampleMetadata(entry.getKey()));
 
-        if (ImanityCommon.CORE_CONFIG.ASYNCHRONOUS_DATA_STORING) {
-            TaskUtil.runAsync(runnable);
-        } else {
-            runnable.run();
-        }
+                        PlayerDataLoadEvent.callEvent(player, entry.getKey());
+                    }
+                    return null;
+                })
+                .abortIf(ignored -> !player.isOnline())
+                .sync(() -> {
+                    if (player.getScoreboard() == Bukkit.getScoreboardManager().getMainScoreboard()) {
+                        player.setScoreboard(Bukkit.getScoreboardManager().getNewScoreboard());
+                    }
+
+                    if (Imanity.BOARD_HANDLER != null) {
+                        Imanity.BOARD_HANDLER.getOrCreateScoreboard(player);
+                    }
+
+                    if (Imanity.TAB_HANDLER != null) {
+                        Imanity.TAB_HANDLER.registerPlayerTablist(player);
+                    }
+
+                    Imanity.LOGGER.info("Loaded PlayerData for " + player.getName() + " with " + (System.currentTimeMillis() - time) + "ms.");
+                }).execute();
     }
 
     @EventHandler
@@ -62,34 +84,34 @@ public class PlayerListener implements Listener {
 
         Player player = event.getPlayer();
 
-        Runnable runnable = () -> {
-            DataHandler.getPlayerDatabases()
-                .forEach(database -> {
-                    if (!database.autoSave()) {
-                        return;
+        Imanity.TASK_CHAIN_FACTORY
+                .newChain()
+                .async(() -> {
+                    for (StoreDatabase database : DataHandler.getPlayerDatabases()) {
+                        if (!database.autoSave()) {
+                            return;
+                        }
+                        PlayerData playerData = database.getByPlayer(player);
+                        database.save(playerData);
                     }
-                    PlayerData playerData = database.getByPlayer(player);
-                    database.save(playerData);
-                });
+                }).sync(() -> {
+                    for (StoreDatabase database : DataHandler.getPlayerDatabases()) {
+                        player.removeMetadata(database.getMetadataTag(), Imanity.PLUGIN);
 
-            try (ServerThreadLock lock = ServerThreadLock.obtain()) {
-                DataHandler.getPlayerDatabases()
-                        .forEach(database -> {
-                            player.removeMetadata(database.getMetadataTag(), Imanity.PLUGIN);
+                        if (!database.autoSave()) {
+                            return;
+                        }
+                        database.delete(player.getUniqueId());
+                    }
+                }).sync(() -> {
+                    if (Imanity.BOARD_HANDLER != null) {
+                        Imanity.BOARD_HANDLER.remove(player);
+                    }
 
-                            if (!database.autoSave()) {
-                                return;
-                            }
-                            database.delete(player.getUniqueId());
-                        });
-            }
-        };
-
-        if (ImanityCommon.CORE_CONFIG.ASYNCHRONOUS_DATA_STORING) {
-            TaskUtil.runAsync(runnable);
-        } else {
-            runnable.run();
-        }
+                    if (Imanity.TAB_HANDLER != null) {
+                        Imanity.TAB_HANDLER.removePlayerTablist(player);
+                    }
+                }).execute();
     }
 
 }

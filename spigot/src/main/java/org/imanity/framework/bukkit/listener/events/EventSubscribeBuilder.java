@@ -10,6 +10,8 @@ import org.bukkit.event.player.PlayerEvent;
 import org.bukkit.plugin.Plugin;
 import org.imanity.framework.bukkit.plugin.ImanityPlugin;
 import org.imanity.framework.bukkit.util.Utility;
+import org.imanity.framework.bukkit.util.reflection.resolver.MethodResolver;
+import org.imanity.framework.bukkit.util.reflection.resolver.wrapper.MethodWrapper;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -27,7 +29,9 @@ public class EventSubscribeBuilder<T extends Event> {
 
     private boolean handleSubClasses;
 
-    private BiConsumer<? super T, Throwable> exceptionHandler;
+    private BiConsumer<? super T, Throwable> exceptionHandler = (t, throwable) -> {
+        throw new RuntimeException(throwable);
+    };
 
     private final List<Predicate<T>> filters;
     private final List<BiPredicate<EventSubscription<T>, T>> beforeExpiryTest;
@@ -81,7 +85,7 @@ public class EventSubscribeBuilder<T extends Event> {
     private String metadata;
 
     public EventSubscribeBuilder<T> forPlayer(Player player, String metadata) {
-        if (!PlayerEvent.class.isAssignableFrom(this.eventType)) {
+        if (!Utility.isPlayerEvent(this.eventType)) {
             throw new IllegalStateException("forPlayer() wouldn't work for non player event!");
         }
 
@@ -126,12 +130,14 @@ public class EventSubscribeBuilder<T extends Event> {
     public EventSubscription<T> build(Plugin plugin) {
 
         if (this.player != null) {
-            this.filter(event -> {
-                if (event instanceof PlayerEvent) {
-                    return ((PlayerEvent) event).getPlayer() == this.player;
-                }
-                return false;
-            });
+            MethodWrapper<Player> method = new MethodResolver(this.eventType)
+                    .resolveWrapper("getPlayer");
+
+            if (method == null) {
+                throw new IllegalStateException("Couldn't find getPlayer method in event " + this.eventType.getSimpleName() + " !");
+            }
+
+            this.filter(event -> method.invoke(event) == player);
         }
 
         EventSubscription<T> subscription = new EventSubscription<>(this);

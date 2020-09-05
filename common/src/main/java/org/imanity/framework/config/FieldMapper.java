@@ -2,6 +2,7 @@ package org.imanity.framework.config;
 
 import org.imanity.framework.config.Converter.ConversionInfo;
 import org.imanity.framework.config.annotation.Format;
+import org.imanity.framework.config.annotation.IgnoredElement;
 import org.imanity.framework.config.filter.FieldFilter;
 import org.imanity.framework.config.format.FieldNameFormatter;
 
@@ -17,6 +18,9 @@ enum FieldMapper {
         Configuration.Properties props = mappingInfo.getProperties();
         FieldFilter filter = props.getFilter();
         for (Field field : filter.filterDeclaredFieldsOf(inst.getClass())) {
+            if (field.getAnnotation(IgnoredElement.class) != null) {
+                continue;
+            }
             Object val = toConvertibleObject(field, inst, mappingInfo);
             FieldNameFormatter fnf = selectFormatter(mappingInfo);
             String fn = fnf.fromFieldName(field.getName());
@@ -41,6 +45,9 @@ enum FieldMapper {
     ) {
         FieldFilter filter = mappingInfo.getProperties().getFilter();
         for (Field field : filter.filterDeclaredFieldsOf(inst.getClass())) {
+            if (field.getAnnotation(IgnoredElement.class) != null) {
+                continue;
+            }
             FieldNameFormatter fnf = selectFormatter(mappingInfo);
             String fn = fnf.fromFieldName(field.getName());
             Object mapValue = instMap.get(fn);

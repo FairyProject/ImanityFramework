@@ -2,7 +2,7 @@ package org.imanity.framework.bukkit.tablist;
 
 public class ImanityTabThread extends Thread {
 
-    private ImanityTabHandler imanityTabHandler;
+    private final ImanityTabHandler imanityTabHandler;
 
     public ImanityTabThread(ImanityTabHandler imanityTabHandler) {
         this.imanityTabHandler = imanityTabHandler;
@@ -20,9 +20,9 @@ public class ImanityTabThread extends Thread {
             }
             //Thread Sleep
             try {
-                sleep(imanityTabHandler.getTicks() * 50);
+                Thread.sleep(imanityTabHandler.getTicks() * 50);
             } catch (InterruptedException e) {
-                e.printStackTrace();
+                break;
             }
         }
     }

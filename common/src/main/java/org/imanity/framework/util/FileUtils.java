@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.URISyntaxException;
 import java.net.URL;
 import java.net.URLConnection;
 import java.nio.charset.Charset;
@@ -11,6 +12,11 @@ import java.nio.charset.Charset;
 
 public class FileUtils {
 
+
+	public static File getSelfJar() throws URISyntaxException {
+		return new File(FileUtils.class.getProtectionDomain().getCodeSource().getLocation()
+				.toURI());
+	}
 	
 	@SuppressWarnings("rawtypes")
 	public static InputStream getResource(Class target, String filename) {

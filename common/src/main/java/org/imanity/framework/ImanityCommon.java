@@ -23,11 +23,14 @@ import org.imanity.framework.data.PlayerData;
 import org.imanity.framework.redis.ImanityRedis;
 import org.imanity.framework.redis.server.enums.ServerState;
 import org.imanity.framework.task.ITaskScheduler;
+import org.imanity.framework.util.FileUtils;
 import org.imanity.framework.util.annotation.AnnotationDetector;
 
 import java.io.File;
 import java.lang.annotation.Annotation;
+import java.util.Arrays;
 import java.util.EnumSet;
+import java.util.List;
 import java.util.Set;
 
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
@@ -76,6 +79,9 @@ public class ImanityCommon {
         }
 
         try {
+            List<File> files = BRIDGE.getPluginFiles();
+            files.add(FileUtils.getSelfJar());
+
             new AnnotationDetector(new AnnotationDetector.TypeReporter() {
                 @Override
                 public void reportTypeAnnotation(Class<? extends Annotation> annotation, String className) {
@@ -86,7 +92,7 @@ public class ImanityCommon {
                 public Class<? extends Annotation>[] annotations() {
                     return new Class[] {AutoWiredListener.class};
                 }
-            }).detect(BRIDGE.getPluginFiles().toArray(new File[0]));
+            }).detect(files.toArray(new File[0]));
         } catch (Throwable throwable) {
             throwable.printStackTrace();
         }

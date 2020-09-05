@@ -28,17 +28,12 @@ public class BukkitEventHandler implements IEventHandler {
                 return;
             }
 
-            Class<?> pluginType = listenerAnnotation.plugin();
-            if (!ImanityPlugin.class.isAssignableFrom(pluginType)) {
-                Imanity.LOGGER.error("The Class " + pluginType.getSimpleName() + " wasn't extends on ImanityPlugin!");
-            }
-
-            ImanityPlugin plugin = ImanityPlugin.getPlugin(pluginType.asSubclass(ImanityPlugin.class));
+            JavaPlugin plugin = JavaPlugin.getProvidingPlugin(type);
 
             ConstructorResolver resolver = new ConstructorResolver(type);
             Object object = resolver.resolveWrapper(
                     new Class[0],
-                    new Class[] {pluginType},
+                    new Class[] {plugin.getClass()},
                     new Class[] {JavaPlugin.class}
                     )
             .resolveBunch(
@@ -48,11 +43,12 @@ public class BukkitEventHandler implements IEventHandler {
 
             if (Listener.class.isAssignableFrom(type)) {
 
-                plugin.getServer().getPluginManager().registerEvents((Listener) object, plugin);
+                Imanity.registerEvents((Listener) object);
+                return;
 
             } else if (FunctionListener.class.isAssignableFrom(type)) {
 
-                FunctionListener functionListener = (FunctionListener) object;
+                return;
 
             }
 

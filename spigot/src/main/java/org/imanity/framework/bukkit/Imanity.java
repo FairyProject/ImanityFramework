@@ -97,7 +97,6 @@ public class Imanity {
         MenuUpdateTask.init();
 
         Imanity.registerEvents(
-                new PlayerListener(),
                 new CacheBlockSetListener(),
                 new HologramListener(),
                 new ItemListener(),
@@ -166,20 +165,17 @@ public class Imanity {
 
     public static void registerEvents(Listener... listeners) {
 
-        Plugin plugin = null;
-
-        try {
-            String typeName = Thread.currentThread().getStackTrace()[2].getClassName();
-            Class<?> type = Class.forName(typeName);
-
-            plugin = JavaPlugin.getProvidingPlugin(type);
-        } catch (Throwable throwable) {}
-
-        if (plugin == null) {
-            plugin = Imanity.PLUGIN;
-        }
-
         for (Listener listener : listeners) {
+            Plugin plugin = null;
+
+            try {
+                plugin = JavaPlugin.getProvidingPlugin(listener.getClass());
+            } catch (Throwable ignored) {}
+
+            if (plugin == null) {
+                plugin = Imanity.PLUGIN;
+            }
+
             PLUGIN.getServer().getPluginManager().registerEvents(listener, plugin);
             LOGGER.info("Registering Listener " + listener.getClass().getSimpleName() + " providing plugin by " + plugin.getName());
         }
@@ -252,6 +248,10 @@ public class Imanity {
 
     public static void shutdown() {
         SHUTTING_DOWN = true;
+
+        if (Imanity.TAB_HANDLER != null) {
+            Imanity.TAB_HANDLER.stop();
+        }
         ImanityCommon.shutdown();
     }
 

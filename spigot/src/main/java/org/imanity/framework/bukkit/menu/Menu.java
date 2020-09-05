@@ -1,5 +1,6 @@
 package org.imanity.framework.bukkit.menu;
 
+import com.google.common.collect.ImmutableMap;
 import lombok.Getter;
 import lombok.Setter;
 import org.bukkit.Bukkit;
@@ -170,6 +171,10 @@ public abstract class Menu {
 	public abstract String getTitle(Player player);
 
 	public abstract Map<Integer, org.imanity.framework.bukkit.menu.Button> getButtons(Player player);
+
+	protected ImmutableMap.Builder<Integer, Button> newMap() {
+		return ImmutableMap.builder();
+	}
 
 	public void onOpen(final Player player) {
 	}
