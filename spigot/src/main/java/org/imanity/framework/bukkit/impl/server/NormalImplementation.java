@@ -6,9 +6,12 @@ import net.minecraft.server.v1_8_R3.PacketPlayOutMultiBlockChange;
 import net.minecraft.server.v1_8_R3.PacketPlayOutNamedEntitySpawn;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
+import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 import org.bukkit.material.MaterialData;
 import org.imanity.framework.ImanityCommon;
+import org.imanity.framework.bukkit.metadata.Metadata;
+import org.imanity.framework.bukkit.metadata.MetadataKey;
 import org.imanity.framework.bukkit.util.*;
 import org.imanity.framework.bukkit.util.BlockPosition;
 import org.imanity.framework.bukkit.util.reflection.MinecraftReflection;
@@ -25,7 +28,9 @@ import java.util.stream.Collectors;
 
 public class NormalImplementation implements ServerImplementation {
 
-    public static final String FAKE_BLOCK_MAP = ImanityCommon.METADATA_PREFIX + "FakeBlockMap";
+    public static final MetadataKey<ConcurrentMap> FAKE_BLOCK_MAP = MetadataKey.create(ImanityCommon.METADATA_PREFIX + "FakeBlockMap", ConcurrentMap.class);
+
+    private static final ObjectWrapper MINECRAFT_SERVER;
 
     private static final Class<?> CHUNK_COORD_PAIR_TYPE;
     private static final Class<?> BLOCK_INFO_TYPE;
@@ -44,6 +49,10 @@ public class NormalImplementation implements ServerImplementation {
 
         NMSClassResolver CLASS_RESOLVER = new NMSClassResolver();
         try {
+
+            Class<?> minecraftServerType = CLASS_RESOLVER.resolve("MinecraftServer");
+            Object minecraftServer = minecraftServerType.getMethod("getServer").invoke(null);
+            MINECRAFT_SERVER = new ObjectWrapper(minecraftServer);
 
             Class<?> entityPlayerType = CLASS_RESOLVER.resolve("EntityPlayer");
             PLAYER_CONNECTION_FIELD = new FieldWrapper<>(entityPlayerType.getField("playerConnection"));
@@ -76,6 +85,15 @@ public class NormalImplementation implements ServerImplementation {
             throw new RuntimeException(throwable);
         }
 
+    }
+
+    @Override
+    public Entity getEntity(UUID uuid) {
+        try {
+            return MinecraftReflection.getBukkitEntity(MINECRAFT_SERVER.invoke("a", uuid));
+        } catch (ReflectiveOperationException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     @Override
@@ -123,10 +141,10 @@ public class NormalImplementation implements ServerImplementation {
 
     @Override
     public void setFakeBlocks(Player player, Map<BlockPosition, MaterialData> blockMap, List<BlockPosition> replace, boolean send) {
-        ConcurrentMap<BlockPosition, MaterialData> fakeBlockMap = Utility.metadata(player, FAKE_BLOCK_MAP);
+        ConcurrentMap<BlockPosition, MaterialData> fakeBlockMap = Metadata.provideForPlayer(player).getOrNull(FAKE_BLOCK_MAP);
         if (fakeBlockMap == null) {
             fakeBlockMap = new ConcurrentHashMap<>();
-            Utility.metadata(player, FAKE_BLOCK_MAP, fakeBlockMap);
+            Metadata.provideForPlayer(player).put(FAKE_BLOCK_MAP, fakeBlockMap);
         }
 
         HashMultimap<CoordXZ, BlockPositionData> map = HashMultimap.create();
@@ -145,7 +163,7 @@ public class NormalImplementation implements ServerImplementation {
                 final int chunkZ = z >> 4;
                 final int posX = x - (chunkX << 4);
                 final int posZ = z - (chunkZ << 4);
-                map.put(new CoordXZ(chunkX, chunkZ), new BlockPositionData(new BlockPosition(posX, y, posZ), materialData));
+                map.put(new CoordXZ(chunkX, chunkZ), new BlockPositionData(new BlockPosition(posX, y, posZ, player.getWorld().getName()), materialData));
             }
         }
         for (final BlockPosition blockPosition : replace) {
@@ -160,7 +178,7 @@ public class NormalImplementation implements ServerImplementation {
                 final int chunkZ2 = z2 >> 4;
                 final int posX2 = x2 - (chunkX2 << 4);
                 final int posZ2 = z2 - (chunkZ2 << 4);
-                map.put(new CoordXZ(chunkX2, chunkZ2), new BlockPositionData(new BlockPosition(posX2, y2, posZ2), new MaterialData(type, (byte) data)));
+                map.put(new CoordXZ(chunkX2, chunkZ2), new BlockPositionData(new BlockPosition(posX2, y2, posZ2, player.getWorld().getName()), new MaterialData(type, (byte) data)));
             }
         }
         if (send) {
@@ -197,7 +215,7 @@ public class NormalImplementation implements ServerImplementation {
 
     @Override
     public void clearFakeBlocks(Player player, boolean send) {
-        ConcurrentMap<BlockPosition, MaterialData> fakeBlockMap = Utility.metadata(player, FAKE_BLOCK_MAP);
+        ConcurrentMap<BlockPosition, MaterialData> fakeBlockMap = Metadata.provideForPlayer(player).getOrNull(FAKE_BLOCK_MAP);
         if (fakeBlockMap == null) {
             return;
         }

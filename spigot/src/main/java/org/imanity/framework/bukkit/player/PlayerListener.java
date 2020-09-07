@@ -3,11 +3,15 @@ package org.imanity.framework.bukkit.player;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
+import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.imanity.framework.bukkit.Imanity;
+import org.imanity.framework.bukkit.events.player.PlayerPostJoinEvent;
+import org.imanity.framework.bukkit.listener.events.Events;
 import org.imanity.framework.bukkit.player.event.PlayerDataLoadEvent;
+import org.imanity.framework.bukkit.util.reflection.MinecraftReflection;
 import org.imanity.framework.data.DataHandler;
 import org.imanity.framework.data.PlayerData;
 import org.imanity.framework.bukkit.util.SampleMetadata;
@@ -18,6 +22,23 @@ import org.imanity.framework.util.entry.EntryArrayList;
 
 @AutoWiredListener
 public class PlayerListener implements Listener {
+
+    @EventHandler(priority = EventPriority.LOWEST)
+    public void onPlayerJoinScoreboard(PlayerJoinEvent event) {
+        Player player = event.getPlayer();
+
+        if (player.getScoreboard() == Bukkit.getScoreboardManager().getMainScoreboard()) {
+            player.setScoreboard(Bukkit.getScoreboardManager().getNewScoreboard());
+        }
+
+        if (Imanity.BOARD_HANDLER != null) {
+            Imanity.BOARD_HANDLER.getOrCreateScoreboard(player);
+        }
+
+        if (Imanity.TAB_HANDLER != null) {
+            Imanity.TAB_HANDLER.registerPlayerTablist(player);
+        }
+    }
 
     @EventHandler
     public void onPlayerJoin(PlayerJoinEvent event) {
@@ -60,19 +81,9 @@ public class PlayerListener implements Listener {
                 })
                 .abortIf(ignored -> !player.isOnline())
                 .sync(() -> {
-                    if (player.getScoreboard() == Bukkit.getScoreboardManager().getMainScoreboard()) {
-                        player.setScoreboard(Bukkit.getScoreboardManager().getNewScoreboard());
-                    }
-
-                    if (Imanity.BOARD_HANDLER != null) {
-                        Imanity.BOARD_HANDLER.getOrCreateScoreboard(player);
-                    }
-
-                    if (Imanity.TAB_HANDLER != null) {
-                        Imanity.TAB_HANDLER.registerPlayerTablist(player);
-                    }
-
+                    Imanity.callEvent(new PlayerPostJoinEvent(player));
                     Imanity.LOGGER.info("Loaded PlayerData for " + player.getName() + " with " + (System.currentTimeMillis() - time) + "ms.");
+                    Imanity.LOGGER.info("Player version " + player.getName() + " is " + MinecraftReflection.getProtocol(player));
                 }).execute();
     }
 
@@ -83,6 +94,14 @@ public class PlayerListener implements Listener {
         }
 
         Player player = event.getPlayer();
+
+        if (Imanity.BOARD_HANDLER != null) {
+            Imanity.BOARD_HANDLER.remove(player);
+        }
+
+        if (Imanity.TAB_HANDLER != null) {
+            Imanity.TAB_HANDLER.removePlayerTablist(player);
+        }
 
         Imanity.TASK_CHAIN_FACTORY
                 .newChain()
@@ -103,15 +122,8 @@ public class PlayerListener implements Listener {
                         }
                         database.delete(player.getUniqueId());
                     }
-                }).sync(() -> {
-                    if (Imanity.BOARD_HANDLER != null) {
-                        Imanity.BOARD_HANDLER.remove(player);
-                    }
-
-                    if (Imanity.TAB_HANDLER != null) {
-                        Imanity.TAB_HANDLER.removePlayerTablist(player);
-                    }
-                }).execute();
+                }).sync(() -> Events.unregisterAll(player))
+                .execute();
     }
 
 }

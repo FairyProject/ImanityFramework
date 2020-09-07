@@ -234,7 +234,7 @@ public class VisualBlockHandler implements Runnable {
                         continue;
                     }
                     for (int y = minHeight; y <= maxHeight; y++) {
-                        blockPositions.add(new VisualPosition(location2.getBlockX(), y, location2.getBlockZ(), type));
+                        blockPositions.add(new VisualPosition(location2.getBlockX(), y, location2.getBlockZ(), player.getWorld().getName(), type));
                     }
                 }
 

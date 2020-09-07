@@ -47,19 +47,14 @@ public class TimerHandler implements Runnable {
     @Override
     public void run() {
 
-        synchronized (this.timers) {
-            Iterator<Timer> iterator = this.timers.iterator();
+        for (Timer timer : new ArrayList<>(this.timers)) {
+            if (!timer.isPaused()) {
 
-            while (iterator.hasNext()) {
-                Timer timer = iterator.next();
-                if (!timer.isPaused()) {
-
-                    timer.tick();
-                    if (timer.isTimerElapsed() && timer.finish()) {
-                        iterator.remove();
-                    }
-
+                timer.tick();
+                if (timer.isTimerElapsed() && timer.finish()) {
+                    this.timers.remove(timer);
                 }
+
             }
         }
     }

@@ -9,6 +9,8 @@ import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.metadata.MetadataValue;
 import org.imanity.framework.bukkit.Imanity;
+import org.imanity.framework.bukkit.metadata.Metadata;
+import org.imanity.framework.bukkit.metadata.MetadataKey;
 import org.imanity.framework.bukkit.util.SampleMetadata;
 import org.imanity.framework.bukkit.util.TaskUtil;
 import org.imanity.framework.bukkit.util.Utility;
@@ -20,8 +22,8 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 
 public class ImanityBoardHandler implements Runnable {
 
-    private ImanityBoardAdapter adapter = null;
-    private Queue<Runnable> runnables = new ConcurrentLinkedQueue<>();
+    private final ImanityBoardAdapter adapter;
+    private final Queue<Runnable> runnables = new ConcurrentLinkedQueue<>();
 
     public ImanityBoardHandler(ImanityBoardAdapter adapter) {
         this.adapter = adapter;
@@ -118,14 +120,19 @@ public class ImanityBoardHandler implements Runnable {
 
         if (board != null) {
             board.remove();
-            player.removeMetadata(ImanityBoard.METADATA_TAG, Imanity.PLUGIN);
+            Metadata.provideForPlayer(player).remove(ImanityBoard.METADATA_TAG);
+
+            String name = player.getName();
 
             if (board.isTagUpdated()) {
                 this.runnables.add(() -> {
                     for (Player other : Bukkit.getOnlinePlayers()) {
+                        if (player == other) {
+                            continue;
+                        }
 
                         ImanityBoard otherBoard = this.getOrCreateScoreboard(other);
-                        otherBoard.removePlayer(player);
+                        otherBoard.removePlayer(name);
                     }
                 });
             }
@@ -133,19 +140,15 @@ public class ImanityBoardHandler implements Runnable {
     }
 
     public ImanityBoard get(Player player) {
-        return Utility.metadata(player, ImanityBoard.METADATA_TAG);
+        return Metadata.provideForPlayer(player).getOrNull(ImanityBoard.METADATA_TAG);
     }
 
     public ImanityBoard getOrCreateScoreboard(Player player) {
-        ImanityBoard board = this.get(player);
-
-        if (board == null) {
-            board = new ImanityBoard(player, this.adapter);
-            Utility.metadata(player, ImanityBoard.METADATA_TAG, board);
-
+        return Metadata.provideForPlayer(player).getOrPut(ImanityBoard.METADATA_TAG, () -> {
+            ImanityBoard board = new ImanityBoard(player, this.adapter);
             this.adapter.onBoardCreate(player, board);
-        }
-        return board;
+            return board;
+        });
     }
 
 

@@ -5,10 +5,9 @@ import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
 import org.bukkit.scoreboard.Team;
-import org.imanity.framework.bukkit.tablist.utils.BufferedTabObject;
-import org.imanity.framework.bukkit.tablist.utils.LegacyClientUtils;
-import org.imanity.framework.bukkit.tablist.utils.TabColumn;
-import org.imanity.framework.bukkit.tablist.utils.TabEntry;
+import org.imanity.framework.bukkit.tablist.util.*;
+import org.imanity.framework.bukkit.util.TaskUtil;
+import org.imanity.framework.bukkit.util.Utility;
 import org.imanity.framework.bukkit.util.reflection.MinecraftReflection;
 import org.imanity.framework.bukkit.util.reflection.version.PlayerVersion;
 
@@ -17,11 +16,11 @@ import java.util.*;
 @Getter
 public class ImanityTablist {
 
-    private Player player;
+    private final Player player;
+    private final Set<TabEntry> currentEntries = new HashSet<>();
 
     private String header;
     private String footer;
-    private Set<TabEntry> currentEntries = new HashSet<>();
 
     public ImanityTablist(Player player) {
         this.player = player;
@@ -41,16 +40,19 @@ public class ImanityTablist {
             team1.addEntry(loopPlayer.getName());
             team1.addEntry(player.getName());
         }
+
+        if (MinecraftReflection.getProtocol(player) == PlayerVersion.v1_7) {
+            TaskUtil.runScheduled(() -> ImanityTabHandler.getInstance().getImplementation().removeSelf(player), 1L);
+        }
     }
 
     private void setup() {
-        final int possibleSlots = (MinecraftReflection.getProtocol(player) == PlayerVersion.v1_7 ? 60 : 80);
+        final int possibleSlots = MinecraftReflection.getProtocol(player) == PlayerVersion.v1_7 ? 60 : 80;
         for (int i = 1; i <= possibleSlots; i++) {
             final TabColumn tabColumn = TabColumn.getFromSlot(player, i);
             if (tabColumn == null) {
                 continue;
             }
-            ImanityTabHandler.getInstance().getImplementation().removeSelf(player);
 
             TabEntry tabEntry = ImanityTabHandler.getInstance().getImplementation().createFakePlayer(
                     this,
@@ -59,16 +61,15 @@ public class ImanityTablist {
                     tabColumn.getNumb(player, i),
                     i
             );
-            if ((MinecraftReflection.getProtocol(player) == PlayerVersion.v1_7)) {
-                Team team = player.getScoreboard().getTeam(LegacyClientUtils.teamNames.get(i - 1));
+            if (MinecraftReflection.getProtocol(player) == PlayerVersion.v1_7) {
+                Team team = player.getScoreboard().getTeam(LegacyClientUtil.name(i - 1));
                 if (team != null) {
                     team.unregister();
                 }
-                team = player.getScoreboard().registerNewTeam(LegacyClientUtils.teamNames.get(i - 1));
+                team = player.getScoreboard().registerNewTeam(LegacyClientUtil.name(i - 1));
                 team.setPrefix("");
                 team.setSuffix("");
-
-                team.addEntry(LegacyClientUtils.tabEntrys.get(i - 1));
+                team.addEntry(LegacyClientUtil.entry(i - 1));
             }
             currentEntries.add(tabEntry);
         }
@@ -78,16 +79,26 @@ public class ImanityTablist {
         ImanityTabAdapter adapter = ImanityTabHandler.getInstance().getAdapter();
 
         Set<TabEntry> previous = new HashSet<>(currentEntries);
+
         Set<BufferedTabObject> processedObjects = adapter.getSlots(player);
+        if (processedObjects == null) {
+            processedObjects = new HashSet<>();
+        }
+
         for (BufferedTabObject scoreObject : processedObjects) {
             TabEntry tabEntry = getEntry(scoreObject.getColumn(), scoreObject.getSlot());
             if (tabEntry != null) {
                 previous.remove(tabEntry);
+                if (scoreObject.getPing() == null) {
+                    ImanityTabHandler.getInstance().getImplementation().updateFakeLatency(this, tabEntry, 0);
+                } else {
+                    ImanityTabHandler.getInstance().getImplementation().updateFakeLatency(this, tabEntry, scoreObject.getPing());
+                }
+
                 ImanityTabHandler.getInstance().getImplementation().updateFakeName(this, tabEntry, scoreObject.getText());
-                ImanityTabHandler.getInstance().getImplementation().updateFakeLatency(this, tabEntry, scoreObject.getPing());
                 if (MinecraftReflection.getProtocol(player) != PlayerVersion.v1_7) {
-                    if (!tabEntry.getTexture().toString().equals(scoreObject.getSkinTexture().toString())) {
-                        ImanityTabHandler.getInstance().getImplementation().updateFakeSkin(this, tabEntry, scoreObject.getSkinTexture());
+                    if (!tabEntry.getTexture().toString().equals(scoreObject.getTabIcon().toString())) {
+                        ImanityTabHandler.getInstance().getImplementation().updateFakeSkin(this, tabEntry, scoreObject.getTabIcon());
                     }
                 }
             }
@@ -96,25 +107,19 @@ public class ImanityTablist {
             ImanityTabHandler.getInstance().getImplementation().updateFakeName(this, tabEntry, "");
             ImanityTabHandler.getInstance().getImplementation().updateFakeLatency(this, tabEntry, 0);
             if (MinecraftReflection.getProtocol(player) != PlayerVersion.v1_7) {
-                ImanityTabHandler.getInstance().getImplementation().updateFakeSkin(this, tabEntry, ImanityTabCommons.defaultTexture);
+                ImanityTabHandler.getInstance().getImplementation().updateFakeSkin(this, tabEntry, TabIcon.GRAY);
             }
         }
         previous.clear();
 
-//        String headerNow = adapter.getHeader(player);
-//        String footerNow = adapter.getFooter(player);
-//
-//        if (headerNow == null)
-//            headerNow = "";
-//
-//        if (footerNow == null)
-//            footerNow = "";
-//
-//        if (!headerNow.equals(this.header) || !footerNow.equals(this.footer)) {
-//            player.setPlayerListHeaderFooter(headerNow.isEmpty() ? null : new TextComponent(headerNow), footerNow.isEmpty() ? null : new TextComponent(footerNow));
-//            this.header = headerNow;
-//            this.footer = footerNow;
-//        }
+        String headerNow = Utility.color(adapter.getHeader(player));
+        String footerNow = Utility.color(adapter.getFooter(player));
+
+        if (!headerNow.equals(this.header) || !footerNow.equals(this.footer)) {
+            ImanityTabHandler.getInstance().getImplementation().updateHeaderAndFooter(this, headerNow, footerNow);
+            this.header = headerNow;
+            this.footer = footerNow;
+        }
     }
 
     public TabEntry getEntry(TabColumn column, Integer slot){

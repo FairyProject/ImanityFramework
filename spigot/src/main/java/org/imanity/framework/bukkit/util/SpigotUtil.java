@@ -5,6 +5,7 @@ import org.bukkit.World;
 import org.bukkit.craftbukkit.v1_8_R3.CraftWorld;
 import org.bukkit.craftbukkit.v1_8_R3.entity.CraftPlayer;
 import org.bukkit.entity.Player;
+import org.imanity.framework.bukkit.util.reflection.MinecraftReflection;
 
 public class SpigotUtil {
 
@@ -52,10 +53,7 @@ public class SpigotUtil {
     }
 
     public static int getProtocolVersion(Player player) {
-        if (SPIGOT_TYPE == SpigotType.IMANITY) {
-            return ((CraftPlayer) player).getHandle().playerConnection.networkManager.getVersion();
-        }
-        return -1;
+        return MinecraftReflection.getProtocol(player).getRawVersion()[0];
     }
 
     public enum SpigotType {

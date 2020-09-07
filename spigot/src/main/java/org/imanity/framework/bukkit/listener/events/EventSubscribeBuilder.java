@@ -130,10 +130,16 @@ public class EventSubscribeBuilder<T extends Event> {
     public EventSubscription<T> build(Plugin plugin) {
 
         if (this.player != null) {
-            MethodWrapper<Player> method = new MethodResolver(this.eventType)
-                    .resolveWrapper("getPlayer");
 
-            if (method == null) {
+            MethodWrapper<Player> method;
+
+            if (PlayerEvent.class.isAssignableFrom(this.eventType)) {
+                method = new MethodResolver(PlayerEvent.class).resolveWrapper("getPlayer");
+            } else {
+                method = new MethodResolver(this.eventType).resolveWrapper("getPlayer");
+            }
+
+            if (!method.exists()) {
                 throw new IllegalStateException("Couldn't find getPlayer method in event " + this.eventType.getSimpleName() + " !");
             }
 
@@ -146,7 +152,7 @@ public class EventSubscribeBuilder<T extends Event> {
         if (this.player != null &&
                 this.metadata != null) {
 
-            Utility.metadata(player, metadata, subscription);
+            Events.getSubscriptionList(player).put(metadata, subscription);
 
         }
 

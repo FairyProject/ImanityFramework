@@ -4,6 +4,9 @@ import lombok.Getter;
 import lombok.Setter;
 import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
+import org.bukkit.scoreboard.Scoreboard;
+import org.bukkit.scoreboard.Team;
+import org.imanity.framework.bukkit.metadata.MetadataKey;
 import org.imanity.framework.bukkit.util.Utility;
 import org.imanity.framework.bukkit.util.reflection.MinecraftReflection;
 import org.imanity.framework.bukkit.util.reflection.resolver.FieldResolver;
@@ -45,7 +48,7 @@ public class ImanityBoard {
         }
     }
 
-    public static final String METADATA_TAG = "Imanity-Scoreboard";
+    public static final MetadataKey<ImanityBoard> METADATA_TAG = MetadataKey.create("Imanity-Scoreboard", ImanityBoard.class);
 
     private final Player player;
     private final Map<String, ImanityTeamData> teamDatas = new HashMap<>();
@@ -83,28 +86,12 @@ public class ImanityBoard {
     public void registerTeam(ImanityTeamData data) {
         this.teamDatas.put(data.getName(), data);
 
-        PacketWrapper packet = PacketWrapper.createByPacketName("PacketPlayOutScoreboardTeam")
-                .setPacketValue("e", FIELD_NAME_TAG_VISIBILITY_E.get(NAME_TAG_VISIBILITY.getType("ALWAYS")))
-                .setPacketValue("f", -1)
-                .setPacketValue("g", data.getNameSet())
-                .setPacketValue("a", data.getName())
-                .setPacketValue("h", 0)
-                .setPacketValue("b", data.getName())
-                .setPacketValue("c", data.getPrefix())
-                .setPacketValue("d", "");
+        Scoreboard scoreboard = player.getScoreboard();
+        Team team = scoreboard.registerNewTeam(data.getName());
 
-        int d = 0;
-
-        if (data.isFriendlyFire()) {
-            d |= 1;
-        }
-        if (data.isFriendlyInvisibles()) {
-            d |= 2;
-        }
-
-        packet.setPacketValue("i", d);
-
-        MinecraftReflection.sendPacket(player, packet);
+        team.setPrefix(data.getPrefix());
+        team.setAllowFriendlyFire(data.isFriendlyFire());
+        team.setCanSeeFriendlyInvisibles(data.isFriendlyInvisibles());
     }
 
     public void updatePlayer(Player target) {
@@ -115,19 +102,25 @@ public class ImanityBoard {
         }
 
         ImanityTeamData data = this.teamDatas.get(name);
-        data.addName(target.getName());
-
         this.addToTeam(data, target.getName());
+
+        data.addName(target.getName());
     }
 
-    public void removePlayer(Player target) {
+    public void removePlayer(String name) {
 
         for (ImanityTeamData team : this.teamDatas.values()) {
 
-            if (team.getNameSet().contains(target.getName())) {
+            if (team.getNameSet().contains(name)) {
 
-                team.removeName(target.getName());
-                this.removeToTeam(team, target.getName());
+                System.out.println("team " + team.getName() + " DOES contains " + name);
+
+                this.removeToTeam(team, name);
+                team.removeName(name);
+
+            } else {
+
+                System.out.println("team " + team.getName() + " doesn't contains " + name);
 
             }
 
@@ -136,21 +129,41 @@ public class ImanityBoard {
     }
 
     public void addToTeam(ImanityTeamData data, String name) {
-        MinecraftReflection.sendPacket(player, PacketWrapper.createByPacketName("PacketPlayOutScoreboardTeam")
-            .setPacketValue("e", FIELD_NAME_TAG_VISIBILITY_E.get(NAME_TAG_VISIBILITY.getType("ALWAYS")))
-            .setPacketValue("f", -1)
-            .setPacketValue("g", Collections.singleton(name))
-            .setPacketValue("h", 3)
-            .setPacketValue("a", data.getName()));
+        for (ImanityTeamData team : this.teamDatas.values()) {
+            if (team.getNameSet().contains(name)) {
+
+                if (team == data) {
+                    return;
+                }
+
+                this.removeToTeam(team, name);
+                team.removeName(name);
+
+            }
+        }
+
+        Team team = player.getScoreboard().getTeam(data.getName());
+
+        if (team == null) {
+            this.registerTeam(data);
+            return;
+        }
+
+        team.addEntry(name);
     }
 
     public void removeToTeam(ImanityTeamData data, String name) {
-        MinecraftReflection.sendPacket(player, PacketWrapper.createByPacketName("PacketPlayOutScoreboardTeam")
-                .setPacketValue("e", FIELD_NAME_TAG_VISIBILITY_E.get(NAME_TAG_VISIBILITY.getType("ALWAYS")))
-                .setPacketValue("f", -1)
-                .setPacketValue("g", Collections.singleton(name))
-                .setPacketValue("h", 4)
-                .setPacketValue("a", data.getName()));
+        if (!data.getNameSet().contains(name)) {
+            return;
+        }
+
+        Team team = player.getScoreboard().getTeam(data.getName());
+
+        if (team == null) {
+            return;
+        }
+
+        team.removeEntry(name);
     }
 
     public void setTitle(String title) {

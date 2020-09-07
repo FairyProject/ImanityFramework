@@ -1,4 +1,4 @@
-package org.imanity.framework.bukkit.tablist.utils;
+package org.imanity.framework.bukkit.tablist.util;
 
 import org.bukkit.entity.Player;
 import org.imanity.framework.bukkit.tablist.ImanityTablist;
@@ -6,6 +6,8 @@ import org.imanity.framework.bukkit.tablist.ImanityTablist;
 public interface IImanityTabImpl {
 
     default void removeSelf(Player player) {}
+
+    default void registerLoginListener() {}
 
     TabEntry createFakePlayer(
             ImanityTablist imanityTablist, String string, TabColumn column, Integer slot, Integer rawSlot
@@ -20,7 +22,7 @@ public interface IImanityTabImpl {
     );
 
     void updateFakeSkin(
-            ImanityTablist imanityTablist, TabEntry tabEntry, SkinTexture skinTexture
+            ImanityTablist imanityTablist, TabEntry tabEntry, TabIcon tabIcon
     );
 
     void updateHeaderAndFooter(

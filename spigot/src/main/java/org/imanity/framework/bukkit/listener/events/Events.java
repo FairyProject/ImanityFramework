@@ -1,5 +1,6 @@
 package org.imanity.framework.bukkit.listener.events;
 
+import com.google.common.collect.ImmutableSet;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Cancellable;
 import org.bukkit.event.Event;
@@ -7,11 +8,20 @@ import org.bukkit.event.player.AsyncPlayerPreLoginEvent;
 import org.bukkit.event.player.PlayerEvent;
 import org.bukkit.event.player.PlayerLoginEvent;
 import org.bukkit.event.player.PlayerMoveEvent;
+import org.imanity.framework.ImanityCommon;
+import org.imanity.framework.bukkit.metadata.Metadata;
+import org.imanity.framework.bukkit.metadata.MetadataKey;
 import org.imanity.framework.bukkit.util.Utility;
+import org.imanity.framework.libraries.Library;
 
+import javax.annotation.Nullable;
+import java.util.Map;
+import java.util.Set;
 import java.util.function.Predicate;
 
 public class Events {
+
+    public static final MetadataKey<EventSubscriptionList> SUBSCRIPTION_LIST = MetadataKey.create(ImanityCommon.METADATA_PREFIX + "SubscriptionList", EventSubscriptionList.class);
 
     public static final Predicate<Cancellable> IGNORE_CANCELLED = e -> !e.isCancelled();
     public static final Predicate<Cancellable> IGNORE_UNCANCELLED = Cancellable::isCancelled;
@@ -42,7 +52,18 @@ public class Events {
         return (Predicate<PlayerEvent>) playerEvent -> playerEvent.getPlayer() == player;
     }
 
-    public static EventSubscription<? extends PlayerEvent> getSubscription(Player player, String metadata) {
-        return Utility.metadata(player, metadata);
+    @Nullable
+    public static EventSubscription<?> getSubscription(Player player, String metadata) {
+        return Events.getSubscriptionList(player).get(metadata);
+    }
+
+    public static EventSubscriptionList getSubscriptionList(Player player) {
+        return Metadata.provideForPlayer(player).getOrPut(SUBSCRIPTION_LIST, EventSubscriptionList::new);
+    }
+
+    public static void unregisterAll(Player player) {
+
+        Events.getSubscriptionList(player).clear();
+
     }
 }

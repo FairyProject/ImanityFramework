@@ -1,15 +1,17 @@
-package org.imanity.framework.bukkit.tablist.utils.impl;
+package org.imanity.framework.bukkit.tablist.util.impl;
 
 import com.comphenix.protocol.PacketType;
 import com.comphenix.protocol.ProtocolLibrary;
+import com.comphenix.protocol.events.PacketAdapter;
 import com.comphenix.protocol.events.PacketContainer;
+import com.comphenix.protocol.events.PacketEvent;
 import com.comphenix.protocol.wrappers.*;
 import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
 import org.bukkit.scoreboard.Team;
-import org.imanity.framework.bukkit.tablist.ImanityTabCommons;
+import org.imanity.framework.bukkit.Imanity;
 import org.imanity.framework.bukkit.tablist.ImanityTablist;
-import org.imanity.framework.bukkit.tablist.utils.*;
+import org.imanity.framework.bukkit.tablist.util.*;
 import org.imanity.framework.bukkit.util.reflection.MinecraftReflection;
 import org.imanity.framework.bukkit.util.reflection.version.PlayerVersion;
 
@@ -23,6 +25,16 @@ public class ProtocolLibTabImpl implements IImanityTabImpl {
     }
 
     @Override
+    public void registerLoginListener() {
+        ProtocolLibrary.getProtocolManager().addPacketListener(new PacketAdapter(Imanity.PLUGIN, PacketType.Play.Server.LOGIN) {
+            @Override
+            public void onPacketSending(PacketEvent event) {
+                event.getPacket().getIntegers().write(2, 60);
+            }
+        });
+    }
+
+    @Override
     public TabEntry createFakePlayer(ImanityTablist tablist, String string, TabColumn column, Integer slot, Integer rawSlot) {
         UUID uuid = UUID.randomUUID();
         final Player player = tablist.getPlayer();
@@ -30,14 +42,14 @@ public class ProtocolLibTabImpl implements IImanityTabImpl {
 
         PacketContainer packet = ProtocolLibrary.getProtocolManager().createPacket(PacketType.Play.Server.PLAYER_INFO);
         packet.getPlayerInfoAction().write(0, EnumWrappers.PlayerInfoAction.ADD_PLAYER);
-        WrappedGameProfile profile = new WrappedGameProfile(uuid, playerVersion != PlayerVersion.v1_7  ? string : LegacyClientUtils.tabEntrys.get(rawSlot - 1) + "");
+        WrappedGameProfile profile = new WrappedGameProfile(uuid, playerVersion != PlayerVersion.v1_7  ? string : LegacyClientUtil.entry(rawSlot - 1) + "");
         PlayerInfoData playerInfoData = new PlayerInfoData(profile, 1, EnumWrappers.NativeGameMode.SURVIVAL, WrappedChatComponent.fromText(playerVersion != PlayerVersion.v1_7 ?  "" : profile.getName()));
         if (playerVersion != PlayerVersion.v1_7) {
-            playerInfoData.getProfile().getProperties().put("texture", new WrappedSignedProperty("textures", ImanityTabCommons.defaultTexture.SKIN_VALUE, ImanityTabCommons.defaultTexture.SKIN_SIGNATURE));
+            playerInfoData.getProfile().getProperties().put("texture", new WrappedSignedProperty("textures", TabIcon.GRAY.skinValue, TabIcon.GRAY.skinSignature));
         }
         packet.getPlayerInfoDataLists().write(0, Collections.singletonList(playerInfoData));
         sendPacket(player, packet);
-        return new TabEntry(string, uuid, "", tablist, ImanityTabCommons.defaultTexture, column, slot, rawSlot, 0);
+        return new TabEntry(string, uuid, "", tablist, TabIcon.GRAY, column, slot, rawSlot, 0);
     }
 
     @Override
@@ -46,9 +58,9 @@ public class ProtocolLibTabImpl implements IImanityTabImpl {
         final PlayerVersion playerVersion = MinecraftReflection.getProtocol(player);
         String[] newStrings = ImanityTablist.splitStrings(text, tabEntry.getRawSlot());
         if (playerVersion == PlayerVersion.v1_7) {
-            Team team = player.getScoreboard().getTeam(LegacyClientUtils.teamNames.get(tabEntry.getRawSlot()-1));
+            Team team = player.getScoreboard().getTeam(LegacyClientUtil.name(tabEntry.getRawSlot()-1));
             if (team == null) {
-                team = player.getScoreboard().registerNewTeam(LegacyClientUtils.teamNames.get(tabEntry.getRawSlot()-1));
+                team = player.getScoreboard().registerNewTeam(LegacyClientUtil.name(tabEntry.getRawSlot()-1));
             }
             team.setPrefix(ChatColor.translateAlternateColorCodes('&', newStrings[0]));
             if (newStrings.length > 1) {
@@ -102,19 +114,19 @@ public class ProtocolLibTabImpl implements IImanityTabImpl {
     }
 
     @Override
-    public void updateFakeSkin(ImanityTablist zigguratTablist, TabEntry tabEntry, SkinTexture skinTexture) {
-        if (tabEntry.getTexture() == skinTexture) {
+    public void updateFakeSkin(ImanityTablist zigguratTablist, TabEntry tabEntry, TabIcon tabIcon) {
+        if (tabEntry.getTexture() == tabIcon) {
             return;
         }
 
         final Player player = zigguratTablist.getPlayer();
         final PlayerVersion playerVersion = MinecraftReflection.getProtocol(player);
 
-        WrappedGameProfile profile = new WrappedGameProfile(tabEntry.getUuid(), playerVersion != PlayerVersion.v1_7  ? tabEntry.getId() : LegacyClientUtils.tabEntrys.get(tabEntry.getRawSlot() - 1) + "");
+        WrappedGameProfile profile = new WrappedGameProfile(tabEntry.getUuid(), playerVersion != PlayerVersion.v1_7  ? tabEntry.getId() : LegacyClientUtil.entry(tabEntry.getRawSlot() - 1) + "");
         PlayerInfoData playerInfoData = new PlayerInfoData(profile, 1, EnumWrappers.NativeGameMode.SURVIVAL, WrappedChatComponent.fromText(playerVersion != PlayerVersion.v1_7 ?  "" : profile.getName()));
 
         if (playerVersion != PlayerVersion.v1_7) {
-            playerInfoData.getProfile().getProperties().put("texture", new WrappedSignedProperty("textures", skinTexture.SKIN_VALUE, skinTexture.SKIN_SIGNATURE));
+            playerInfoData.getProfile().getProperties().put("texture", new WrappedSignedProperty("textures", tabIcon.skinValue, tabIcon.skinSignature));
         }
 
         PacketContainer remove = ProtocolLibrary.getProtocolManager().createPacket(PacketType.Play.Server.PLAYER_INFO);
@@ -129,7 +141,7 @@ public class ProtocolLibTabImpl implements IImanityTabImpl {
         sendPacket(player, remove);
         sendPacket(player, add);
 
-        tabEntry.setTexture(skinTexture);
+        tabEntry.setTexture(tabIcon);
     }
 
     @Override

@@ -160,7 +160,7 @@ public class EventSubscription<T extends Event> implements Listener, EventExecut
 
         unregisterListener(this.type, this);
         if (this.activePlayer != null && this.activeMetadata != null) {
-            Utility.removeMetadata(this.activePlayer, this.activeMetadata);
+            Events.getSubscriptionList(this.activePlayer).remove(this.activeMetadata);
         }
 
         return true;

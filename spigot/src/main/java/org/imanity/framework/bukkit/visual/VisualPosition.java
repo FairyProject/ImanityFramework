@@ -9,8 +9,8 @@ public class VisualPosition extends BlockPosition {
 
     private VisualType type;
 
-    public VisualPosition(int x, int y, int z, VisualType type) {
-        super(x, y ,z);
+    public VisualPosition(int x, int y, int z, String world, VisualType type) {
+        super(x, y ,z, world);
         this.type = type;
     }
 }

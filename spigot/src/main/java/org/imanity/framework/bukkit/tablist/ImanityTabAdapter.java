@@ -1,7 +1,7 @@
 package org.imanity.framework.bukkit.tablist;
 
 import org.bukkit.entity.Player;
-import org.imanity.framework.bukkit.tablist.utils.BufferedTabObject;
+import org.imanity.framework.bukkit.tablist.util.BufferedTabObject;
 
 import java.util.Set;
 

@@ -1,4 +1,4 @@
-package org.imanity.framework.bukkit.tablist.utils.impl;
+package org.imanity.framework.bukkit.tablist.util.impl.v1_8;
 
 import com.mojang.authlib.GameProfile;
 import com.mojang.authlib.properties.Property;
@@ -11,10 +11,10 @@ import org.bukkit.craftbukkit.v1_8_R3.entity.CraftPlayer;
 import org.bukkit.entity.Player;
 import org.bukkit.scoreboard.Team;
 import org.imanity.framework.bukkit.util.Utility;
-import org.imanity.framework.bukkit.tablist.ImanityTabCommons;
 import org.imanity.framework.bukkit.tablist.ImanityTablist;
-import org.imanity.framework.bukkit.tablist.utils.*;
+import org.imanity.framework.bukkit.tablist.util.*;
 import org.imanity.framework.bukkit.util.reflection.MinecraftReflection;
+import org.imanity.framework.bukkit.util.reflection.resolver.wrapper.PacketWrapper;
 import org.imanity.framework.bukkit.util.reflection.version.PlayerVersion;
 import org.imanity.framework.bukkit.util.reflection.resolver.FieldResolver;
 import org.imanity.framework.bukkit.util.reflection.resolver.minecraft.NMSClassResolver;
@@ -56,10 +56,10 @@ public class NMS1_8TabImpl implements IImanityTabImpl {
         final Player player = imanityTablist.getPlayer();
         final PlayerVersion playerVersion = MinecraftReflection.getProtocol(player);
 
-        GameProfile profile = new GameProfile(UUID.randomUUID(), playerVersion != PlayerVersion.v1_7  ? string : LegacyClientUtils.tabEntrys.get(rawSlot - 1) + "");
+        GameProfile profile = new GameProfile(UUID.randomUUID(), playerVersion != PlayerVersion.v1_7  ? string : LegacyClientUtil.entry(rawSlot - 1) + "");
 
         if (playerVersion != PlayerVersion.v1_7) {
-            profile.getProperties().put("textures", new Property("textures", ImanityTabCommons.defaultTexture.SKIN_VALUE, ImanityTabCommons.defaultTexture.SKIN_SIGNATURE));
+            profile.getProperties().put("textures", new Property("textures", TabIcon.GRAY.skinValue, TabIcon.GRAY.skinSignature));
         }
 
         PacketPlayOutPlayerInfo packetPlayOutPlayerInfo = new PacketPlayOutPlayerInfo();
@@ -67,7 +67,7 @@ public class NMS1_8TabImpl implements IImanityTabImpl {
         INFO_DATA_FIELD.get(packetPlayOutPlayerInfo).add(INFO_DATA_CONSTRUCTOR.newInstance(profile, 1, WorldSettings.EnumGamemode.SURVIVAL, IChatBaseComponent.ChatSerializer.a(fromText(""))));
         sendPacket(player, packetPlayOutPlayerInfo);
 
-        return new TabEntry(string, profile.getId(), "", imanityTablist, ImanityTabCommons.defaultTexture, column, slot, rawSlot, 0);
+        return new TabEntry(string, profile.getId(), "", imanityTablist, TabIcon.GRAY, column, slot, rawSlot, 0);
     }
 
     @Override
@@ -82,9 +82,9 @@ public class NMS1_8TabImpl implements IImanityTabImpl {
         String[] newStrings = ImanityTablist.splitStrings(text, tabEntry.getRawSlot());
 
         if (playerVersion == PlayerVersion.v1_7) {
-            Team team = player.getScoreboard().getTeam(LegacyClientUtils.teamNames.get(tabEntry.getRawSlot() - 1));
+            Team team = player.getScoreboard().getTeam(LegacyClientUtil.name(tabEntry.getRawSlot() - 1));
             if (team == null) {
-                team = player.getScoreboard().registerNewTeam(LegacyClientUtils.teamNames.get(tabEntry.getRawSlot() - 1));
+                team = player.getScoreboard().registerNewTeam(LegacyClientUtil.name(tabEntry.getRawSlot() - 1));
             }
             team.setPrefix(Utility.color(newStrings[0]));
             if (newStrings.length > 1) {
@@ -93,7 +93,7 @@ public class NMS1_8TabImpl implements IImanityTabImpl {
                 team.setSuffix("");
             }
 
-            team.addEntry(LegacyClientUtils.tabEntrys.get(tabEntry.getRawSlot() - 1) + "");
+            team.addEntry(LegacyClientUtil.entry(tabEntry.getRawSlot() - 1) + "");
         } else {
             IChatBaseComponent listName = ChatComponentText.ChatSerializer.a(fromText(Utility.color(text)));
 
@@ -126,8 +126,8 @@ public class NMS1_8TabImpl implements IImanityTabImpl {
     }
 
     @Override
-    public void updateFakeSkin(ImanityTablist imanityTablist, TabEntry tabEntry, SkinTexture skinTexture) {
-        if (tabEntry.getTexture() == skinTexture){
+    public void updateFakeSkin(ImanityTablist imanityTablist, TabEntry tabEntry, TabIcon tabIcon) {
+        if (tabEntry.getTexture() == tabIcon){
             return;
         }
 
@@ -139,7 +139,7 @@ public class NMS1_8TabImpl implements IImanityTabImpl {
         GameProfile gameProfile = this.getGameProfile(playerVersion, tabEntry);
 
         gameProfile.getProperties().clear();
-        gameProfile.getProperties().put("textures", new Property("textures", skinTexture.SKIN_VALUE, skinTexture.SKIN_SIGNATURE));
+        gameProfile.getProperties().put("textures", new Property("textures", tabIcon.skinValue, tabIcon.skinSignature));
 
         IChatBaseComponent listName = ChatComponentText.ChatSerializer.a(fromText(tabEntry.getText()));
 
@@ -155,11 +155,26 @@ public class NMS1_8TabImpl implements IImanityTabImpl {
         INFO_DATA_FIELD.get(packetPlayOutPlayerInfo).add(playerInfoData);
         sendPacket(imanityTablist.getPlayer(), packetPlayOutPlayerInfo);
 
-        tabEntry.setTexture(skinTexture);
+        tabEntry.setTexture(tabIcon);
     }
 
     @Override
     public void updateHeaderAndFooter(ImanityTablist imanityTablist, String header, String footer) {
+
+        Player player = imanityTablist.getPlayer();
+        if (MinecraftReflection.getProtocol(player) == PlayerVersion.v1_7) {
+            return;
+        }
+
+        PacketWrapper packet = new PacketWrapper(new PacketPlayOutPlayerListHeaderFooter());
+
+        final IChatBaseComponent tabHeader = IChatBaseComponent.ChatSerializer.a("{text: '" + header + "'}");
+        final IChatBaseComponent tabFooter = IChatBaseComponent.ChatSerializer.a("{text: '" + footer + "'}");
+
+        packet.setPacketValue("a", tabHeader);
+        packet.setPacketValue("b", tabFooter);
+
+        MinecraftReflection.sendPacket(player, packet);
 
     }
 
@@ -172,7 +187,7 @@ public class NMS1_8TabImpl implements IImanityTabImpl {
     }
 
     private GameProfile getGameProfile(PlayerVersion playerVersion, TabEntry tabEntry) {
-        return new GameProfile(tabEntry.getUuid(), playerVersion != PlayerVersion.v1_7  ? "0" + (tabEntry.getRawSlot() > 9 ? tabEntry.getRawSlot() : "0" + tabEntry.getRawSlot()) + "|Tab" : LegacyClientUtils.tabEntrys.get(tabEntry.getRawSlot() - 1) + "");
+        return new GameProfile(tabEntry.getUuid(), playerVersion != PlayerVersion.v1_7  ? tabEntry.getId() : LegacyClientUtil.entry(tabEntry.getRawSlot() - 1) + "");
     }
 
     private static String fromText(String text) {

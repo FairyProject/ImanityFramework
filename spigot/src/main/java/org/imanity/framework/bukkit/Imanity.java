@@ -5,6 +5,7 @@ import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.bukkit.Bukkit;
 import org.bukkit.Sound;
 import org.bukkit.World;
 import org.bukkit.entity.Player;
@@ -12,6 +13,7 @@ import org.bukkit.event.Event;
 import org.bukkit.event.Listener;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.java.JavaPlugin;
+import org.github.paperspigot.Title;
 import org.imanity.framework.ImanityCommon;
 import org.imanity.framework.bukkit.bossbar.BossBarAdapter;
 import org.imanity.framework.bukkit.bossbar.BossBarHandler;
@@ -19,7 +21,7 @@ import org.imanity.framework.bukkit.chunk.KeepChunkHandler;
 import org.imanity.framework.bukkit.chunk.block.CacheBlockSetHandler;
 import org.imanity.framework.bukkit.chunk.block.CacheBlockSetListener;
 import org.imanity.framework.bukkit.command.CommandHandler;
-import org.imanity.framework.bukkit.events.player.CallEventListener;
+import org.imanity.framework.bukkit.listener.CallEventListener;
 import org.imanity.framework.bukkit.hologram.HologramHandler;
 import org.imanity.framework.bukkit.hologram.HologramListener;
 import org.imanity.framework.bukkit.impl.*;
@@ -27,7 +29,6 @@ import org.imanity.framework.bukkit.impl.server.ServerImplementation;
 import org.imanity.framework.bukkit.menu.ButtonListener;
 import org.imanity.framework.bukkit.menu.task.MenuUpdateTask;
 import org.imanity.framework.bukkit.player.BukkitPlayerData;
-import org.imanity.framework.bukkit.player.PlayerListener;
 import org.imanity.framework.bukkit.player.movement.MovementListener;
 import org.imanity.framework.bukkit.player.movement.impl.AbstractMovementImplementation;
 import org.imanity.framework.bukkit.player.movement.impl.BukkitMovementImplementation;
@@ -49,7 +50,6 @@ import org.imanity.framework.util.FastRandom;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
@@ -213,6 +213,22 @@ public class Imanity {
         return Utility.toStringList(Imanity.translate(player, key, replaceValues), "\n");
     }
 
+    public static String translate(Player player, String key, LocaleRV... replaceValues) {
+
+        String result = Imanity.translate(player, key);
+
+        for (LocaleRV rv : replaceValues) {
+            result = Utility.replace(result, rv.getTarget(), rv.getReplacement(player));
+        }
+
+        return result;
+    }
+
+    public static Iterable<String> translateList(Player player, String key, LocaleRV... replaceValues) {
+        return Utility.toStringList(Imanity.translate(player, key, replaceValues), "\n");
+    }
+
+
     public static void broadcast(String key, LocaleRV... rvs) {
         Imanity.broadcast(Imanity.PLUGIN.getServer().getOnlinePlayers(), key, rvs);
     }
@@ -244,6 +260,21 @@ public class Imanity {
             player.sendMessage(result);
             player.playSound(player.getLocation(), sound, 1f, 1f);
         }
+    }
+
+    public static void broadcastTitleWithSound(String messageLocale, String titleLocale, String subTitleLocale, Sound sound, LocaleRV... rvs) {
+        Imanity.broadcastTitleWithSound(Bukkit.getOnlinePlayers(), messageLocale, titleLocale, subTitleLocale, sound, rvs);
+    }
+
+    public static void broadcastTitleWithSound(Iterable<? extends Player> players, String messageLocale, String titleLocale, String subTitleLocale, Sound sound, LocaleRV... rvs) {
+        players
+                .forEach(player -> {
+                    player.playSound(player.getLocation(), sound, 1f, 1f);
+                    player.sendMessage(Imanity.translate(player, messageLocale, rvs));
+                    if (SpigotUtil.getProtocolVersion(player) > 5) {
+                        player.sendTitle(new Title(Imanity.translate(player, titleLocale, rvs), Imanity.translate(player, subTitleLocale, rvs), 20, 100, 20));
+                    }
+                });
     }
 
     public static void shutdown() {

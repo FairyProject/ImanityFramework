@@ -1,11 +1,8 @@
-package org.imanity.framework.bukkit.tablist.utils;
+package org.imanity.framework.bukkit.tablist.util;
 
-import com.mojang.authlib.GameProfile;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
-import net.minecraft.server.v1_8_R3.EntityPlayer;
-import org.bukkit.OfflinePlayer;
 import org.imanity.framework.bukkit.tablist.ImanityTablist;
 
 import java.util.UUID;
@@ -17,7 +14,7 @@ public class TabEntry {
     private UUID uuid;
     private String text;
     private ImanityTablist tab;
-    private SkinTexture texture;
+    private TabIcon texture;
     private TabColumn column;
     private int slot;
     private int rawSlot;

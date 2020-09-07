@@ -1,19 +1,22 @@
 package org.imanity.framework.bukkit.tablist;
 
+import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.scoreboard.Team;
 import org.imanity.framework.bukkit.Imanity;
-import org.imanity.framework.bukkit.tablist.utils.IImanityTabImpl;
+import org.imanity.framework.bukkit.tablist.util.IImanityTabImpl;
 import lombok.Getter;
 import lombok.Setter;
-import org.imanity.framework.bukkit.tablist.utils.impl.NMS1_8TabImpl;
-import org.imanity.framework.bukkit.tablist.utils.impl.ProtocolLibTabImpl;
+import org.imanity.framework.bukkit.tablist.util.impl.v1_8.ImanitySpigotTabImpl;
+import org.imanity.framework.bukkit.tablist.util.impl.v1_8.NMS1_8TabImpl;
+import org.imanity.framework.bukkit.tablist.util.impl.ProtocolLibTabImpl;
+import org.imanity.framework.bukkit.util.SpigotUtil;
 import org.imanity.framework.bukkit.util.reflection.MinecraftReflection;
 
 import java.util.Map;
 import java.util.UUID;
-import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.*;
 
 @Getter
 public class ImanityTabHandler {
@@ -23,10 +26,8 @@ public class ImanityTabHandler {
 
     private ImanityTabAdapter adapter;
     private Map<UUID, ImanityTablist> tablists;
-    private ImanityTabThread thread;
+    private ScheduledExecutorService thread;
     private IImanityTabImpl implementation;
-
-    private boolean done;
 
     //Tablist Ticks
     @Setter private long ticks = 20;
@@ -54,7 +55,12 @@ public class ImanityTabHandler {
         }
 
         if (MinecraftReflection.VERSION == MinecraftReflection.Version.v1_8_R3) {
-            this.implementation = new NMS1_8TabImpl();
+
+            if (SpigotUtil.SPIGOT_TYPE == SpigotUtil.SpigotType.IMANITY) {
+                this.implementation = new ImanitySpigotTabImpl();
+            } else {
+                this.implementation = new NMS1_8TabImpl();
+            }
             return;
         }
         Imanity.PLUGIN.getLogger().info("Unable to register ImanityTablist with a proper implementation");
@@ -77,18 +83,32 @@ public class ImanityTabHandler {
 
         //Ensure that the thread has stopped running
         if (this.thread != null) {
-            this.thread.interrupt();
+            this.thread.shutdown();
             this.thread = null;
         }
 
+        // To ensure client will display 60 slots on 1.7
+        if (Bukkit.getMaxPlayers() < 60) {
+            this.implementation.registerLoginListener();
+        }
+
         //Start Thread
-        this.thread = new ImanityTabThread(this);
+        this.thread = Executors.newSingleThreadScheduledExecutor(new ThreadFactoryBuilder()
+            .setNameFormat("Imanity-Tablist-Thread")
+            .setDaemon(true)
+            .build());
+
+        this.thread.scheduleAtFixedRate(() -> {
+            for (ImanityTablist tablist : this.getTablists().values()) {
+                tablist.update();
+            }
+        }, 50L, 50L, TimeUnit.MILLISECONDS);
     }
 
     public void stop() {
 
         if (this.thread != null) {
-            this.thread.interrupt();
+            this.thread.shutdown();
             this.thread = null;
         }
 

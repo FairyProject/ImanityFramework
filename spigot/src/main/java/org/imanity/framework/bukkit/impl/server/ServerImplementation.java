@@ -3,6 +3,7 @@ package org.imanity.framework.bukkit.impl.server;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
+import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 import org.bukkit.material.MaterialData;
 import org.imanity.framework.bukkit.util.BlockPosition;
@@ -11,6 +12,7 @@ import org.imanity.framework.bukkit.visual.VisualPosition;
 
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 
 public interface ServerImplementation {
 
@@ -25,6 +27,8 @@ public interface ServerImplementation {
         }
         return null;
     }
+
+    Entity getEntity(UUID uuid);
 
     void showDyingNPC(Player player);
 

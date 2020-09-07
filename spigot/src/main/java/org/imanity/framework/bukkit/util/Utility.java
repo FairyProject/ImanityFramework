@@ -280,21 +280,6 @@ public class Utility {
 
     }
 
-    public static <T> T metadata(Metadatable metadatable, String key) {
-        if (!metadatable.hasMetadata(key)) {
-            return null;
-        }
-        return (T) metadatable.getMetadata(key).get(0).value();
-    }
-
-    public static <T> void metadata(Metadatable metadatable, String key, T value) {
-        metadatable.setMetadata(key, new SampleMetadata(value));
-    }
-
-    public static void removeMetadata(Metadatable metadatable, String key) {
-        metadatable.removeMetadata(key, Imanity.PLUGIN);
-    }
-
     public static void delayedUpdateInventory(Player player) {
         TaskUtil.runScheduled(() -> {
             if (player.isOnline()) {

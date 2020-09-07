@@ -1,4 +1,4 @@
-package org.imanity.framework.bukkit.tablist.utils;
+package org.imanity.framework.bukkit.tablist.util;
 
 import lombok.Getter;
 import org.bukkit.entity.Player;

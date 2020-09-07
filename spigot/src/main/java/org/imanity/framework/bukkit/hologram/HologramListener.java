@@ -31,8 +31,7 @@ public class HologramListener implements Listener {
             public void handleUpdateRotation(Player player, Location from, Location to) {
 
             }
-        })
-                .ignoreSameBlockAndY();
+        }).ignoreSameBlockAndY();
 
         TaskUtil.runRepeated(() -> {
             if (Imanity.SHUTTING_DOWN) {
@@ -78,8 +77,7 @@ public class HologramListener implements Listener {
     }
 
     private void update(Player player) {
-        Imanity.getHologramHandler(player.getWorld())
-                .update(player);
+        Imanity.getHologramHandler(player.getWorld()).update(player);
     }
 
 }
