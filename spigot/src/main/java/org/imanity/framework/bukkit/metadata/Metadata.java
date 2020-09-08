@@ -50,6 +50,13 @@ import java.util.concurrent.atomic.AtomicBoolean;
 /**
  * Provides access to {@link MetadataRegistry} instances bound to players, entities, blocks and worlds.
  */
+
+/**
+ *
+ * @credit https://github.com/lucko/helper
+ * @modified by LeeGod
+ *
+ */
 public final class Metadata {
 
     private static final AtomicBoolean SETUP = new AtomicBoolean(false);

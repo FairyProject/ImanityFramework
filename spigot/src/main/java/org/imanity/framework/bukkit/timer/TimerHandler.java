@@ -1,5 +1,6 @@
 package org.imanity.framework.bukkit.timer;
 
+import com.google.common.collect.ImmutableList;
 import org.imanity.framework.bukkit.Imanity;
 import org.imanity.framework.bukkit.timer.event.TimerStartEvent;
 import org.imanity.framework.bukkit.util.TaskUtil;
@@ -47,7 +48,7 @@ public class TimerHandler implements Runnable {
     @Override
     public void run() {
 
-        for (Timer timer : new ArrayList<>(this.timers)) {
+        for (Timer timer : ImmutableList.copyOf(this.timers)) {
             if (!timer.isPaused()) {
 
                 timer.tick();

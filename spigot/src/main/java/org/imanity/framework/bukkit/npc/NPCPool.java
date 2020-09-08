@@ -1,0 +1,171 @@
+package org.imanity.framework.bukkit.npc;
+
+
+import com.comphenix.protocol.PacketType;
+import com.comphenix.protocol.ProtocolLibrary;
+import com.comphenix.protocol.events.PacketAdapter;
+import com.comphenix.protocol.events.PacketContainer;
+import com.comphenix.protocol.events.PacketEvent;
+import com.comphenix.protocol.wrappers.EnumWrappers;
+import com.google.common.base.Preconditions;
+import com.google.common.collect.ImmutableList;
+import lombok.Getter;
+import org.bukkit.Bukkit;
+import org.bukkit.entity.Player;
+import org.bukkit.event.EventHandler;
+import org.bukkit.event.Listener;
+import org.bukkit.event.block.Action;
+import org.bukkit.event.player.PlayerInteractEvent;
+import org.bukkit.event.player.PlayerQuitEvent;
+import org.bukkit.event.player.PlayerToggleSneakEvent;
+import org.bukkit.plugin.java.JavaPlugin;
+import org.imanity.framework.bukkit.npc.event.PlayerNPCInteractEvent;
+import org.imanity.framework.bukkit.npc.modifier.AnimationModifier;
+import org.imanity.framework.bukkit.npc.modifier.MetadataModifier;
+import org.imanity.framework.bukkit.util.TaskUtil;
+import org.imanity.framework.events.annotation.AutoWiredListener;
+import org.imanity.framework.util.thread.ServerThreadLock;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
+
+import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
+
+@Getter
+@AutoWiredListener
+public class NPCPool implements Listener {
+
+    private final JavaPlugin javaPlugin;
+
+    private final double spawnDistance;
+
+    private final double actionDistance;
+
+    private final long tabListRemoveTicks;
+
+    private final Map<Integer, NPC> npcMap = new ConcurrentHashMap<>();
+
+    /**
+     * Creates a new NPC pool which handles events, spawning and destruction of the NPCs for players
+     *
+     * @param javaPlugin the instance of the plugin which creates this pool
+     */
+    public NPCPool(@NotNull JavaPlugin javaPlugin) {
+        this(javaPlugin, 50, 20, 30);
+    }
+
+    /**
+     * Creates a new NPC pool which handles events, spawning and destruction of the NPCs for players
+     *
+     * @param javaPlugin         the instance of the plugin which creates this pool
+     * @param spawnDistance      the distance in which NPCs are spawned for players
+     * @param actionDistance     the distance in which NPC actions are displayed for players
+     * @param tabListRemoveTicks the time in ticks after which the NPC will be removed from the players tab
+     */
+    public NPCPool(@NotNull JavaPlugin javaPlugin, int spawnDistance, int actionDistance, long tabListRemoveTicks) {
+        Preconditions.checkArgument(spawnDistance > 0 && actionDistance > 0, "Distance has to be > 0!");
+        Preconditions.checkArgument(actionDistance <= spawnDistance, "Action distance cannot be higher than spawn distance!");
+        Preconditions.checkArgument(tabListRemoveTicks > 0, "TabListRemoveTicks have to be > 0!");
+
+        this.javaPlugin = javaPlugin;
+
+        this.spawnDistance = spawnDistance * spawnDistance;
+        this.actionDistance = actionDistance * actionDistance;
+        this.tabListRemoveTicks = tabListRemoveTicks;
+
+        this.addInteractListener();
+        this.npcTick();
+    }
+
+    private void addInteractListener() {
+        ProtocolLibrary.getProtocolManager().addPacketListener(new PacketAdapter(this.javaPlugin, PacketType.Play.Client.USE_ENTITY) {
+
+            @Override
+            public void onPacketReceiving(PacketEvent event) {
+                PacketContainer packetContainer = event.getPacket();
+                int targetId = packetContainer.getIntegers().read(0);
+
+                if (npcMap.containsKey(targetId)) {
+                    NPC npc = npcMap.get(targetId);
+                    EnumWrappers.EntityUseAction action = packetContainer.getEntityUseActions().read(0);
+
+                    try (ServerThreadLock lock = ServerThreadLock.obtain()) {
+                        Bukkit.getPluginManager().callEvent(new PlayerNPCInteractEvent(event.getPlayer(), npc, action));
+                    }
+                }
+            }
+
+        });
+    }
+
+    private void npcTick() {
+
+        TaskUtil.runAsyncRepeated(() -> {
+            List<NPC> npcs = ImmutableList.copyOf(this.npcMap.values());
+
+            for (NPC npc : npcs) {
+                npc.tick();
+            }
+
+            for (NPC npc : npcs) {
+                npc.render();
+            }
+        }, 1);
+
+    }
+
+    protected void takeCareOf(@NotNull NPC npc) {
+        this.npcMap.put(npc.getEntityId(), npc);
+    }
+
+    @Nullable
+    public NPC getNPC(int entityId) {
+        return this.npcMap.get(entityId);
+    }
+
+    public void removeNPC(int entityId) {
+        NPC npc = this.getNPC(entityId);
+
+        if (npc != null) {
+            this.npcMap.remove(entityId);
+            npc.getSeeingPlayers().forEach(npc::hide);
+        }
+    }
+
+    @EventHandler
+    public void handleQuit(PlayerQuitEvent event) {
+        Player player = event.getPlayer();
+
+        this.npcMap.values().stream()
+                .filter(npc -> npc.isShownFor(player))
+                .forEach(npc -> npc.untrack(player));
+    }
+
+    @EventHandler
+    public void handleSneak(PlayerToggleSneakEvent event) {
+        Player player = event.getPlayer();
+
+        this.npcMap.values().stream()
+                .filter(npc -> npc.isImitatePlayer() && npc.isShownFor(player) && npc.getLocation().distanceSquared(player.getLocation()) <= this.actionDistance)
+                .forEach(npc -> npc.metadata().queue(MetadataModifier.EntityMetadata.SNEAKING, event.isSneaking()).send(player));
+    }
+
+    @EventHandler
+    public void handleClick(PlayerInteractEvent event) {
+        Player player = event.getPlayer();
+
+        if (event.getAction() == Action.LEFT_CLICK_AIR || event.getAction() == Action.LEFT_CLICK_BLOCK) {
+            this.npcMap.values().stream()
+                    .filter(npc -> npc.isImitatePlayer() && npc.isShownFor(player) && npc.getLocation().distanceSquared(player.getLocation()) <= this.actionDistance)
+                    .forEach(npc -> npc.animation().queue(AnimationModifier.EntityAnimation.SWING_MAIN_ARM).send(player));
+        }
+    }
+
+    /**
+     * @return a copy of the NPCs this pool manages
+     */
+    public Collection<NPC> getNPCs() {
+        return new HashSet<>(this.npcMap.values());
+    }
+
+}

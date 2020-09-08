@@ -48,6 +48,13 @@ import java.util.stream.Collectors;
 /**
  * The Main API class of TaskChain. TaskChain's are created by a {@link TaskChainFactory}
  */
+
+/**
+ *
+ * @credit https://github.com/aikar/TaskChain
+ * @modified by LeeGod
+ *
+ */
 @SuppressWarnings({"unused", "FieldAccessedSynchronizedAndUnsynchronized"})
 public class TaskChain <T> {
     private static final ThreadLocal<TaskChain<?>> currentChain = new ThreadLocal<>();

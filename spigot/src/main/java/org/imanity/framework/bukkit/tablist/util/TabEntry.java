@@ -4,6 +4,7 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
 import org.imanity.framework.bukkit.tablist.ImanityTablist;
+import org.imanity.framework.bukkit.util.Skin;
 
 import java.util.UUID;
 
@@ -14,7 +15,7 @@ public class TabEntry {
     private UUID uuid;
     private String text;
     private ImanityTablist tab;
-    private TabIcon texture;
+    private Skin texture;
     private TabColumn column;
     private int slot;
     private int rawSlot;

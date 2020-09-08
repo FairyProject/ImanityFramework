@@ -10,6 +10,7 @@ import org.bukkit.ChatColor;
 import org.bukkit.craftbukkit.v1_8_R3.entity.CraftPlayer;
 import org.bukkit.entity.Player;
 import org.bukkit.scoreboard.Team;
+import org.imanity.framework.bukkit.util.Skin;
 import org.imanity.framework.bukkit.util.Utility;
 import org.imanity.framework.bukkit.tablist.ImanityTablist;
 import org.imanity.framework.bukkit.tablist.util.*;
@@ -59,7 +60,7 @@ public class NMS1_8TabImpl implements IImanityTabImpl {
         GameProfile profile = new GameProfile(UUID.randomUUID(), playerVersion != PlayerVersion.v1_7  ? string : LegacyClientUtil.entry(rawSlot - 1) + "");
 
         if (playerVersion != PlayerVersion.v1_7) {
-            profile.getProperties().put("textures", new Property("textures", TabIcon.GRAY.skinValue, TabIcon.GRAY.skinSignature));
+            profile.getProperties().put("textures", new Property("textures", Skin.GRAY.skinValue, Skin.GRAY.skinSignature));
         }
 
         PacketPlayOutPlayerInfo packetPlayOutPlayerInfo = new PacketPlayOutPlayerInfo();
@@ -67,7 +68,7 @@ public class NMS1_8TabImpl implements IImanityTabImpl {
         INFO_DATA_FIELD.get(packetPlayOutPlayerInfo).add(INFO_DATA_CONSTRUCTOR.newInstance(profile, 1, WorldSettings.EnumGamemode.SURVIVAL, IChatBaseComponent.ChatSerializer.a(fromText(""))));
         sendPacket(player, packetPlayOutPlayerInfo);
 
-        return new TabEntry(string, profile.getId(), "", imanityTablist, TabIcon.GRAY, column, slot, rawSlot, 0);
+        return new TabEntry(string, profile.getId(), "", imanityTablist, Skin.GRAY, column, slot, rawSlot, 0);
     }
 
     @Override
@@ -126,8 +127,8 @@ public class NMS1_8TabImpl implements IImanityTabImpl {
     }
 
     @Override
-    public void updateFakeSkin(ImanityTablist imanityTablist, TabEntry tabEntry, TabIcon tabIcon) {
-        if (tabEntry.getTexture() == tabIcon){
+    public void updateFakeSkin(ImanityTablist imanityTablist, TabEntry tabEntry, Skin skin) {
+        if (tabEntry.getTexture() == skin){
             return;
         }
 
@@ -139,7 +140,7 @@ public class NMS1_8TabImpl implements IImanityTabImpl {
         GameProfile gameProfile = this.getGameProfile(playerVersion, tabEntry);
 
         gameProfile.getProperties().clear();
-        gameProfile.getProperties().put("textures", new Property("textures", tabIcon.skinValue, tabIcon.skinSignature));
+        gameProfile.getProperties().put("textures", new Property("textures", skin.skinValue, skin.skinSignature));
 
         IChatBaseComponent listName = ChatComponentText.ChatSerializer.a(fromText(tabEntry.getText()));
 
@@ -155,7 +156,7 @@ public class NMS1_8TabImpl implements IImanityTabImpl {
         INFO_DATA_FIELD.get(packetPlayOutPlayerInfo).add(playerInfoData);
         sendPacket(imanityTablist.getPlayer(), packetPlayOutPlayerInfo);
 
-        tabEntry.setTexture(tabIcon);
+        tabEntry.setTexture(skin);
     }
 
     @Override

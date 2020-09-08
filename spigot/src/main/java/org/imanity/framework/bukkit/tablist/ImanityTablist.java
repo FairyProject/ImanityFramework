@@ -6,6 +6,7 @@ import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
 import org.bukkit.scoreboard.Team;
 import org.imanity.framework.bukkit.tablist.util.*;
+import org.imanity.framework.bukkit.util.Skin;
 import org.imanity.framework.bukkit.util.TaskUtil;
 import org.imanity.framework.bukkit.util.Utility;
 import org.imanity.framework.bukkit.util.reflection.MinecraftReflection;
@@ -97,8 +98,8 @@ public class ImanityTablist {
 
                 ImanityTabHandler.getInstance().getImplementation().updateFakeName(this, tabEntry, scoreObject.getText());
                 if (MinecraftReflection.getProtocol(player) != PlayerVersion.v1_7) {
-                    if (!tabEntry.getTexture().toString().equals(scoreObject.getTabIcon().toString())) {
-                        ImanityTabHandler.getInstance().getImplementation().updateFakeSkin(this, tabEntry, scoreObject.getTabIcon());
+                    if (!tabEntry.getTexture().toString().equals(scoreObject.getSkin().toString())) {
+                        ImanityTabHandler.getInstance().getImplementation().updateFakeSkin(this, tabEntry, scoreObject.getSkin());
                     }
                 }
             }
@@ -107,7 +108,7 @@ public class ImanityTablist {
             ImanityTabHandler.getInstance().getImplementation().updateFakeName(this, tabEntry, "");
             ImanityTabHandler.getInstance().getImplementation().updateFakeLatency(this, tabEntry, 0);
             if (MinecraftReflection.getProtocol(player) != PlayerVersion.v1_7) {
-                ImanityTabHandler.getInstance().getImplementation().updateFakeSkin(this, tabEntry, TabIcon.GRAY);
+                ImanityTabHandler.getInstance().getImplementation().updateFakeSkin(this, tabEntry, Skin.GRAY);
             }
         }
         previous.clear();

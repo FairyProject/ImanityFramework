@@ -12,6 +12,7 @@ import org.bukkit.scoreboard.Team;
 import org.imanity.framework.bukkit.Imanity;
 import org.imanity.framework.bukkit.tablist.ImanityTablist;
 import org.imanity.framework.bukkit.tablist.util.*;
+import org.imanity.framework.bukkit.util.Skin;
 import org.imanity.framework.bukkit.util.reflection.MinecraftReflection;
 import org.imanity.framework.bukkit.util.reflection.version.PlayerVersion;
 
@@ -45,11 +46,11 @@ public class ProtocolLibTabImpl implements IImanityTabImpl {
         WrappedGameProfile profile = new WrappedGameProfile(uuid, playerVersion != PlayerVersion.v1_7  ? string : LegacyClientUtil.entry(rawSlot - 1) + "");
         PlayerInfoData playerInfoData = new PlayerInfoData(profile, 1, EnumWrappers.NativeGameMode.SURVIVAL, WrappedChatComponent.fromText(playerVersion != PlayerVersion.v1_7 ?  "" : profile.getName()));
         if (playerVersion != PlayerVersion.v1_7) {
-            playerInfoData.getProfile().getProperties().put("texture", new WrappedSignedProperty("textures", TabIcon.GRAY.skinValue, TabIcon.GRAY.skinSignature));
+            playerInfoData.getProfile().getProperties().put("texture", new WrappedSignedProperty("textures", Skin.GRAY.skinValue, Skin.GRAY.skinSignature));
         }
         packet.getPlayerInfoDataLists().write(0, Collections.singletonList(playerInfoData));
         sendPacket(player, packet);
-        return new TabEntry(string, uuid, "", tablist, TabIcon.GRAY, column, slot, rawSlot, 0);
+        return new TabEntry(string, uuid, "", tablist, Skin.GRAY, column, slot, rawSlot, 0);
     }
 
     @Override
@@ -114,8 +115,8 @@ public class ProtocolLibTabImpl implements IImanityTabImpl {
     }
 
     @Override
-    public void updateFakeSkin(ImanityTablist zigguratTablist, TabEntry tabEntry, TabIcon tabIcon) {
-        if (tabEntry.getTexture() == tabIcon) {
+    public void updateFakeSkin(ImanityTablist zigguratTablist, TabEntry tabEntry, Skin skin) {
+        if (tabEntry.getTexture() == skin) {
             return;
         }
 
@@ -126,7 +127,7 @@ public class ProtocolLibTabImpl implements IImanityTabImpl {
         PlayerInfoData playerInfoData = new PlayerInfoData(profile, 1, EnumWrappers.NativeGameMode.SURVIVAL, WrappedChatComponent.fromText(playerVersion != PlayerVersion.v1_7 ?  "" : profile.getName()));
 
         if (playerVersion != PlayerVersion.v1_7) {
-            playerInfoData.getProfile().getProperties().put("texture", new WrappedSignedProperty("textures", tabIcon.skinValue, tabIcon.skinSignature));
+            playerInfoData.getProfile().getProperties().put("texture", new WrappedSignedProperty("textures", skin.skinValue, skin.skinSignature));
         }
 
         PacketContainer remove = ProtocolLibrary.getProtocolManager().createPacket(PacketType.Play.Server.PLAYER_INFO);
@@ -141,7 +142,7 @@ public class ProtocolLibTabImpl implements IImanityTabImpl {
         sendPacket(player, remove);
         sendPacket(player, add);
 
-        tabEntry.setTexture(tabIcon);
+        tabEntry.setTexture(skin);
     }
 
     @Override

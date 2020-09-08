@@ -2,6 +2,7 @@ package org.imanity.framework.bukkit.tablist.util;
 
 import org.bukkit.entity.Player;
 import org.imanity.framework.bukkit.tablist.ImanityTablist;
+import org.imanity.framework.bukkit.util.Skin;
 
 public interface IImanityTabImpl {
 
@@ -22,7 +23,7 @@ public interface IImanityTabImpl {
     );
 
     void updateFakeSkin(
-            ImanityTablist imanityTablist, TabEntry tabEntry, TabIcon tabIcon
+            ImanityTablist imanityTablist, TabEntry tabEntry, Skin skin
     );
 
     void updateHeaderAndFooter(

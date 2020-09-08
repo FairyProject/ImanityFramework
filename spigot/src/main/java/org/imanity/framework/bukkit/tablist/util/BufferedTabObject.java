@@ -1,6 +1,7 @@
 package org.imanity.framework.bukkit.tablist.util;
 
 import lombok.Getter;
+import org.imanity.framework.bukkit.util.Skin;
 
 @Getter
 public class BufferedTabObject {
@@ -8,13 +9,13 @@ public class BufferedTabObject {
     private Integer ping;
     private int slot;
     private String text;
-    private TabIcon tabIcon;
+    private Skin skin;
 
     public BufferedTabObject() {
         this.column = TabColumn.LEFT;
         this.slot = 1;
         this.text = "";
-        this.tabIcon = TabIcon.GRAY;
+        this.skin = Skin.GRAY;
     }
 
     public BufferedTabObject text(String text) {
@@ -22,8 +23,8 @@ public class BufferedTabObject {
         return this;
     }
 
-    public BufferedTabObject skin(TabIcon tabIcon) {
-        this.tabIcon = tabIcon;
+    public BufferedTabObject skin(Skin skin) {
+        this.skin = skin;
         return this;
     }
 
