@@ -6,8 +6,11 @@ import lombok.Getter;
 import lombok.Setter;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
+import org.bukkit.Material;
 import org.bukkit.World;
+import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
+import org.bukkit.util.Vector;
 import org.imanity.framework.bukkit.Imanity;
 import org.imanity.framework.bukkit.npc.goal.Goal;
 import org.imanity.framework.bukkit.npc.goal.LookAtPlayerGoal;
@@ -25,6 +28,7 @@ import java.util.*;
  * @modified by LeeGod
  *
  */
+@Getter
 public class NPC {
 
     private static final Random RANDOM = new FastRandom();
@@ -37,10 +41,14 @@ public class NPC {
 
     @Setter
     private Location location;
+    private Vector velocity;
 
+    private int noDamageTicks;
+
+    private boolean sneaking;
+    private boolean sprinting;
     private boolean imitatePlayer;
 
-    @Getter
     private final NPCPool pool;
     private final SpawnCustomizer spawnCustomizer;
 
@@ -51,6 +59,7 @@ public class NPC {
         this.gameProfile = gameProfile;
 
         this.location = location;
+        this.velocity = new Vector();
         this.imitatePlayer = imitatePlayer;
         this.spawnCustomizer = spawnCustomizer;
 
@@ -87,6 +96,75 @@ public class NPC {
 
         this.location.setYaw(yaw);
         this.location.setPitch(pitch);
+    }
+
+    public Block getCurrentBlock() {
+        return this.location.getBlock();
+    }
+
+    public boolean isInWater() {
+        Material material = this.getCurrentBlock().getType();
+        return material == Material.WATER || material == Material.STATIONARY_WATER;
+    }
+
+    public boolean isInLava() {
+        Material material = this.getCurrentBlock().getType();
+        return material == Material.LAVA || material == Material.STATIONARY_LAVA;
+    }
+
+    public void move(float moveForward, float moveStrafe) {
+
+        double y;
+
+        if (this.isInWater()) {
+            y = this.location.getY();
+
+            this.moveFlying(moveForward, moveStrafe, 0.02F);
+            this.motion(this.velocity.getX(), this.velocity.getY(), this.velocity.getZ());
+            this.velocity.multiply(0.800000011920929D);
+            this.velocity.setY(this.velocity.getY() - 0.02);
+        } else if (this.isInLava()) {
+
+            y = this.location.getY();
+
+            this.moveFlying(moveForward, moveStrafe, 0.02F);
+            this.motion(this.velocity.getX(), this.velocity.getY(), this.velocity.getZ());
+            this.velocity.multiply(0.5D);
+            this.velocity.setY(this.velocity.getY() - 0.02);
+
+        } else {
+
+            float multiply = 0.91F;
+            if (this.isOnGround()) {
+                multiply =
+            }
+
+        }
+
+    }
+
+    public void moveFlying(float moveForward, float moveStrafe, float multiply) {
+        float f = moveForward * moveForward + moveStrafe * moveStrafe;
+
+        if (f >= 1.0E-4F) {
+            f = (float) Math.sqrt(f);
+
+            if (f < 1.0F) {
+                f = 1.0F;
+            }
+
+            f = multiply / f;
+            moveForward *= f;
+            moveStrafe *= f;
+
+            float motX = (float) Math.sin(this.getLocation().getYaw() * Math.PI / 180.0F);
+            float motZ = (float) Math.sin(this.getLocation().getYaw() * Math.PI / 180.0F);
+            this.velocity.add(new Vector(moveForward * motZ - moveStrafe * motX, 0, moveStrafe * motZ + moveForward * motX));
+        }
+    }
+
+    protected void motion(double motX, double motY, double motZ) {
+
     }
 
     public void show(@NotNull Player player) {
