@@ -11,8 +11,9 @@ import org.imanity.framework.bukkit.events.player.EntityDamageByPlayerEvent;
 import org.imanity.framework.bukkit.events.player.PlayerDamageByEntityEvent;
 import org.imanity.framework.bukkit.events.player.PlayerDamageByPlayerEvent;
 import org.imanity.framework.bukkit.events.player.PlayerDamageEvent;
+import org.imanity.framework.events.annotation.AutoWiredListener;
 
-@AllArgsConstructor
+@AutoWiredListener
 public class CallEventListener implements Listener {
 
     @EventHandler

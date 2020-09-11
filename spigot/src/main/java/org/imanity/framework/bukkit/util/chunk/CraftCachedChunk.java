@@ -1,13 +1,10 @@
 package org.imanity.framework.bukkit.util.chunk;
 
-import net.minecraft.server.v1_8_R3.BiomeBase;
 import org.bukkit.ChunkSnapshot;
 import org.bukkit.block.Biome;
-import org.bukkit.craftbukkit.v1_8_R3.block.CraftBlock;
 import org.bukkit.material.MaterialData;
-import org.imanity.framework.bukkit.util.AccessUtil;
+import org.imanity.framework.util.AccessUtil;
 import org.imanity.framework.bukkit.util.reflection.resolver.minecraft.OBCClassResolver;
-import org.imanity.framework.bukkit.util.reflection.resolver.wrapper.ClassWrapper;
 import org.imanity.framework.bukkit.util.reflection.resolver.wrapper.FieldWrapper;
 
 public class CraftCachedChunk implements CachedChunk {
@@ -52,7 +49,7 @@ public class CraftCachedChunk implements CachedChunk {
     }
 
     public int getZ() {
-        return this.getZ();
+        return this.snapshot.getZ();
     }
 
     public String getWorldName() {

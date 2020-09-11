@@ -2,6 +2,7 @@ package org.imanity.framework.bukkit.impl;
 
 import org.bukkit.event.Listener;
 import org.bukkit.plugin.java.JavaPlugin;
+import org.imanity.framework.ImanityCommon;
 import org.imanity.framework.bukkit.Imanity;
 import org.imanity.framework.bukkit.events.NetworkStateChangedEvent;
 import org.imanity.framework.bukkit.listener.FunctionListener;
@@ -19,13 +20,14 @@ public class BukkitEventHandler implements IEventHandler {
     }
 
     @Override
-    public void registerWiredListener(String className) {
+    public Object registerWiredListener(String className) {
         try {
             Class<?> type = Class.forName(className);
 
             AutoWiredListener listenerAnnotation = type.getAnnotation(AutoWiredListener.class);
             if (listenerAnnotation == null) {
-                return;
+                System.out.println("Didn't find AutoWiredListener annotation on " + type.getSimpleName() + " !");
+                return null;
             }
 
             JavaPlugin plugin = JavaPlugin.getProvidingPlugin(type);
@@ -44,17 +46,14 @@ public class BukkitEventHandler implements IEventHandler {
             if (Listener.class.isAssignableFrom(type)) {
 
                 Imanity.registerEvents((Listener) object);
-                return;
 
-            } else if (FunctionListener.class.isAssignableFrom(type)) {
+            } else if (!FunctionListener.class.isAssignableFrom(type)) {
+                Imanity.LOGGER.error("The Class " + type.getSimpleName() + " wasn't implement Listener or FunctionListener!");
 
-                return;
-
+                return null;
             }
 
-            Imanity.LOGGER.error("The Class " + type.getSimpleName() + " wasn't implement Listener or FunctionListener!");
-
-
+            return object;
         } catch (Throwable throwable) {
             throw new RuntimeException("Something wrong while registering wired listener", throwable);
         }

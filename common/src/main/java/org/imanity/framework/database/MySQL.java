@@ -1,6 +1,8 @@
 package org.imanity.framework.database;
 
 import lombok.Getter;
+import org.imanity.framework.plugin.service.IService;
+import org.imanity.framework.plugin.service.Service;
 import org.imanity.framework.util.builder.SQLHost;
 import org.imanity.framework.util.builder.hikari.HikariHandler;
 import org.imanity.framework.ImanityCommon;
@@ -12,26 +14,35 @@ import javax.sql.DataSource;
 import java.io.File;
 import java.util.Arrays;
 
+@Service(name = "mysql")
 @Getter
-public class MySQL {
+public class MySQL implements IService {
 
     private SQLConfig config;
     private SQLHost host;
     private DataSource dataSource;
-
-    public MySQL() {
-    }
 
     public void generateConfig() {
         this.config = new SQLConfig();
         config.loadAndSave();
     }
 
+    @Override
     public void init() {
+        this.generateConfig();
+        if (!ImanityCommon.CORE_CONFIG.isDatabaseTypeUsed(DatabaseType.MYSQL)) {
+            return;
+        }
+
         HikariHandler.init();
 
         host = new SQLHost(config.HOST, config.USER, config.PORT, config.PASSWORD, config.DATABASE);
         this.dataSource = HikariHandler.createDataSource(host);
+    }
+
+    @Override
+    public void stop() {
+        HikariHandler.closeDataSource(this.host);
     }
 
     public static class SQLConfig extends YamlConfiguration {

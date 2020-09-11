@@ -14,7 +14,9 @@ import org.bukkit.inventory.ItemStack;
 import org.imanity.framework.ImanityCommon;
 import org.imanity.framework.bukkit.Imanity;
 import org.imanity.framework.bukkit.util.SampleMetadata;
+import org.imanity.framework.events.annotation.AutoWiredListener;
 
+@AutoWiredListener
 public class ItemListener implements Listener {
 
     private static final String SET_ITEM_METADATA = ImanityCommon.METADATA_PREFIX + "SetItem";

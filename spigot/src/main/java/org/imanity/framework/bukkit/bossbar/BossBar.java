@@ -1,11 +1,13 @@
 package org.imanity.framework.bukkit.bossbar;
 
 import lombok.Getter;
+import net.minecraft.server.v1_8_R3.PacketPlayOutEntityDestroy;
 import org.bukkit.Location;
 import org.bukkit.entity.Player;
 import org.imanity.framework.bukkit.util.reflection.MinecraftReflection;
 import org.imanity.framework.bukkit.util.reflection.minecraft.DataWatcher;
 import org.imanity.framework.bukkit.util.reflection.resolver.ConstructorResolver;
+import org.imanity.framework.bukkit.util.reflection.resolver.minecraft.NMSClassResolver;
 import org.imanity.framework.bukkit.util.reflection.resolver.wrapper.DataWatcherWrapper;
 import org.imanity.framework.bukkit.util.reflection.resolver.wrapper.PacketWrapper;
 import org.imanity.framework.util.CommonUtility;
@@ -58,7 +60,7 @@ public class BossBar {
         this.packetWither.setPacketValue("i", (byte) 0);
         this.packetWither.setPacketValue("j", (byte) 0);
         this.packetWither.setPacketValue("k", (byte) 0);
-        this.packetWither.setPacketValue("l", dataWatcher);
+        this.packetWither.setPacketValue("l", dataWatcher != null ? dataWatcher.getDataWatcherObject() : null);
     }
 
     private void buildDataWatcher() {
@@ -96,7 +98,8 @@ public class BossBar {
         this.previousHealth = bossBarData.getHealth();
 
         CommonUtility.tryCatch(() -> {
-            ConstructorResolver constructorResolver = new ConstructorResolver("PacketPlayOutEntityMetadata");
+            NMSClassResolver classResolver = new NMSClassResolver();
+            ConstructorResolver constructorResolver = new ConstructorResolver(classResolver.resolve("PacketPlayOutEntityMetadata"));
             Object packetMetadata = constructorResolver
                     .resolveWrapper(new Class[] {int.class, DataWatcher.TYPE, boolean.class})
                     .newInstanceSilent(this.entityId, dataWatcher, true);
@@ -149,7 +152,7 @@ public class BossBar {
         }
 
         PacketWrapper packetDestroy = PacketWrapper.createByPacketName("PacketPlayOutEntityDestroy");
-        packetDestroy.setPacketValue("a", this.entityId);
+        packetDestroy.setPacketValue("a", new int[] {this.entityId});
         MinecraftReflection.sendPacket(player, packetDestroy);
         this.visible = false;
     }

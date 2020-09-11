@@ -4,6 +4,8 @@ import lombok.Getter;
 import org.imanity.framework.ImanityCommon;
 import org.imanity.framework.config.format.FieldNameFormatters;
 import org.imanity.framework.config.yaml.YamlConfiguration;
+import org.imanity.framework.plugin.service.IService;
+import org.imanity.framework.plugin.service.Service;
 import org.imanity.framework.redis.server.ServerHandler;
 import org.redisson.Redisson;
 import org.redisson.api.RMap;
@@ -13,8 +15,9 @@ import org.redisson.config.Config;
 
 import java.io.File;
 
+@Service(name = "redis")
 @Getter
-public class ImanityRedis {
+public class ImanityRedis implements IService {
 
     private RedissonClient client;
     private ServerHandler serverHandler;
@@ -25,7 +28,13 @@ public class ImanityRedis {
         redisConfig.loadAndSave();
     }
 
+    @Override
     public void init() {
+        this.generateConfig();
+        if (!ImanityCommon.CORE_CONFIG.USE_REDIS) {
+            return;
+        }
+
         Config config = new Config();
         config.useClusterServers()
                 .addNodeAddress("redis://" + redisConfig.IP_ADDRESS + ":" + redisConfig.PASSWORD);
@@ -38,6 +47,16 @@ public class ImanityRedis {
 
         this.serverHandler = new ServerHandler(this);
         this.serverHandler.init();
+    }
+
+    @Override
+    public void stop() {
+        if (!ImanityCommon.CORE_CONFIG.USE_REDIS) {
+            return;
+        }
+        this.serverHandler.shutdown();
+
+        this.client.shutdown();
     }
 
     public RReadWriteLock getLock(String name) {

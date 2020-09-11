@@ -1,8 +1,10 @@
 package org.imanity.framework.bukkit.impl.server;
 
+import net.minecraft.server.v1_8_R3.Block;
 import net.minecraft.server.v1_8_R3.EntityPlayer;
 import net.minecraft.server.v1_8_R3.MinecraftServer;
 import org.bukkit.Location;
+import org.bukkit.Material;
 import org.bukkit.craftbukkit.v1_8_R3.CraftWorld;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
@@ -26,5 +28,10 @@ public class ImanityImplementation extends NormalImplementation {
                 .getServer()
                 .a(uuid)
                 .getBukkitEntity();
+    }
+
+    @Override
+    public float getBlockSlipperiness(Material material) {
+        return Block.getById(material.getId()).frictionFactor;
     }
 }

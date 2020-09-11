@@ -23,6 +23,8 @@ public interface ImanityBridge {
 
     Map<String, Object> loadYaml(InputStream inputStream);
 
+    List<Object> getPluginInstances();
+
     List<File> getPluginFiles();
 
     boolean isShuttingDown();

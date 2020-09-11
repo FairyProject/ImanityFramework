@@ -1,5 +1,6 @@
 package org.imanity.framework.bukkit.impl;
 
+import com.google.common.collect.ImmutableList;
 import org.apache.logging.log4j.Logger;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.imanity.framework.ImanityBridge;
@@ -11,6 +12,7 @@ import org.imanity.framework.task.ITaskScheduler;
 
 import java.io.File;
 import java.io.InputStream;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -51,6 +53,11 @@ public class BukkitImanityBridge implements ImanityBridge {
     @Override
     public boolean isShuttingDown() {
         return Imanity.SHUTTING_DOWN;
+    }
+
+    @Override
+    public List<Object> getPluginInstances() {
+        return ImmutableList.copyOf(Imanity.PLUGINS);
     }
 
     @Override

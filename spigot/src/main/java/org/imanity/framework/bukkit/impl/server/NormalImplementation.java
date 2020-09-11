@@ -6,6 +6,7 @@ import net.minecraft.server.v1_8_R3.PacketPlayOutMultiBlockChange;
 import net.minecraft.server.v1_8_R3.PacketPlayOutNamedEntitySpawn;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
+import org.bukkit.Material;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 import org.bukkit.material.MaterialData;
@@ -34,6 +35,8 @@ public class NormalImplementation implements ServerImplementation {
 
     private static final Class<?> CHUNK_COORD_PAIR_TYPE;
     private static final Class<?> BLOCK_INFO_TYPE;
+
+    private static final FieldWrapper<Float> BLOCK_SLIPPERINESS_FIELD;
 
     private static final FieldWrapper<?> PLAYER_CONNECTION_FIELD;
 
@@ -70,6 +73,8 @@ public class NormalImplementation implements ServerImplementation {
             Class<?> blockType = CLASS_RESOLVER.resolve("Block");
             BLOCK_GET_BY_ID_METHOD = new MethodWrapper<>(blockType.getMethod("getById", int.class));
             FROM_LEGACY_DATA_METHOD = new MethodWrapper<>(blockType.getMethod("fromLegacyData", int.class));
+
+            BLOCK_SLIPPERINESS_FIELD = new FieldWrapper<>(blockType.getField("frictionFactor"));
 
             CHUNK_COORD_PAIR_TYPE = CLASS_RESOLVER.resolve("ChunkCoordIntPair");
             CHUNK_COORD_PAIR_CONSTRUCTOR = new ConstructorWrapper<>(CHUNK_COORD_PAIR_TYPE.getConstructor(int.class, int.class));
@@ -257,5 +262,11 @@ public class NormalImplementation implements ServerImplementation {
         Object packet = PACKET_CHAT_CONSTRUCTOR.newInstance(chatComponent, (byte) 2);
 
         MinecraftReflection.sendPacket(player, packet);
+    }
+
+    @Override
+    public float getBlockSlipperiness(Material material) {
+        Object block = BLOCK_GET_BY_ID_METHOD.invoke(null);
+        return BLOCK_SLIPPERINESS_FIELD.get(block);
     }
 }

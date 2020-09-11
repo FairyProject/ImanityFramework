@@ -11,13 +11,16 @@ import org.imanity.framework.config.annotation.Comment;
 import org.imanity.framework.config.annotation.ConfigurationElement;
 import org.imanity.framework.config.format.FieldNameFormatters;
 import org.imanity.framework.config.yaml.YamlConfiguration;
+import org.imanity.framework.plugin.service.IService;
+import org.imanity.framework.plugin.service.Service;
 
 import java.io.File;
 import java.util.Arrays;
 import java.util.Collections;
 
+@Service(name = "mongo")
 @Getter
-public class Mongo {
+public class Mongo implements IService {
 
     private MongoClient client;
     private MongoDatabase database;
@@ -30,6 +33,11 @@ public class Mongo {
     }
 
     public void init() {
+
+        this.generateConfig();
+        if (!ImanityCommon.CORE_CONFIG.isDatabaseTypeUsed(DatabaseType.MONGO)) {
+            return;
+        }
 
         if (this.config.AUTHENTICATION.ENABLED) {
 
@@ -46,6 +54,11 @@ public class Mongo {
         }
 
         this.database = this.client.getDatabase(this.config.DATABASE);
+    }
+
+    @Override
+    public void stop() {
+        this.client.close();
     }
 
     public static class MongoConfig extends YamlConfiguration {

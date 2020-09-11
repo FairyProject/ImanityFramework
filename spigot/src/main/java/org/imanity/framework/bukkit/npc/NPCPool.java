@@ -26,6 +26,7 @@ import org.bukkit.plugin.java.JavaPlugin;
 import org.imanity.framework.bukkit.npc.event.PlayerNPCInteractEvent;
 import org.imanity.framework.bukkit.npc.modifier.AnimationModifier;
 import org.imanity.framework.bukkit.npc.modifier.MetadataModifier;
+import org.imanity.framework.bukkit.npc.util.AxisAlignedBB;
 import org.imanity.framework.bukkit.plugin.ImanityPlugin;
 import org.imanity.framework.bukkit.util.CoordXZ;
 import org.imanity.framework.bukkit.util.TaskUtil;
@@ -113,8 +114,7 @@ public class NPCPool implements Listener {
 
     public MaterialData getBlockAt(Location location) {
 
-        long key = this.xzToKey(location.getBlockX() >> 4, location.getBlockZ() >> 4);
-        CachedChunk chunk = this.chunkSnapshots.get(key);
+        CachedChunk chunk = this.getChunkAt(location.getBlockX() >> 4, location.getBlockZ() >> 4);
 
         if (chunk != null) {
             int cx = location.getBlockX() & 0xF;
@@ -124,6 +124,45 @@ public class NPCPool implements Listener {
 
         return null;
 
+    }
+
+    public MaterialData getBlockAt(int x, int y, int z) {
+
+        CachedChunk chunk = this.getChunkAt(x >> 4, z >> 4);
+
+        if (chunk != null) {
+            int cx = x & 0xF;
+            int cz = z & 0xF;
+            return chunk.getBlock(cx, y, cz);
+        }
+
+        return null;
+
+    }
+
+    public boolean isMaterialInBoundingBox(AxisAlignedBB boundingBox, Material... materials) {
+        int minX = (int) Math.floor(boundingBox.minX), maxX = (int) Math.floor(boundingBox.maxX) + 1,
+                minY = (int) Math.floor(boundingBox.minY), maxY = (int) Math.floor(boundingBox.maxY) + 1,
+                minZ = (int) Math.floor(boundingBox.minZ), maxZ = (int) Math.floor(boundingBox.maxZ) + 1;
+
+        for (int x = minX; x < maxX; x++) {
+            for (int y = minY; y < maxY; y++) {
+                for (int z = minZ; z < maxZ; z++) {
+
+                    MaterialData materialData = this.getBlockAt(new Location(this.world, x, y, z));
+                    if (materialData != null) {
+                        for (Material material : materials) {
+                            if (material == materialData.getItemType()) {
+                                return true;
+                            }
+                        }
+                    }
+
+                }
+            }
+        }
+
+        return false;
     }
 
     public void setBlockAt(Location location, Material material, byte data) {
@@ -276,6 +315,12 @@ public class NPCPool implements Listener {
 
         public Builder cornerB(CoordXZ coord) {
             this.cornerB = coord;
+            return this;
+        }
+
+        public Builder range(CoordXZ coord, int range) {
+            this.cornerA = new CoordXZ(coord.x + range, coord.z + range);
+            this.cornerB = new CoordXZ(coord.x - range, coord.z - range);
             return this;
         }
 

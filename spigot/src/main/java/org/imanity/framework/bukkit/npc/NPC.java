@@ -10,6 +10,7 @@ import org.bukkit.Material;
 import org.bukkit.World;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
+import org.bukkit.material.MaterialData;
 import org.bukkit.util.Vector;
 import org.imanity.framework.bukkit.Imanity;
 import org.imanity.framework.bukkit.npc.goal.Goal;
@@ -17,6 +18,7 @@ import org.imanity.framework.bukkit.npc.goal.LookAtPlayerGoal;
 import org.imanity.framework.bukkit.npc.modifier.*;
 import org.imanity.framework.bukkit.npc.profile.Profile;
 import org.imanity.framework.bukkit.npc.tracker.NPCTrackerEntry;
+import org.imanity.framework.bukkit.npc.util.AxisAlignedBB;
 import org.imanity.framework.util.FastRandom;
 import org.jetbrains.annotations.NotNull;
 
@@ -39,15 +41,21 @@ public class NPC {
 
     private final WrappedGameProfile gameProfile;
 
-    @Setter
     private Location location;
     private Vector velocity;
+
+    private AxisAlignedBB boundingBox;
 
     private int noDamageTicks;
 
     private boolean sneaking;
     private boolean sprinting;
     private boolean imitatePlayer;
+
+    private final float width;
+    private final float height;
+
+    private float jumpMovementFactor = 0.02F;
 
     private final NPCPool pool;
     private final SpawnCustomizer spawnCustomizer;
@@ -64,6 +72,9 @@ public class NPC {
         this.spawnCustomizer = spawnCustomizer;
 
         this.trackerEntry = new NPCTrackerEntry(this);
+
+        this.width = 0.6F;
+        this.height = 1.8F;
     }
 
     public void addGoal(Goal goal) {
@@ -98,18 +109,20 @@ public class NPC {
         this.location.setPitch(pitch);
     }
 
-    public Block getCurrentBlock() {
-        return this.location.getBlock();
+    public MaterialData getCurrentBlock() {
+        return this.pool.getBlockAt(this.location);
+    }
+
+    public boolean isCurrentBlock(Material... material) {
+        return this.pool.isMaterialInBoundingBox(this.boundingBox.expand(-0.10000000149011612D, -0.4000000059604645D, -0.10000000149011612D), material);
     }
 
     public boolean isInWater() {
-        Material material = this.getCurrentBlock().getType();
-        return material == Material.WATER || material == Material.STATIONARY_WATER;
+        return this.isCurrentBlock(Material.WATER, Material.STATIONARY_WATER);
     }
 
     public boolean isInLava() {
-        Material material = this.getCurrentBlock().getType();
-        return material == Material.LAVA || material == Material.STATIONARY_LAVA;
+        return this.isCurrentBlock(Material.LAVA, Material.STATIONARY_LAVA);
     }
 
     public void move(float moveForward, float moveStrafe) {
@@ -136,8 +149,13 @@ public class NPC {
 
             float multiply = 0.91F;
             if (this.isOnGround()) {
-                multiply =
+                multiply = Imanity.IMPLEMENTATION.getBlockSlipperiness(this.pool.getBlockAt(this.getBlockX(), ((int) Math.floor(this.boundingBox.minY)) - 1, this.getBlockZ()).getItemType()) * 0.91F;
             }
+
+            float f = 0.16277136F / (multiply * multiply * multiply);
+            float speed = this.isOnGround() ? 0.699999988079071F * f : this.jumpMovementFactor;
+
+            this.moveFlying(moveForward, moveStrafe, speed);
 
         }
 
@@ -209,16 +227,51 @@ public class NPC {
         return this.trackerEntry.isTracked(player);
     }
 
-    public void teleport(double x, double y, double z) {
+    public void setPosition(double x, double y, double z) {
         Location location = this.getLocation().clone();
         location.setX(x);
         location.setY(y);
         location.setZ(z);
-        this.setLocation(location);
+        this.location = location;
+
+        float f = this.width / 2.0F;
+        float f1 = this.height;
+
+        this.setBoundingBox(new AxisAlignedBB(x - (double) f, y, z - (double) f, x + (double) f, y + (double) f1, z + (double) f));
     }
 
-    public void teleport(Location location) {
-        this.setLocation(location.clone());
+    public void setPosition(Location location) {
+        location = location.clone();
+        this.setPosition(location.getX(), location.getY(), location.getZ());
+        this.rotate(location.getYaw(), location.getPitch());
+    }
+
+    private void setBoundingBox(AxisAlignedBB boundingBox) {
+        this.boundingBox = boundingBox;
+    }
+
+    public double getX() {
+        return this.getLocation().getX();
+    }
+
+    public double getY() {
+        return this.getLocation().getY();
+    }
+
+    public double getZ() {
+        return this.getLocation().getZ();
+    }
+
+    public int getBlockX() {
+        return (int) Math.floor(this.getX());
+    }
+
+    public int getBlockY() {
+        return (int) Math.floor(this.getY());
+    }
+
+    public int getBlockZ() {
+        return (int) Math.floor(this.getZ());
     }
 
     /**
@@ -236,10 +289,8 @@ public class NPC {
      * @return a rotation modifier modifying this NPC
      */
     public void rotate(float yaw, float pitch) {
-        Location location = this.getLocation().clone();
-        location.setYaw(yaw);
-        location.setPitch(pitch);
-        this.setLocation(location);
+        this.location.setYaw(yaw);
+        this.location.setPitch(pitch);
     }
 
     /**

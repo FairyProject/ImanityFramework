@@ -1,7 +1,7 @@
 package org.imanity.framework.bukkit.util.reflection.resolver;
 
 import org.imanity.framework.bukkit.util.reflection.resolver.wrapper.FieldWrapper;
-import org.imanity.framework.bukkit.util.AccessUtil;
+import org.imanity.framework.util.AccessUtil;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;

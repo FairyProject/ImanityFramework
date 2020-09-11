@@ -2,6 +2,7 @@ package org.imanity.framework.bukkit.listener;
 
 import co.aikar.timings.TimedEventExecutor;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import org.bukkit.event.Event;
 import org.bukkit.event.EventException;
 import org.bukkit.event.HandlerList;
@@ -17,6 +18,7 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
+@NoArgsConstructor
 public class FunctionListener<T extends Plugin> implements Listener {
 
     @Getter
@@ -24,9 +26,14 @@ public class FunctionListener<T extends Plugin> implements Listener {
     public T plugin;
 
     public FunctionListener(FunctionEventChecker checker, T plugin) {
-        this.checker = checker;
+        this.initial(plugin, checker);
+    }
+
+    public void initial(T plugin, FunctionEventChecker eventChecker) {
         this.plugin = plugin;
-        this.init(plugin);
+        this.checker = eventChecker;
+
+        this.init(this.plugin);
     }
 
     private void init(Plugin plugin) {

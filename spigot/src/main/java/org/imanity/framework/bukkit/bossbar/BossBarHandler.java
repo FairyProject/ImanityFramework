@@ -97,7 +97,7 @@ public class BossBarHandler implements Runnable {
             BossBar bossBar = this.getOrCreate(player);
             BossBarData bossBarData = this.adapter.tick(bossBar);
 
-            if (bossBarData.getHealth() <= 0.0F) {
+            if (bossBarData == null || bossBarData.getHealth() <= 0.0F) {
                 bossBar.destroy(player);
                 continue;
             }

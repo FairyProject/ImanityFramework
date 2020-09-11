@@ -1,4 +1,4 @@
-package org.imanity.framework.bukkit.util;
+package org.imanity.framework.util;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;

@@ -1,20 +1,32 @@
 package org.imanity.framework.bukkit.timer;
 
 import com.google.common.collect.ImmutableList;
+import org.bukkit.scheduler.BukkitTask;
 import org.imanity.framework.bukkit.Imanity;
 import org.imanity.framework.bukkit.timer.event.TimerStartEvent;
 import org.imanity.framework.bukkit.util.TaskUtil;
+import org.imanity.framework.plugin.service.IService;
+import org.imanity.framework.plugin.service.Service;
 
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
-public class TimerHandler implements Runnable {
+@Service(name = "timer")
+public class TimerHandler implements Runnable, IService {
 
-    private final List<Timer> timers = new ArrayList<>();
+    private List<Timer> timers;
+
+    private BukkitTask task;
 
     public void init() {
-        TaskUtil.runRepeated(this, 5L);
+        this.timers = new ArrayList<>();
+        this.task = TaskUtil.runRepeated(this, 5L);
+    }
+
+    @Override
+    public void stop() {
+        this.task.cancel();
     }
 
     public void add(Timer timer) {
@@ -31,6 +43,10 @@ public class TimerHandler implements Runnable {
 
     public synchronized void clear(Timer timer) {
         this.timers.remove(timer);
+    }
+
+    public synchronized void clear(Class<? extends Timer> timerClass) {
+        this.timers.removeIf(timerClass::isInstance);
     }
 
     public boolean isTimerRunning(Class<? extends Timer> timerClass) {

@@ -1,7 +1,7 @@
 package org.imanity.framework.bukkit.util.reflection.resolver;
 
 import org.imanity.framework.bukkit.util.reflection.resolver.wrapper.MethodWrapper;
-import org.imanity.framework.bukkit.util.AccessUtil;
+import org.imanity.framework.util.AccessUtil;
 import org.imanity.framework.util.CommonUtility;
 
 import java.lang.reflect.Method;

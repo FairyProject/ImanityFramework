@@ -6,6 +6,8 @@ import org.imanity.framework.locale.player.LocaleData;
 import org.imanity.framework.locale.type.LocaleTypeDataConverter;
 import org.imanity.framework.data.PlayerDataBuilder;
 import org.imanity.framework.data.type.DataConverterType;
+import org.imanity.framework.plugin.service.IService;
+import org.imanity.framework.plugin.service.Service;
 
 import java.io.File;
 import java.io.InputStream;
@@ -13,15 +15,17 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class LocaleHandler {
+@Service(name = "locale")
+public class LocaleHandler implements IService {
 
-    private final Map<String, Locale> locales = new HashMap<>();
+    private Map<String, Locale> locales;
     @Getter
     private Locale defaultLocale;
 
     public void init() {
         DataConverterType.register(LocaleTypeDataConverter.class, Locale.class);
 
+        this.locales = new HashMap<>();
         this.defaultLocale = this.getOrRegister(ImanityCommon.CORE_CONFIG.DEFAULT_LOCALE);
 
         new PlayerDataBuilder()
@@ -33,6 +37,7 @@ public class LocaleHandler {
     }
 
     public Locale getOrRegister(String name) {
+        System.out.println("Registering Locale " + name + " " + this.locales);
         Locale locale;
 
         if (this.locales.containsKey(name)) {

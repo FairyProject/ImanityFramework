@@ -1,5 +1,6 @@
 package org.imanity.framework.bukkit;
 
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
@@ -19,14 +20,10 @@ import org.imanity.framework.bukkit.bossbar.BossBarAdapter;
 import org.imanity.framework.bukkit.bossbar.BossBarHandler;
 import org.imanity.framework.bukkit.chunk.KeepChunkHandler;
 import org.imanity.framework.bukkit.chunk.block.CacheBlockSetHandler;
-import org.imanity.framework.bukkit.chunk.block.CacheBlockSetListener;
 import org.imanity.framework.bukkit.command.CommandHandler;
-import org.imanity.framework.bukkit.listener.CallEventListener;
 import org.imanity.framework.bukkit.hologram.HologramHandler;
-import org.imanity.framework.bukkit.hologram.HologramListener;
 import org.imanity.framework.bukkit.impl.*;
 import org.imanity.framework.bukkit.impl.server.ServerImplementation;
-import org.imanity.framework.bukkit.menu.ButtonListener;
 import org.imanity.framework.bukkit.menu.task.MenuUpdateTask;
 import org.imanity.framework.bukkit.player.BukkitPlayerData;
 import org.imanity.framework.bukkit.player.movement.MovementListener;
@@ -39,12 +36,12 @@ import org.imanity.framework.bukkit.scoreboard.ImanityBoardHandler;
 import org.imanity.framework.bukkit.task.BukkitTaskChainFactory;
 import org.imanity.framework.bukkit.timer.TimerHandler;
 import org.imanity.framework.bukkit.util.*;
-import org.imanity.framework.bukkit.util.items.ItemListener;
 import org.imanity.framework.bukkit.tablist.ImanityTabAdapter;
 import org.imanity.framework.bukkit.tablist.ImanityTabHandler;
 import org.imanity.framework.bukkit.visual.VisualBlockHandler;
 import org.imanity.framework.libraries.Library;
 import org.imanity.framework.libraries.classloader.PluginClassLoader;
+import org.imanity.framework.plugin.service.Autowired;
 import org.imanity.framework.task.chain.TaskChainFactory;
 import org.imanity.framework.util.FastRandom;
 
@@ -59,9 +56,14 @@ public class Imanity {
     public static FastRandom RANDOM;
     public static ImanityBoardHandler BOARD_HANDLER;
     public static ImanityTabHandler TAB_HANDLER;
-    public static KeepChunkHandler KEEP_CHUNK_HANDLER;
     public static BossBarHandler BOSS_BAR_HANDLER;
+
+    @Autowired
     public static TimerHandler TIMER_HANDLER;
+
+    @Autowired
+    public static KeepChunkHandler KEEP_CHUNK_HANDLER;
+
     public static Plugin PLUGIN;
 
     public static ServerImplementation IMPLEMENTATION;
@@ -88,21 +90,9 @@ public class Imanity {
         BukkitPlayerData.init();
 
         Imanity.TASK_CHAIN_FACTORY = BukkitTaskChainFactory.create(plugin);
-        Imanity.TIMER_HANDLER = new TimerHandler();
-        Imanity.TIMER_HANDLER.init();
-
-        Imanity.KEEP_CHUNK_HANDLER = new KeepChunkHandler();
 
         CommandHandler.init();
         MenuUpdateTask.init();
-
-        Imanity.registerEvents(
-                new CacheBlockSetListener(),
-                new HologramListener(),
-                new ItemListener(),
-                new CallEventListener(),
-                new ButtonListener()
-        );
     }
 
     private static void initCommon() {
@@ -176,9 +166,28 @@ public class Imanity {
                 plugin = Imanity.PLUGIN;
             }
 
-            PLUGIN.getServer().getPluginManager().registerEvents(listener, plugin);
-            LOGGER.info("Registering Listener " + listener.getClass().getSimpleName() + " providing plugin by " + plugin.getName());
+            if (!plugin.isEnabled()) {
+
+                if (plugin instanceof ImanityPlugin) {
+
+                    Plugin finalPlugin = plugin;
+                    ((ImanityPlugin) plugin).queue(() -> PLUGIN.getServer().getPluginManager().registerEvents(listener, finalPlugin));
+
+                } else {
+
+                    Imanity.LOGGER.error("The plugin hasn't enabled but trying to register listener " + listener.getClass().getSimpleName());
+                    return;
+                }
+            } else {
+
+                PLUGIN.getServer().getPluginManager().registerEvents(listener, plugin);
+
+            }
         }
+    }
+
+    public static List<? extends Player> getPlayers() {
+        return ImmutableList.copyOf(Imanity.PLUGIN.getServer().getOnlinePlayers());
     }
 
     public static void callEvent(Event event) {

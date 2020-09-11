@@ -41,4 +41,6 @@ public interface ServerImplementation {
     void clearFakeBlocks(Player player, boolean send);
 
     void sendActionBar(Player player, String message);
+
+    float getBlockSlipperiness(Material material);
 }

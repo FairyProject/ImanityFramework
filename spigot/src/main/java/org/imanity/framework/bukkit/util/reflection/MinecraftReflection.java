@@ -14,7 +14,7 @@ import org.imanity.framework.bukkit.util.reflection.resolver.minecraft.NMSClassR
 import org.imanity.framework.bukkit.util.reflection.resolver.minecraft.OBCClassResolver;
 import org.imanity.framework.bukkit.util.reflection.resolver.wrapper.FieldWrapper;
 import org.imanity.framework.bukkit.util.reflection.resolver.wrapper.MethodWrapper;
-import org.imanity.framework.bukkit.util.AccessUtil;
+import org.imanity.framework.util.AccessUtil;
 import org.imanity.framework.bukkit.util.reflection.resolver.wrapper.PacketWrapper;
 import org.imanity.framework.bukkit.util.reflection.version.PlayerVersion;
 import org.imanity.framework.bukkit.util.reflection.version.protocol.*;
