@@ -4,28 +4,18 @@ import lombok.Getter;
 import lombok.Setter;
 import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
-import org.bukkit.scoreboard.Scoreboard;
-import org.bukkit.scoreboard.Team;
 import org.imanity.framework.bukkit.metadata.MetadataKey;
 import org.imanity.framework.bukkit.util.Utility;
 import org.imanity.framework.bukkit.util.reflection.MinecraftReflection;
-import org.imanity.framework.bukkit.util.reflection.resolver.FieldResolver;
 import org.imanity.framework.bukkit.util.reflection.resolver.minecraft.NMSClassResolver;
 import org.imanity.framework.bukkit.util.reflection.resolver.wrapper.EnumWrapper;
-import org.imanity.framework.bukkit.util.reflection.resolver.wrapper.FieldWrapper;
 import org.imanity.framework.bukkit.util.reflection.resolver.wrapper.PacketWrapper;
 
-import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 public class ImanityBoard {
 
     private static EnumWrapper SCOREBOARD_HEALTH_DISPLAY;
-
-    private static EnumWrapper NAME_TAG_VISIBILITY;
-    private static FieldWrapper FIELD_NAME_TAG_VISIBILITY_E;
 
     private static EnumWrapper SCOREBOARD_ACTION;
 
@@ -35,11 +25,6 @@ public class ImanityBoard {
         try {
             Class<?> enumScoreboardHealthDisplay = CLASS_RESOLVER.resolveSilent("IScoreboardCriteria$EnumScoreboardHealthDisplay");
             SCOREBOARD_HEALTH_DISPLAY = new EnumWrapper(enumScoreboardHealthDisplay);
-
-            Class<?> TYPE_NAME_TAG_VISIBILITY = CLASS_RESOLVER.resolveSilent("ScoreboardTeamBase$EnumNameTagVisibility");
-            NAME_TAG_VISIBILITY = new EnumWrapper(TYPE_NAME_TAG_VISIBILITY);
-
-            FIELD_NAME_TAG_VISIBILITY_E = new FieldResolver(TYPE_NAME_TAG_VISIBILITY).resolveWrapper("e");
 
             Class<?> TYPE_SCOREBOARD_ACTION = CLASS_RESOLVER.resolveSilent("PacketPlayOutScoreboardScore$EnumScoreboardAction");
             SCOREBOARD_ACTION = new EnumWrapper(TYPE_SCOREBOARD_ACTION);
@@ -51,22 +36,18 @@ public class ImanityBoard {
     public static final MetadataKey<ImanityBoard> METADATA_TAG = MetadataKey.create("Imanity-Scoreboard", ImanityBoard.class);
 
     private final Player player;
-    private final Map<String, ImanityTeamData> teamDatas = new HashMap<>();
 
     private String title;
     private final String[] teams;
-
-    private final ImanityBoardAdapter adapter;
 
     @Getter
     @Setter
     private boolean tagUpdated;
 
-    public ImanityBoard(Player player, ImanityBoardAdapter adapter) {
+    public ImanityBoard(Player player) {
 
         this.player = player;
         this.teams = new String[16];
-        this.adapter = adapter;
 
         PacketWrapper packetA = PacketWrapper.createByPacketName("PacketPlayOutScoreboardObjective")
                 .setPacketValue("b", "Objective")
@@ -81,89 +62,6 @@ public class ImanityBoard {
         MinecraftReflection.sendPacket(player, packetA);
         MinecraftReflection.sendPacket(player, packetB);
 
-    }
-
-    public void registerTeam(ImanityTeamData data) {
-        this.teamDatas.put(data.getName(), data);
-
-        Scoreboard scoreboard = player.getScoreboard();
-        Team team = scoreboard.registerNewTeam(data.getName());
-
-        team.setPrefix(data.getPrefix());
-        team.setAllowFriendlyFire(data.isFriendlyFire());
-        team.setCanSeeFriendlyInvisibles(data.isFriendlyInvisibles());
-    }
-
-    public void updatePlayer(Player target) {
-        String name = this.adapter.getTeam(player, target);
-
-        if (name == null) {
-            return;
-        }
-
-        ImanityTeamData data = this.teamDatas.get(name);
-        this.addToTeam(data, target.getName());
-
-        data.addName(target.getName());
-    }
-
-    public void removePlayer(String name) {
-
-        for (ImanityTeamData team : this.teamDatas.values()) {
-
-            if (team.getNameSet().contains(name)) {
-
-                System.out.println("team " + team.getName() + " DOES contains " + name);
-
-                this.removeToTeam(team, name);
-                team.removeName(name);
-
-            } else {
-
-                System.out.println("team " + team.getName() + " doesn't contains " + name);
-
-            }
-
-        }
-
-    }
-
-    public void addToTeam(ImanityTeamData data, String name) {
-        for (ImanityTeamData team : this.teamDatas.values()) {
-            if (team.getNameSet().contains(name)) {
-
-                if (team == data) {
-                    return;
-                }
-
-                this.removeToTeam(team, name);
-                team.removeName(name);
-
-            }
-        }
-
-        Team team = player.getScoreboard().getTeam(data.getName());
-
-        if (team == null) {
-            this.registerTeam(data);
-            return;
-        }
-
-        team.addEntry(name);
-    }
-
-    public void removeToTeam(ImanityTeamData data, String name) {
-        if (!data.getNameSet().contains(name)) {
-            return;
-        }
-
-        Team team = player.getScoreboard().getTeam(data.getName());
-
-        if (team == null) {
-            return;
-        }
-
-        team.removeEntry(name);
     }
 
     public void setTitle(String title) {
@@ -212,8 +110,8 @@ public class ImanityBoard {
         }
 
         PacketWrapper packet = getOrRegisterTeam(line);
-        String prefix = "";
-        String suffix = "";
+        String prefix;
+        String suffix;
 
         if (value.length() <= 16) {
             prefix = value;

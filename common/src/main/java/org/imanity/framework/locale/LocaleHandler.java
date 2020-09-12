@@ -37,7 +37,6 @@ public class LocaleHandler implements IService {
     }
 
     public Locale getOrRegister(String name) {
-        System.out.println("Registering Locale " + name + " " + this.locales);
         Locale locale;
 
         if (this.locales.containsKey(name)) {

@@ -8,6 +8,8 @@ public interface IEventHandler {
 
     void onServerStateChanged(ImanityServer server, ServerState oldState, ServerState newState);
 
+    void onPostServicesInitial();
+
     Object registerWiredListener(String className);
 
 }

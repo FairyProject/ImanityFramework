@@ -10,6 +10,7 @@ import org.bukkit.event.player.PlayerQuitEvent;
 import org.imanity.framework.bukkit.Imanity;
 import org.imanity.framework.bukkit.events.player.PlayerPostJoinEvent;
 import org.imanity.framework.bukkit.listener.events.Events;
+import org.imanity.framework.bukkit.metadata.Metadata;
 import org.imanity.framework.bukkit.player.event.PlayerDataLoadEvent;
 import org.imanity.framework.bukkit.util.reflection.MinecraftReflection;
 import org.imanity.framework.data.DataHandler;
@@ -24,12 +25,8 @@ import org.imanity.framework.util.entry.EntryArrayList;
 public class PlayerListener implements Listener {
 
     @EventHandler(priority = EventPriority.LOWEST)
-    public void onPlayerJoinScoreboard(PlayerJoinEvent event) {
+    public void onPlayerJoinScoreboard(PlayerPostJoinEvent event) {
         Player player = event.getPlayer();
-
-        if (player.getScoreboard() == Bukkit.getScoreboardManager().getMainScoreboard()) {
-            player.setScoreboard(Bukkit.getScoreboardManager().getNewScoreboard());
-        }
 
         if (Imanity.BOARD_HANDLER != null) {
             Imanity.BOARD_HANDLER.getOrCreateScoreboard(player);
@@ -122,7 +119,11 @@ public class PlayerListener implements Listener {
                         }
                         database.delete(player.getUniqueId());
                     }
-                }).sync(() -> Events.unregisterAll(player))
+
+                    Events.unregisterAll(player);
+                    Metadata.provideForPlayer(player.getUniqueId())
+                        .clear();
+                })
                 .execute();
     }
 

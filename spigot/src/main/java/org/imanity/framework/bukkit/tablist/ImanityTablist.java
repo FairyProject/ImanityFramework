@@ -1,10 +1,9 @@
 package org.imanity.framework.bukkit.tablist;
 
 import lombok.Getter;
-import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
-import org.bukkit.scoreboard.Team;
+import org.imanity.framework.bukkit.Imanity;
 import org.imanity.framework.bukkit.tablist.util.*;
 import org.imanity.framework.bukkit.util.Skin;
 import org.imanity.framework.bukkit.util.TaskUtil;
@@ -26,21 +25,6 @@ public class ImanityTablist {
     public ImanityTablist(Player player) {
         this.player = player;
         this.setup();
-        Team team1 = player.getScoreboard().getTeam("\\u000181");
-        if (team1 == null) {
-            team1 = player.getScoreboard().registerNewTeam("\\u000181");
-        }
-        team1.addEntry(player.getName());
-        for (Player loopPlayer : Bukkit.getOnlinePlayers()) {
-            Team team = loopPlayer.getScoreboard().getTeam("\\u000181");
-            if (team == null) {
-                team = loopPlayer.getScoreboard().registerNewTeam("\\u000181");
-            }
-            team.addEntry(player.getName());
-            team.addEntry(loopPlayer.getName());
-            team1.addEntry(loopPlayer.getName());
-            team1.addEntry(player.getName());
-        }
 
         if (MinecraftReflection.getProtocol(player) == PlayerVersion.v1_7) {
             TaskUtil.runScheduled(() -> ImanityTabHandler.getInstance().getImplementation().removeSelf(player), 1L);
@@ -49,6 +33,9 @@ public class ImanityTablist {
 
     private void setup() {
         final int possibleSlots = MinecraftReflection.getProtocol(player) == PlayerVersion.v1_7 ? 60 : 80;
+
+        System.out.println(MinecraftReflection.getProtocol(player));
+
         for (int i = 1; i <= possibleSlots; i++) {
             final TabColumn tabColumn = TabColumn.getFromSlot(player, i);
             if (tabColumn == null) {
@@ -63,14 +50,15 @@ public class ImanityTablist {
                     i
             );
             if (MinecraftReflection.getProtocol(player) == PlayerVersion.v1_7) {
-                Team team = player.getScoreboard().getTeam(LegacyClientUtil.name(i - 1));
-                if (team != null) {
-                    team.unregister();
-                }
-                team = player.getScoreboard().registerNewTeam(LegacyClientUtil.name(i - 1));
-                team.setPrefix("");
-                team.setSuffix("");
-                team.addEntry(LegacyClientUtil.entry(i - 1));
+
+                Imanity.IMPLEMENTATION.sendTeam(
+                        player,
+                        LegacyClientUtil.name(i - 1),
+                        "",
+                        "",
+                        Collections.singleton(LegacyClientUtil.entry(i - 1)),
+                        0
+                );
             }
             currentEntries.add(tabEntry);
         }
@@ -104,6 +92,7 @@ public class ImanityTablist {
                 }
             }
         }
+
         for (TabEntry tabEntry : previous) {
             ImanityTabHandler.getInstance().getImplementation().updateFakeName(this, tabEntry, "");
             ImanityTabHandler.getInstance().getImplementation().updateFakeLatency(this, tabEntry, 0);
@@ -111,6 +100,7 @@ public class ImanityTablist {
                 ImanityTabHandler.getInstance().getImplementation().updateFakeSkin(this, tabEntry, Skin.GRAY);
             }
         }
+
         previous.clear();
 
         String headerNow = Utility.color(adapter.getHeader(player));

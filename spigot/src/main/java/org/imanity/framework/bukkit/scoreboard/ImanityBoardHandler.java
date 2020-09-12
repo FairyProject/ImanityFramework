@@ -1,23 +1,15 @@
 package org.imanity.framework.bukkit.scoreboard;
 
-import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
-import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
-import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
-import org.bukkit.metadata.MetadataValue;
 import org.imanity.framework.bukkit.Imanity;
 import org.imanity.framework.bukkit.metadata.Metadata;
-import org.imanity.framework.bukkit.metadata.MetadataKey;
-import org.imanity.framework.bukkit.util.SampleMetadata;
-import org.imanity.framework.bukkit.util.TaskUtil;
 import org.imanity.framework.bukkit.util.Utility;
 
 import java.util.List;
 import java.util.Queue;
-import java.util.UUID;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
 public class ImanityBoardHandler implements Runnable {
@@ -99,43 +91,12 @@ public class ImanityBoardHandler implements Runnable {
         }
     }
 
-    public void updatePlayer(Player player, boolean doSelf) {
-        ImanityBoard board = this.getOrCreateScoreboard(player);
-
-        board.setTagUpdated(true);
-
-        for (Player other : Imanity.PLUGIN.getServer().getOnlinePlayers()) {
-            ImanityBoard otherBoard = this.getOrCreateScoreboard(other);
-
-            otherBoard.updatePlayer(player);
-
-            if (doSelf) {
-                board.updatePlayer(other);
-            }
-        }
-    }
-
     public void remove(Player player) {
         ImanityBoard board = this.get(player);
 
         if (board != null) {
             board.remove();
             Metadata.provideForPlayer(player).remove(ImanityBoard.METADATA_TAG);
-
-            String name = player.getName();
-
-            if (board.isTagUpdated()) {
-                this.runnables.add(() -> {
-                    for (Player other : Bukkit.getOnlinePlayers()) {
-                        if (player == other) {
-                            continue;
-                        }
-
-                        ImanityBoard otherBoard = this.getOrCreateScoreboard(other);
-                        otherBoard.removePlayer(name);
-                    }
-                });
-            }
         }
     }
 
@@ -145,7 +106,7 @@ public class ImanityBoardHandler implements Runnable {
 
     public ImanityBoard getOrCreateScoreboard(Player player) {
         return Metadata.provideForPlayer(player).getOrPut(ImanityBoard.METADATA_TAG, () -> {
-            ImanityBoard board = new ImanityBoard(player, this.adapter);
+            ImanityBoard board = new ImanityBoard(player);
             this.adapter.onBoardCreate(player, board);
             return board;
         });

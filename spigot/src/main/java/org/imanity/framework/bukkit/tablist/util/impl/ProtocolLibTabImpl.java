@@ -13,6 +13,7 @@ import org.imanity.framework.bukkit.Imanity;
 import org.imanity.framework.bukkit.tablist.ImanityTablist;
 import org.imanity.framework.bukkit.tablist.util.*;
 import org.imanity.framework.bukkit.util.Skin;
+import org.imanity.framework.bukkit.util.Utility;
 import org.imanity.framework.bukkit.util.reflection.MinecraftReflection;
 import org.imanity.framework.bukkit.util.reflection.version.PlayerVersion;
 
@@ -55,20 +56,22 @@ public class ProtocolLibTabImpl implements IImanityTabImpl {
 
     @Override
     public void updateFakeName(ImanityTablist tablist, TabEntry tabEntry, String text) {
+        if (tabEntry.getText().equals(text)) {
+            return;
+        }
+
         final Player player = tablist.getPlayer();
         final PlayerVersion playerVersion = MinecraftReflection.getProtocol(player);
         String[] newStrings = ImanityTablist.splitStrings(text, tabEntry.getRawSlot());
         if (playerVersion == PlayerVersion.v1_7) {
-            Team team = player.getScoreboard().getTeam(LegacyClientUtil.name(tabEntry.getRawSlot()-1));
-            if (team == null) {
-                team = player.getScoreboard().registerNewTeam(LegacyClientUtil.name(tabEntry.getRawSlot()-1));
-            }
-            team.setPrefix(ChatColor.translateAlternateColorCodes('&', newStrings[0]));
-            if (newStrings.length > 1) {
-                team.setSuffix(ChatColor.translateAlternateColorCodes('&', newStrings[1]));
-            }else{
-                team.setSuffix("");
-            }
+            Imanity.IMPLEMENTATION.sendTeam(
+                    player,
+                    LegacyClientUtil.name(tabEntry.getRawSlot() - 1),
+                    Utility.color(newStrings[0]),
+                    newStrings.length > 1 ? Utility.color(newStrings[1]) : "",
+                    Collections.singleton(LegacyClientUtil.entry(tabEntry.getRawSlot() - 1)),
+                    2
+            );
         }else {
             PacketContainer packet = ProtocolLibrary.getProtocolManager().createPacket(PacketType.Play.Server.PLAYER_INFO);
             packet.getPlayerInfoAction().write(0, EnumWrappers.PlayerInfoAction.UPDATE_DISPLAY_NAME);

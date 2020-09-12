@@ -169,6 +169,8 @@ public class ServiceHandler {
         this.registerListeners();
 
         this.getImplementedService().forEach(IService::init);
+
+        ImanityCommon.EVENT_HANDLER.onPostServicesInitial();
     }
 
     public void stop() {

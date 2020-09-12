@@ -5,6 +5,7 @@ import org.bukkit.plugin.java.JavaPlugin;
 import org.imanity.framework.ImanityCommon;
 import org.imanity.framework.bukkit.Imanity;
 import org.imanity.framework.bukkit.events.NetworkStateChangedEvent;
+import org.imanity.framework.bukkit.events.PostServicesInitialEvent;
 import org.imanity.framework.bukkit.listener.FunctionListener;
 import org.imanity.framework.bukkit.plugin.ImanityPlugin;
 import org.imanity.framework.bukkit.util.reflection.resolver.ConstructorResolver;
@@ -17,6 +18,11 @@ public class BukkitEventHandler implements IEventHandler {
     @Override
     public void onServerStateChanged(ImanityServer server, ServerState oldState, ServerState newState) {
         Imanity.callEvent(new NetworkStateChangedEvent(server, oldState, newState));
+    }
+
+    @Override
+    public void onPostServicesInitial() {
+        Imanity.callEvent(new PostServicesInitialEvent());
     }
 
     @Override

@@ -269,4 +269,14 @@ public class NormalImplementation implements ServerImplementation {
         Object block = BLOCK_GET_BY_ID_METHOD.invoke(null);
         return BLOCK_SLIPPERINESS_FIELD.get(block);
     }
+
+    @Override
+    public void sendTeam(Player player, String name, String prefix, String suffix, Collection<String> nameSet, int type) {
+        // TODO
+    }
+
+    @Override
+    public void sendMember(Player player, String name, Collection<String> players, int type) {
+        // TODO
+    }
 }

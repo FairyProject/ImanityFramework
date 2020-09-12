@@ -1,7 +1,7 @@
 package org.imanity.framework.bukkit.bossbar;
 
 import lombok.Getter;
-import net.minecraft.server.v1_8_R3.PacketPlayOutEntityDestroy;
+import lombok.Setter;
 import org.bukkit.Location;
 import org.bukkit.entity.Player;
 import org.imanity.framework.bukkit.util.reflection.MinecraftReflection;
@@ -10,6 +10,7 @@ import org.imanity.framework.bukkit.util.reflection.resolver.ConstructorResolver
 import org.imanity.framework.bukkit.util.reflection.resolver.minecraft.NMSClassResolver;
 import org.imanity.framework.bukkit.util.reflection.resolver.wrapper.DataWatcherWrapper;
 import org.imanity.framework.bukkit.util.reflection.resolver.wrapper.PacketWrapper;
+import org.imanity.framework.bukkit.util.reflection.version.PlayerVersion;
 import org.imanity.framework.util.CommonUtility;
 
 import static org.imanity.framework.bukkit.util.reflection.minecraft.DataWatcher.V1_9.ValueType.*;
@@ -20,16 +21,21 @@ import java.util.concurrent.atomic.AtomicBoolean;
 public class BossBar {
 
     private static final int ENTITY_DISTANCE = 32;
-    private static final int MAX_HEALTH = 300;
+    private static final int WITHER_MAX_HEALTH = 300;
+    private static final int DRAGON_MAX_HEALTH = 200;
 
     private final int entityId;
 
     private final Player player;
+    private final PlayerVersion version;
 
     private boolean visible;
     private String previousText;
     private float previousHealth;
     private DataWatcherWrapper dataWatcher;
+
+    @Setter
+    private long lastUpdate;
 
     @Getter
     private final AtomicBoolean moved = new AtomicBoolean(false);
@@ -37,13 +43,26 @@ public class BossBar {
     public BossBar(Player player) {
         this.player = player;
 
+        this.version = MinecraftReflection.getProtocol(player);
         this.entityId = MinecraftReflection.getNewEntityId();
 
         this.buildPackets();
     }
 
+    public float getMaxHealth() {
+        return this.version == PlayerVersion.v1_7 ? DRAGON_MAX_HEALTH : WITHER_MAX_HEALTH;
+    }
+
     public Location makeLocation(Location base) {
-        return base.getDirection().multiply(ENTITY_DISTANCE).add(base.toVector()).toLocation(base.getWorld());
+
+        switch (this.version) {
+            case v1_7:
+                Location location = base.clone();
+                location.setY(-200);
+                return location;
+            default:
+                return base.getDirection().multiply(ENTITY_DISTANCE).add(base.toVector()).toLocation(base.getWorld());
+        }
     }
 
     private PacketWrapper packetWither;
@@ -66,11 +85,13 @@ public class BossBar {
     private void buildDataWatcher() {
         this.dataWatcher = DataWatcherWrapper.create(null);
 
-        this.dataWatcher.setValue(17, ENTITY_WITHER_a, 0);
-        this.dataWatcher.setValue(18, ENTITY_WIHER_b, 0);
-        this.dataWatcher.setValue(19, ENTITY_WITHER_c, 0);
+        if (this.version != PlayerVersion.v1_7) {
+            this.dataWatcher.setValue(17, ENTITY_WITHER_a, 0);
+            this.dataWatcher.setValue(18, ENTITY_WIHER_b, 0);
+            this.dataWatcher.setValue(19, ENTITY_WITHER_c, 0);
 
-        this.dataWatcher.setValue(20, ENTITY_WITHER_bw, 1000);
+            this.dataWatcher.setValue(20, ENTITY_WITHER_bw, 880);
+        }
         this.dataWatcher.setValue(0, ENTITY_FLAG, (byte) (0 | 1 << 5));
     }
 
@@ -79,10 +100,8 @@ public class BossBar {
             this.buildDataWatcher();
         }
 
-        this.dataWatcher.setValue(6, ENTITY_LIVING_HEALTH, bossBarData.getHealth() / 100.0F * MAX_HEALTH);
-        this.dataWatcher.setValue(10, ENTITY_NAME, bossBarData.getText());
+        this.dataWatcher.setValue(6, ENTITY_LIVING_HEALTH, bossBarData.getHealth() / 100.0F * this.getMaxHealth());
         this.dataWatcher.setValue(2, ENTITY_NAME, bossBarData.getText());
-        this.dataWatcher.setValue(11, ENTITY_NAME_VISIBLE, (byte) 1);
         this.dataWatcher.setValue(3, ENTITY_NAME_VISIBLE, (byte) 1);
     }
 

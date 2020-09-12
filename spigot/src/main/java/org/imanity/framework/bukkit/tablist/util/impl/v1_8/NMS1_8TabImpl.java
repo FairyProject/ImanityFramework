@@ -9,7 +9,7 @@ import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.craftbukkit.v1_8_R3.entity.CraftPlayer;
 import org.bukkit.entity.Player;
-import org.bukkit.scoreboard.Team;
+import org.imanity.framework.bukkit.Imanity;
 import org.imanity.framework.bukkit.util.Skin;
 import org.imanity.framework.bukkit.util.Utility;
 import org.imanity.framework.bukkit.tablist.ImanityTablist;
@@ -22,6 +22,7 @@ import org.imanity.framework.bukkit.util.reflection.resolver.minecraft.NMSClassR
 import org.imanity.framework.bukkit.util.reflection.resolver.wrapper.ConstructorWrapper;
 import org.imanity.framework.bukkit.util.reflection.resolver.wrapper.FieldWrapper;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
 
@@ -83,18 +84,16 @@ public class NMS1_8TabImpl implements IImanityTabImpl {
         String[] newStrings = ImanityTablist.splitStrings(text, tabEntry.getRawSlot());
 
         if (playerVersion == PlayerVersion.v1_7) {
-            Team team = player.getScoreboard().getTeam(LegacyClientUtil.name(tabEntry.getRawSlot() - 1));
-            if (team == null) {
-                team = player.getScoreboard().registerNewTeam(LegacyClientUtil.name(tabEntry.getRawSlot() - 1));
-            }
-            team.setPrefix(Utility.color(newStrings[0]));
-            if (newStrings.length > 1) {
-                team.setSuffix(Utility.color(newStrings[1]));
-            } else {
-                team.setSuffix("");
-            }
 
-            team.addEntry(LegacyClientUtil.entry(tabEntry.getRawSlot() - 1) + "");
+            Imanity.IMPLEMENTATION.sendTeam(
+                    player,
+                    LegacyClientUtil.name(tabEntry.getRawSlot() - 1),
+                    Utility.color(newStrings[0]),
+                    newStrings.length > 1 ? Utility.color(newStrings[1]) : "",
+                    Collections.singleton(LegacyClientUtil.entry(tabEntry.getRawSlot() - 1)),
+                    2
+            );
+
         } else {
             IChatBaseComponent listName = ChatComponentText.ChatSerializer.a(fromText(Utility.color(text)));
 
@@ -128,7 +127,7 @@ public class NMS1_8TabImpl implements IImanityTabImpl {
 
     @Override
     public void updateFakeSkin(ImanityTablist imanityTablist, TabEntry tabEntry, Skin skin) {
-        if (tabEntry.getTexture() == skin){
+        if (tabEntry.getTexture().equals(skin)){
             return;
         }
 

@@ -107,13 +107,7 @@ public class Imanity {
 
     public static VisualBlockHandler getVisualBlockHandler() {
         if (VISUAL_BLOCK_HANDLER == null) {
-
-            Set<Library> libraries = ImmutableSet.of(Library.CAFFEINE);
-            ImanityCommon.LIBRARY_HANDLER.downloadLibraries(libraries);
-            ImanityCommon.LIBRARY_HANDLER.obtainClassLoaderWith(libraries);
-
             VISUAL_BLOCK_HANDLER = new VisualBlockHandler();
-
         }
 
         return VISUAL_BLOCK_HANDLER;
@@ -202,8 +196,8 @@ public class Imanity {
         Imanity.TAB_HANDLER = new ImanityTabHandler(adapter);
     }
 
-    public static void registerBossBarHandler(BossBarAdapter adapter, long tick) {
-        Imanity.BOSS_BAR_HANDLER = new BossBarHandler(adapter, tick);
+    public static void registerBossBarHandler(BossBarAdapter adapter) {
+        Imanity.BOSS_BAR_HANDLER = new BossBarHandler(adapter);
     }
 
     public static String translate(Player player, String key) {

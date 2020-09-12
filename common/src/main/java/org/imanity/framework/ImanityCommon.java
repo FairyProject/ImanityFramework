@@ -28,7 +28,7 @@ import java.util.Set;
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class ImanityCommon {
 
-    private static final Set<Library> GLOBAL_LIBRARIES = EnumSet.of(Library.REDISSON, Library.MONGO_DB, Library.HIKARI_CP, Library.YAML);
+    private static final Set<Library> GLOBAL_LIBRARIES = EnumSet.of(Library.REDISSON, Library.MONGO_DB, Library.HIKARI_CP, Library.YAML, Library.CAFFEINE);
 
     public static ImanityBridge BRIDGE;
     public static CoreConfig CORE_CONFIG;

@@ -6,10 +6,12 @@ import org.bukkit.block.Block;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 import org.bukkit.material.MaterialData;
+import org.imanity.framework.bukkit.nametag.NameTagInfo;
 import org.imanity.framework.bukkit.util.BlockPosition;
 import org.imanity.framework.bukkit.util.SpigotUtil;
 import org.imanity.framework.bukkit.visual.VisualPosition;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -43,4 +45,8 @@ public interface ServerImplementation {
     void sendActionBar(Player player, String message);
 
     float getBlockSlipperiness(Material material);
+
+    void sendTeam(Player player, String name, String prefix, String suffix, Collection<String> nameSet, int type);
+
+    void sendMember(Player player, String name, Collection<String> players, int type);
 }

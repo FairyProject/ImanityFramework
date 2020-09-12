@@ -3,8 +3,10 @@ package org.imanity.framework.bukkit.tablist;
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
-import org.bukkit.scoreboard.Team;
+import org.imanity.framework.ImanityCommon;
 import org.imanity.framework.bukkit.Imanity;
+import org.imanity.framework.bukkit.metadata.Metadata;
+import org.imanity.framework.bukkit.metadata.MetadataKey;
 import org.imanity.framework.bukkit.tablist.util.IImanityTabImpl;
 import lombok.Getter;
 import lombok.Setter;
@@ -14,8 +16,6 @@ import org.imanity.framework.bukkit.tablist.util.impl.ProtocolLibTabImpl;
 import org.imanity.framework.bukkit.util.SpigotUtil;
 import org.imanity.framework.bukkit.util.reflection.MinecraftReflection;
 
-import java.util.Map;
-import java.util.UUID;
 import java.util.concurrent.*;
 
 @Getter
@@ -24,8 +24,9 @@ public class ImanityTabHandler {
     //Instance
     @Getter private static ImanityTabHandler instance;
 
+    private static final MetadataKey<ImanityTablist> TABLIST_KEY = MetadataKey.create(ImanityCommon.METADATA_PREFIX + "TabList", ImanityTablist.class);
+
     private ImanityTabAdapter adapter;
-    private Map<UUID, ImanityTablist> tablists;
     private ScheduledExecutorService thread;
     private IImanityTabImpl implementation;
 
@@ -40,7 +41,6 @@ public class ImanityTabHandler {
         instance = this;
 
         this.adapter = adapter;
-        this.tablists = new ConcurrentHashMap<>();
 
         this.registerImplementation();
 
@@ -67,16 +67,17 @@ public class ImanityTabHandler {
     }
 
     public void registerPlayerTablist(Player player) {
-        ImanityTabHandler.getInstance().getTablists().put(player.getUniqueId(), new ImanityTablist(player));
+        ImanityTablist tablist = new ImanityTablist(player);
+
+        Metadata
+                .provideForPlayer(player)
+                .put(TABLIST_KEY, tablist);
     }
 
     public void removePlayerTablist(Player player) {
-        Team team = player.getScoreboard().getTeam("\\u000181");
-        if (team != null) {
-            team.unregister();
-        }
-
-        ImanityTabHandler.getInstance().getTablists().remove(player.getUniqueId());
+        Metadata
+                .provideForPlayer(player)
+                .remove(TABLIST_KEY);
     }
 
     private void setup() {
@@ -99,8 +100,15 @@ public class ImanityTabHandler {
             .build());
 
         this.thread.scheduleAtFixedRate(() -> {
-            for (ImanityTablist tablist : this.getTablists().values()) {
-                tablist.update();
+            System.out.println("tick");
+            for (Player player : Imanity.getPlayers()) {
+                ImanityTablist tablist = Metadata
+                        .provideForPlayer(player)
+                        .getOrNull(TABLIST_KEY);
+
+                if (tablist != null) {
+                    tablist.update();
+                }
             }
         }, 50L, 50L, TimeUnit.MILLISECONDS);
     }

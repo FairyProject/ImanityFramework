@@ -8,21 +8,26 @@ import org.bukkit.event.player.PlayerChangedWorldEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.imanity.framework.bukkit.Imanity;
 import org.imanity.framework.ImanityCommon;
+import org.imanity.framework.bukkit.metadata.Metadata;
+import org.imanity.framework.bukkit.metadata.MetadataKey;
 import org.imanity.framework.bukkit.player.movement.MovementListener;
 import org.imanity.framework.bukkit.util.SampleMetadata;
 import org.imanity.framework.bukkit.util.Utility;
 
 public class BossBarHandler implements Runnable {
 
-    public static final String METADATA = ImanityCommon.METADATA_PREFIX + "BossBar";
+    public static final MetadataKey<BossBar> METADATA = MetadataKey.create(ImanityCommon.METADATA_PREFIX + "BossBar", BossBar.class);
 
-    private long tick;
+    private static final long v1_7_tick = 3L;
+    private static final long v1_8_tick = 60L;
+
+    private long last1_7Update;
+    private long last1_8Update;
     private BossBarAdapter adapter;
 
-    public BossBarHandler(BossBarAdapter adapter, long tick) {
+    public BossBarHandler(BossBarAdapter adapter) {
 
         this.adapter = adapter;
-        this.tick = tick;
 
         Imanity.registerMovementListener(new MovementListener() {
             @Override
@@ -49,7 +54,9 @@ public class BossBarHandler implements Runnable {
                 BossBar bossBar = getOrCreate(player);
                 bossBar.destroy(player);
 
-                player.removeMetadata(BossBarHandler.METADATA, Imanity.PLUGIN);
+                Metadata
+                        .provideForPlayer(player)
+                        .remove(METADATA);
             }
 
             @EventHandler
@@ -80,7 +87,7 @@ public class BossBarHandler implements Runnable {
             }
 
             try {
-                Thread.sleep(50L * tick);
+                Thread.sleep(50L);
             } catch (InterruptedException e) {
                 throw new RuntimeException("Something wrong while ticking boss bar", e);
             }
@@ -90,11 +97,28 @@ public class BossBarHandler implements Runnable {
         Thread.interrupted();
     }
 
+    private long getUpdateTick(BossBar bossBar) {
+        switch (bossBar.getVersion()) {
+            case v1_7:
+                return v1_7_tick;
+            default:
+                return v1_8_tick;
+        }
+    }
+
     private void tick() {
 
-        for (Player player : Imanity.PLUGIN.getServer().getOnlinePlayers()) {
+        long now = System.currentTimeMillis();
+
+        for (Player player : Imanity.getPlayers()) {
 
             BossBar bossBar = this.getOrCreate(player);
+
+            if (now - bossBar.getLastUpdate() < this.getUpdateTick(bossBar)) {
+                continue;
+            }
+
+            bossBar.setLastUpdate(now);
             BossBarData bossBarData = this.adapter.tick(bossBar);
 
             if (bossBarData == null || bossBarData.getHealth() <= 0.0F) {
@@ -114,12 +138,9 @@ public class BossBarHandler implements Runnable {
     }
 
     public BossBar getOrCreate(Player player) {
-        if (player.hasMetadata(BossBarHandler.METADATA)) {
-            return (BossBar) player.getMetadata(BossBarHandler.METADATA).get(0).value();
-        }
-        BossBar bossBar = new BossBar(player);
-        player.setMetadata(BossBarHandler.METADATA, new SampleMetadata(bossBar));
-        return bossBar;
+        return Metadata
+                .provideForPlayer(player)
+                .getOrPut(METADATA, () -> new BossBar(player));
     }
 
 }
