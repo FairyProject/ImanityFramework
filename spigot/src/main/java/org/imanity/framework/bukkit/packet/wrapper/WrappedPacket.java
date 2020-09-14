@@ -24,29 +24,31 @@
 
 package org.imanity.framework.bukkit.packet.wrapper;
 
+import lombok.Getter;
+import org.bukkit.World;
 import org.bukkit.entity.Player;
 import org.imanity.framework.bukkit.packet.type.PacketTypeClasses;
-import org.imanity.framework.bukkit.util.MinecraftVersion;
 import org.imanity.framework.bukkit.util.reflection.resolver.minecraft.NMSClassResolver;
-
-import java.lang.invoke.MethodHandle;
+import org.imanity.framework.bukkit.util.reflection.resolver.minecraft.OBCClassResolver;
+import org.imanity.framework.bukkit.util.reflection.resolver.wrapper.PacketWrapper;
 import java.lang.invoke.MethodHandles;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 
+@Getter
 public class WrappedPacket implements WrapperPacketReader {
-    protected static final NMSClassResolver PACKET_FIELD_CLASS_RESOLVER = new NMSClassResolver();
+
+    private static Map<Class<?>, Class<? extends WrappedPacket>> PACKET_TO_WRAPPED;
+    public static final NMSClassResolver NMS_CLASS_RESOLVER = new NMSClassResolver();
+    public static final OBCClassResolver CRAFT_CLASS_RESOLVER = new OBCClassResolver();
 
     protected final List<Field> fields = new ArrayList<>();
-    public static MinecraftVersion version;
     protected final Player player;
-    protected Object packet;
-    private Class<?> packetClass;
 
-    private static Map<String, Field> fieldCache = new ConcurrentHashMap<>();
+    protected PacketWrapper packet;
+    private Class<?> packetClass;
 
     public WrappedPacket() {
         this(null);
@@ -62,53 +64,36 @@ public class WrappedPacket implements WrapperPacketReader {
             return;
         }
         this.packetClass = packet.getClass();
+
         if (packet.getClass().getSuperclass().equals(PacketTypeClasses.Client.FLYING)) {
             packetClass = PacketTypeClasses.Client.FLYING;
         } else if (packet.getClass().getSuperclass().equals(PacketTypeClasses.Server.ENTITY)) {
             packetClass = PacketTypeClasses.Server.ENTITY;
         }
+
         for (Field f : packetClass.getDeclaredFields()) {
             f.setAccessible(true);
             fields.add(f);
         }
         this.player = player;
-        this.packet = packet;
+        this.packet = new PacketWrapper(packet);
         setup();
-    }
-
-    public static void loadAllWrappers() {
-        //SERVER BOUND
-        WrappedPacketInBlockDig.load();
-        WrappedPacketInBlockPlace.load();
-        WrappedPacketInChat.load();
-        WrappedPacketInClientCommand.load();
-        WrappedPacketInCustomPayload.load();
-        WrappedPacketInEntityAction.load();
-        WrappedPacketInFlying.load();
-        WrappedPacketInHeldItemSlot.load();
-        WrappedPacketInKeepAlive.load();
-        WrappedPacketInSettings.load();
-        WrappedPacketInSteerVehicle.load();
-        WrappedPacketInTransaction.load();
-        WrappedPacketInUseEntity.load();
-        WrappedPacketInWindowClick.load();
-
-        //CLIENTBOUND
-        WrappedPacketOutAbilities.load();
-        WrappedPacketOutAnimation.load();
-        WrappedPacketOutChat.load();
-        WrappedPacketOutEntity.load();
-        WrappedPacketOutEntityVelocity.load();
-        WrappedPacketOutKeepAlive.load();
-        WrappedPacketOutKickDisconnect.load();
-        WrappedPacketOutPosition.load();
-        WrappedPacketOutTransaction.load();
-        WrappedPacketOutUpdateHealth.load();
-        //WrappedPacketOutCustomPayload.load();
     }
 
     protected void setup() {
 
+    }
+
+    public <T extends WrappedPacket> T wrap(Class<T> type) {
+        try {
+            return type.cast(this);
+        } catch (ClassCastException ex) {
+            throw new IllegalStateException("Couldn't convert current wrapper " + this.getClass().getSimpleName() + " to " + type.getSimpleName());
+        }
+    }
+
+    public World getWorld() {
+        return this.player != null ? this.player.getWorld() : null;
     }
 
     @Override
@@ -148,20 +133,7 @@ public class WrappedPacket implements WrapperPacketReader {
 
     @Override
     public Object readObject(int index, Class<?> type) {
-        int currentIndex = 0;
-        for (Field f : fields) {
-            if (type.isAssignableFrom(f.getType())) {
-                if (index == currentIndex++) {
-                    try {
-                        //System.out.println("Ended: " + (System.nanoTime() - start) + "ns");
-                        return f.get(packet);
-                    } catch (Exception exception) {
-                        exception.printStackTrace();
-                    }
-                }
-            }
-        }
-        return null;
+        return this.packet.setPacketValueByType(type, index);
     }
 
     @Override
@@ -171,7 +143,7 @@ public class WrappedPacket implements WrapperPacketReader {
         for (Field f : fields) {
             if (index == currentIndex++) {
                 try {
-                    return lookup.unreflectGetter(f).invoke(packet);
+                    return lookup.unreflectGetter(f).invoke(packet.getPacket());
                 } catch (Throwable throwable) {
                     throwable.printStackTrace();
                 }

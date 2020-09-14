@@ -5,13 +5,12 @@ import com.mojang.authlib.properties.Property;
 import net.md_5.bungee.api.chat.TextComponent;
 import net.md_5.bungee.chat.ComponentSerializer;
 import net.minecraft.server.v1_8_R3.*;
-import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.craftbukkit.v1_8_R3.entity.CraftPlayer;
 import org.bukkit.entity.Player;
 import org.imanity.framework.bukkit.Imanity;
 import org.imanity.framework.bukkit.util.Skin;
-import org.imanity.framework.bukkit.util.Utility;
+import org.imanity.framework.bukkit.util.BukkitUtil;
 import org.imanity.framework.bukkit.tablist.ImanityTablist;
 import org.imanity.framework.bukkit.tablist.util.*;
 import org.imanity.framework.bukkit.util.reflection.MinecraftReflection;
@@ -91,14 +90,14 @@ public class NMS1_8TabImpl implements IImanityTabImpl {
             Imanity.IMPLEMENTATION.sendTeam(
                     player,
                     LegacyClientUtil.name(tabEntry.getRawSlot() - 1),
-                    Utility.color(newStrings[0]),
-                    newStrings.length > 1 ? Utility.color(newStrings[1]) : "",
+                    BukkitUtil.color(newStrings[0]),
+                    newStrings.length > 1 ? BukkitUtil.color(newStrings[1]) : "",
                     Collections.singleton(LegacyClientUtil.entry(tabEntry.getRawSlot() - 1)),
                     2
             );
 
         } else {
-            IChatBaseComponent listName = ChatComponentText.ChatSerializer.a(fromText(Utility.color(text)));
+            IChatBaseComponent listName = ChatComponentText.ChatSerializer.a(fromText(BukkitUtil.color(text)));
 
             GameProfile profile = this.getGameProfile(playerVersion, tabEntry);
 

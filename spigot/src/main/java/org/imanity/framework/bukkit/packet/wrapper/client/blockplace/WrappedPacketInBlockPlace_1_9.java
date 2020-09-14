@@ -22,13 +22,26 @@
  * SOFTWARE.
  */
 
-package org.imanity.framework.bukkit.packet.wrapper;
+package org.imanity.framework.bukkit.packet.wrapper.client.blockplace;
 
-/**
- * This interface indicates that a packet wrapper supports being sent to a client.
- */
-public interface SendableWrapper {
+import lombok.Getter;
+import org.bukkit.block.Block;
+import org.bukkit.entity.Player;
+import org.imanity.framework.bukkit.packet.wrapper.WrappedPacket;
+import org.imanity.framework.bukkit.util.BukkitUtil;
 
-    Object asNMSPacket();
+@Getter
+final class WrappedPacketInBlockPlace_1_9 extends WrappedPacket {
+    private Block block;
+
+    public WrappedPacketInBlockPlace_1_9(final Player player, final Object packet) {
+        super(player, packet);
+    }
+
+    @Override
+    protected void setup() {
+        this.block = BukkitUtil.getBlockLookingAt(this.getPlayer(), 3);
+    }
+
 
 }

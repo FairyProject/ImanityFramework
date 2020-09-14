@@ -34,30 +34,45 @@ public class MinecraftReflection {
     public static final Version VERSION;
     public static final MinecraftVersion MINECRAFT_VERSION = MinecraftVersion.VERSION;
 
-    private static NMSClassResolver nmsClassResolver = new NMSClassResolver();
-    private static OBCClassResolver obcClassResolver = new OBCClassResolver();
-    private static Class<?> NmsEntity;
-    private static Class<?> CraftEntity;
+    private static NMSClassResolver NMS_CLASS_RESOLVER = new NMSClassResolver();
+    private static OBCClassResolver OBC_CLASS_RESOLVER = new OBCClassResolver();
+    private static Class<?> NMS_ENTITY;
+    private static Class<?> CRAFT_ENTITY;
 
     /**
      * The CraftPlayer.getHandle method
      */
-    private static MethodWrapper playerGetHandle;
+    private static MethodWrapper PLAYER_GET_HANDLE;
 
     /**
-     * The EntityPlayer.playerConnection method
+     * The EntityPlayer.playerConnection field
      */
-    private static FieldWrapper fieldPlayerConnection;
+    private static FieldWrapper FIELD_PLAYER_CONNECTION;
+
+    /**
+     * The PlayerConnection.networkManager field
+     */
+    private static FieldWrapper FIELD_NETWORK_MANAGER;
+
+    /**
+     * The NetworkManager.channel field
+     */
+    private static FieldWrapper FIELD_CHANNEL;
+
+    /**
+     * Netty Channel Type
+     */
+    private static Class<?> CHANNEL_TYPE;
 
     /**
      * The PlayerConnection.sendPacket method
      */
-    private static MethodWrapper<Void> sendPacket;
+    private static MethodWrapper<Void> METHOD_SEND_PACKET;
 
-    private static ProtocolCheck protocolCheck;
+    private static ProtocolCheck PROTOCOL_CHECK;
 
     public static PlayerVersion getProtocol(Player player) {
-        return PlayerVersion.getVersionFromRaw(protocolCheck.getVersion(player));
+        return PlayerVersion.getVersionFromRaw(PROTOCOL_CHECK.getVersion(player));
     }
 
     static {
@@ -76,10 +91,45 @@ public class MinecraftReflection {
         }
 
         try {
-            NmsEntity = nmsClassResolver.resolve("Entity");
-            CraftEntity = obcClassResolver.resolve("entity.CraftEntity");
+            NMS_ENTITY = NMS_CLASS_RESOLVER.resolve("Entity");
+            CRAFT_ENTITY = OBC_CLASS_RESOLVER.resolve("entity.CraftEntity");
         } catch (ReflectiveOperationException e) {
             throw new RuntimeException(e);
+        }
+
+        try {
+            CHANNEL_TYPE = Class.forName("io.netty.channel.Channel");
+        } catch (ClassNotFoundException ex) {
+
+            try {
+                CHANNEL_TYPE = Class.forName("net.minecraft.util.io.netty.channel.Channel");
+            } catch (ClassNotFoundException ex2) {
+                throw new IllegalStateException("Coulnd't find netty Channel class!", ex2);
+            }
+
+        }
+
+        try {
+            Class<?> entityPlayerType = NMS_CLASS_RESOLVER.resolve("EntityPlayer");
+            Class<?> playerConnectionType = NMS_CLASS_RESOLVER.resolve("PlayerConnection");
+            Class<?> networkManagerType = NMS_CLASS_RESOLVER.resolve("NetworkManager");
+
+            MinecraftReflection.PLAYER_GET_HANDLE = new MethodWrapper(OBC_CLASS_RESOLVER.resolve("entity.CraftPlayer")
+                    .getDeclaredMethod("getHandle"));
+            MinecraftReflection.FIELD_PLAYER_CONNECTION = new FieldResolver(entityPlayerType)
+                .resolveByFirstTypeDynamic(playerConnectionType);
+
+            Class<?> packetClass = NMS_CLASS_RESOLVER.resolve("Packet");
+
+            MinecraftReflection.METHOD_SEND_PACKET = new MethodWrapper(playerConnectionType.getDeclaredMethod("sendPacket", packetClass));
+
+            MinecraftReflection.FIELD_NETWORK_MANAGER = new FieldResolver(playerConnectionType)
+                    .resolveByFirstTypeWrapper(networkManagerType);
+
+            MinecraftReflection.FIELD_CHANNEL = new FieldResolver(networkManagerType)
+                    .resolveByFirstTypeDynamic(CHANNEL_TYPE);
+        } catch (Throwable throwable) {
+            throw new IllegalStateException("Something went wrong when doing reflection", throwable);
         }
 
         MinecraftReflection.initProtocolCheck();
@@ -87,19 +137,19 @@ public class MinecraftReflection {
 
     private static void initProtocolCheck() {
         if (SpigotUtil.SPIGOT_TYPE == SpigotUtil.SpigotType.IMANITY) {
-            protocolCheck = new ProtocolCheckImanitySpigot();
+            PROTOCOL_CHECK = new ProtocolCheckImanitySpigot();
             Imanity.LOGGER.info("Initialized Protocol Check with ImanitySpigotCheck.");
             return;
         }
 
         try {
-            Class<?> networkManager = nmsClassResolver.resolve("NetworkManager");
+            Class<?> networkManager = NMS_CLASS_RESOLVER.resolve("NetworkManager");
             MethodResolver resolver = new MethodResolver(networkManager);
 
             Method method = resolver.resolve(new ResolverQuery("getVersion", new Class[0]));
 
             if (method != null && (method.getReturnType() == int.class || method.getReturnType() == Integer.class)) {
-                protocolCheck = new ProtocolCheckMethodVersion();
+                PROTOCOL_CHECK = new ProtocolCheckMethodVersion();
                 Imanity.LOGGER.info("Initialized Protocol Check with NetworkManager-getVersion SpigotCheck.");
                 return;
             }
@@ -107,13 +157,13 @@ public class MinecraftReflection {
         }
 
         try {
-            Class<?> networkManager = nmsClassResolver.resolve("NetworkManager");
+            Class<?> networkManager = NMS_CLASS_RESOLVER.resolve("NetworkManager");
             FieldResolver resolver = new FieldResolver(networkManager);
 
             Field field = resolver.resolve(new ResolverQuery("version", Integer.class, int.class));
 
             if (field != null) {
-                protocolCheck = new ProtocolCheckMethodVersion();
+                PROTOCOL_CHECK = new ProtocolCheckMethodVersion();
                 Imanity.LOGGER.info("Initialized Protocol Check with NetworkManager-version-field SpigotCheck.");
                 return;
             }
@@ -121,24 +171,24 @@ public class MinecraftReflection {
         }
 
         if (Bukkit.getPluginManager().getPlugin("ViaVersion") != null) {
-            protocolCheck = new ProtocolCheckViaVersion();
+            PROTOCOL_CHECK = new ProtocolCheckViaVersion();
             Imanity.LOGGER.info("Initialized Protocol Check with ViaVersionSpigotCheck.");
             return;
         }
 
         if (Bukkit.getPluginManager().getPlugin("ProtocolSupport") != null) {
-            protocolCheck = new ProtocolCheckProtocolSupport();
+            PROTOCOL_CHECK = new ProtocolCheckProtocolSupport();
             Imanity.LOGGER.info("Initialized Protocol Check with ProtocolSupportSpigotCheck.");
             return;
         }
 
         if (Bukkit.getPluginManager().getPlugin("ProtocolLib") != null) {
-            protocolCheck = new ProtocolCheckProtocolLib();
+            PROTOCOL_CHECK = new ProtocolCheckProtocolLib();
             Imanity.LOGGER.info("Initialized Protocol Check with ProtocolLibSpigotCheck.");
             return;
         }
 
-        protocolCheck = new ProtocolCheckNone();
+        PROTOCOL_CHECK = new ProtocolCheckNone();
     }
 
     /**
@@ -148,23 +198,17 @@ public class MinecraftReflection {
         return MINECRAFT_VERSION.packageName() + ".";
     }
 
+    public static <T> T getChannel(Player player) {
+        Object entityPlayer = MinecraftReflection.PLAYER_GET_HANDLE.invoke(player);
+        Object playerConnection = MinecraftReflection.FIELD_PLAYER_CONNECTION.get(entityPlayer);
+        Object networkManager = MinecraftReflection.FIELD_NETWORK_MANAGER.get(playerConnection);
+        return (T) MinecraftReflection.FIELD_CHANNEL.get(networkManager);
+    }
+
     public static void sendPacket(Player player, Object packet) {
-        if (playerGetHandle == null || fieldPlayerConnection == null || sendPacket == null) {
-            try {
-                MinecraftReflection.playerGetHandle = new MethodWrapper(obcClassResolver.resolve("entity.CraftPlayer").getDeclaredMethod("getHandle"));
-                MinecraftReflection.fieldPlayerConnection = new FieldWrapper(nmsClassResolver.resolve("EntityPlayer").getDeclaredField("playerConnection"));
-
-                java.lang.Class packetClass = nmsClassResolver.resolve("Packet");
-
-                MinecraftReflection.sendPacket = new MethodWrapper(nmsClassResolver.resolve("PlayerConnection").getDeclaredMethod("sendPacket", packetClass));
-            } catch (Throwable throwable) {
-                throw new IllegalStateException("Something went wrong when doing reflection", throwable);
-            }
-        }
-
-        Object entityPlayer = MinecraftReflection.playerGetHandle.invoke(player);
-        Object playerConnection = MinecraftReflection.fieldPlayerConnection.get(entityPlayer);
-        MinecraftReflection.sendPacket.invoke(playerConnection, packet);
+        Object entityPlayer = MinecraftReflection.PLAYER_GET_HANDLE.invoke(player);
+        Object playerConnection = MinecraftReflection.FIELD_PLAYER_CONNECTION.get(entityPlayer);
+        MinecraftReflection.METHOD_SEND_PACKET.invoke(playerConnection, packet);
     }
 
     private static FieldWrapper<Integer> ENTITY_ID_RESOLVER;
@@ -175,7 +219,7 @@ public class MinecraftReflection {
 
     public static int setEntityId(int newIds) {
         if (ENTITY_ID_RESOLVER == null) {
-            ENTITY_ID_RESOLVER = new FieldResolver(nmsClassResolver.resolveSilent("Entity"))
+            ENTITY_ID_RESOLVER = new FieldResolver(NMS_CLASS_RESOLVER.resolveSilent("Entity"))
                     .resolveWrapper("entityCount");
         }
 
@@ -193,7 +237,7 @@ public class MinecraftReflection {
         try {
             method = AccessUtil.setAccessible(object.getClass().getDeclaredMethod("getHandle"));
         } catch (ReflectiveOperationException e) {
-            method = AccessUtil.setAccessible(CraftEntity.getDeclaredMethod("getHandle"));
+            method = AccessUtil.setAccessible(CRAFT_ENTITY.getDeclaredMethod("getHandle"));
         }
         return method.invoke(object);
     }
@@ -201,9 +245,9 @@ public class MinecraftReflection {
     public static Entity getBukkitEntity(Object object) throws ReflectiveOperationException {
         Method method;
         try {
-            method = AccessUtil.setAccessible(NmsEntity.getDeclaredMethod("getBukkitEntity"));
+            method = AccessUtil.setAccessible(NMS_ENTITY.getDeclaredMethod("getBukkitEntity"));
         } catch (ReflectiveOperationException e) {
-            method = AccessUtil.setAccessible(CraftEntity.getDeclaredMethod("getHandle"));
+            method = AccessUtil.setAccessible(CRAFT_ENTITY.getDeclaredMethod("getHandle"));
         }
         return (Entity) method.invoke(object);
     }

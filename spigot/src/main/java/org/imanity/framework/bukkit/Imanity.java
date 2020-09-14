@@ -1,7 +1,6 @@
 package org.imanity.framework.bukkit;
 
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableSet;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 import org.apache.logging.log4j.LogManager;
@@ -199,19 +198,19 @@ public final class Imanity {
     }
 
     public static String translate(Player player, String key) {
-        return Utility.color(ImanityCommon.translate(player, key));
+        return BukkitUtil.color(ImanityCommon.translate(player, key));
     }
 
     public static Iterable<String> translateList(Player player, String key) {
-        return Utility.toStringList(Imanity.translate(player, key), "\n");
+        return BukkitUtil.toStringList(Imanity.translate(player, key), "\n");
     }
 
     public static String translate(Player player, String key, RV... replaceValues) {
-        return Utility.replace(Imanity.translate(player, key), replaceValues);
+        return BukkitUtil.replace(Imanity.translate(player, key), replaceValues);
     }
 
     public static Iterable<String> translateList(Player player, String key, RV... replaceValues) {
-        return Utility.toStringList(Imanity.translate(player, key, replaceValues), "\n");
+        return BukkitUtil.toStringList(Imanity.translate(player, key, replaceValues), "\n");
     }
 
     public static String translate(Player player, String key, LocaleRV... replaceValues) {
@@ -219,14 +218,14 @@ public final class Imanity {
         String result = Imanity.translate(player, key);
 
         for (LocaleRV rv : replaceValues) {
-            result = Utility.replace(result, rv.getTarget(), rv.getReplacement(player));
+            result = BukkitUtil.replace(result, rv.getTarget(), rv.getReplacement(player));
         }
 
         return result;
     }
 
     public static Iterable<String> translateList(Player player, String key, LocaleRV... replaceValues) {
-        return Utility.toStringList(Imanity.translate(player, key, replaceValues), "\n");
+        return BukkitUtil.toStringList(Imanity.translate(player, key, replaceValues), "\n");
     }
 
 
@@ -239,7 +238,7 @@ public final class Imanity {
             String result = Imanity.translate(player, key);
 
             for (LocaleRV rv : rvs) {
-                result = Utility.replace(result, rv.getTarget(), rv.getReplacement(player));
+                result = BukkitUtil.replace(result, rv.getTarget(), rv.getReplacement(player));
             }
 
             player.sendMessage(result);
@@ -255,7 +254,7 @@ public final class Imanity {
             String result = Imanity.translate(player, key);
 
             for (LocaleRV rv : rvs) {
-                result = Utility.replace(result, rv.getTarget(), rv.getReplacement(player));
+                result = BukkitUtil.replace(result, rv.getTarget(), rv.getReplacement(player));
             }
 
             player.sendMessage(result);

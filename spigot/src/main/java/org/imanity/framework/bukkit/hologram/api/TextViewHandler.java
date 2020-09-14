@@ -2,7 +2,7 @@ package org.imanity.framework.bukkit.hologram.api;
 
 import lombok.AllArgsConstructor;
 import org.bukkit.entity.Player;
-import org.imanity.framework.bukkit.util.Utility;
+import org.imanity.framework.bukkit.util.BukkitUtil;
 
 import javax.annotation.Nullable;
 
@@ -13,6 +13,6 @@ public class TextViewHandler implements ViewHandler {
 
     @Override
     public String view(@Nullable Player player) {
-        return Utility.color(text);
+        return BukkitUtil.color(text);
     }
 }

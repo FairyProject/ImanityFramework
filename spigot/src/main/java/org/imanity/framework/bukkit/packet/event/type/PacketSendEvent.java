@@ -63,7 +63,7 @@ public final class PacketSendEvent extends PacketEvent {
      * @return packet id
      */
     public byte getPacketId() {
-        return PacketType.Server.packetIds.getOrDefault(packet.getClass(), (byte) -1);
+        return PacketType.Server.PACKET_IDS.getOrDefault(packet.getClass(), (byte) -1);
     }
 
     /**

@@ -8,12 +8,11 @@ import com.comphenix.protocol.events.PacketEvent;
 import com.comphenix.protocol.wrappers.*;
 import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
-import org.bukkit.scoreboard.Team;
 import org.imanity.framework.bukkit.Imanity;
 import org.imanity.framework.bukkit.tablist.ImanityTablist;
 import org.imanity.framework.bukkit.tablist.util.*;
 import org.imanity.framework.bukkit.util.Skin;
-import org.imanity.framework.bukkit.util.Utility;
+import org.imanity.framework.bukkit.util.BukkitUtil;
 import org.imanity.framework.bukkit.util.reflection.MinecraftReflection;
 import org.imanity.framework.bukkit.util.reflection.version.PlayerVersion;
 
@@ -67,8 +66,8 @@ public class ProtocolLibTabImpl implements IImanityTabImpl {
             Imanity.IMPLEMENTATION.sendTeam(
                     player,
                     LegacyClientUtil.name(tabEntry.getRawSlot() - 1),
-                    Utility.color(newStrings[0]),
-                    newStrings.length > 1 ? Utility.color(newStrings[1]) : "",
+                    BukkitUtil.color(newStrings[0]),
+                    newStrings.length > 1 ? BukkitUtil.color(newStrings[1]) : "",
                     Collections.singleton(LegacyClientUtil.entry(tabEntry.getRawSlot() - 1)),
                     2
             );

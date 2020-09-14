@@ -15,4 +15,8 @@ public interface ImanityBoardAdapter {
 
     List<String> getLines(Player player);
 
+    default int tick() {
+        return 2;
+    }
+
 }

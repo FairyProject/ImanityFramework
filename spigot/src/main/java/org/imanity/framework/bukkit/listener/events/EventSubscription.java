@@ -5,9 +5,6 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.*;
 import org.bukkit.plugin.EventExecutor;
 import org.bukkit.plugin.Plugin;
-import org.imanity.framework.bukkit.Imanity;
-import org.imanity.framework.bukkit.plugin.ImanityPlugin;
-import org.imanity.framework.bukkit.util.Utility;
 import org.imanity.framework.util.Terminable;
 
 import java.lang.reflect.Method;

@@ -82,7 +82,7 @@ public final class PacketReceiveEvent extends PacketEvent {
      * @return packet id
      */
     public byte getPacketId() {
-        return PacketType.Client.packetIds.getOrDefault(packet.getClass(), (byte) -1);
+        return PacketType.Client.PACKET_IDS.getOrDefault(packet.getClass(), (byte) -1);
     }
 
     @Override

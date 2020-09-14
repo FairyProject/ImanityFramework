@@ -6,13 +6,11 @@ import org.bukkit.configuration.file.YamlConfiguration;
 import org.imanity.framework.ImanityBridge;
 import org.imanity.framework.bukkit.Imanity;
 import org.imanity.framework.bukkit.util.SpigotUtil;
-import org.imanity.framework.bukkit.util.Utility;
+import org.imanity.framework.bukkit.util.BukkitUtil;
 import org.imanity.framework.libraries.classloader.PluginClassLoader;
-import org.imanity.framework.task.ITaskScheduler;
 
 import java.io.File;
 import java.io.InputStream;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -64,7 +62,7 @@ public class BukkitImanityBridge implements ImanityBridge {
     public List<File> getPluginFiles() {
         return Imanity.PLUGINS
                 .stream()
-                .map(Utility::getPluginJar)
+                .map(BukkitUtil::getPluginJar)
                 .collect(Collectors.toList());
     }
 

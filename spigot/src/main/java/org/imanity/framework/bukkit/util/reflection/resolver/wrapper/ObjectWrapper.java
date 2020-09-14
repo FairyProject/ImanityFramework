@@ -49,6 +49,10 @@ public class ObjectWrapper extends WrapperAbstract {
         return fieldWrapper;
     }
 
+    public <T> T getFieldByIndex(Class<T> type, int index) {
+        return this.fieldResolver.resolve(type, index).get(this.object);
+    }
+
     public <T> T getField(String field) {
         return (T) this.getFieldWrapper(field).get(this.object);
     }

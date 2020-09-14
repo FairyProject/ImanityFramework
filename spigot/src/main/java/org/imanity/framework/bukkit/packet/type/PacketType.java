@@ -24,12 +24,15 @@
 
 package org.imanity.framework.bukkit.packet.type;
 
+import com.google.common.collect.ImmutableMap;
+import org.imanity.framework.bukkit.packet.wrapper.WrappedPacket;
+
 import java.util.HashMap;
 import java.util.Map;
 
 public class PacketType {
     public static class Client {
-        public static final Map<Class<?>, Byte> packetIds = new HashMap<Class<?>, Byte>();
+        public static Map<Class<?>, Byte> PACKET_IDS;
         public static final byte TELEPORT_ACCEPT = 0,
                 TILE_NBT_QUERY = 1, DIFFICULTY_CHANGE = 2, CHAT = 3, CLIENT_COMMAND = 4,
                 SETTINGS = 5, TAB_COMPLETE = 6, TRANSACTION = 7, ENCHANT_ITEM = 8,
@@ -44,7 +47,13 @@ public class PacketType {
                 STRUCT = 41, UPDATE_SIGN = 42, ARM_ANIMATION = 43, SPECTATE = 44,
                 USE_ITEM = 45, BLOCK_PLACE = 46;
 
+        public static byte getIdByType(Class<?> type) {
+            return PACKET_IDS.get(type);
+        }
+
         public static void init() {
+            ImmutableMap.Builder<Class<?>, Byte> packetIds = ImmutableMap.builder();
+
             packetIds.put(PacketTypeClasses.Client.TELEPORT_ACCEPT, TELEPORT_ACCEPT);
             packetIds.put(PacketTypeClasses.Client.TILE_NBT_QUERY, TILE_NBT_QUERY);
             packetIds.put(PacketTypeClasses.Client.DIFFICULTY_CHANGE, DIFFICULTY_CHANGE);
@@ -92,6 +101,8 @@ public class PacketType {
             packetIds.put(PacketTypeClasses.Client.SPECTATE, SPECTATE);
             packetIds.put(PacketTypeClasses.Client.USE_ITEM, USE_ITEM);
             packetIds.put(PacketTypeClasses.Client.BLOCK_PLACE, BLOCK_PLACE);
+
+            Client.PACKET_IDS = packetIds.build();
         }
 
         public static class Util {
@@ -110,7 +121,7 @@ public class PacketType {
     }
 
     public static class Server {
-        public static final Map<Class<?>, Byte> packetIds = new HashMap<Class<?>, Byte>();
+        public static Map<Class<?>, Byte> PACKET_IDS;
         public static final byte SPAWN_ENTITY = 0, SPAWN_ENTITY_EXPERIENCE_ORB = 1, SPAWN_ENTITY_WEATHER = 2, SPAWN_ENTITY_LIVING = 3,
                 SPAWN_ENTITY_PAINTING = 4, SPAWN_ENTITY_SPAWN = 5, ANIMATION = 6, STATISTIC = 7,
                 BLOCK_BREAK = 8, BLOCK_BREAK_ANIMATION = 9, TILE_ENTITY_DATA = 10, BLOCK_ACTION = 11,
@@ -135,7 +146,13 @@ public class PacketType {
                 NBT_QUERY = 85, COLLECT = 86, ENTITY_TELEPORT = 87, ADVANCEMENTS = 88, UPDATE_ATTRIBUTES = 89,
                 ENTITY_EFFECT = 90, RECIPE_UPDATE = 91, TAGS = 92, MAP_CHUNK_BULK = 93;
 
+        public static byte getIdByType(Class<?> type) {
+            return PACKET_IDS.get(type);
+        }
+
         public static void init() {
+            ImmutableMap.Builder<Class<?>, Byte> packetIds = ImmutableMap.builder();
+
             packetIds.put(PacketTypeClasses.Server.SPAWN_ENTITY, SPAWN_ENTITY);
             packetIds.put(PacketTypeClasses.Server.SPAWN_ENTITY_EXPERIENCE_ORB, SPAWN_ENTITY_EXPERIENCE_ORB);
             packetIds.put(PacketTypeClasses.Server.SPAWN_ENTITY_WEATHER, SPAWN_ENTITY_WEATHER);
@@ -232,6 +249,8 @@ public class PacketType {
             packetIds.put(PacketTypeClasses.Server.RECIPE_UPDATE, RECIPE_UPDATE);
             packetIds.put(PacketTypeClasses.Server.TAGS, TAGS);
             packetIds.put(PacketTypeClasses.Server.MAP_CHUNK_BULK, MAP_CHUNK_BULK);
+
+            Server.PACKET_IDS = packetIds.build();
         }
 
         public static class Util {

@@ -22,27 +22,45 @@
  * SOFTWARE.
  */
 
-package org.imanity.framework.bukkit.packet.wrapper.client;
+package org.imanity.framework.bukkit.packet.wrapper.client.blockplace;
 
-import org.imanity.framework.bukkit.packet.type.PacketTypeClasses;
+import net.minecraft.server.v1_7_R4.PacketPlayInBlockPlace;
+import org.bukkit.entity.Player;
+import org.bukkit.inventory.ItemStack;
 import org.imanity.framework.bukkit.packet.wrapper.WrappedPacket;
-import org.imanity.framework.bukkit.packet.wrapper.annotation.AutowiredWrappedPacket;
+import org.imanity.framework.bukkit.util.BlockPosition;
 
-@AutowiredWrappedPacket(type = "PacketPlayInArmAnimation")
-public final class WrappedPacketInArmAnimation extends WrappedPacket {
+final class WrappedPacketInBlockPlace_1_7_10 extends WrappedPacket {
+    private BlockPosition blockPosition;
+    private ItemStack itemStack;
+    private int blockFace;
 
-    private long timestamp;
-
-    public WrappedPacketInArmAnimation(Object packet) {
-        super(packet);
+    WrappedPacketInBlockPlace_1_7_10(final Player player, final Object packet) {
+        super(player, packet);
     }
+
 
     @Override
-    public void setup() {
-        this.timestamp = readLong(0);
+    protected void setup() {
+        final PacketPlayInBlockPlace blockPlace = (PacketPlayInBlockPlace) packet.getPacket();
+
+        this.blockPosition = new BlockPosition(blockPlace.c(), blockPlace.d(), blockPlace.e(), this.getWorld().getName());
+
+        this.blockFace = blockPlace.d();
+
+        net.minecraft.server.v1_7_R4.ItemStack stack = blockPlace.getItemStack();
+        this.itemStack = org.bukkit.craftbukkit.v1_7_R4.inventory.CraftItemStack.asBukkitCopy(stack);
     }
 
-    public long getTimestamp() {
-        return this.timestamp;
+    public BlockPosition getBlockPosition() {
+        return blockPosition;
+    }
+
+    public ItemStack getItemStack() {
+        return itemStack;
+    }
+
+    public int getBlockFace() {
+        return blockFace;
     }
 }

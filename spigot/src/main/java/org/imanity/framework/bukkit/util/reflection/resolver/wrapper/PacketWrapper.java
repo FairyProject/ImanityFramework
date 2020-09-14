@@ -23,10 +23,18 @@ public class PacketWrapper extends WrapperAbstract {
     private final Object packetObject;
     private final FieldResolver fieldResolver;
 
+    private boolean cached;
+
     public PacketWrapper(Object packetObject) {
         this.packetObject = packetObject;
 
         this.fieldResolver = new FieldResolver(this.packetObject.getClass());
+        this.cached = true;
+    }
+
+    public PacketWrapper noCache() {
+        this.cached = false;
+        return this;
     }
 
     public Object getPacket() {
@@ -64,6 +72,10 @@ public class PacketWrapper extends WrapperAbstract {
             e.printStackTrace();
         }
         return value;
+    }
+
+    public <T> T getPacketValueByIndex(Class<T> type, int index) {
+        return this.fieldResolver.resolve(type, index).get(this.packetObject);
     }
 
     @Override

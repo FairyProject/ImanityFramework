@@ -6,7 +6,7 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.imanity.framework.bukkit.Imanity;
 import org.imanity.framework.bukkit.metadata.Metadata;
-import org.imanity.framework.bukkit.util.Utility;
+import org.imanity.framework.bukkit.util.BukkitUtil;
 
 import java.util.List;
 import java.util.Queue;
@@ -56,7 +56,7 @@ public class ImanityBoardHandler implements Runnable {
             }
 
             try {
-                Thread.sleep(2 * 50L);
+                Thread.sleep(this.adapter.tick() * 50L);
             } catch (InterruptedException ex) {
                 ex.printStackTrace();
             }
@@ -75,7 +75,7 @@ public class ImanityBoardHandler implements Runnable {
                 continue;
             }
 
-            String title = Utility.color(adapter.getTitle(player));
+            String title = BukkitUtil.color(adapter.getTitle(player));
 
             board.setTitle(title);
 

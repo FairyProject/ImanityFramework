@@ -22,13 +22,25 @@
  * SOFTWARE.
  */
 
-package org.imanity.framework.bukkit.packet.wrapper;
+package org.imanity.framework.bukkit.packet.wrapper.client;
 
-/**
- * This interface indicates that a packet wrapper supports being sent to a client.
- */
-public interface SendableWrapper {
+import lombok.Getter;
+import org.imanity.framework.bukkit.packet.wrapper.WrappedPacket;
+import org.imanity.framework.bukkit.packet.wrapper.annotation.AutowiredWrappedPacket;
 
-    Object asNMSPacket();
+@Getter
+@AutowiredWrappedPacket(type = "PacketPlayInChat")
+public final class WrappedPacketInChat extends WrappedPacket {
+
+    private String message;
+
+    public WrappedPacketInChat(Object packet) {
+        super(packet);
+    }
+
+    @Override
+    protected void setup() {
+        this.message = readString(0);
+    }
 
 }

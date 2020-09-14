@@ -8,8 +8,7 @@ import org.bukkit.event.Event;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.player.PlayerEvent;
 import org.bukkit.plugin.Plugin;
-import org.imanity.framework.bukkit.plugin.ImanityPlugin;
-import org.imanity.framework.bukkit.util.Utility;
+import org.imanity.framework.bukkit.util.BukkitUtil;
 import org.imanity.framework.bukkit.util.reflection.resolver.MethodResolver;
 import org.imanity.framework.bukkit.util.reflection.resolver.wrapper.MethodWrapper;
 
@@ -85,7 +84,7 @@ public class EventSubscribeBuilder<T extends Event> {
     private String metadata;
 
     public EventSubscribeBuilder<T> forPlayer(Player player, String metadata) {
-        if (!Utility.isPlayerEvent(this.eventType)) {
+        if (!BukkitUtil.isPlayerEvent(this.eventType)) {
             throw new IllegalStateException("forPlayer() wouldn't work for non player event!");
         }
 

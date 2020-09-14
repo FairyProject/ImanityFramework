@@ -11,7 +11,7 @@ import org.imanity.framework.ImanityCommon;
 import org.imanity.framework.bukkit.metadata.Metadata;
 import org.imanity.framework.metadata.MetadataKey;
 import org.imanity.framework.bukkit.player.movement.MovementListener;
-import org.imanity.framework.bukkit.util.Utility;
+import org.imanity.framework.bukkit.util.BukkitUtil;
 
 public class BossBarHandler implements Runnable {
 
@@ -127,7 +127,7 @@ public class BossBarHandler implements Runnable {
                 bossBarData.setText("");
             }
 
-            bossBarData.setText(Utility.color(bossBarData.getText()));
+            bossBarData.setText(BukkitUtil.color(bossBarData.getText()));
             bossBar.send(bossBarData);
 
         }

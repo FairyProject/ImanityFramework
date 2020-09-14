@@ -5,7 +5,7 @@ import lombok.Setter;
 import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
 import org.imanity.framework.metadata.MetadataKey;
-import org.imanity.framework.bukkit.util.Utility;
+import org.imanity.framework.bukkit.util.BukkitUtil;
 import org.imanity.framework.bukkit.util.reflection.MinecraftReflection;
 import org.imanity.framework.bukkit.util.reflection.resolver.minecraft.NMSClassResolver;
 import org.imanity.framework.bukkit.util.reflection.resolver.wrapper.EnumWrapper;
@@ -85,7 +85,7 @@ public class ImanityBoard {
         int lineCount = 1;
 
         for (int i = lines.size() - 1; i >= 0; --i) {
-            this.setLine(lineCount, Utility.color(lines.get(i)));
+            this.setLine(lineCount, BukkitUtil.color(lines.get(i)));
 
             lineCount++;
         }

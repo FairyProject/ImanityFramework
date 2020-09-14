@@ -6,8 +6,7 @@ import org.bukkit.entity.Player;
 import org.imanity.framework.bukkit.Imanity;
 import org.imanity.framework.bukkit.tablist.util.*;
 import org.imanity.framework.bukkit.util.Skin;
-import org.imanity.framework.bukkit.util.TaskUtil;
-import org.imanity.framework.bukkit.util.Utility;
+import org.imanity.framework.bukkit.util.BukkitUtil;
 import org.imanity.framework.bukkit.util.reflection.MinecraftReflection;
 import org.imanity.framework.bukkit.util.reflection.version.PlayerVersion;
 
@@ -97,8 +96,8 @@ public class ImanityTablist {
 
         previous.clear();
 
-        String headerNow = Utility.color(adapter.getHeader(player));
-        String footerNow = Utility.color(adapter.getFooter(player));
+        String headerNow = BukkitUtil.color(adapter.getHeader(player));
+        String footerNow = BukkitUtil.color(adapter.getFooter(player));
 
         if (!headerNow.equals(this.header) || !footerNow.equals(this.footer)) {
             ImanityTabHandler.getInstance().getImplementation().updateHeaderAndFooter(this, headerNow, footerNow);

@@ -77,6 +77,20 @@ public class FieldResolver extends MemberResolver<Field> {
 		}
 	}
 
+	public <T> FieldWrapper<T> resolve(Class<T> type, int index) {
+		int current = 0;
+		try {
+			for (Field field : this.clazz.getDeclaredFields()) {
+				if (field.getType().equals(type) && current++ == index) {
+					return new FieldWrapper<>(AccessUtil.setAccessible(field));
+				}
+			}
+		} catch (Throwable throwable) {
+			throw new RuntimeException(throwable);
+		}
+		throw new RuntimeException("Could not resolve field of type '" + type.toString() + "' in class " + this.clazz);
+	}
+
 	@Override
 	protected Field resolveObject(ResolverQuery query) throws ReflectiveOperationException {
 		if (query.getTypes() == null || query.getTypes().length == 0) {

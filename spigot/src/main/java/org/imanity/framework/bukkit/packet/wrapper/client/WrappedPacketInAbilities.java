@@ -24,15 +24,26 @@
 
 package org.imanity.framework.bukkit.packet.wrapper.client;
 
+import lombok.Getter;
 import org.imanity.framework.bukkit.packet.type.PacketTypeClasses;
 import org.imanity.framework.bukkit.packet.wrapper.WrappedPacket;
-import org.imanity.framework.bukkit.util.reflection.Reflection;
+import org.imanity.framework.bukkit.packet.wrapper.annotation.AutowiredWrappedPacket;
 import org.imanity.framework.bukkit.util.reflection.resolver.FieldResolver;
 
+@Getter
+@AutowiredWrappedPacket(type = "PacketPlayInAbilities")
 public final class WrappedPacketInAbilities extends WrappedPacket {
-    private static boolean MULTIPLE_ABILITIES;
-    private boolean isVulnerable;
-    private boolean isFlying;
+
+    private static final boolean MULTIPLE_ABILITIES;
+
+    static {
+        MULTIPLE_ABILITIES = new FieldResolver(PacketTypeClasses.Client.ABILITIES)
+                .resolve(boolean.class, 1)
+                .get(null);
+    }
+
+    private boolean vulnerable;
+    private boolean flying;
     private boolean allowFly;
     private boolean instantBuild;
     private float flySpeed;
@@ -42,75 +53,17 @@ public final class WrappedPacketInAbilities extends WrappedPacket {
         super(packet);
     }
 
-    static {
-        MULTIPLE_ABILITIES = Reflection.getField(PacketTypeClasses.Client.ABILITIES, boolean.class, 1) != null;
-    }
-
     @Override
     protected void setup() {
         if (MULTIPLE_ABILITIES) {
-            this.isVulnerable = readBoolean(0);
-            this.isFlying = readBoolean(1);
+            this.vulnerable = readBoolean(0);
+            this.flying = readBoolean(1);
             this.allowFly = readBoolean(2);
             this.instantBuild = readBoolean(3);
             this.flySpeed = readFloat(0);
             this.walkSpeed = readFloat(1);
         } else {
-            this.isFlying = readBoolean(0);
+            this.flying = readBoolean(0);
         }
-    }
-
-    /**
-     * This will return null if the server version is not available in 1.16.x and above
-     *
-     * @return Whether the player is vulnerable to damage or not.
-     */
-    @Deprecated
-    public Boolean isVulnerable() {
-        return isVulnerable;
-    }
-
-    public boolean isFlying() {
-        return isFlying;
-    }
-
-    /**
-     * This will return null if the server version is not available in 1.16.x and above
-     *
-     * @return Whether or not the player can fly.
-     */
-    @Deprecated
-    public Boolean isFlightAllowed() {
-        return allowFly;
-    }
-
-    /**
-     * This will return null if the server version is not available in 1.16.x and above
-     *
-     * @return Whether or not the player can break blocks instantly.
-     */
-    @Deprecated
-    public Boolean canInstantlyBuild() {
-        return instantBuild;
-    }
-
-    /**
-     * This will return null if the server version is not available in 1.16.x and above
-     *
-     * @return The speed at which the player can fly, as a float.
-     */
-    @Deprecated
-    public Float getFlySpeed() {
-        return flySpeed;
-    }
-
-    /**
-     * This will return null if the server version is not available in 1.16.x and above
-     *
-     * @return The speed at which the player can walk, as a float.
-     */
-    @Deprecated
-    public Float getWalkSpeed() {
-        return walkSpeed;
     }
 }

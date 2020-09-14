@@ -24,17 +24,20 @@
 
 package org.imanity.framework.bukkit.packet.wrapper.client;
 
+import lombok.Getter;
 import org.imanity.framework.bukkit.packet.type.PacketTypeClasses;
 import org.imanity.framework.bukkit.packet.wrapper.WrappedPacket;
+import org.imanity.framework.bukkit.packet.wrapper.annotation.AutowiredWrappedPacket;
 import org.imanity.framework.bukkit.packet.wrapper.other.EnumDirection;
-import org.imanity.framework.bukkit.packet.wrapper.other.Vector3D;
 import org.imanity.framework.bukkit.util.BlockPosition;
 import org.imanity.framework.bukkit.util.MinecraftVersion;
-import org.imanity.framework.bukkit.util.reflection.Reflection;
+import org.imanity.framework.bukkit.util.reflection.resolver.FieldResolver;
+import org.imanity.framework.bukkit.util.reflection.resolver.wrapper.ObjectWrapper;
 
+@Getter
+@AutowiredWrappedPacket(type = "PacketPlayInBlockDig")
 public final class WrappedPacketInBlockDig extends WrappedPacket {
     private static Class<?> blockDigClass, blockPositionClass, enumDirectionClass, digTypeClass;
-    private static boolean isVersionLowerThan_v_1_8;
     private BlockPosition blockPosition;
     private EnumDirection direction;
     private PlayerDigType digType;
@@ -42,24 +45,23 @@ public final class WrappedPacketInBlockDig extends WrappedPacket {
         super(packet);
     }
 
-    public static void load() {
+    public static void init() {
         blockDigClass = PacketTypeClasses.Client.BLOCK_DIG;
         try {
             if (MinecraftVersion.newerThan(MinecraftVersion.V.v1_7)) {
-                blockPositionClass = PACKET_FIELD_CLASS_RESOLVER.resolve("BlockPosition");
-                enumDirectionClass = PACKET_FIELD_CLASS_RESOLVER.resolve("EnumDirection");
+                blockPositionClass = NMS_CLASS_RESOLVER.resolve("BlockPosition");
+                enumDirectionClass = NMS_CLASS_RESOLVER.resolve("EnumDirection");
             }
         } catch (ClassNotFoundException e) {
             e.printStackTrace();
         }
-        isVersionLowerThan_v_1_8 = MinecraftVersion.olderThan(MinecraftVersion.V.v1_8);
 
         if (!MinecraftVersion.equals(MinecraftVersion.V.v1_7)) {
             try {
-                digTypeClass = PACKET_FIELD_CLASS_RESOLVER.resolve("EnumPlayerDigType");
+                digTypeClass = NMS_CLASS_RESOLVER.resolve("EnumPlayerDigType");
             } catch (ClassNotFoundException e) {
                 //It is probably a subclass
-                digTypeClass = PACKET_FIELD_CLASS_RESOLVER.resolveSilent(blockDigClass.getSimpleName() + "$EnumPlayerDigType");
+                digTypeClass = NMS_CLASS_RESOLVER.resolveSilent(blockDigClass.getSimpleName() + "$EnumPlayerDigType");
             }
         }
     }
@@ -70,88 +72,35 @@ public final class WrappedPacketInBlockDig extends WrappedPacket {
         PlayerDigType enumDigType = null;
         int x = 0, y = 0, z = 0;
         //1.7.10
-        try {
-            if (isVersionLowerThan_v_1_8) {
-                enumDigType = PlayerDigType.values()[(Reflection.getField(blockDigClass, int.class, 4).getInt(packet))];
-                x = readInt(0);
-                y = readInt(1);
-                z = readInt(2);
-                enumDirection = null;
-            } else {
-                //1.8+
-                final Object blockPosObj = readObject(0, blockPositionClass);
-                final Object enumDirectionObj = readObject(0, enumDirectionClass);
-                final Object digTypeObj = readObject(0, digTypeClass);
+        if (MinecraftVersion.olderThan(MinecraftVersion.V.v1_8)) {
+            enumDigType = PlayerDigType.values()[new FieldResolver(blockDigClass).resolve(int.class, 4).get(null)];
 
-                Class<?> blockPosSuper = blockPositionClass;
-                x = Reflection.getField(blockPosSuper, int.class, 0).getInt(blockPosObj);
-                y = Reflection.getField(blockPosSuper, int.class, 1).getInt(blockPosObj);
-                z = Reflection.getField(blockPosSuper, int.class, 2).getInt(blockPosObj);
+            x = readInt(0);
+            y = readInt(1);
+            z = readInt(2);
 
-                //.toString() won't work so we must do this
-                enumDirection = EnumDirection.valueOf(((Enum)enumDirectionObj).name());
-                enumDigType = PlayerDigType.valueOf(((Enum)digTypeObj).name());
-            }
-        } catch (IllegalAccessException e) {
-            e.printStackTrace();
+            enumDirection = null;
+        } else {
+            //1.8+
+            final Object blockPosObj = readObject(0, blockPositionClass);
+            final Enum<?> enumDirectionObj = (Enum<?>) readObject(0, enumDirectionClass);
+            final Enum<?> digTypeObj = (Enum<?>) readObject(0, digTypeClass);
+
+            ObjectWrapper objectWrapper = new ObjectWrapper(blockPosObj);
+            x = objectWrapper.getFieldByIndex(int.class, 0);
+            y = objectWrapper.getFieldByIndex(int.class, 1);
+            z = objectWrapper.getFieldByIndex(int.class, 2);
+
+            enumDirection = EnumDirection.valueOf(enumDirectionObj.name());
+            enumDigType = PlayerDigType.valueOf(digTypeObj.name());
         }
-        this.blockPosition = new BlockPosition(x, y, z);
+        this.blockPosition = new BlockPosition(x, y, z, this.player.getWorld().getName());
         if (enumDirection == null) {
             this.direction = EnumDirection.NULL;
         } else {
             this.direction = enumDirection;
         }
         this.digType = enumDigType;
-    }
-
-    /**
-     * Get X position of the block
-     * @return Block Position X
-     */
-    public int getBlockPositionX() {
-        return blockPosition.x;
-    }
-
-    /**
-     * Get Y position of the block
-     * @return Block Position Y
-     */
-    public int getBlockPositionY() {
-        return blockPosition.y;
-    }
-
-    /**
-     * Get Z position of the block
-     * @return Block Position Z
-     */
-    public int getBlockPositionZ() {
-        return blockPosition.z;
-    }
-
-    /**
-     * Use {@link #getBlockPositionX()}, {@link #getBlockPositionY()}, {@link #getBlockPositionZ()}
-     * @return Block Position
-     */
-    @Deprecated
-    public Vector3i getBlockPosition() {
-        return blockPosition;
-    }
-
-    /**
-     * Get the direction
-     * Is Direction.NULL on 1.7.10 FOR NOW
-     * @return Direction
-     */
-    public Direction getDirection() {
-        return direction;
-    }
-
-    /**
-     * Get the PlayerDigType enum sent in this packet.
-     * @return Dig Type
-     */
-    public PlayerDigType getDigType() {
-        return digType;
     }
 
     public enum PlayerDigType {
