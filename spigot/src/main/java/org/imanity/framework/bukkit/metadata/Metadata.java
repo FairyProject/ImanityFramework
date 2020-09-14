@@ -38,13 +38,15 @@ import org.imanity.framework.bukkit.metadata.type.PlayerMetadataRegistry;
 import org.imanity.framework.bukkit.metadata.type.WorldMetadataRegistry;
 import org.imanity.framework.bukkit.util.BlockPosition;
 import org.imanity.framework.bukkit.util.TaskUtil;
+import org.imanity.framework.metadata.MetadataKey;
+import org.imanity.framework.metadata.MetadataMap;
+import org.imanity.framework.metadata.MetadataRegistry;
 
 import javax.annotation.Nonnull;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
-import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
@@ -72,11 +74,11 @@ public final class Metadata {
             // remove player metadata when they leave the server
             Events.subscribe(PlayerQuitEvent.class)
                     .priority(EventPriority.MONITOR)
-                    .listen((sub, e) -> StandardMetadataRegistries.PLAYER.remove(e.getPlayer().getUniqueId()));
+                    .listen((sub, e) -> BukkitMetadataRegistries.PLAYER.remove(e.getPlayer().getUniqueId()));
 
             // cache housekeeping task
             TaskUtil.runAsyncRepeated(() -> {
-                for (MetadataRegistry<?> registry : StandardMetadataRegistries.values()) {
+                for (MetadataRegistry<?> registry : BukkitMetadataRegistries.values()) {
                     registry.cleanup();
                 }
             }, 20 * 60L);
@@ -90,7 +92,7 @@ public final class Metadata {
      */
     public static PlayerMetadataRegistry players() {
         ensureSetup();
-        return StandardMetadataRegistries.PLAYER;
+        return BukkitMetadataRegistries.PLAYER;
     }
 
     /**
@@ -100,7 +102,7 @@ public final class Metadata {
      */
     public static EntityMetadataRegistry entities() {
         ensureSetup();
-        return StandardMetadataRegistries.ENTITY;
+        return BukkitMetadataRegistries.ENTITY;
     }
 
     /**
@@ -110,7 +112,7 @@ public final class Metadata {
      */
     public static BlockMetadataRegistry blocks() {
         ensureSetup();
-        return StandardMetadataRegistries.BLOCK;
+        return BukkitMetadataRegistries.BLOCK;
     }
 
     /**
@@ -120,7 +122,7 @@ public final class Metadata {
      */
     public static WorldMetadataRegistry worlds() {
         ensureSetup();
-        return StandardMetadataRegistries.WORLD;
+        return BukkitMetadataRegistries.WORLD;
     }
 
     /**

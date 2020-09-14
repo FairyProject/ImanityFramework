@@ -50,7 +50,10 @@ public class NMS1_8TabImpl implements IImanityTabImpl {
 
     @Override
     public void removeSelf(Player player) {
-        Bukkit.getOnlinePlayers().forEach(online -> sendPacket(online, new PacketPlayOutPlayerInfo(PacketPlayOutPlayerInfo.EnumPlayerInfoAction.REMOVE_PLAYER, ( (CraftPlayer) player).getHandle())));
+        Imanity.getPlayers()
+                .stream()
+                .filter(online -> MinecraftReflection.getProtocol(online) == PlayerVersion.v1_7)
+                .forEach(online -> sendPacket(online, new PacketPlayOutPlayerInfo(PacketPlayOutPlayerInfo.EnumPlayerInfoAction.REMOVE_PLAYER, ( (CraftPlayer) player).getHandle())));
     }
 
     @Override

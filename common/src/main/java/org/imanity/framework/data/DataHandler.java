@@ -2,6 +2,8 @@ package org.imanity.framework.data;
 
 import org.imanity.framework.data.store.StoreDatabase;
 import org.imanity.framework.data.store.StoreType;
+import org.imanity.framework.metadata.CommonMetadataRegistries;
+import org.imanity.framework.metadata.MetadataMap;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -23,7 +25,13 @@ public class DataHandler {
     }
 
     public static boolean hasData(Object player, StoreDatabase database) {
-        return PlayerData.PLAYER_BRIDGE.hasData(player, database);
+        MetadataMap map = CommonMetadataRegistries.getOrNull(PlayerData.PLAYER_BRIDGE.getUUID(player));
+
+        if (map == null) {
+            return false;
+        }
+
+        return map.has(database.getMetadataTag());
     }
 
 

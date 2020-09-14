@@ -8,10 +8,6 @@ import java.util.UUID;
 
 public interface IPlayerBridge<T> {
 
-    PlayerData getPlayerData(T t, StoreDatabase database);
-
-    boolean hasData(T t, StoreDatabase database);
-
     Collection<? extends T> getOnlinePlayers();
 
     UUID getUUID(T t);

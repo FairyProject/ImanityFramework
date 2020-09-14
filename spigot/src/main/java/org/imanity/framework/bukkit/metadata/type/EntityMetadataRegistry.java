@@ -26,9 +26,9 @@
 package org.imanity.framework.bukkit.metadata.type;
 
 import org.bukkit.entity.Entity;
-import org.imanity.framework.bukkit.metadata.MetadataKey;
-import org.imanity.framework.bukkit.metadata.MetadataMap;
-import org.imanity.framework.bukkit.metadata.MetadataRegistry;
+import org.imanity.framework.metadata.MetadataKey;
+import org.imanity.framework.metadata.MetadataMap;
+import org.imanity.framework.metadata.MetadataRegistry;
 
 import javax.annotation.Nonnull;
 import java.util.Map;

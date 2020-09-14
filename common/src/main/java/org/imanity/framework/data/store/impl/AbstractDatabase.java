@@ -3,6 +3,7 @@ package org.imanity.framework.data.store.impl;
 import lombok.Getter;
 import lombok.Setter;
 import org.bson.Document;
+import org.imanity.framework.ImanityCommon;
 import org.imanity.framework.data.AbstractData;
 import org.imanity.framework.data.DataHandler;
 import org.imanity.framework.data.PlayerData;
@@ -11,6 +12,8 @@ import org.imanity.framework.data.store.StoreType;
 import org.imanity.framework.data.type.DataConverter;
 import org.imanity.framework.data.type.DataConverterType;
 import org.imanity.framework.data.type.DataFieldConvert;
+import org.imanity.framework.metadata.CommonMetadataRegistries;
+import org.imanity.framework.metadata.MetadataKey;
 import org.imanity.framework.util.CommonUtility;
 import org.imanity.framework.util.entry.EntryArrayList;
 
@@ -21,6 +24,8 @@ import java.util.*;
 public abstract class AbstractDatabase implements StoreDatabase {
 
     private final Map<UUID, AbstractData> dataList = new HashMap<>();
+
+    private MetadataKey<PlayerData> metadataKey;
 
     protected Class<? extends AbstractData> dataClass;
     protected List<DataFieldConvert> dataConverterTypes;
@@ -35,6 +40,11 @@ public abstract class AbstractDatabase implements StoreDatabase {
         this.dataClass = data;
         this.type = type;
         this.dataConverterTypes = AbstractData.getDataTypes(data);
+
+        if (this.type == StoreType.PLAYER) {
+            this.metadataKey = MetadataKey.create(ImanityCommon.METADATA_PREFIX + this.getName(), PlayerData.class);
+        }
+
         this.init(name);
         DataHandler.add(data, this);
     }
@@ -121,7 +131,9 @@ public abstract class AbstractDatabase implements StoreDatabase {
         if (this.type != StoreType.PLAYER) {
             throw new UnsupportedOperationException("The data type is not player but trying to get data by type");
         }
-        return (PlayerData) PlayerData.PLAYER_BRIDGE.getPlayerData(player, this);
+        return CommonMetadataRegistries
+                .provide(PlayerData.PLAYER_BRIDGE.getUUID(player))
+                .getOrNull(this.metadataKey);
     }
 
     public AbstractData getByUuid(UUID uuid) {
@@ -131,6 +143,10 @@ public abstract class AbstractDatabase implements StoreDatabase {
     @Override
     public void delete(UUID uuid) {
         this.dataList.remove(uuid);
+
+        CommonMetadataRegistries
+                .get(uuid)
+                .ifPresent(map -> map.remove(this.metadataKey));
     }
 
     public void saveAndClear() {
@@ -152,5 +168,10 @@ public abstract class AbstractDatabase implements StoreDatabase {
     @Override
     public boolean autoSave() {
         return autoSave;
+    }
+
+    @Override
+    public MetadataKey<PlayerData> getMetadataTag() {
+        return this.metadataKey;
     }
 }

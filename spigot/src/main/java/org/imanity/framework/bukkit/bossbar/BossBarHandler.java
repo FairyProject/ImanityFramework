@@ -9,9 +9,8 @@ import org.bukkit.event.player.PlayerQuitEvent;
 import org.imanity.framework.bukkit.Imanity;
 import org.imanity.framework.ImanityCommon;
 import org.imanity.framework.bukkit.metadata.Metadata;
-import org.imanity.framework.bukkit.metadata.MetadataKey;
+import org.imanity.framework.metadata.MetadataKey;
 import org.imanity.framework.bukkit.player.movement.MovementListener;
-import org.imanity.framework.bukkit.util.SampleMetadata;
 import org.imanity.framework.bukkit.util.Utility;
 
 public class BossBarHandler implements Runnable {
@@ -21,8 +20,6 @@ public class BossBarHandler implements Runnable {
     private static final long v1_7_tick = 3L;
     private static final long v1_8_tick = 60L;
 
-    private long last1_7Update;
-    private long last1_8Update;
     private BossBarAdapter adapter;
 
     public BossBarHandler(BossBarAdapter adapter) {
@@ -100,9 +97,9 @@ public class BossBarHandler implements Runnable {
     private long getUpdateTick(BossBar bossBar) {
         switch (bossBar.getVersion()) {
             case v1_7:
-                return v1_7_tick;
+                return v1_7_tick * 50L;
             default:
-                return v1_8_tick;
+                return v1_8_tick * 50L;
         }
     }
 

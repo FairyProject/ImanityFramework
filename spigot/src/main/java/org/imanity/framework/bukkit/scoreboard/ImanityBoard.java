@@ -4,7 +4,7 @@ import lombok.Getter;
 import lombok.Setter;
 import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
-import org.imanity.framework.bukkit.metadata.MetadataKey;
+import org.imanity.framework.metadata.MetadataKey;
 import org.imanity.framework.bukkit.util.Utility;
 import org.imanity.framework.bukkit.util.reflection.MinecraftReflection;
 import org.imanity.framework.bukkit.util.reflection.resolver.minecraft.NMSClassResolver;

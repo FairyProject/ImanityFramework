@@ -10,24 +10,12 @@ import java.util.Collection;
 import java.util.UUID;
 
 public class BukkitPlayerBridge implements IPlayerBridge<Player> {
-    @Override
-    public PlayerData getPlayerData(Player player, StoreDatabase database) {
-        try {
-            return (PlayerData) player.getMetadata(database.getMetadataTag()).get(0).value();
-        } catch (IndexOutOfBoundsException throwable) {
-            throw new IllegalStateException("Metadata " + database.getMetadataTag() + " not exists!", throwable);
-        }
-    }
-
-    @Override
-    public boolean hasData(Player player, StoreDatabase database) {
-        return player.hasMetadata(database.getMetadataTag());
-    }
 
     @Override
     public Collection<? extends Player> getOnlinePlayers() {
         return Imanity.PLUGIN.getServer().getOnlinePlayers();
     }
+
     @Override
     public UUID getUUID(Player player) {
         return player.getUniqueId();

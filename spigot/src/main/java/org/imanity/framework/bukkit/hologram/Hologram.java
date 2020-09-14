@@ -84,13 +84,7 @@ public class Hologram {
 
     public void update() {
         this.validateMainThread();
-        this.lines.forEach(hologram -> {
-            if (!hologram.isPacketsBuilt()) {
-                return;
-            }
-            hologram.build(true);
-            hologram.sendNamePackets(this.renderedPlayers);
-        });
+        this.lines.forEach(hologram -> hologram.sendNamePackets(this.renderedPlayers));
     }
 
     public void setView(int index, ViewHandler viewHandler) {
@@ -100,10 +94,7 @@ public class Hologram {
             this.lines.add(index, single);
 
             if (this.isSpawned()) {
-                single.build(false);
-                single.setPacketsBuilt(true);
-
-                single.send(this.location.getWorld().getPlayers());
+                single.send(this.renderedPlayers);
             }
         } else {
             HologramSingle single = this.lines.get(index);
@@ -112,12 +103,6 @@ public class Hologram {
             }
 
             single.setViewHandler(viewHandler);
-            if (!single.isPacketsBuilt()) {
-                single.build(false);
-                single.setPacketsBuilt(true);
-            } else {
-                single.build(true);
-            }
             single.sendNamePackets(this.renderedPlayers);
         }
 
@@ -151,10 +136,7 @@ public class Hologram {
         if (this.isSpawned()) {
 
             List<Player> players = this.location.getWorld().getPlayers();
-            this.lines.forEach(hologram -> {
-                hologram.build(true);
-                hologram.sendTeleportPacket(players);
-            });
+            this.lines.forEach(hologram -> hologram.sendTeleportPacket(players));
 
         }
     }
@@ -165,14 +147,7 @@ public class Hologram {
 
     public void spawnPlayer(Player player) {
         this.validateMainThread();
-        this.lines.forEach(hologram -> {
-            if (!hologram.isPacketsBuilt()) {
-                hologram.build(false);
-                hologram.setPacketsBuilt(true);
-            }
-
-            hologram.send(Collections.singleton(player));
-        });
+        this.lines.forEach(hologram -> hologram.send(Collections.singleton(player)));
         this.renderedPlayers.add(player);
     }
 

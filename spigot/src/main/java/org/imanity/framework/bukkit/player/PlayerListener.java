@@ -1,6 +1,5 @@
 package org.imanity.framework.bukkit.player;
 
-import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
@@ -11,11 +10,11 @@ import org.imanity.framework.bukkit.Imanity;
 import org.imanity.framework.bukkit.events.player.PlayerPostJoinEvent;
 import org.imanity.framework.bukkit.listener.events.Events;
 import org.imanity.framework.bukkit.metadata.Metadata;
+import org.imanity.framework.metadata.MetadataKey;
 import org.imanity.framework.bukkit.player.event.PlayerDataLoadEvent;
 import org.imanity.framework.bukkit.util.reflection.MinecraftReflection;
 import org.imanity.framework.data.DataHandler;
 import org.imanity.framework.data.PlayerData;
-import org.imanity.framework.bukkit.util.SampleMetadata;
 import org.imanity.framework.data.store.StoreDatabase;
 import org.imanity.framework.events.annotation.AutoWiredListener;
 import org.imanity.framework.util.entry.Entry;
@@ -25,7 +24,7 @@ import org.imanity.framework.util.entry.EntryArrayList;
 public class PlayerListener implements Listener {
 
     @EventHandler(priority = EventPriority.LOWEST)
-    public void onPlayerJoinScoreboard(PlayerPostJoinEvent event) {
+    public void onPlayerJoinScoreboard(PlayerJoinEvent event) {
         Player player = event.getPlayer();
 
         if (Imanity.BOARD_HANDLER != null) {
@@ -70,7 +69,9 @@ public class PlayerListener implements Listener {
                 .abortIf(ignored -> !player.isOnline())
                 .sync(list -> {
                     for (Entry<PlayerData, StoreDatabase> entry : list) {
-                        player.setMetadata(entry.getValue().getMetadataTag(), new SampleMetadata(entry.getKey()));
+                        Metadata
+                                .provideForPlayer(player)
+                                .put(entry.getValue().getMetadataTag(), entry.getKey());
 
                         PlayerDataLoadEvent.callEvent(player, entry.getKey());
                     }
@@ -112,8 +113,6 @@ public class PlayerListener implements Listener {
                     }
                 }).sync(() -> {
                     for (StoreDatabase database : DataHandler.getPlayerDatabases()) {
-                        player.removeMetadata(database.getMetadataTag(), Imanity.PLUGIN);
-
                         if (!database.autoSave()) {
                             return;
                         }

@@ -39,7 +39,6 @@ import org.imanity.framework.bukkit.util.*;
 import org.imanity.framework.bukkit.tablist.ImanityTabAdapter;
 import org.imanity.framework.bukkit.tablist.ImanityTabHandler;
 import org.imanity.framework.bukkit.visual.VisualBlockHandler;
-import org.imanity.framework.libraries.Library;
 import org.imanity.framework.libraries.classloader.PluginClassLoader;
 import org.imanity.framework.plugin.service.Autowired;
 import org.imanity.framework.task.chain.TaskChainFactory;
@@ -47,10 +46,9 @@ import org.imanity.framework.util.FastRandom;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Set;
 
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
-public class Imanity {
+public final class Imanity {
 
     public static final Logger LOGGER = LogManager.getLogger("Imanity");
     public static FastRandom RANDOM;

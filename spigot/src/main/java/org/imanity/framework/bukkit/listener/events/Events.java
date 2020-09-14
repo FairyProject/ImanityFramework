@@ -1,6 +1,5 @@
 package org.imanity.framework.bukkit.listener.events;
 
-import com.google.common.collect.ImmutableSet;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Cancellable;
 import org.bukkit.event.Event;
@@ -10,13 +9,9 @@ import org.bukkit.event.player.PlayerLoginEvent;
 import org.bukkit.event.player.PlayerMoveEvent;
 import org.imanity.framework.ImanityCommon;
 import org.imanity.framework.bukkit.metadata.Metadata;
-import org.imanity.framework.bukkit.metadata.MetadataKey;
-import org.imanity.framework.bukkit.util.Utility;
-import org.imanity.framework.libraries.Library;
+import org.imanity.framework.metadata.MetadataKey;
 
 import javax.annotation.Nullable;
-import java.util.Map;
-import java.util.Set;
 import java.util.function.Predicate;
 
 public class Events {

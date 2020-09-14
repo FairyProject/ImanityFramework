@@ -6,7 +6,7 @@ import org.bukkit.entity.Player;
 import org.imanity.framework.ImanityCommon;
 import org.imanity.framework.bukkit.Imanity;
 import org.imanity.framework.bukkit.metadata.Metadata;
-import org.imanity.framework.bukkit.metadata.MetadataKey;
+import org.imanity.framework.metadata.MetadataKey;
 import org.imanity.framework.bukkit.tablist.util.IImanityTabImpl;
 import lombok.Getter;
 import lombok.Setter;
@@ -100,7 +100,6 @@ public class ImanityTabHandler {
             .build());
 
         this.thread.scheduleAtFixedRate(() -> {
-            System.out.println("tick");
             for (Player player : Imanity.getPlayers()) {
                 ImanityTablist tablist = Metadata
                         .provideForPlayer(player)

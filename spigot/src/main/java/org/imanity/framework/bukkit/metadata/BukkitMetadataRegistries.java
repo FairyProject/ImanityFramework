@@ -25,6 +25,7 @@
 
 package org.imanity.framework.bukkit.metadata;
 
+import com.github.benmanes.caffeine.cache.LoadingCache;
 import com.google.common.collect.ImmutableMap;
 import org.bukkit.Bukkit;
 import org.bukkit.World;
@@ -37,6 +38,8 @@ import org.imanity.framework.bukkit.metadata.type.EntityMetadataRegistry;
 import org.imanity.framework.bukkit.metadata.type.PlayerMetadataRegistry;
 import org.imanity.framework.bukkit.metadata.type.WorldMetadataRegistry;
 import org.imanity.framework.bukkit.util.BlockPosition;
+import org.imanity.framework.metadata.*;
+import org.jetbrains.annotations.NotNull;
 
 import javax.annotation.Nonnull;
 import java.util.Map;
@@ -49,9 +52,9 @@ import java.util.UUID;
  *
  * These instances can be accessed through {@link Metadata}.
  */
-final class StandardMetadataRegistries {
+final class BukkitMetadataRegistries {
 
-    public static final PlayerMetadataRegistry PLAYER = new PlayerRegistry();
+    public static final PlayerMetadataRegistry PLAYER = new PlayerRegistry(CommonMetadataRegistries.PLAYERS);
     public static final EntityMetadataRegistry ENTITY = new EntityRegistry();
     public static final BlockMetadataRegistry BLOCK = new BlockRegistry();
     public static final WorldMetadataRegistry WORLD = new WorldRegistry();
@@ -62,7 +65,13 @@ final class StandardMetadataRegistries {
         return VALUES;
     }
 
-    private static final class PlayerRegistry extends AbstractMetadataRegistry<UUID> implements PlayerMetadataRegistry {
+    private static final class PlayerRegistry implements PlayerMetadataRegistry {
+
+        private AbstractMetadataRegistry<UUID> uuids;
+
+        private PlayerRegistry(AbstractMetadataRegistry<UUID> uuids) {
+            this.uuids = uuids;
+        }
 
         @Nonnull
         @Override
@@ -83,13 +92,40 @@ final class StandardMetadataRegistries {
         public <K> Map<Player, K> getAllWithKey(@Nonnull MetadataKey<K> key) {
             Objects.requireNonNull(key, "key");
             ImmutableMap.Builder<Player, K> ret = ImmutableMap.builder();
-            this.cache.asMap().forEach((uuid, map) -> map.get(key).ifPresent(t -> {
+            this.uuids.cache().asMap().forEach((uuid, map) -> map.get(key).ifPresent(t -> {
                 Player player = Bukkit.getPlayer(uuid);
                 if (player != null) {
                     ret.put(player, t);
                 }
             }));
             return ret.build();
+        }
+
+        @NotNull
+        @Override
+        public MetadataMap provide(@NotNull UUID id) {
+            return this.uuids.provide(id);
+        }
+
+        @NotNull
+        @Override
+        public Optional<MetadataMap> get(@NotNull UUID id) {
+            return this.uuids.get(id);
+        }
+
+        @Override
+        public void remove(@NotNull UUID id) {
+            this.uuids.remove(id);
+        }
+
+        @Override
+        public void cleanup() {
+            this.uuids.cleanup();
+        }
+
+        @Override
+        public LoadingCache<UUID, MetadataMap> cache() {
+            return this.uuids.cache();
         }
     }
 
@@ -182,7 +218,7 @@ final class StandardMetadataRegistries {
         }
     }
 
-    private StandardMetadataRegistries() {
+    private BukkitMetadataRegistries() {
         throw new UnsupportedOperationException("This class cannot be instantiated");
     }
 

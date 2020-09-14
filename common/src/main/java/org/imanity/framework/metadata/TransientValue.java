@@ -23,7 +23,7 @@
  *  SOFTWARE.
  */
 
-package org.imanity.framework.bukkit.metadata;
+package org.imanity.framework.metadata;
 
 import javax.annotation.Nullable;
 

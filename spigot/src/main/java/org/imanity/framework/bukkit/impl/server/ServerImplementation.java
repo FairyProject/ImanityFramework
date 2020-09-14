@@ -6,6 +6,7 @@ import org.bukkit.block.Block;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 import org.bukkit.material.MaterialData;
+import org.imanity.framework.bukkit.hologram.HologramSingle;
 import org.imanity.framework.bukkit.nametag.NameTagInfo;
 import org.imanity.framework.bukkit.util.BlockPosition;
 import org.imanity.framework.bukkit.util.SpigotUtil;
@@ -49,4 +50,14 @@ public interface ServerImplementation {
     void sendTeam(Player player, String name, String prefix, String suffix, Collection<String> nameSet, int type);
 
     void sendMember(Player player, String name, Collection<String> players, int type);
+
+    void sendEntityDestroy(Player player, int... ids);
+
+    void sendEntityTeleport(Player player, Location location, int id);
+
+    void sendEntityAttach(Player player, int type, int toAttach, int attachTo);
+
+    void sendHologramSpawnPacket(Player player, HologramSingle hologramSingle);
+
+    void sendHologramNamePacket(Player player, HologramSingle hologramSingle);
 }

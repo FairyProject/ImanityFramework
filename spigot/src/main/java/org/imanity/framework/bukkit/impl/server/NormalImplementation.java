@@ -1,9 +1,7 @@
 package org.imanity.framework.bukkit.impl.server;
 
 import com.google.common.collect.HashMultimap;
-import net.minecraft.server.v1_8_R3.Block;
-import net.minecraft.server.v1_8_R3.PacketPlayOutMultiBlockChange;
-import net.minecraft.server.v1_8_R3.PacketPlayOutNamedEntitySpawn;
+import net.minecraft.server.v1_8_R3.PacketPlayOutAttachEntity;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -11,15 +9,15 @@ import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 import org.bukkit.material.MaterialData;
 import org.imanity.framework.ImanityCommon;
+import org.imanity.framework.bukkit.hologram.HologramSingle;
 import org.imanity.framework.bukkit.metadata.Metadata;
-import org.imanity.framework.bukkit.metadata.MetadataKey;
+import org.imanity.framework.metadata.MetadataKey;
 import org.imanity.framework.bukkit.util.*;
 import org.imanity.framework.bukkit.util.BlockPosition;
 import org.imanity.framework.bukkit.util.reflection.MinecraftReflection;
 import org.imanity.framework.bukkit.util.reflection.resolver.ConstructorResolver;
 import org.imanity.framework.bukkit.util.reflection.resolver.minecraft.NMSClassResolver;
 import org.imanity.framework.bukkit.util.reflection.resolver.wrapper.*;
-import org.imanity.framework.util.CommonUtility;
 
 import java.lang.reflect.Array;
 import java.util.*;
@@ -125,13 +123,13 @@ public class NormalImplementation implements ServerImplementation {
 
         for (Player other : players) {
 //            ((CraftPlayer) other).getHandle().playerConnection.fakeEntities.add(i); // TODO
-            MinecraftReflection.sendPacket(player, packet);
-            MinecraftReflection.sendPacket(player, statusPacket);
+            MinecraftReflection.sendPacket(other, packet);
+            MinecraftReflection.sendPacket(other, statusPacket);
         }
 
         TaskUtil.runScheduled(() -> players.forEach(other -> {
 //            ((CraftPlayer) other).getHandle().playerConnection.fakeEntities.remove(i); // TODO
-            MinecraftReflection.sendPacket(player, destroyPacket);
+            MinecraftReflection.sendPacket(other, destroyPacket);
         }), 20L);
     }
 
@@ -278,5 +276,49 @@ public class NormalImplementation implements ServerImplementation {
     @Override
     public void sendMember(Player player, String name, Collection<String> players, int type) {
         // TODO
+    }
+
+    @Override
+    public void sendEntityDestroy(Player player, int... ids) {
+        MinecraftReflection.sendPacket(player, DESTROY_ENTITY_CONSTRUCTOR.newInstance(ids));
+    }
+
+    @Override
+    public void sendEntityAttach(Player player, int type, int toAttach, int attachTo) {
+
+        PacketWrapper packetWrapper = PacketWrapper.createByPacketName("PacketPlayOutAttachEntity");
+        packetWrapper.setPacketValue("a", type);
+        packetWrapper.setPacketValue("b", toAttach);
+        packetWrapper.setPacketValue("c", attachTo);
+
+        MinecraftReflection.sendPacket(player, packetWrapper);
+
+    }
+
+    @Override
+    public void sendEntityTeleport(Player player, Location location, int id) {
+
+        PacketWrapper packet = PacketWrapper.createByPacketName("PacketPlayOutEntityTeleport");
+
+        packet.setPacketValue("a", id);
+        packet.setPacketValue("b", (int) (location.getX() * 32.0D));
+        packet.setPacketValue("c", (int) (location.getY() * 32.0D));
+        packet.setPacketValue("d", (int) (location.getZ() * 32.0D));
+
+        packet.setPacketValue("e", (byte) ((int) (location.getYaw() * 256.0F / 360.0F)));
+        packet.setPacketValue("f", (byte) ((int) (location.getPitch() * 256.0F / 360.0F)));
+
+        MinecraftReflection.sendPacket(player, packet);
+
+    }
+
+    @Override
+    public void sendHologramSpawnPacket(Player player, HologramSingle hologramSingle) {
+        // TODO
+    }
+
+    @Override
+    public void sendHologramNamePacket(Player player, HologramSingle hologramSingle) {
+
     }
 }

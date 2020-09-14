@@ -23,51 +23,52 @@
  *  SOFTWARE.
  */
 
-package org.imanity.framework.bukkit.metadata;
+package org.imanity.framework.metadata;
 
-import javax.annotation.Nullable;
-import java.lang.ref.WeakReference;
-import java.util.Objects;
-import java.util.function.Supplier;
+import com.github.benmanes.caffeine.cache.LoadingCache;
+
+import javax.annotation.Nonnull;
+import java.util.Optional;
 
 /**
- * Represents a value wrapped in a {@link WeakReference}
+ * A registry which provides and stores {@link MetadataMap}s for a given type.
  *
- * @param <T> the wrapped value type
+ * @param <T> the type
  */
-public final class WeakValue<T> implements TransientValue<T> {
+public interface MetadataRegistry<T> {
 
-    public static <T> WeakValue<T> of(T value) {
-        Objects.requireNonNull(value, "value");
-        return new WeakValue<>(value);
-    }
+    /**
+     * Produces a {@link MetadataMap} for the given object.
+     *
+     * @param id the object
+     * @return a metadata map
+     */
+    @Nonnull
+    MetadataMap provide(@Nonnull T id);
 
-    public static <T> Supplier<WeakValue<T>> supplied(Supplier<? extends T> supplier) {
-        Objects.requireNonNull(supplier, "supplier");
+    /**
+     * Gets a {@link MetadataMap} for the given object, if one already exists and has
+     * been cached in this registry.
+     *
+     * @param id the object
+     * @return a metadata map, if present
+     */
+    @Nonnull
+    Optional<MetadataMap> get(@Nonnull T id);
 
-        return () -> {
-            T value = supplier.get();
-            Objects.requireNonNull(value, "value");
+    /**
+     * Deletes the {@link MetadataMap} and all contained {@link MetadataKey}s for
+     * the given object.
+     *
+     * @param id the object
+     */
+    void remove(@Nonnull T id);
 
-            return new WeakValue<>(value);
-        };
-    }
+    /**
+     * Performs cache maintenance to remove empty map instances and expired transient values.
+     */
+    void cleanup();
 
-    private final WeakReference<T> value;
-
-    private WeakValue(T value) {
-        this.value = new WeakReference<>(value);
-    }
-
-    @Nullable
-    @Override
-    public T getOrNull() {
-        return this.value.get();
-    }
-
-    @Override
-    public boolean shouldExpire() {
-        return this.value.get() == null;
-    }
+    public LoadingCache<T, MetadataMap> cache();
 
 }

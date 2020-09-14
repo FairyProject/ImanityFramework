@@ -23,51 +23,44 @@
  *  SOFTWARE.
  */
 
-package org.imanity.framework.bukkit.metadata;
+package org.imanity.framework.metadata;
 
-import javax.annotation.Nullable;
-import java.lang.ref.SoftReference;
-import java.util.Objects;
+import javax.annotation.Nonnull;
 import java.util.function.Supplier;
 
 /**
- * Represents a value wrapped in a {@link SoftReference}
+ * An object which represents nothing.
  *
- * @param <T> the wrapped value type
+ * <p>Used mostly by {@link MetadataKey}s, where the presence of the key in the map
+ * is enough for a behaviour to apply. In other words, the value is not significant.</p>
+ *
+ * <p>Very similar to {@link Void}, except this class also provides an instance of the "empty" object.</p>
  */
-public final class SoftValue<T> implements TransientValue<T> {
+public final class Empty {
+    private static final Empty INSTANCE = new Empty();
+    private static final Supplier<Empty> SUPPLIER = () -> INSTANCE;
 
-    public static <T> SoftValue<T> of(T value) {
-        Objects.requireNonNull(value, "value");
-        return new SoftValue<>(value);
+    @Nonnull
+    public static Empty instance() {
+        return INSTANCE;
     }
 
-    public static <T> Supplier<SoftValue<T>> supplied(Supplier<? extends T> supplier) {
-        Objects.requireNonNull(supplier, "supplier");
-
-        return () -> {
-            T value = supplier.get();
-            Objects.requireNonNull(value, "value");
-
-            return new SoftValue<>(value);
-        };
+    @Nonnull
+    public static Supplier<Empty> supplier() {
+        return SUPPLIER;
     }
 
-    private final SoftReference<T> value;
+    private Empty() {
 
-    private SoftValue(T value) {
-        this.value = new SoftReference<>(value);
-    }
-
-    @Nullable
-    @Override
-    public T getOrNull() {
-        return this.value.get();
     }
 
     @Override
-    public boolean shouldExpire() {
-        return this.value.get() == null;
+    public boolean equals(Object obj) {
+        return obj == this;
     }
 
+    @Override
+    public String toString() {
+        return "Empty";
+    }
 }

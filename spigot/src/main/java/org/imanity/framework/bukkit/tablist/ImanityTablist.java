@@ -25,16 +25,10 @@ public class ImanityTablist {
     public ImanityTablist(Player player) {
         this.player = player;
         this.setup();
-
-        if (MinecraftReflection.getProtocol(player) == PlayerVersion.v1_7) {
-            TaskUtil.runScheduled(() -> ImanityTabHandler.getInstance().getImplementation().removeSelf(player), 1L);
-        }
     }
 
     private void setup() {
         final int possibleSlots = MinecraftReflection.getProtocol(player) == PlayerVersion.v1_7 ? 60 : 80;
-
-        System.out.println(MinecraftReflection.getProtocol(player));
 
         for (int i = 1; i <= possibleSlots; i++) {
             final TabColumn tabColumn = TabColumn.getFromSlot(player, i);
