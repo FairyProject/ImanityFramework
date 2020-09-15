@@ -27,45 +27,26 @@ package org.imanity.framework.bukkit.packet.wrapper.client;
 import lombok.Getter;
 import org.imanity.framework.bukkit.packet.PacketDirection;
 import org.imanity.framework.bukkit.packet.type.PacketType;
-import org.imanity.framework.bukkit.packet.type.PacketTypeClasses;
 import org.imanity.framework.bukkit.packet.wrapper.WrappedPacket;
 import org.imanity.framework.bukkit.packet.wrapper.annotation.AutowiredWrappedPacket;
-import org.imanity.framework.bukkit.util.reflection.resolver.FieldResolver;
 
+@AutowiredWrappedPacket(value = PacketType.Client.TRANSACTION, direction = PacketDirection.READ)
 @Getter
-@AutowiredWrappedPacket(value = PacketType.Client.ABILITIES, direction = PacketDirection.READ)
-public final class WrappedPacketInAbilities extends WrappedPacket {
+public final class WrappedPacketInTransaction extends WrappedPacket {
 
-    private static final boolean MULTIPLE_ABILITIES;
+    private int windowId;
+    private short actionNumber;
+    private boolean accepted;
 
-    static {
-        MULTIPLE_ABILITIES = new FieldResolver(PacketTypeClasses.Client.ABILITIES)
-                .resolve(boolean.class, 1)
-                .get(null);
-    }
-
-    private boolean vulnerable;
-    private boolean flying;
-    private boolean allowFly;
-    private boolean instantBuild;
-    private float flySpeed;
-    private float walkSpeed;
-
-    public WrappedPacketInAbilities(Object packet) {
+    public WrappedPacketInTransaction(final Object packet) {
         super(packet);
     }
 
     @Override
     protected void setup() {
-        if (MULTIPLE_ABILITIES) {
-            this.vulnerable = readBoolean(0);
-            this.flying = readBoolean(1);
-            this.allowFly = readBoolean(2);
-            this.instantBuild = readBoolean(3);
-            this.flySpeed = readFloat(0);
-            this.walkSpeed = readFloat(1);
-        } else {
-            this.flying = readBoolean(0);
-        }
+        this.windowId = readInt(0);
+        this.actionNumber = readShort(0);
+        this.accepted = readBoolean(0);
     }
+
 }

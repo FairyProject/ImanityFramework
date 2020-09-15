@@ -5,12 +5,15 @@ import net.minecraft.server.v1_8_R3.PacketPlayOutAttachEntity;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.Material;
+import org.bukkit.World;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 import org.bukkit.material.MaterialData;
 import org.imanity.framework.ImanityCommon;
 import org.imanity.framework.bukkit.hologram.HologramSingle;
 import org.imanity.framework.bukkit.metadata.Metadata;
+import org.imanity.framework.bukkit.util.reflection.resolver.MethodResolver;
+import org.imanity.framework.bukkit.util.reflection.resolver.ResolverQuery;
 import org.imanity.framework.metadata.MetadataKey;
 import org.imanity.framework.bukkit.util.*;
 import org.imanity.framework.bukkit.util.BlockPosition;
@@ -40,6 +43,8 @@ public class NormalImplementation implements ServerImplementation {
 
     private static final MethodWrapper<?> BLOCK_GET_BY_ID_METHOD;
     private static final MethodWrapper<?> FROM_LEGACY_DATA_METHOD;
+    private static final MethodWrapper<?> GET_ENTITY_BY_UUID_METHOD;
+    private static final MethodWrapper<?> GET_ENTITY_BY_ID_METHOD;
 
     private static final ConstructorWrapper<?> BLOCK_INFO_CONSTRUCTOR;
     private static final ConstructorWrapper<?> SPAWN_NAMED_ENTITY_CONSTRUCTOR;
@@ -54,6 +59,11 @@ public class NormalImplementation implements ServerImplementation {
             Class<?> minecraftServerType = CLASS_RESOLVER.resolve("MinecraftServer");
             Object minecraftServer = minecraftServerType.getMethod("getServer").invoke(null);
             MINECRAFT_SERVER = new ObjectWrapper(minecraftServer);
+
+            GET_ENTITY_BY_UUID_METHOD = new MethodResolver(minecraftServerType).resolveWrapper(
+                    new ResolverQuery("getEntity", int.class),
+                    new ResolverQuery("a", int.class)
+            );
 
             Class<?> entityPlayerType = CLASS_RESOLVER.resolve("EntityPlayer");
             PLAYER_CONNECTION_FIELD = new FieldWrapper<>(entityPlayerType.getField("playerConnection"));
@@ -71,6 +81,13 @@ public class NormalImplementation implements ServerImplementation {
             Class<?> blockType = CLASS_RESOLVER.resolve("Block");
             BLOCK_GET_BY_ID_METHOD = new MethodWrapper<>(blockType.getMethod("getById", int.class));
             FROM_LEGACY_DATA_METHOD = new MethodWrapper<>(blockType.getMethod("fromLegacyData", int.class));
+
+            Class<?> worldType = CLASS_RESOLVER.resolve("World");
+            MethodResolver methodResolver = new MethodResolver(worldType);
+            GET_ENTITY_BY_ID_METHOD = methodResolver.resolveWrapper(
+                    new ResolverQuery("getEntity", int.class),
+                    new ResolverQuery("a", int.class)
+            );
 
             BLOCK_SLIPPERINESS_FIELD = new FieldWrapper<>(blockType.getField("frictionFactor"));
 
@@ -94,6 +111,16 @@ public class NormalImplementation implements ServerImplementation {
     public Entity getEntity(UUID uuid) {
         try {
             return MinecraftReflection.getBukkitEntity(MINECRAFT_SERVER.invoke("a", uuid));
+        } catch (ReflectiveOperationException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    @Override
+    public Entity getEntity(World world, int id) {
+        try {
+            Object worldHandle = MinecraftReflection.getHandle(world);
+            return MinecraftReflection.getBukkitEntity(GET_ENTITY_BY_ID_METHOD.invoke(worldHandle, id));
         } catch (ReflectiveOperationException e) {
             throw new RuntimeException(e);
         }

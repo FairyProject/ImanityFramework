@@ -31,41 +31,52 @@ import org.imanity.framework.bukkit.packet.type.PacketTypeClasses;
 import org.imanity.framework.bukkit.packet.wrapper.WrappedPacket;
 import org.imanity.framework.bukkit.packet.wrapper.annotation.AutowiredWrappedPacket;
 import org.imanity.framework.bukkit.util.reflection.resolver.FieldResolver;
+import org.imanity.framework.bukkit.util.reflection.resolver.wrapper.FieldWrapper;
 
+@AutowiredWrappedPacket(value = PacketType.Client.CUSTOM_PAYLOAD, direction = PacketDirection.READ)
 @Getter
-@AutowiredWrappedPacket(value = PacketType.Client.ABILITIES, direction = PacketDirection.READ)
-public final class WrappedPacketInAbilities extends WrappedPacket {
+public final class WrappedPacketInCustomPayload extends WrappedPacket {
+    private static Class<?> packetClass, nmsMinecraftKey, nmsPacketDataSerializer;
 
-    private static final boolean MULTIPLE_ABILITIES;
-
-    static {
-        MULTIPLE_ABILITIES = new FieldResolver(PacketTypeClasses.Client.ABILITIES)
-                .resolve(boolean.class, 1)
-                .get(null);
-    }
-
-    private boolean vulnerable;
-    private boolean flying;
-    private boolean allowFly;
-    private boolean instantBuild;
-    private float flySpeed;
-    private float walkSpeed;
-
-    public WrappedPacketInAbilities(Object packet) {
+    private static boolean strPresentInIndex0;
+    private String data;
+    private Object minecraftKey, dataSerializer;
+    public WrappedPacketInCustomPayload(Object packet) {
         super(packet);
     }
 
-    @Override
-    protected void setup() {
-        if (MULTIPLE_ABILITIES) {
-            this.vulnerable = readBoolean(0);
-            this.flying = readBoolean(1);
-            this.allowFly = readBoolean(2);
-            this.instantBuild = readBoolean(3);
-            this.flySpeed = readFloat(0);
-            this.walkSpeed = readFloat(1);
-        } else {
-            this.flying = readBoolean(0);
+    public static void init() {
+        packetClass = PacketTypeClasses.Client.CUSTOM_PAYLOAD;
+        strPresentInIndex0 = new FieldResolver(packetClass)
+            .resolve(String.class, 0)
+            .exists();
+        try {
+            nmsPacketDataSerializer = NMS_CLASS_RESOLVER.resolve("PacketDataSerializer");
+        } catch (ClassNotFoundException e) {
+            e.printStackTrace();
+        }
+        try {
+            //Only on 1.13+
+            nmsMinecraftKey = NMS_CLASS_RESOLVER.resolve("MinecraftKey");
+        } catch (ClassNotFoundException e) {
+            //Its okay, this means they are on versions 1.7.10 - 1.12.2
         }
     }
+
+    @Override
+    public void setup() {
+        if (!strPresentInIndex0) {
+            this.minecraftKey = readObject(0, nmsMinecraftKey);
+            this.dataSerializer = readObject(0, nmsPacketDataSerializer);
+
+        } else {
+            this.data = readString(0);
+
+            FieldWrapper<?> fieldWrapper = this.packet.getFieldWrapperByIndex(nmsPacketDataSerializer, 0);
+            if (fieldWrapper.exists()) {
+                this.dataSerializer = fieldWrapper.get(this.packet.getPacket());
+            }
+        }
+    }
+
 }

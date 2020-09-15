@@ -35,10 +35,7 @@ import org.imanity.framework.bukkit.util.reflection.resolver.wrapper.ObjectWrapp
 final class WrappedPacketInBlockPlace_1_8 extends WrappedPacket {
     private static Class<?>
             BLOCK_POSITION,
-            BLOCK_POSITION_SUPER,
-            NMS_ITEM_STACK;
-
-    private static MethodWrapper<ItemStack> ITEM_COPY_OF_METHOD;
+            BLOCK_POSITION_SUPER;
 
     private BlockPosition blockPosition;
     private ItemStack itemStack;
@@ -50,11 +47,7 @@ final class WrappedPacketInBlockPlace_1_8 extends WrappedPacket {
     protected static void load() {
         try {
             BLOCK_POSITION = NMS_CLASS_RESOLVER.resolve("BlockPosition");
-            NMS_ITEM_STACK = NMS_CLASS_RESOLVER.resolve("ItemStack");
-
-            Class<?> type = CRAFT_CLASS_RESOLVER.resolve("CraftItemStack");
-            ITEM_COPY_OF_METHOD = new MethodWrapper<>(type.getDeclaredMethod("asBukkitCopy"));
-        } catch (ClassNotFoundException | NoSuchMethodException e) {
+        } catch (ClassNotFoundException e) {
             throw new RuntimeException(e);
         }
         BLOCK_POSITION_SUPER = BLOCK_POSITION.getSuperclass();
@@ -72,6 +65,6 @@ final class WrappedPacketInBlockPlace_1_8 extends WrappedPacket {
         this.blockPosition.setY(objectWrapper.invoke("getY"));
         this.blockPosition.setZ(objectWrapper.invoke("getZ"));
 
-        this.itemStack = ITEM_COPY_OF_METHOD.invoke(null, readObject(0, NMS_ITEM_STACK));
+        this.itemStack = this.readItemStack(0);
     }
 }

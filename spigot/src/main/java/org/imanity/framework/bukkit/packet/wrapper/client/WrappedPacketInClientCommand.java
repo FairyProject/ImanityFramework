@@ -30,42 +30,44 @@ import org.imanity.framework.bukkit.packet.type.PacketType;
 import org.imanity.framework.bukkit.packet.type.PacketTypeClasses;
 import org.imanity.framework.bukkit.packet.wrapper.WrappedPacket;
 import org.imanity.framework.bukkit.packet.wrapper.annotation.AutowiredWrappedPacket;
-import org.imanity.framework.bukkit.util.reflection.resolver.FieldResolver;
 
+@AutowiredWrappedPacket(value = PacketType.Client.CLIENT_COMMAND, direction = PacketDirection.READ)
 @Getter
-@AutowiredWrappedPacket(value = PacketType.Client.ABILITIES, direction = PacketDirection.READ)
-public final class WrappedPacketInAbilities extends WrappedPacket {
+public final class WrappedPacketInClientCommand extends WrappedPacket {
+    private static Class<?> packetClass;
+    private static Class<?> enumClientCommandClass;
 
-    private static final boolean MULTIPLE_ABILITIES;
+    private ClientCommand clientCommand;
 
-    static {
-        MULTIPLE_ABILITIES = new FieldResolver(PacketTypeClasses.Client.ABILITIES)
-                .resolve(boolean.class, 1)
-                .get(null);
-    }
-
-    private boolean vulnerable;
-    private boolean flying;
-    private boolean allowFly;
-    private boolean instantBuild;
-    private float flySpeed;
-    private float walkSpeed;
-
-    public WrappedPacketInAbilities(Object packet) {
+    public WrappedPacketInClientCommand(Object packet) {
         super(packet);
     }
 
-    @Override
-    protected void setup() {
-        if (MULTIPLE_ABILITIES) {
-            this.vulnerable = readBoolean(0);
-            this.flying = readBoolean(1);
-            this.allowFly = readBoolean(2);
-            this.instantBuild = readBoolean(3);
-            this.flySpeed = readFloat(0);
-            this.walkSpeed = readFloat(1);
-        } else {
-            this.flying = readBoolean(0);
+    public static void init() {
+        packetClass = PacketTypeClasses.Client.CLIENT_COMMAND;
+
+        try {
+            enumClientCommandClass = NMS_CLASS_RESOLVER.resolve("EnumClientCommand");
+        } catch (ClassNotFoundException e) {
+            //Probably a subclass
+            try {
+                enumClientCommandClass = NMS_CLASS_RESOLVER.resolve(packetClass.getSimpleName() + "$EnumClientCommand");
+            } catch (ClassNotFoundException ex) {
+                throw new IllegalStateException("Cound't find EnumClientCommand class!", ex);
+            }
         }
     }
+
+    @Override
+    public void setup() {
+        Object enumObj = readObject(0, enumClientCommandClass);
+        this.clientCommand = ClientCommand.valueOf(enumObj.toString());
+    }
+
+    public enum ClientCommand {
+        PERFORM_RESPAWN,
+        REQUEST_STATS,
+        OPEN_INVENTORY_ACHIEVEMENT
+    }
+
 }

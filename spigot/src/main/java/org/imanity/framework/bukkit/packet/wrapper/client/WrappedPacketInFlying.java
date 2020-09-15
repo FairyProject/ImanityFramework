@@ -27,45 +27,39 @@ package org.imanity.framework.bukkit.packet.wrapper.client;
 import lombok.Getter;
 import org.imanity.framework.bukkit.packet.PacketDirection;
 import org.imanity.framework.bukkit.packet.type.PacketType;
-import org.imanity.framework.bukkit.packet.type.PacketTypeClasses;
 import org.imanity.framework.bukkit.packet.wrapper.WrappedPacket;
 import org.imanity.framework.bukkit.packet.wrapper.annotation.AutowiredWrappedPacket;
-import org.imanity.framework.bukkit.util.reflection.resolver.FieldResolver;
 
+@AutowiredWrappedPacket(value = PacketType.Client.FLYING, direction = PacketDirection.READ)
 @Getter
-@AutowiredWrappedPacket(value = PacketType.Client.ABILITIES, direction = PacketDirection.READ)
-public final class WrappedPacketInAbilities extends WrappedPacket {
+public class WrappedPacketInFlying extends WrappedPacket {
 
-    private static final boolean MULTIPLE_ABILITIES;
+    private double x;
+    private double y;
+    private double z;
+    private float yaw;
+    private float pitch;
+    private boolean onGround;
+    private boolean position;
+    private boolean look;
 
-    static {
-        MULTIPLE_ABILITIES = new FieldResolver(PacketTypeClasses.Client.ABILITIES)
-                .resolve(boolean.class, 1)
-                .get(null);
-    }
-
-    private boolean vulnerable;
-    private boolean flying;
-    private boolean allowFly;
-    private boolean instantBuild;
-    private float flySpeed;
-    private float walkSpeed;
-
-    public WrappedPacketInAbilities(Object packet) {
+    public WrappedPacketInFlying(Object packet) {
         super(packet);
     }
 
     @Override
     protected void setup() {
-        if (MULTIPLE_ABILITIES) {
-            this.vulnerable = readBoolean(0);
-            this.flying = readBoolean(1);
-            this.allowFly = readBoolean(2);
-            this.instantBuild = readBoolean(3);
-            this.flySpeed = readFloat(0);
-            this.walkSpeed = readFloat(1);
-        } else {
-            this.flying = readBoolean(0);
-        }
+        x = readDouble(0);
+        y = readDouble(1);
+        z = readDouble(2);
+
+        yaw = readFloat(0);
+        pitch = readFloat(1);
+
+        onGround = readBoolean(0);
+
+        position = readBoolean(1);
+        look = readBoolean(2);
     }
+
 }

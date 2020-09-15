@@ -2,6 +2,7 @@ package org.imanity.framework.bukkit.impl.server;
 
 import org.bukkit.Location;
 import org.bukkit.Material;
+import org.bukkit.World;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
@@ -32,6 +33,8 @@ public interface ServerImplementation {
     }
 
     Entity getEntity(UUID uuid);
+
+    Entity getEntity(World world, int id);
 
     void showDyingNPC(Player player);
 

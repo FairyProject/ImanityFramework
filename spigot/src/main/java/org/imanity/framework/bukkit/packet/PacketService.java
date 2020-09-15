@@ -9,7 +9,6 @@ import org.imanity.framework.bukkit.Imanity;
 import org.imanity.framework.bukkit.packet.netty.INettyInjection;
 import org.imanity.framework.bukkit.packet.netty.NettyInjection1_7;
 import org.imanity.framework.bukkit.packet.netty.NettyInjection1_8;
-import org.imanity.framework.bukkit.packet.type.PacketType;
 import org.imanity.framework.bukkit.packet.wrapper.WrappedPacket;
 import org.imanity.framework.bukkit.packet.wrapper.annotation.AutowiredWrappedPacket;
 import org.imanity.framework.plugin.service.IService;
@@ -18,7 +17,6 @@ import org.imanity.framework.util.FileUtils;
 import org.imanity.framework.util.annotation.AnnotationDetector;
 
 import java.lang.annotation.Annotation;
-import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.Map;
 
@@ -26,8 +24,6 @@ import java.util.Map;
 public class PacketService implements IService {
 
     public static final String CHANNEL_HANDLER = ImanityCommon.METADATA_PREFIX + "ChannelHandler";
-    private Map<Class<?>, Class<? extends WrappedPacket>> packetToWrapped;
-    private Multimap<Byte, PacketListener> registeredPacketListeners;
     private INettyInjection nettyInjection;
 
     @Override
@@ -47,8 +43,6 @@ public class PacketService implements IService {
         ImanityCommon.SERVICE_HANDLER.registerAutowired(nettyInjection);
         Imanity.getPlayers().forEach(this::inject);
 
-        this.registeredPacketListeners = HashMultimap.create();
-
         try {
 
             this.loadWrappers();
@@ -59,7 +53,8 @@ public class PacketService implements IService {
     }
 
     private void loadWrappers() throws Throwable {
-        ImmutableMap.Builder<Class<?>, Class<? extends WrappedPacket>> builder = ImmutableMap.builder();
+        ImmutableMap.Builder<Byte, Class<? extends WrappedPacket>> readBuilder = ImmutableMap.builder();
+        ImmutableMap.Builder<Byte, Class<? extends WrappedPacket>> writeBuilder = ImmutableMap.builder();
 
         new AnnotationDetector(new AnnotationDetector.TypeReporter() {
 
@@ -77,7 +72,14 @@ public class PacketService implements IService {
                     Method method = type.getDeclaredMethod("init");
                     method.invoke(null);
 
-                    builder.put(WrappedPacket.NMS_CLASS_RESOLVER.resolve(annotation.type()), type);
+                    switch (annotation.direction()) {
+                        case READ:
+                            readBuilder.put(annotation.value(), type);
+                            break;
+                        case WRITE:
+                            writeBuilder.put(annotation.value(), type);
+                            break;
+                    }
                 } catch (NoSuchMethodException ex) {
                     // Ignores
                 } catch (Throwable throwable) {
@@ -92,7 +94,8 @@ public class PacketService implements IService {
 
         }).detect(FileUtils.getSelfJar());
 
-        this.packetToWrapped = builder.build();
+        PacketDirection.READ.register(readBuilder.build());
+        PacketDirection.WRITE.register(writeBuilder.build());
     }
 
     @Override
@@ -114,30 +117,14 @@ public class PacketService implements IService {
         this.nettyInjection.eject(player);
     }
 
-    private WrappedPacket getWrappedFromNMS(Player player, Object packet) {
-        Class<? extends WrappedPacket> wrappedPacketClass = this.packetToWrapped.getOrDefault(packet.getClass(), null);
-
-        if (wrappedPacketClass == null) {
-            return new WrappedPacket(player, packet);
-        }
-
-        try {
-            return wrappedPacketClass
-                    .getConstructor(Player.class, Object.class)
-                    .newInstance(player, packet);
-        } catch (IllegalAccessException | InstantiationException | NoSuchMethodException | InvocationTargetException e) {
-            throw new IllegalStateException(e);
-        }
-    }
-
     public Object read(Player player, Object packet) {
-        byte type = PacketType.Client.getIdByType(packet.getClass());
+        byte type = PacketDirection.READ.getPacketType(packet);
 
         if (!this.registeredPacketListeners.containsKey(type)) {
             return packet;
         }
 
-        WrappedPacket wrappedPacket = this.getWrappedFromNMS(player, packet);
+        WrappedPacket wrappedPacket = PacketDirection.READ.getWrappedFromNMS(player, type, packet);
 
         boolean cancelled = false;
         for (PacketListener packetListener : this.registeredPacketListeners.get(type)) {
@@ -150,13 +137,13 @@ public class PacketService implements IService {
     }
 
     public Object write(Player player, Object packet) {
-        byte type = PacketType.Server.getIdByType(packet.getClass());
+        byte type = PacketDirection.WRITE.getPacketType(packet);
 
         if (!this.registeredPacketListeners.containsKey(type)) {
             return packet;
         }
 
-        WrappedPacket wrappedPacket = this.getWrappedFromNMS(player, packet);
+        WrappedPacket wrappedPacket = PacketDirection.WRITE.getWrappedFromNMS(player, type, packet);
 
         boolean cancelled = false;
         for (PacketListener packetListener : this.registeredPacketListeners.get(type)) {

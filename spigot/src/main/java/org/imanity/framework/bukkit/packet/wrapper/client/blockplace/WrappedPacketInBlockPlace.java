@@ -28,13 +28,15 @@ import lombok.Getter;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
+import org.imanity.framework.bukkit.packet.PacketDirection;
+import org.imanity.framework.bukkit.packet.type.PacketType;
 import org.imanity.framework.bukkit.packet.wrapper.WrappedPacket;
 import org.imanity.framework.bukkit.packet.wrapper.annotation.AutowiredWrappedPacket;
 import org.imanity.framework.bukkit.util.BlockPosition;
 import org.imanity.framework.bukkit.util.MinecraftVersion;
 
 @Getter
-@AutowiredWrappedPacket(type = "PacketPlayInBlockPlace")
+@AutowiredWrappedPacket(value = PacketType.Client.BLOCK_PLACE, direction = PacketDirection.READ)
 public final class WrappedPacketInBlockPlace extends WrappedPacket {
 
     private BlockPosition blockPosition;

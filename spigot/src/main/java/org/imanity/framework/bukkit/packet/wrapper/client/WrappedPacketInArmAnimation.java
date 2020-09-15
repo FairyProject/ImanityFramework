@@ -24,11 +24,13 @@
 
 package org.imanity.framework.bukkit.packet.wrapper.client;
 
+import org.imanity.framework.bukkit.packet.PacketDirection;
+import org.imanity.framework.bukkit.packet.type.PacketType;
 import org.imanity.framework.bukkit.packet.type.PacketTypeClasses;
 import org.imanity.framework.bukkit.packet.wrapper.WrappedPacket;
 import org.imanity.framework.bukkit.packet.wrapper.annotation.AutowiredWrappedPacket;
 
-@AutowiredWrappedPacket(type = "PacketPlayInArmAnimation")
+@AutowiredWrappedPacket(value = PacketType.Client.ARM_ANIMATION, direction = PacketDirection.READ)
 public final class WrappedPacketInArmAnimation extends WrappedPacket {
 
     private long timestamp;

@@ -27,22 +27,36 @@ package org.imanity.framework.bukkit.packet.wrapper;
 import lombok.Getter;
 import org.bukkit.World;
 import org.bukkit.entity.Player;
+import org.bukkit.inventory.ItemStack;
 import org.imanity.framework.bukkit.packet.type.PacketTypeClasses;
 import org.imanity.framework.bukkit.util.reflection.resolver.minecraft.NMSClassResolver;
 import org.imanity.framework.bukkit.util.reflection.resolver.minecraft.OBCClassResolver;
+import org.imanity.framework.bukkit.util.reflection.resolver.wrapper.MethodWrapper;
 import org.imanity.framework.bukkit.util.reflection.resolver.wrapper.PacketWrapper;
 import java.lang.invoke.MethodHandles;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 @Getter
 public class WrappedPacket implements WrapperPacketReader {
 
-    private static Map<Class<?>, Class<? extends WrappedPacket>> PACKET_TO_WRAPPED;
+    private static final Class<?> NMS_ITEM_STACK;
+    private static final MethodWrapper<ItemStack> ITEM_COPY_OF_METHOD;
+
     public static final NMSClassResolver NMS_CLASS_RESOLVER = new NMSClassResolver();
     public static final OBCClassResolver CRAFT_CLASS_RESOLVER = new OBCClassResolver();
+
+    static {
+        try {
+            NMS_ITEM_STACK = NMS_CLASS_RESOLVER.resolve("ItemStack");
+
+            Class<?> type = CRAFT_CLASS_RESOLVER.resolve("CraftItemStack");
+            ITEM_COPY_OF_METHOD = new MethodWrapper<>(type.getDeclaredMethod("asBukkitCopy"));
+        } catch (ClassNotFoundException | NoSuchMethodException e) {
+            throw new RuntimeException(e);
+        }
+    }
 
     protected final List<Field> fields = new ArrayList<>();
     protected final Player player;
@@ -129,6 +143,10 @@ public class WrappedPacket implements WrapperPacketReader {
     @Override
     public double readDouble(int index) {
         return (double) readObject(index, double.class);
+    }
+
+    public ItemStack readItemStack(int index) {
+        return ITEM_COPY_OF_METHOD.invoke(null, readObject(index, NMS_ITEM_STACK));
     }
 
     @Override

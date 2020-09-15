@@ -32,40 +32,28 @@ import org.imanity.framework.bukkit.packet.wrapper.WrappedPacket;
 import org.imanity.framework.bukkit.packet.wrapper.annotation.AutowiredWrappedPacket;
 import org.imanity.framework.bukkit.util.reflection.resolver.FieldResolver;
 
+@AutowiredWrappedPacket(value = PacketType.Client.KEEP_ALIVE, direction = PacketDirection.READ)
 @Getter
-@AutowiredWrappedPacket(value = PacketType.Client.ABILITIES, direction = PacketDirection.READ)
-public final class WrappedPacketInAbilities extends WrappedPacket {
+public final class WrappedPacketInKeepAlive extends WrappedPacket {
+    private static boolean integerPresent;
+    private long id;
 
-    private static final boolean MULTIPLE_ABILITIES;
-
-    static {
-        MULTIPLE_ABILITIES = new FieldResolver(PacketTypeClasses.Client.ABILITIES)
-                .resolve(boolean.class, 1)
-                .get(null);
+    public WrappedPacketInKeepAlive(final Object packet) {
+        super(packet);
     }
 
-    private boolean vulnerable;
-    private boolean flying;
-    private boolean allowFly;
-    private boolean instantBuild;
-    private float flySpeed;
-    private float walkSpeed;
-
-    public WrappedPacketInAbilities(Object packet) {
-        super(packet);
+    public static void init() {
+        integerPresent = new FieldResolver(PacketTypeClasses.Client.KEEP_ALIVE)
+            .resolve(int.class, 0)
+            .exists();
     }
 
     @Override
     protected void setup() {
-        if (MULTIPLE_ABILITIES) {
-            this.vulnerable = readBoolean(0);
-            this.flying = readBoolean(1);
-            this.allowFly = readBoolean(2);
-            this.instantBuild = readBoolean(3);
-            this.flySpeed = readFloat(0);
-            this.walkSpeed = readFloat(1);
+        if (!integerPresent) {
+            this.id = readLong(0);
         } else {
-            this.flying = readBoolean(0);
+            this.id = readInt(0);
         }
     }
 }

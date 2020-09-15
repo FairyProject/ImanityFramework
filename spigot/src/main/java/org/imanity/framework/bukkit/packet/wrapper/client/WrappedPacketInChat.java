@@ -25,11 +25,13 @@
 package org.imanity.framework.bukkit.packet.wrapper.client;
 
 import lombok.Getter;
+import org.imanity.framework.bukkit.packet.PacketDirection;
+import org.imanity.framework.bukkit.packet.type.PacketType;
 import org.imanity.framework.bukkit.packet.wrapper.WrappedPacket;
 import org.imanity.framework.bukkit.packet.wrapper.annotation.AutowiredWrappedPacket;
 
 @Getter
-@AutowiredWrappedPacket(type = "PacketPlayInChat")
+@AutowiredWrappedPacket(value = PacketType.Client.CHAT, direction = PacketDirection.READ)
 public final class WrappedPacketInChat extends WrappedPacket {
 
     private String message;
