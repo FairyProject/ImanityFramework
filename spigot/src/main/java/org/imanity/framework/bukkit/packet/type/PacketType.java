@@ -25,27 +25,75 @@
 package org.imanity.framework.bukkit.packet.type;
 
 import com.google.common.collect.ImmutableMap;
+import org.imanity.framework.bukkit.packet.PacketDirection;
 import org.imanity.framework.bukkit.packet.wrapper.WrappedPacket;
 
 import java.util.HashMap;
 import java.util.Map;
 
 public class PacketType {
-    public static class Client {
+
+    private byte id;
+
+    private Class<?> packetType;
+    private PacketDirection direction;
+
+    public PacketType(byte id, Class<?> packetType, PacketDirection direction) {
+        this.id = id;
+        this.packetType = packetType;
+        this.direction = direction;
+    }
+
+    public static class Client { // TODO
         public static Map<Class<?>, Byte> PACKET_IDS;
-        public static final byte TELEPORT_ACCEPT = 0,
-                TILE_NBT_QUERY = 1, DIFFICULTY_CHANGE = 2, CHAT = 3, CLIENT_COMMAND = 4,
-                SETTINGS = 5, TAB_COMPLETE = 6, TRANSACTION = 7, ENCHANT_ITEM = 8,
-                WINDOW_CLICK = 9, CLOSE_WINDOW = 10, CUSTOM_PAYLOAD = 11, B_EDIT = 12,
-                ENTITY_NBT_QUERY = 13, USE_ENTITY = 14, JIGSAW_GENERATE = 15, KEEP_ALIVE = 16,
-                DIFFICULTY_LOCK = 17, POSITION = 18, POSITION_LOOK = 19, LOOK = 20,
-                FLYING = 21, VEHICLE_MOVE = 22, BOAT_MOVE = 23, PICK_ITEM = 24,
-                AUTO_RECIPE = 25, ABILITIES = 26, BLOCK_DIG = 27, ENTITY_ACTION = 28,
-                STEER_VEHICLE = 29, RECIPE_DISPLAYED = 30, ITEM_NAME = 31, RESOURCE_PACK_STATUS = 32,
-                ADVANCEMENTS = 33, TR_SEL = 34, BEACON = 35, HELD_ITEM_SLOT = 36,
-                SET_COMMAND_BLOCK = 37, SET_COMMAND_MINECART = 38, SET_CREATIVE_SLOT = 39, SET_JIGSAW = 40,
-                STRUCT = 41, UPDATE_SIGN = 42, ARM_ANIMATION = 43, SPECTATE = 44,
-                USE_ITEM = 45, BLOCK_PLACE = 46;
+        public static final PacketType
+                TELEPORT_ACCEPT = 0,
+                TILE_NBT_QUERY = 1,
+                DIFFICULTY_CHANGE = 2,
+                CHAT = 3,
+                CLIENT_COMMAND = 4,
+                SETTINGS = 5,
+                TAB_COMPLETE = 6,
+                TRANSACTION = 7,
+                ENCHANT_ITEM = 8,
+                WINDOW_CLICK = 9,
+                CLOSE_WINDOW = 10,
+                CUSTOM_PAYLOAD = 11,
+                B_EDIT = 12,
+                ENTITY_NBT_QUERY = 13,
+                USE_ENTITY = 14,
+                JIGSAW_GENERATE = 15,
+                KEEP_ALIVE = 16,
+                DIFFICULTY_LOCK = 17,
+                POSITION = 18,
+                POSITION_LOOK = 19,
+                LOOK = 20,
+                FLYING = 21,
+                VEHICLE_MOVE = 22,
+                BOAT_MOVE = 23,
+                PICK_ITEM = 24,
+                AUTO_RECIPE = 25,
+                ABILITIES = 26,
+                BLOCK_DIG = 27,
+                ENTITY_ACTION = 28,
+                STEER_VEHICLE = 29,
+                RECIPE_DISPLAYED = 30,
+                ITEM_NAME = 31,
+                RESOURCE_PACK_STATUS = 32,
+                ADVANCEMENTS = 33,
+                TR_SEL = 34,
+                BEACON = 35,
+                HELD_ITEM_SLOT = 36,
+                SET_COMMAND_BLOCK = 37,
+                SET_COMMAND_MINECART = 38,
+                SET_CREATIVE_SLOT = 39,
+                SET_JIGSAW = 40,
+                STRUCT = 41,
+                UPDATE_SIGN = 42,
+                ARM_ANIMATION = 43,
+                SPECTATE = 44,
+                USE_ITEM = 45,
+                BLOCK_PLACE = 46;
 
         public static byte getIdByType(Class<?> type) {
             return PACKET_IDS.get(type);

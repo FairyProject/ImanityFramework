@@ -17,4 +17,18 @@ public class NMSClassResolver extends ClassResolver {
 		}
 		return super.resolve(names);
 	}
+
+	@Override
+	public Class resolveSubClass(Class<?> mainClass, String... names) throws ClassNotFoundException {
+		String prefix = mainClass.getName() + "$";
+
+		if (!prefix.startsWith("net.minecraft.server")) {
+			prefix = "net.minecraft.server." + MinecraftReflection.getVersion() + prefix;
+		}
+
+		for (int i = 0; i < names.length; i++) {
+			names[i] = prefix + names[i];
+		}
+		return super.resolve(names);
+	}
 }

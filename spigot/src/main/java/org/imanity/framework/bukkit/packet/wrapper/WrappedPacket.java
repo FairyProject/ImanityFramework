@@ -30,6 +30,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.imanity.framework.bukkit.packet.type.PacketTypeClasses;
 import org.imanity.framework.bukkit.util.reflection.resolver.minecraft.NMSClassResolver;
+import org.imanity.framework.bukkit.util.reflection.resolver.minecraft.NettyClassResolver;
 import org.imanity.framework.bukkit.util.reflection.resolver.minecraft.OBCClassResolver;
 import org.imanity.framework.bukkit.util.reflection.resolver.wrapper.MethodWrapper;
 import org.imanity.framework.bukkit.util.reflection.resolver.wrapper.PacketWrapper;
@@ -46,6 +47,7 @@ public class WrappedPacket implements WrapperPacketReader {
 
     public static final NMSClassResolver NMS_CLASS_RESOLVER = new NMSClassResolver();
     public static final OBCClassResolver CRAFT_CLASS_RESOLVER = new OBCClassResolver();
+    public static final NettyClassResolver NETTY_CLASS_RESOLVER = new NettyClassResolver();
 
     static {
         try {
@@ -150,8 +152,8 @@ public class WrappedPacket implements WrapperPacketReader {
     }
 
     @Override
-    public Object readObject(int index, Class<?> type) {
-        return this.packet.setPacketValueByType(type, index);
+    public <T> T readObject(int index, Class<T> type) {
+        return (T) this.packet.getPacketValueByIndex(type, index);
     }
 
     @Override

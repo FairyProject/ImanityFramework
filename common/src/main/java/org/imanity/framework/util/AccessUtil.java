@@ -18,8 +18,13 @@ public abstract class AccessUtil {
 	 * @throws ReflectiveOperationException (usually never)
 	 */
 	public static Field setAccessible(Field field) throws ReflectiveOperationException {
-		field.setAccessible(true);
+		if (!field.isAccessible()) {
+			field.setAccessible(true);
+		}
 		int modifiers = field.getModifiers();
+		if (!Modifier.isFinal(modifiers)) {
+			return field;
+		}
 		try {
 			Field modifiersField = Field.class.getDeclaredField("modifiers");
 			modifiersField.setAccessible(true);
@@ -53,6 +58,10 @@ public abstract class AccessUtil {
 	 * @throws ReflectiveOperationException (usually never)
 	 */
 	public static Method setAccessible(Method method) throws ReflectiveOperationException {
+		if (method.isAccessible()) {
+			return method;
+		}
+
 		method.setAccessible(true);
 		return method;
 	}
@@ -65,6 +74,10 @@ public abstract class AccessUtil {
 	 * @throws ReflectiveOperationException (usually never)
 	 */
 	public static Constructor setAccessible(Constructor constructor) throws ReflectiveOperationException {
+		if (constructor.isAccessible()) {
+			return constructor;
+		}
+
 		constructor.setAccessible(true);
 		return constructor;
 	}

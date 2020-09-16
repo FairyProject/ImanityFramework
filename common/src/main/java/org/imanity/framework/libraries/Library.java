@@ -39,6 +39,12 @@ public enum Library {
             "caffeine",
             "2.8.4",
             "KV9YN5gQj6b507VJApJpPF5PkCon0DZqAi0T7Ln0lag="
+    ),
+    GUAVA(
+            "com.google.guava",
+            "guava",
+            "29.0-jre",
+            "SIXFTM1H57LSJTHQSY+RW1FY6AQGTA7NKCYL+WEW2IU="
     );
 
     private final String mavenRepoPath;

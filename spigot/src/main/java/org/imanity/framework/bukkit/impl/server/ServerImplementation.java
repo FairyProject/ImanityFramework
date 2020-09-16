@@ -1,5 +1,6 @@
 package org.imanity.framework.bukkit.impl.server;
 
+import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.World;
@@ -35,6 +36,17 @@ public interface ServerImplementation {
     Entity getEntity(UUID uuid);
 
     Entity getEntity(World world, int id);
+
+    default Entity getEntity(int id) {
+        for (World world : Bukkit.getWorlds()) {
+            Entity entity = this.getEntity(world, id);
+            if (entity != null) {
+                return entity;
+            }
+        }
+
+        return null;
+    }
 
     void showDyingNPC(Player player);
 

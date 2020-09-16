@@ -43,6 +43,27 @@ public class MethodResolver extends MemberResolver<Method> {
 		return new MethodWrapper(resolveSignatureSilent(signatures));
 	}
 
+	public MethodWrapper resolve(int index, Class<?>... parameters) throws ReflectiveOperationException {
+
+		return this.resolve(null, index, parameters);
+
+	}
+
+	public MethodWrapper resolve(Class<?> returnType, int index, Class<?>... parameters) throws ReflectiveOperationException {
+
+		int currentIndex = 0;
+		for (Method method : this.clazz.getDeclaredMethods()) {
+			if ((returnType == null || method.getReturnType() == returnType) &&
+					(parameters.length == 0 || isParametersEquals(parameters, method.getParameterTypes())) &&
+					index == currentIndex++) {
+				return new MethodWrapper(AccessUtil.setAccessible(method));
+			}
+		}
+
+		throw new NoSuchMethodException();
+
+	}
+
 	@Override
 	public Method resolveIndex(int index) throws IndexOutOfBoundsException, ReflectiveOperationException {
 		return AccessUtil.setAccessible(this.clazz.getDeclaredMethods()[index]);
@@ -103,7 +124,7 @@ public class MethodResolver extends MemberResolver<Method> {
 	@Override
 	protected Method resolveObject(ResolverQuery query) throws ReflectiveOperationException {
 		for (Method method : this.clazz.getDeclaredMethods()) {
-			if (method.getName().equals(query.getName()) && (query.getTypes().length == 0 || ClassListEqual(query.getTypes(), method.getParameterTypes()))) {
+			if (method.getName().equals(query.getName()) && (query.getTypes().length == 0 || isParametersEquals(query.getTypes(), method.getParameterTypes()))) {
 				return AccessUtil.setAccessible(method);
 			}
 		}
@@ -115,7 +136,7 @@ public class MethodResolver extends MemberResolver<Method> {
 		return new NoSuchMethodException("Could not resolve method for " + joinedNames + " in class " + this.clazz);
 	}
 
-	static boolean ClassListEqual(Class<?>[] l1, Class<?>[] l2) {
+	static boolean isParametersEquals(Class<?>[] l1, Class<?>[] l2) {
 		boolean equal = true;
 		if (l1.length != l2.length) { return false; }
 		for (int i = 0; i < l1.length; i++) {

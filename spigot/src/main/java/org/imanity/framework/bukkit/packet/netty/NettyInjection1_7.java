@@ -1,5 +1,6 @@
 package org.imanity.framework.bukkit.packet.netty;
 
+import net.minecraft.util.io.netty.buffer.ByteBuf;
 import net.minecraft.util.io.netty.channel.*;
 import org.bukkit.entity.Player;
 import org.imanity.framework.bukkit.packet.PacketService;
@@ -41,5 +42,13 @@ public class NettyInjection1_7 implements INettyInjection {
     public void eject(Player player) {
         Channel channel = MinecraftReflection.getChannel(player);
         channel.pipeline().remove(PacketService.CHANNEL_HANDLER);
+    }
+
+    @Override
+    public byte[] readBytes(Object byteBuffer) {
+        ByteBuf byteBuf = (ByteBuf) byteBuffer;
+        byte[] array = new byte[byteBuf.readableBytes()];
+        byteBuf.readBytes(array);
+        return array;
     }
 }

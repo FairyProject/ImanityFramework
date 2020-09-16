@@ -70,10 +70,23 @@ public class ImanityCommon {
         ImanityCommon.LIBRARY_HANDLER = new LibraryHandler();
         ImanityCommon.LIBRARY_HANDLER.downloadLibraries(GLOBAL_LIBRARIES);
         ImanityCommon.LIBRARY_HANDLER.obtainClassLoaderWith(GLOBAL_LIBRARIES);
+
+        try {
+            Class.forName("com.google.common.collect.ImmutableList");
+        } catch (ClassNotFoundException ex) {
+            // Below 1.8
+            EnumSet<Library> guava = EnumSet.of(Library.GUAVA);
+            ImanityCommon.LIBRARY_HANDLER.downloadLibraries(guava);
+            ImanityCommon.LIBRARY_HANDLER.obtainClassLoaderWith(guava);
+        }
     }
 
     public static Logger getLogger() {
         return ImanityCommon.BRIDGE.getLogger();
+    }
+
+    public static <T> T getService(Class<T> type) {
+        return (T) SERVICE_HANDLER.getServiceInstance(type);
     }
 
     public static void shutdown() {

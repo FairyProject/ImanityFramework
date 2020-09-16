@@ -40,7 +40,7 @@ public interface WrapperPacketReader {
 
     double readDouble(int index);
 
-    Object readObject(int index, Class<?> type);
+    <T> T readObject(int index, Class<T> type);
 
     Object readAnyObject(int index);
 

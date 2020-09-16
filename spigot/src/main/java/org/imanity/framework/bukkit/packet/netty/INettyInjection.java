@@ -8,4 +8,6 @@ public interface INettyInjection {
 
     void eject(Player player);
 
+    byte[] readBytes(Object byteBuffer);
+
 }

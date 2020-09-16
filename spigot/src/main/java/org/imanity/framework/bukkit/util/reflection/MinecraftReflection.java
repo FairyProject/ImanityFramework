@@ -34,6 +34,8 @@ public class MinecraftReflection {
     public static final Version VERSION;
     public static final MinecraftVersion MINECRAFT_VERSION = MinecraftVersion.VERSION;
 
+    public static String NETTY_PREFIX;
+
     private static NMSClassResolver NMS_CLASS_RESOLVER = new NMSClassResolver();
     private static OBCClassResolver OBC_CLASS_RESOLVER = new OBCClassResolver();
     private static Class<?> NMS_ENTITY;
@@ -99,10 +101,12 @@ public class MinecraftReflection {
 
         try {
             CHANNEL_TYPE = Class.forName("io.netty.channel.Channel");
+            NETTY_PREFIX = "io.netty.";
         } catch (ClassNotFoundException ex) {
 
             try {
                 CHANNEL_TYPE = Class.forName("net.minecraft.util.io.netty.channel.Channel");
+                NETTY_PREFIX = "net.minecraft.util.io.netty.";
             } catch (ClassNotFoundException ex2) {
                 throw new IllegalStateException("Coulnd't find netty Channel class!", ex2);
             }

@@ -1,8 +1,7 @@
 package org.imanity.framework.bukkit.packet;
 
-import com.google.common.collect.HashMultimap;
 import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.Multimap;
+import lombok.Getter;
 import org.bukkit.entity.Player;
 import org.imanity.framework.ImanityCommon;
 import org.imanity.framework.bukkit.Imanity;
@@ -18,12 +17,12 @@ import org.imanity.framework.util.annotation.AnnotationDetector;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
-import java.util.Map;
 
 @Service(name = "packet")
 public class PacketService implements IService {
 
     public static final String CHANNEL_HANDLER = ImanityCommon.METADATA_PREFIX + "ChannelHandler";
+    @Getter
     private INettyInjection nettyInjection;
 
     @Override
