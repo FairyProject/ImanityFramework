@@ -24,6 +24,9 @@
 
 package org.imanity.framework.bukkit.packet.wrapper;
 
+import org.bukkit.inventory.ItemStack;
+import org.imanity.framework.bukkit.reflection.wrapper.GameProfileWrapper;
+
 public interface WrapperPacketReader {
 
     boolean readBoolean(int index);
@@ -39,6 +42,10 @@ public interface WrapperPacketReader {
     float readFloat(int index);
 
     double readDouble(int index);
+
+    ItemStack readItemStack(int index);
+
+    GameProfileWrapper readGameProfile(int index);
 
     <T> T readObject(int index, Class<T> type);
 

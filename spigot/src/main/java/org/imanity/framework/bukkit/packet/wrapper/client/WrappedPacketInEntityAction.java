@@ -32,11 +32,10 @@ import org.imanity.framework.bukkit.packet.PacketDirection;
 import org.imanity.framework.bukkit.packet.type.PacketType;
 import org.imanity.framework.bukkit.packet.wrapper.WrappedPacket;
 import org.imanity.framework.bukkit.packet.wrapper.annotation.AutowiredWrappedPacket;
-import org.imanity.framework.bukkit.util.reflection.MinecraftReflection;
-import org.imanity.framework.bukkit.util.reflection.minecraft.MinecraftVersion;
+import org.imanity.framework.bukkit.reflection.MinecraftReflection;
+import org.imanity.framework.bukkit.reflection.minecraft.MinecraftVersion;
 
 import javax.annotation.Nullable;
-import java.util.HashMap;
 import java.util.Map;
 
 @AutowiredWrappedPacket(value = PacketType.Client.ENTITY_ACTION, direction = PacketDirection.READ)

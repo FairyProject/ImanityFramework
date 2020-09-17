@@ -2,13 +2,11 @@ package org.imanity.framework.bukkit.impl;
 
 import org.bukkit.event.Listener;
 import org.bukkit.plugin.java.JavaPlugin;
-import org.imanity.framework.ImanityCommon;
 import org.imanity.framework.bukkit.Imanity;
 import org.imanity.framework.bukkit.events.NetworkStateChangedEvent;
 import org.imanity.framework.bukkit.events.PostServicesInitialEvent;
 import org.imanity.framework.bukkit.listener.FunctionListener;
-import org.imanity.framework.bukkit.plugin.ImanityPlugin;
-import org.imanity.framework.bukkit.util.reflection.resolver.ConstructorResolver;
+import org.imanity.framework.bukkit.reflection.resolver.ConstructorResolver;
 import org.imanity.framework.events.IEventHandler;
 import org.imanity.framework.events.annotation.AutoWiredListener;
 import org.imanity.framework.redis.server.ImanityServer;
@@ -39,7 +37,7 @@ public class BukkitEventHandler implements IEventHandler {
             JavaPlugin plugin = JavaPlugin.getProvidingPlugin(type);
 
             ConstructorResolver resolver = new ConstructorResolver(type);
-            Object object = resolver.resolveWrapper(
+            Object object = resolver.resolveMatches(
                     new Class[0],
                     new Class[] {plugin.getClass()},
                     new Class[] {JavaPlugin.class}

@@ -6,10 +6,10 @@ import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
 import org.imanity.framework.metadata.MetadataKey;
 import org.imanity.framework.bukkit.util.BukkitUtil;
-import org.imanity.framework.bukkit.util.reflection.MinecraftReflection;
-import org.imanity.framework.bukkit.util.reflection.resolver.minecraft.NMSClassResolver;
-import org.imanity.framework.bukkit.util.reflection.resolver.wrapper.EnumWrapper;
-import org.imanity.framework.bukkit.util.reflection.resolver.wrapper.PacketWrapper;
+import org.imanity.framework.bukkit.reflection.MinecraftReflection;
+import org.imanity.framework.bukkit.reflection.resolver.minecraft.NMSClassResolver;
+import org.imanity.framework.bukkit.reflection.wrapper.EnumWrapper;
+import org.imanity.framework.bukkit.reflection.wrapper.PacketWrapper;
 
 import java.util.List;
 

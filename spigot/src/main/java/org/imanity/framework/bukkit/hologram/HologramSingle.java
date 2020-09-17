@@ -7,7 +7,7 @@ import org.bukkit.entity.Player;
 import org.imanity.framework.bukkit.Imanity;
 import org.imanity.framework.bukkit.hologram.api.ViewHandler;
 import org.imanity.framework.bukkit.util.SpigotUtil;
-import org.imanity.framework.bukkit.util.reflection.MinecraftReflection;
+import org.imanity.framework.bukkit.reflection.MinecraftReflection;
 
 import java.util.Collection;
 

@@ -34,8 +34,8 @@ import org.imanity.framework.bukkit.packet.type.PacketTypeClasses;
 import org.imanity.framework.bukkit.packet.wrapper.SendableWrapper;
 import org.imanity.framework.bukkit.packet.wrapper.WrappedPacket;
 import org.imanity.framework.bukkit.packet.wrapper.annotation.AutowiredWrappedPacket;
-import org.imanity.framework.bukkit.util.reflection.resolver.FieldResolver;
-import org.imanity.framework.bukkit.util.reflection.resolver.wrapper.ObjectWrapper;
+import org.imanity.framework.bukkit.reflection.resolver.FieldResolver;
+import org.imanity.framework.bukkit.reflection.wrapper.ObjectWrapper;
 
 import java.util.Collections;
 import java.util.EnumSet;
@@ -184,11 +184,14 @@ public final class WrappedPacketOutPosition extends WrappedPacket implements Sen
             return (flags & this.getBit()) == this.getBit();
         }
 
-        public static Set toNMS(Set<EnumPlayerTeleportFlags> flags) {
-            return flags.stream()
-                    .map(Enum::name)
-                    .map(name -> Enum.valueOf(enumPlayerTeleportFlagClass, name))
-                    .collect(Collectors.toSet());
+        public static Set<?> toNMS(Set<EnumPlayerTeleportFlags> flags) {
+            EnumSet nmsFlags = EnumSet.noneOf(enumPlayerTeleportFlagClass);
+
+            for (EnumPlayerTeleportFlags teleportFlags : flags) {
+                nmsFlags.add(Enum.valueOf(enumPlayerTeleportFlagClass, teleportFlags.name()));
+            }
+
+            return nmsFlags;
         }
 
         public static Set<EnumPlayerTeleportFlags> unpack(int flags) {

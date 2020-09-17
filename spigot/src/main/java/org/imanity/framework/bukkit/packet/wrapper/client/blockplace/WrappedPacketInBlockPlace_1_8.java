@@ -28,8 +28,7 @@ import lombok.Getter;
 import org.bukkit.inventory.ItemStack;
 import org.imanity.framework.bukkit.packet.wrapper.WrappedPacket;
 import org.imanity.framework.bukkit.util.BlockPosition;
-import org.imanity.framework.bukkit.util.reflection.resolver.wrapper.MethodWrapper;
-import org.imanity.framework.bukkit.util.reflection.resolver.wrapper.ObjectWrapper;
+import org.imanity.framework.bukkit.reflection.wrapper.ObjectWrapper;
 
 @Getter
 final class WrappedPacketInBlockPlace_1_8 extends WrappedPacket {

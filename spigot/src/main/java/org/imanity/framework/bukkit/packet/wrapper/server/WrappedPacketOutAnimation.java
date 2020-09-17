@@ -34,7 +34,7 @@ import org.imanity.framework.bukkit.packet.type.PacketTypeClasses;
 import org.imanity.framework.bukkit.packet.wrapper.SendableWrapper;
 import org.imanity.framework.bukkit.packet.wrapper.WrappedPacket;
 import org.imanity.framework.bukkit.packet.wrapper.annotation.AutowiredWrappedPacket;
-import org.imanity.framework.bukkit.util.reflection.MinecraftReflection;
+import org.imanity.framework.bukkit.reflection.MinecraftReflection;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;

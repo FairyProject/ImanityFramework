@@ -4,16 +4,16 @@ import lombok.Getter;
 import lombok.Setter;
 import org.bukkit.Location;
 import org.bukkit.entity.Player;
-import org.imanity.framework.bukkit.util.reflection.MinecraftReflection;
-import org.imanity.framework.bukkit.util.reflection.minecraft.DataWatcher;
-import org.imanity.framework.bukkit.util.reflection.resolver.ConstructorResolver;
-import org.imanity.framework.bukkit.util.reflection.resolver.minecraft.NMSClassResolver;
-import org.imanity.framework.bukkit.util.reflection.resolver.wrapper.DataWatcherWrapper;
-import org.imanity.framework.bukkit.util.reflection.resolver.wrapper.PacketWrapper;
-import org.imanity.framework.bukkit.util.reflection.version.PlayerVersion;
+import org.imanity.framework.bukkit.reflection.MinecraftReflection;
+import org.imanity.framework.bukkit.reflection.minecraft.DataWatcher;
+import org.imanity.framework.bukkit.reflection.resolver.ConstructorResolver;
+import org.imanity.framework.bukkit.reflection.resolver.minecraft.NMSClassResolver;
+import org.imanity.framework.bukkit.reflection.wrapper.DataWatcherWrapper;
+import org.imanity.framework.bukkit.reflection.wrapper.PacketWrapper;
+import org.imanity.framework.bukkit.reflection.version.PlayerVersion;
 import org.imanity.framework.util.CommonUtility;
 
-import static org.imanity.framework.bukkit.util.reflection.minecraft.DataWatcher.V1_9.ValueType.*;
+import static org.imanity.framework.bukkit.reflection.minecraft.DataWatcher.V1_9.ValueType.*;
 
 import java.util.concurrent.atomic.AtomicBoolean;
 

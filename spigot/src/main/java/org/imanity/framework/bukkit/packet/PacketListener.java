@@ -5,10 +5,14 @@ import org.imanity.framework.bukkit.packet.wrapper.WrappedPacket;
 
 public interface PacketListener {
 
-    byte[] type();
+    Class<?>[] type();
 
-    boolean read(Player player, WrappedPacket packet);
+    default boolean read(Player player, WrappedPacket packet) {
+        return true;
+    }
 
-    boolean write(Player player, WrappedPacket packet);
+    default boolean write(Player player, WrappedPacket packet) {
+        return true;
+    }
 
 }

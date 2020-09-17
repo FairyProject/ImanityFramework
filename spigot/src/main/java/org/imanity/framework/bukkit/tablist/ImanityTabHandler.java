@@ -6,6 +6,11 @@ import org.bukkit.entity.Player;
 import org.imanity.framework.ImanityCommon;
 import org.imanity.framework.bukkit.Imanity;
 import org.imanity.framework.bukkit.metadata.Metadata;
+import org.imanity.framework.bukkit.packet.PacketListener;
+import org.imanity.framework.bukkit.packet.PacketService;
+import org.imanity.framework.bukkit.packet.type.PacketTypeClasses;
+import org.imanity.framework.bukkit.packet.wrapper.WrappedPacket;
+import org.imanity.framework.bukkit.packet.wrapper.server.WrappedPacketOutLogin;
 import org.imanity.framework.metadata.MetadataKey;
 import org.imanity.framework.bukkit.tablist.util.IImanityTabImpl;
 import lombok.Getter;
@@ -14,7 +19,8 @@ import org.imanity.framework.bukkit.tablist.util.impl.v1_8.ImanitySpigotTabImpl;
 import org.imanity.framework.bukkit.tablist.util.impl.v1_8.NMS1_8TabImpl;
 import org.imanity.framework.bukkit.tablist.util.impl.ProtocolLibTabImpl;
 import org.imanity.framework.bukkit.util.SpigotUtil;
-import org.imanity.framework.bukkit.util.reflection.MinecraftReflection;
+import org.imanity.framework.bukkit.reflection.MinecraftReflection;
+import org.imanity.framework.plugin.service.Autowired;
 
 import java.util.concurrent.*;
 
@@ -30,6 +36,9 @@ public class ImanityTabHandler {
     private ScheduledExecutorService thread;
     private IImanityTabImpl implementation;
 
+    @Autowired
+    private PacketService packetService;
+
     //Tablist Ticks
     @Setter private long ticks = 20;
 
@@ -42,8 +51,9 @@ public class ImanityTabHandler {
 
         this.adapter = adapter;
 
-        this.registerImplementation();
+        ImanityCommon.registerAutowired(this);
 
+        this.registerImplementation();
         this.setup();
     }
 
@@ -90,7 +100,23 @@ public class ImanityTabHandler {
 
         // To ensure client will display 60 slots on 1.7
         if (Bukkit.getMaxPlayers() < 60) {
-            this.implementation.registerLoginListener();
+//            this.implementation.registerLoginListener();
+            packetService.registerPacketListener(new PacketListener() {
+                @Override
+                public Class<?>[] type() {
+                    return new Class[] { PacketTypeClasses.Server.LOGIN };
+                }
+
+                @Override
+                public boolean write(Player player, WrappedPacket packet1) {
+                    WrappedPacketOutLogin packet = packet1.wrap(WrappedPacketOutLogin.class);
+                    packet.setMaxPlayers(60);
+
+                    System.out.println("yo my brother!");
+
+                    return true;
+                }
+            });
         }
 
         //Start Thread

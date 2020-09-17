@@ -2,8 +2,8 @@ package org.imanity.framework.bukkit.tablist.util;
 
 import lombok.Getter;
 import org.bukkit.entity.Player;
-import org.imanity.framework.bukkit.util.reflection.MinecraftReflection;
-import org.imanity.framework.bukkit.util.reflection.version.PlayerVersion;
+import org.imanity.framework.bukkit.reflection.MinecraftReflection;
+import org.imanity.framework.bukkit.reflection.version.PlayerVersion;
 
 import java.util.ArrayList;
 import java.util.Arrays;

@@ -9,8 +9,8 @@ import org.bukkit.event.EventPriority;
 import org.bukkit.event.player.PlayerEvent;
 import org.bukkit.plugin.Plugin;
 import org.imanity.framework.bukkit.util.BukkitUtil;
-import org.imanity.framework.bukkit.util.reflection.resolver.MethodResolver;
-import org.imanity.framework.bukkit.util.reflection.resolver.wrapper.MethodWrapper;
+import org.imanity.framework.bukkit.reflection.resolver.MethodResolver;
+import org.imanity.framework.bukkit.reflection.wrapper.MethodWrapper;
 
 import java.util.ArrayList;
 import java.util.Arrays;

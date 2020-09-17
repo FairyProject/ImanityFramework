@@ -29,11 +29,13 @@ import org.bukkit.World;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.imanity.framework.bukkit.packet.type.PacketTypeClasses;
-import org.imanity.framework.bukkit.util.reflection.resolver.minecraft.NMSClassResolver;
-import org.imanity.framework.bukkit.util.reflection.resolver.minecraft.NettyClassResolver;
-import org.imanity.framework.bukkit.util.reflection.resolver.minecraft.OBCClassResolver;
-import org.imanity.framework.bukkit.util.reflection.resolver.wrapper.MethodWrapper;
-import org.imanity.framework.bukkit.util.reflection.resolver.wrapper.PacketWrapper;
+import org.imanity.framework.bukkit.reflection.MinecraftReflection;
+import org.imanity.framework.bukkit.reflection.resolver.minecraft.NMSClassResolver;
+import org.imanity.framework.bukkit.reflection.resolver.minecraft.NettyClassResolver;
+import org.imanity.framework.bukkit.reflection.resolver.minecraft.OBCClassResolver;
+import org.imanity.framework.bukkit.reflection.wrapper.GameProfileWrapper;
+import org.imanity.framework.bukkit.reflection.wrapper.MethodWrapper;
+import org.imanity.framework.bukkit.reflection.wrapper.PacketWrapper;
 import java.lang.invoke.MethodHandles;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
@@ -49,12 +51,16 @@ public class WrappedPacket implements WrapperPacketReader {
     public static final OBCClassResolver CRAFT_CLASS_RESOLVER = new OBCClassResolver();
     public static final NettyClassResolver NETTY_CLASS_RESOLVER = new NettyClassResolver();
 
+    public static void go() {
+
+    }
+
     static {
         try {
             NMS_ITEM_STACK = NMS_CLASS_RESOLVER.resolve("ItemStack");
 
-            Class<?> type = CRAFT_CLASS_RESOLVER.resolve("CraftItemStack");
-            ITEM_COPY_OF_METHOD = new MethodWrapper<>(type.getDeclaredMethod("asBukkitCopy"));
+            Class<?> type = CRAFT_CLASS_RESOLVER.resolve("inventory.CraftItemStack");
+            ITEM_COPY_OF_METHOD = new MethodWrapper<>(type.getMethod("asBukkitCopy", NMS_ITEM_STACK));
         } catch (ClassNotFoundException | NoSuchMethodException e) {
             throw new RuntimeException(e);
         }
@@ -147,8 +153,14 @@ public class WrappedPacket implements WrapperPacketReader {
         return (double) readObject(index, double.class);
     }
 
+    @Override
     public ItemStack readItemStack(int index) {
         return ITEM_COPY_OF_METHOD.invoke(null, readObject(index, NMS_ITEM_STACK));
+    }
+
+    @Override
+    public GameProfileWrapper readGameProfile(int index) {
+        return new GameProfileWrapper(this.readObject(index, MinecraftReflection.GAME_PROFILE_TYPE));
     }
 
     @Override

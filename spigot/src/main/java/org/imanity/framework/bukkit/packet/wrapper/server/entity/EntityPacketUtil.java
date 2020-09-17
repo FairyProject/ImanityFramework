@@ -1,9 +1,8 @@
 package org.imanity.framework.bukkit.packet.wrapper.server.entity;
 
 import lombok.Getter;
-import org.bukkit.entity.Entity;
 import org.imanity.framework.bukkit.packet.type.PacketTypeClasses;
-import org.imanity.framework.bukkit.util.reflection.resolver.FieldResolver;
+import org.imanity.framework.bukkit.reflection.resolver.FieldResolver;
 
 import java.lang.reflect.Field;
 

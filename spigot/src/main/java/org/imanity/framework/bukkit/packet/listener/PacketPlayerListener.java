@@ -5,6 +5,7 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerJoinEvent;
+import org.bukkit.event.player.PlayerLoginEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.imanity.framework.bukkit.packet.PacketService;
 import org.imanity.framework.events.annotation.AutoWiredListener;
@@ -17,17 +18,10 @@ public class PacketPlayerListener implements Listener {
     private PacketService packetService;
 
     @EventHandler(priority = EventPriority.LOWEST)
-    public void onPlayerJoin(PlayerJoinEvent event) {
+    public void onPlayerLogin(PlayerLoginEvent event) {
         Player player = event.getPlayer();
 
         this.packetService.inject(player);
-    }
-
-    @EventHandler(priority = EventPriority.MONITOR)
-    public void onPlayerQuit(PlayerQuitEvent event) {
-        Player player = event.getPlayer();
-
-        this.packetService.eject(player);
     }
 
 }

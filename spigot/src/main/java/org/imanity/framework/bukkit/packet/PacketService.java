@@ -1,15 +1,19 @@
 package org.imanity.framework.bukkit.packet;
 
+import com.google.common.collect.HashMultimap;
 import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.Multimap;
 import lombok.Getter;
 import org.bukkit.entity.Player;
 import org.imanity.framework.ImanityCommon;
 import org.imanity.framework.bukkit.Imanity;
 import org.imanity.framework.bukkit.packet.netty.INettyInjection;
-import org.imanity.framework.bukkit.packet.netty.NettyInjection1_7;
 import org.imanity.framework.bukkit.packet.netty.NettyInjection1_8;
+import org.imanity.framework.bukkit.packet.type.PacketType;
+import org.imanity.framework.bukkit.packet.type.PacketTypeClasses;
 import org.imanity.framework.bukkit.packet.wrapper.WrappedPacket;
 import org.imanity.framework.bukkit.packet.wrapper.annotation.AutowiredWrappedPacket;
+import org.imanity.framework.bukkit.util.TaskUtil;
 import org.imanity.framework.plugin.service.IService;
 import org.imanity.framework.plugin.service.Service;
 import org.imanity.framework.util.FileUtils;
@@ -22,6 +26,9 @@ import java.lang.reflect.Method;
 public class PacketService implements IService {
 
     public static final String CHANNEL_HANDLER = ImanityCommon.METADATA_PREFIX + "ChannelHandler";
+
+    private final Multimap<Class<?>, PacketListener> registeredPacketListeners = HashMultimap.create();
+
     @Getter
     private INettyInjection nettyInjection;
 
@@ -35,8 +42,23 @@ public class PacketService implements IService {
 
         } catch (ClassNotFoundException ex) {
 
-            nettyInjection = new NettyInjection1_7();
+//            nettyInjection = new NettyInjection1_7();
 
+        }
+
+        PacketTypeClasses.load();
+        WrappedPacket.go();
+
+        try {
+            nettyInjection.registerChannels();
+        } catch (Throwable throwable) {
+            TaskUtil.runScheduled(() -> {
+                try {
+                    nettyInjection.registerChannels();
+                } catch (Throwable throwable1) {
+                    throw new RuntimeException(throwable1);
+                }
+            }, 0L);
         }
 
         ImanityCommon.SERVICE_HANDLER.registerAutowired(nettyInjection);
@@ -99,11 +121,15 @@ public class PacketService implements IService {
 
     @Override
     public void stop() {
-        Imanity.getPlayers().forEach(this::eject);
+        this.nettyInjection.unregisterChannels();
     }
 
     public void registerPacketListener(PacketListener packetListener) {
-        for (byte type : packetListener.type()) {
+        for (Class<?> type : packetListener.type()) {
+            if (type == null) {
+                throw new UnsupportedOperationException("There is one packet doesn't exists in current version!");
+            }
+
             this.registeredPacketListeners.put(type, packetListener);
         }
     }
@@ -117,13 +143,13 @@ public class PacketService implements IService {
     }
 
     public Object read(Player player, Object packet) {
-        byte type = PacketDirection.READ.getPacketType(packet);
+        Class<?> type = packet.getClass();
 
         if (!this.registeredPacketListeners.containsKey(type)) {
             return packet;
         }
 
-        WrappedPacket wrappedPacket = PacketDirection.READ.getWrappedFromNMS(player, type, packet);
+        WrappedPacket wrappedPacket = PacketDirection.READ.getWrappedFromNMS(player, PacketType.Client.getIdByType(type), packet);
 
         boolean cancelled = false;
         for (PacketListener packetListener : this.registeredPacketListeners.get(type)) {
@@ -136,13 +162,15 @@ public class PacketService implements IService {
     }
 
     public Object write(Player player, Object packet) {
-        byte type = PacketDirection.WRITE.getPacketType(packet);
+        Class<?> type = packet.getClass();
+
+        System.out.println(type.getSimpleName());
 
         if (!this.registeredPacketListeners.containsKey(type)) {
             return packet;
         }
 
-        WrappedPacket wrappedPacket = PacketDirection.WRITE.getWrappedFromNMS(player, type, packet);
+        WrappedPacket wrappedPacket = PacketDirection.WRITE.getWrappedFromNMS(player, PacketType.Server.getIdByType(type), packet);
 
         boolean cancelled = false;
         for (PacketListener packetListener : this.registeredPacketListeners.get(type)) {

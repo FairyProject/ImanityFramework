@@ -1,7 +1,6 @@
 package org.imanity.framework.bukkit.impl.server;
 
 import com.google.common.collect.HashMultimap;
-import net.minecraft.server.v1_8_R3.PacketPlayOutAttachEntity;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -12,15 +11,15 @@ import org.bukkit.material.MaterialData;
 import org.imanity.framework.ImanityCommon;
 import org.imanity.framework.bukkit.hologram.HologramSingle;
 import org.imanity.framework.bukkit.metadata.Metadata;
-import org.imanity.framework.bukkit.util.reflection.resolver.MethodResolver;
-import org.imanity.framework.bukkit.util.reflection.resolver.ResolverQuery;
+import org.imanity.framework.bukkit.reflection.resolver.MethodResolver;
+import org.imanity.framework.bukkit.reflection.resolver.ResolverQuery;
 import org.imanity.framework.metadata.MetadataKey;
 import org.imanity.framework.bukkit.util.*;
 import org.imanity.framework.bukkit.util.BlockPosition;
-import org.imanity.framework.bukkit.util.reflection.MinecraftReflection;
-import org.imanity.framework.bukkit.util.reflection.resolver.ConstructorResolver;
-import org.imanity.framework.bukkit.util.reflection.resolver.minecraft.NMSClassResolver;
-import org.imanity.framework.bukkit.util.reflection.resolver.wrapper.*;
+import org.imanity.framework.bukkit.reflection.MinecraftReflection;
+import org.imanity.framework.bukkit.reflection.resolver.ConstructorResolver;
+import org.imanity.framework.bukkit.reflection.resolver.minecraft.NMSClassResolver;
+import org.imanity.framework.bukkit.reflection.wrapper.*;
 
 import java.lang.reflect.Array;
 import java.util.*;

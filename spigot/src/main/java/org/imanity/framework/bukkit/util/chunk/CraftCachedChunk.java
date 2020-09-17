@@ -4,8 +4,8 @@ import org.bukkit.ChunkSnapshot;
 import org.bukkit.block.Biome;
 import org.bukkit.material.MaterialData;
 import org.imanity.framework.util.AccessUtil;
-import org.imanity.framework.bukkit.util.reflection.resolver.minecraft.OBCClassResolver;
-import org.imanity.framework.bukkit.util.reflection.resolver.wrapper.FieldWrapper;
+import org.imanity.framework.bukkit.reflection.resolver.minecraft.OBCClassResolver;
+import org.imanity.framework.bukkit.reflection.wrapper.FieldWrapper;
 
 public class CraftCachedChunk implements CachedChunk {
 

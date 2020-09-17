@@ -3,10 +3,10 @@ package org.imanity.framework.bukkit.packet.wrapper.wrapped;
 import lombok.Getter;
 import lombok.SneakyThrows;
 import org.imanity.framework.bukkit.util.MinecraftVersion;
-import org.imanity.framework.bukkit.util.reflection.resolver.ClassResolver;
-import org.imanity.framework.bukkit.util.reflection.resolver.MethodResolver;
-import org.imanity.framework.bukkit.util.reflection.resolver.minecraft.NMSClassResolver;
-import org.imanity.framework.bukkit.util.reflection.resolver.minecraft.OBCClassResolver;
+import org.imanity.framework.bukkit.reflection.resolver.ClassResolver;
+import org.imanity.framework.bukkit.reflection.resolver.MethodResolver;
+import org.imanity.framework.bukkit.reflection.resolver.minecraft.NMSClassResolver;
+import org.imanity.framework.bukkit.reflection.resolver.minecraft.OBCClassResolver;
 
 import java.lang.reflect.Method;
 import java.util.Arrays;

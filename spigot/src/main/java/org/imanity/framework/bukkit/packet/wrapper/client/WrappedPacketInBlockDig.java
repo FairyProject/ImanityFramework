@@ -33,8 +33,8 @@ import org.imanity.framework.bukkit.packet.wrapper.annotation.AutowiredWrappedPa
 import org.imanity.framework.bukkit.packet.wrapper.other.EnumDirection;
 import org.imanity.framework.bukkit.util.BlockPosition;
 import org.imanity.framework.bukkit.util.MinecraftVersion;
-import org.imanity.framework.bukkit.util.reflection.resolver.FieldResolver;
-import org.imanity.framework.bukkit.util.reflection.resolver.wrapper.ObjectWrapper;
+import org.imanity.framework.bukkit.reflection.resolver.FieldResolver;
+import org.imanity.framework.bukkit.reflection.wrapper.ObjectWrapper;
 
 @Getter
 @AutowiredWrappedPacket(value = PacketType.Client.BLOCK_DIG, direction = PacketDirection.READ)

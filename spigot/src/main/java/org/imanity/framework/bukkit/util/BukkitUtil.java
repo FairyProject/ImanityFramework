@@ -10,13 +10,11 @@ import org.bukkit.entity.Projectile;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.player.PlayerEvent;
-import org.bukkit.metadata.Metadatable;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.projectiles.ProjectileSource;
 import org.bukkit.util.BlockIterator;
-import org.imanity.framework.bukkit.Imanity;
-import org.imanity.framework.bukkit.util.reflection.resolver.MethodResolver;
+import org.imanity.framework.bukkit.reflection.resolver.MethodResolver;
 
 import javax.annotation.Nullable;
 import java.io.File;

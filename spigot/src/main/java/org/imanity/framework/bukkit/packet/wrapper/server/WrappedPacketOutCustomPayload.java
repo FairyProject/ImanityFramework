@@ -29,7 +29,7 @@ import org.imanity.framework.bukkit.packet.PacketService;
 import org.imanity.framework.bukkit.packet.type.PacketTypeClasses;
 import org.imanity.framework.bukkit.packet.wrapper.SendableWrapper;
 import org.imanity.framework.bukkit.packet.wrapper.WrappedPacket;
-import org.imanity.framework.bukkit.util.reflection.resolver.MethodResolver;
+import org.imanity.framework.bukkit.reflection.resolver.MethodResolver;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;

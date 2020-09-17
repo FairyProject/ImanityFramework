@@ -33,12 +33,11 @@ import org.imanity.framework.bukkit.packet.type.PacketTypeClasses;
 import org.imanity.framework.bukkit.packet.wrapper.SendableWrapper;
 import org.imanity.framework.bukkit.packet.wrapper.WrappedPacket;
 import org.imanity.framework.bukkit.packet.wrapper.annotation.AutowiredWrappedPacket;
-import org.imanity.framework.bukkit.util.reflection.resolver.MethodResolver;
-import org.imanity.framework.bukkit.util.reflection.resolver.wrapper.MethodWrapper;
+import org.imanity.framework.bukkit.reflection.resolver.MethodResolver;
+import org.imanity.framework.bukkit.reflection.wrapper.MethodWrapper;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 

@@ -7,8 +7,8 @@ import org.imanity.framework.bukkit.Imanity;
 import org.imanity.framework.bukkit.tablist.util.*;
 import org.imanity.framework.bukkit.util.Skin;
 import org.imanity.framework.bukkit.util.BukkitUtil;
-import org.imanity.framework.bukkit.util.reflection.MinecraftReflection;
-import org.imanity.framework.bukkit.util.reflection.version.PlayerVersion;
+import org.imanity.framework.bukkit.reflection.MinecraftReflection;
+import org.imanity.framework.bukkit.reflection.version.PlayerVersion;
 
 import java.util.*;
 

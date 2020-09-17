@@ -8,6 +8,10 @@ public interface INettyInjection {
 
     void eject(Player player);
 
+    void registerChannels() throws Exception;
+
+    void unregisterChannels();
+
     byte[] readBytes(Object byteBuffer);
 
 }

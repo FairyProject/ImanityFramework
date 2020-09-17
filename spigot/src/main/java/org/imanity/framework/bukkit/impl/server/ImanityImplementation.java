@@ -7,7 +7,7 @@ import org.bukkit.craftbukkit.v1_8_R3.CraftWorld;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 import org.imanity.framework.bukkit.hologram.HologramSingle;
-import org.imanity.framework.bukkit.util.reflection.MinecraftReflection;
+import org.imanity.framework.bukkit.reflection.MinecraftReflection;
 
 import java.util.Collection;
 import java.util.List;

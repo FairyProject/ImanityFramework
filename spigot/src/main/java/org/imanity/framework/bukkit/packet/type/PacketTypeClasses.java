@@ -25,11 +25,16 @@
 package org.imanity.framework.bukkit.packet.type;
 
 import lombok.SneakyThrows;
-import org.imanity.framework.bukkit.util.reflection.resolver.minecraft.NMSClassResolver;
+import org.imanity.framework.bukkit.reflection.resolver.minecraft.NMSClassResolver;
 
 public class PacketTypeClasses {
     private static final NMSClassResolver PACKET_CLASS_RESOLVER = new NMSClassResolver();
-    
+
+    public static void load() {
+        Client.load();
+        Server.load();
+    }
+
     public static class Client {
         private static final String c = "PacketPlayIn";
         public static Class<?> FLYING, POSITION, POSITION_LOOK, LOOK, CLIENT_COMMAND,
@@ -42,73 +47,73 @@ public class PacketTypeClasses {
                 JIGSAW_GENERATE, DIFFICULTY_LOCK, VEHICLE_MOVE, BOAT_MOVE, PICK_ITEM,
                 AUTO_RECIPE, RECIPE_DISPLAYED, ITEM_NAME, RESOURCE_PACK_STATUS,
                 ADVANCEMENTS, TR_SEL, BEACON, SET_COMMAND_BLOCK,
-                SET_COMMAND_MINECART, SET_JIGSAW, STRUCT, UPDATE_SIGN, SPECTATE;
+                SET_COMMAND_MINECART, SET_JIGSAW, STRUCT, UPDATE_SIGN, SPECTATE,
+
+                LOGIN_START;
 
         /**
          * Initiate all server-bound packet classes.
          */
         @SneakyThrows
         public static void load() {
-            FLYING = PACKET_CLASS_RESOLVER.resolve(c + "Flying");
+            FLYING = PACKET_CLASS_RESOLVER.resolveSilent(c + "Flying");
             try {
                 POSITION = PACKET_CLASS_RESOLVER.resolve(c + "Position");
                 POSITION_LOOK = PACKET_CLASS_RESOLVER.resolve(c + "PositionLook");
                 LOOK = PACKET_CLASS_RESOLVER.resolve(c + "Look");
             } catch (ClassNotFoundException e) {
-                POSITION = PACKET_CLASS_RESOLVER.resolve(c + "Flying$" + c + "Position") ;//SubclassUtil.getSubClass(FLYING, c + "Position");
-                POSITION_LOOK = PACKET_CLASS_RESOLVER.resolve(c + "Flying$" + c + "PositionLook"); //SubclassUtil.getSubClass(FLYING, c + "PositionLook");
-                LOOK = PACKET_CLASS_RESOLVER.resolve(c + "Flying$" + c + "Look"); // SubclassUtil.getSubClass(FLYING, c + "Look");
+                POSITION = PACKET_CLASS_RESOLVER.resolveSilent(c + "Flying$" + c + "Position") ;//SubclassUtil.getSubClass(FLYING, c + "Position");
+                POSITION_LOOK = PACKET_CLASS_RESOLVER.resolveSilent(c + "Flying$" + c + "PositionLook"); //SubclassUtil.getSubClass(FLYING, c + "PositionLook");
+                LOOK = PACKET_CLASS_RESOLVER.resolveSilent(c + "Flying$" + c + "Look"); // SubclassUtil.getSubClass(FLYING, c + "Look");
             }
 
-            try {
-                SETTINGS = PACKET_CLASS_RESOLVER.resolve(c + "Settings");
-                ENCHANT_ITEM = PACKET_CLASS_RESOLVER.resolve(c + "EnchantItem");
+            LOGIN_START = PACKET_CLASS_RESOLVER.resolveSilent("PacketLoginInStart");
 
-                CLIENT_COMMAND = PACKET_CLASS_RESOLVER.resolve(c + "ClientCommand");
-                TRANSACTION = PACKET_CLASS_RESOLVER.resolve(c + "Transaction");
-                BLOCK_DIG = PACKET_CLASS_RESOLVER.resolve(c + "BlockDig");
-                ENTITY_ACTION = PACKET_CLASS_RESOLVER.resolve(c + "EntityAction");
-                USE_ENTITY = PACKET_CLASS_RESOLVER.resolve(c + "UseEntity");
-                WINDOW_CLICK = PACKET_CLASS_RESOLVER.resolve(c + "WindowClick");
-                STEER_VEHICLE = PACKET_CLASS_RESOLVER.resolve(c + "SteerVehicle");
-                CUSTOM_PAYLOAD = PACKET_CLASS_RESOLVER.resolve(c + "CustomPayload");
-                ARM_ANIMATION = PACKET_CLASS_RESOLVER.resolve(c + "ArmAnimation");
-                ABILITIES = PACKET_CLASS_RESOLVER.resolve(c + "Abilities");
-                HELD_ITEM_SLOT = PACKET_CLASS_RESOLVER.resolve(c + "HeldItemSlot");
-                CLOSE_WINDOW = PACKET_CLASS_RESOLVER.resolve(c + "CloseWindow");
-                TAB_COMPLETE = PACKET_CLASS_RESOLVER.resolve(c + "TabComplete");
-                CHAT = PACKET_CLASS_RESOLVER.resolve(c + "Chat");
-                SET_CREATIVE_SLOT = PACKET_CLASS_RESOLVER.resolve(c + "SetCreativeSlot");
-                KEEP_ALIVE = PACKET_CLASS_RESOLVER.resolve(c + "KeepAlive");
-                UPDATE_SIGN = PACKET_CLASS_RESOLVER.resolve(c + "UpdateSign");
+            SETTINGS = PACKET_CLASS_RESOLVER.resolveSilent(c + "Settings");
+            ENCHANT_ITEM = PACKET_CLASS_RESOLVER.resolveSilent(c + "EnchantItem");
 
-                TELEPORT_ACCEPT = PACKET_CLASS_RESOLVER.resolve(c + "TeleportAccept");
-                TILE_NBT_QUERY = PACKET_CLASS_RESOLVER.resolve(c + "TileNBTQuery");
-                DIFFICULTY_CHANGE = PACKET_CLASS_RESOLVER.resolve(c + "DifficultyChange");
-                B_EDIT = PACKET_CLASS_RESOLVER.resolve(c + "BEdit");
-                ENTITY_NBT_QUERY = PACKET_CLASS_RESOLVER.resolve(c + "EntityNBTQuery");
-                JIGSAW_GENERATE = PACKET_CLASS_RESOLVER.resolve(c + "JigsawGenerate");
-                DIFFICULTY_LOCK = PACKET_CLASS_RESOLVER.resolve(c + "DifficultyLock");
-                VEHICLE_MOVE = PACKET_CLASS_RESOLVER.resolve(c + "VehicleMove");
-                BOAT_MOVE = PACKET_CLASS_RESOLVER.resolve(c + "BoatMove");
-                PICK_ITEM = PACKET_CLASS_RESOLVER.resolve(c + "PickItem");
-                AUTO_RECIPE = PACKET_CLASS_RESOLVER.resolve(c + "AutoRecipe");
-                RECIPE_DISPLAYED = PACKET_CLASS_RESOLVER.resolve(c + "RecipeDisplayed");
-                ITEM_NAME = PACKET_CLASS_RESOLVER.resolve(c + "ItemName");
-                //1.8+
-                RESOURCE_PACK_STATUS = PACKET_CLASS_RESOLVER.resolve(c + "ResourcePackStatus");
+            CLIENT_COMMAND = PACKET_CLASS_RESOLVER.resolveSilent(c + "ClientCommand");
+            TRANSACTION = PACKET_CLASS_RESOLVER.resolveSilent(c + "Transaction");
+            BLOCK_DIG = PACKET_CLASS_RESOLVER.resolveSilent(c + "BlockDig");
+            ENTITY_ACTION = PACKET_CLASS_RESOLVER.resolveSilent(c + "EntityAction");
+            USE_ENTITY = PACKET_CLASS_RESOLVER.resolveSilent(c + "UseEntity");
+            WINDOW_CLICK = PACKET_CLASS_RESOLVER.resolveSilent(c + "WindowClick");
+            STEER_VEHICLE = PACKET_CLASS_RESOLVER.resolveSilent(c + "SteerVehicle");
+            CUSTOM_PAYLOAD = PACKET_CLASS_RESOLVER.resolveSilent(c + "CustomPayload");
+            ARM_ANIMATION = PACKET_CLASS_RESOLVER.resolveSilent(c + "ArmAnimation");
+            ABILITIES = PACKET_CLASS_RESOLVER.resolveSilent(c + "Abilities");
+            HELD_ITEM_SLOT = PACKET_CLASS_RESOLVER.resolveSilent(c + "HeldItemSlot");
+            CLOSE_WINDOW = PACKET_CLASS_RESOLVER.resolveSilent(c + "CloseWindow");
+            TAB_COMPLETE = PACKET_CLASS_RESOLVER.resolveSilent(c + "TabComplete");
+            CHAT = PACKET_CLASS_RESOLVER.resolveSilent(c + "Chat");
+            SET_CREATIVE_SLOT = PACKET_CLASS_RESOLVER.resolveSilent(c + "SetCreativeSlot");
+            KEEP_ALIVE = PACKET_CLASS_RESOLVER.resolveSilent(c + "KeepAlive");
+            UPDATE_SIGN = PACKET_CLASS_RESOLVER.resolveSilent(c + "UpdateSign");
 
-                ADVANCEMENTS = PACKET_CLASS_RESOLVER.resolve(c + "Advancements");
-                TR_SEL = PACKET_CLASS_RESOLVER.resolve(c + "TrSel");
-                BEACON = PACKET_CLASS_RESOLVER.resolve(c + "Beacon");
-                SET_COMMAND_BLOCK = PACKET_CLASS_RESOLVER.resolve(c + "SetCommandBlock");
-                SET_COMMAND_MINECART = PACKET_CLASS_RESOLVER.resolve(c + "SetCommandMinecart");
-                SET_JIGSAW = PACKET_CLASS_RESOLVER.resolve(c + "SetJigsaw");
-                STRUCT = PACKET_CLASS_RESOLVER.resolve(c + "Struct");
-                SPECTATE = PACKET_CLASS_RESOLVER.resolve(c + "Spectate");
-            } catch (ClassNotFoundException e) {
-                e.printStackTrace();
-            }
+            TELEPORT_ACCEPT = PACKET_CLASS_RESOLVER.resolveSilent(c + "TeleportAccept");
+            TILE_NBT_QUERY = PACKET_CLASS_RESOLVER.resolveSilent(c + "TileNBTQuery");
+            DIFFICULTY_CHANGE = PACKET_CLASS_RESOLVER.resolveSilent(c + "DifficultyChange");
+            B_EDIT = PACKET_CLASS_RESOLVER.resolveSilent(c + "BEdit");
+            ENTITY_NBT_QUERY = PACKET_CLASS_RESOLVER.resolveSilent(c + "EntityNBTQuery");
+            JIGSAW_GENERATE = PACKET_CLASS_RESOLVER.resolveSilent(c + "JigsawGenerate");
+            DIFFICULTY_LOCK = PACKET_CLASS_RESOLVER.resolveSilent(c + "DifficultyLock");
+            VEHICLE_MOVE = PACKET_CLASS_RESOLVER.resolveSilent(c + "VehicleMove");
+            BOAT_MOVE = PACKET_CLASS_RESOLVER.resolveSilent(c + "BoatMove");
+            PICK_ITEM = PACKET_CLASS_RESOLVER.resolveSilent(c + "PickItem");
+            AUTO_RECIPE = PACKET_CLASS_RESOLVER.resolveSilent(c + "AutoRecipe");
+            RECIPE_DISPLAYED = PACKET_CLASS_RESOLVER.resolveSilent(c + "RecipeDisplayed");
+            ITEM_NAME = PACKET_CLASS_RESOLVER.resolveSilent(c + "ItemName");
+            //1.8+
+            RESOURCE_PACK_STATUS = PACKET_CLASS_RESOLVER.resolveSilent(c + "ResourcePackStatus");
+
+            ADVANCEMENTS = PACKET_CLASS_RESOLVER.resolveSilent(c + "Advancements");
+            TR_SEL = PACKET_CLASS_RESOLVER.resolveSilent(c + "TrSel");
+            BEACON = PACKET_CLASS_RESOLVER.resolveSilent(c + "Beacon");
+            SET_COMMAND_BLOCK = PACKET_CLASS_RESOLVER.resolveSilent(c + "SetCommandBlock");
+            SET_COMMAND_MINECART = PACKET_CLASS_RESOLVER.resolveSilent(c + "SetCommandMinecart");
+            SET_JIGSAW = PACKET_CLASS_RESOLVER.resolveSilent(c + "SetJigsaw");
+            STRUCT = PACKET_CLASS_RESOLVER.resolveSilent(c + "Struct");
+            SPECTATE = PACKET_CLASS_RESOLVER.resolveSilent(c + "Spectate");
             //Block place
             try {
                 BLOCK_PLACE = PACKET_CLASS_RESOLVER.resolve(c + "BlockPlace");
@@ -129,7 +134,7 @@ public class PacketTypeClasses {
     public static class Server {
         private static final String s = "PacketPlayOut";
         public static Class<?> SPAWN_ENTITY, SPAWN_ENTITY_EXPERIENCE_ORB, SPAWN_ENTITY_WEATHER, SPAWN_ENTITY_LIVING,
-                SPAWN_ENTITY_PAINTING, SPAWN_ENTITY_SPAWN, ANIMATION, STATISTIC,
+                SPAWN_ENTITY_PAINTING, ANIMATION, STATISTIC,
                 BLOCK_BREAK, BLOCK_BREAK_ANIMATION, TILE_ENTITY_DATA, BLOCK_ACTION,
                 BLOCK_CHANGE, BOSS, SERVER_DIFFICULTY, CHAT, MULTI_BLOCK_CHANGE,
                 TAB_COMPLETE, COMMANDS, TRANSACTION, CLOSE_WINDOW,
@@ -157,106 +162,105 @@ public class PacketTypeClasses {
          */
         @SneakyThrows
         public static void load() {
-            SPAWN_ENTITY = PACKET_CLASS_RESOLVER.resolve(s + "SpawnEntity");
-            SPAWN_ENTITY_EXPERIENCE_ORB = PACKET_CLASS_RESOLVER.resolve(s + "SpawnEntityExperienceOrb");
-            SPAWN_ENTITY_WEATHER = PACKET_CLASS_RESOLVER.resolve(s + "SpawnEntityWeather");
-            SPAWN_ENTITY_LIVING = PACKET_CLASS_RESOLVER.resolve(s + "SpawnEntityLiving");
-            SPAWN_ENTITY_PAINTING = PACKET_CLASS_RESOLVER.resolve(s + "SpawnEntityPainting");
-            SPAWN_ENTITY_SPAWN = PACKET_CLASS_RESOLVER.resolve(s + "SpawnEntitySpawn");
-            ANIMATION = PACKET_CLASS_RESOLVER.resolve(s + "Animation");
-            STATISTIC = PACKET_CLASS_RESOLVER.resolve(s + "Statistic");
-            BLOCK_BREAK = PACKET_CLASS_RESOLVER.resolve(s + "BlockBreak");
-            BLOCK_BREAK_ANIMATION = PACKET_CLASS_RESOLVER.resolve(s + "BlockBreakAnimation");
-            TILE_ENTITY_DATA = PACKET_CLASS_RESOLVER.resolve(s + "TileEntityData");
-            BLOCK_ACTION = PACKET_CLASS_RESOLVER.resolve(s + "BlockAction");
-            BLOCK_CHANGE = PACKET_CLASS_RESOLVER.resolve(s + "BlockChange");
-            BOSS = PACKET_CLASS_RESOLVER.resolve(s + "Boss");
-            SERVER_DIFFICULTY = PACKET_CLASS_RESOLVER.resolve(s + "ServerDifficulty");
-            CHAT = PACKET_CLASS_RESOLVER.resolve(s + "Chat");
-            MULTI_BLOCK_CHANGE = PACKET_CLASS_RESOLVER.resolve(s + "MultiBlockChange");
-            TAB_COMPLETE = PACKET_CLASS_RESOLVER.resolve(s + "TabComplete");
-            COMMANDS = PACKET_CLASS_RESOLVER.resolve(s + "Commands");
-            TRANSACTION = PACKET_CLASS_RESOLVER.resolve(s + "Transaction");
-            CLOSE_WINDOW = PACKET_CLASS_RESOLVER.resolve(s + "CloseWindow");
-            WINDOW_ITEMS = PACKET_CLASS_RESOLVER.resolve(s + "WindowItems");
-            WINDOW_DATA = PACKET_CLASS_RESOLVER.resolve(s + "WindowData");
-            SET_SLOT = PACKET_CLASS_RESOLVER.resolve(s + "SetSlot");
-            SET_COOLDOWN = PACKET_CLASS_RESOLVER.resolve(s + "SetCooldown");
-            CUSTOM_PAYLOAD = PACKET_CLASS_RESOLVER.resolve(s + "CustomPayload");
-            CUSTOM_SOUND_EFFECT = PACKET_CLASS_RESOLVER.resolve(s + "CustomSoundEffect");
-            KICK_DISCONNECT = PACKET_CLASS_RESOLVER.resolve(s + "KickDisconnect");
-            ENTITY_STATUS = PACKET_CLASS_RESOLVER.resolve(s + "EntityStatus");
-            EXPLOSION = PACKET_CLASS_RESOLVER.resolve(s + "Explosion");
-            UNLOAD_CHUNK = PACKET_CLASS_RESOLVER.resolve(s + "UnloadChunk");
-            GAME_STATE_CHANGE = PACKET_CLASS_RESOLVER.resolve(s + "GameStateChange");
-            OPEN_WINDOW_HORSE = PACKET_CLASS_RESOLVER.resolve(s + "OpenWindowHorse");
-            KEEP_ALIVE = PACKET_CLASS_RESOLVER.resolve(s + "KeepAlive");
-            MAP_CHUNK = PACKET_CLASS_RESOLVER.resolve(s + "MapChunk");
-            WORLD_EVENT = PACKET_CLASS_RESOLVER.resolve(s + "WorldEvent");
-            WORLD_PARTICLES = PACKET_CLASS_RESOLVER.resolve(s + "WorldParticles");
-            LIGHT_UPDATE = PACKET_CLASS_RESOLVER.resolve(s + "LightUpdate");
-            LOGIN = PACKET_CLASS_RESOLVER.resolve(s + "Login");
-            MAP = PACKET_CLASS_RESOLVER.resolve(s + "Map");
-            OPEN_WINDOW_MERCHANT = PACKET_CLASS_RESOLVER.resolve(s + "OpenWindowMerchant");
-            ENTITY = PACKET_CLASS_RESOLVER.resolve(s + "Entity");
-            REL_ENTITY_MOVE = PACKET_CLASS_RESOLVER.resolve(s + "Flying$" + s + "RelEntityMove"); //SubclassUtil.getSubClass(ENTITY, s + "RelEntityMove");
-            REL_ENTITY_MOVE_LOOK = PACKET_CLASS_RESOLVER.resolve(s + "Flying$" + s + "RelEntityMoveLook"); //SubclassUtil.getSubClass(ENTITY, s + "RelEntityMoveLook");
-            ENTITY_LOOK = PACKET_CLASS_RESOLVER.resolve(s + "Entity$" + s + "EntityLook"); //SubclassUtil.getSubClass(ENTITY, s + "EntityLook");
+            SPAWN_ENTITY = PACKET_CLASS_RESOLVER.resolveSilent(s + "SpawnEntity");
+            SPAWN_ENTITY_EXPERIENCE_ORB = PACKET_CLASS_RESOLVER.resolveSilent(s + "SpawnEntityExperienceOrb");
+            SPAWN_ENTITY_WEATHER = PACKET_CLASS_RESOLVER.resolveSilent(s + "SpawnEntityWeather");
+            SPAWN_ENTITY_LIVING = PACKET_CLASS_RESOLVER.resolveSilent(s + "SpawnEntityLiving");
+            SPAWN_ENTITY_PAINTING = PACKET_CLASS_RESOLVER.resolveSilent(s + "SpawnEntityPainting");
+            ANIMATION = PACKET_CLASS_RESOLVER.resolveSilent(s + "Animation");
+            STATISTIC = PACKET_CLASS_RESOLVER.resolveSilent(s + "Statistic");
+            BLOCK_BREAK = PACKET_CLASS_RESOLVER.resolveSilent(s + "BlockBreak");
+            BLOCK_BREAK_ANIMATION = PACKET_CLASS_RESOLVER.resolveSilent(s + "BlockBreakAnimation");
+            TILE_ENTITY_DATA = PACKET_CLASS_RESOLVER.resolveSilent(s + "TileEntityData");
+            BLOCK_ACTION = PACKET_CLASS_RESOLVER.resolveSilent(s + "BlockAction");
+            BLOCK_CHANGE = PACKET_CLASS_RESOLVER.resolveSilent(s + "BlockChange");
+            BOSS = PACKET_CLASS_RESOLVER.resolveSilent(s + "Boss");
+            SERVER_DIFFICULTY = PACKET_CLASS_RESOLVER.resolveSilent(s + "ServerDifficulty");
+            CHAT = PACKET_CLASS_RESOLVER.resolveSilent(s + "Chat");
+            MULTI_BLOCK_CHANGE = PACKET_CLASS_RESOLVER.resolveSilent(s + "MultiBlockChange");
+            TAB_COMPLETE = PACKET_CLASS_RESOLVER.resolveSilent(s + "TabComplete");
+            COMMANDS = PACKET_CLASS_RESOLVER.resolveSilent(s + "Commands");
+            TRANSACTION = PACKET_CLASS_RESOLVER.resolveSilent(s + "Transaction");
+            CLOSE_WINDOW = PACKET_CLASS_RESOLVER.resolveSilent(s + "CloseWindow");
+            WINDOW_ITEMS = PACKET_CLASS_RESOLVER.resolveSilent(s + "WindowItems");
+            WINDOW_DATA = PACKET_CLASS_RESOLVER.resolveSilent(s + "WindowData");
+            SET_SLOT = PACKET_CLASS_RESOLVER.resolveSilent(s + "SetSlot");
+            SET_COOLDOWN = PACKET_CLASS_RESOLVER.resolveSilent(s + "SetCooldown");
+            CUSTOM_PAYLOAD = PACKET_CLASS_RESOLVER.resolveSilent(s + "CustomPayload");
+            CUSTOM_SOUND_EFFECT = PACKET_CLASS_RESOLVER.resolveSilent(s + "CustomSoundEffect");
+            KICK_DISCONNECT = PACKET_CLASS_RESOLVER.resolveSilent(s + "KickDisconnect");
+            ENTITY_STATUS = PACKET_CLASS_RESOLVER.resolveSilent(s + "EntityStatus");
+            EXPLOSION = PACKET_CLASS_RESOLVER.resolveSilent(s + "Explosion");
+            UNLOAD_CHUNK = PACKET_CLASS_RESOLVER.resolveSilent(s + "UnloadChunk");
+            GAME_STATE_CHANGE = PACKET_CLASS_RESOLVER.resolveSilent(s + "GameStateChange");
+            OPEN_WINDOW_HORSE = PACKET_CLASS_RESOLVER.resolveSilent(s + "OpenWindowHorse");
+            KEEP_ALIVE = PACKET_CLASS_RESOLVER.resolveSilent(s + "KeepAlive");
+            MAP_CHUNK = PACKET_CLASS_RESOLVER.resolveSilent(s + "MapChunk");
+            WORLD_EVENT = PACKET_CLASS_RESOLVER.resolveSilent(s + "WorldEvent");
+            WORLD_PARTICLES = PACKET_CLASS_RESOLVER.resolveSilent(s + "WorldParticles");
+            LIGHT_UPDATE = PACKET_CLASS_RESOLVER.resolveSilent(s + "LightUpdate");
+            LOGIN = PACKET_CLASS_RESOLVER.resolveSilent(s + "Login");
+            MAP = PACKET_CLASS_RESOLVER.resolveSilent(s + "Map");
+            OPEN_WINDOW_MERCHANT = PACKET_CLASS_RESOLVER.resolveSilent(s + "OpenWindowMerchant");
+            ENTITY = PACKET_CLASS_RESOLVER.resolveSilent(s + "Entity");
+            REL_ENTITY_MOVE = PACKET_CLASS_RESOLVER.resolveSilent(s + "Flying$" + s + "RelEntityMove"); //SubclassUtil.getSubClass(ENTITY, s + "RelEntityMove");
+            REL_ENTITY_MOVE_LOOK = PACKET_CLASS_RESOLVER.resolveSilent(s + "Flying$" + s + "RelEntityMoveLook"); //SubclassUtil.getSubClass(ENTITY, s + "RelEntityMoveLook");
+            ENTITY_LOOK = PACKET_CLASS_RESOLVER.resolveSilent(s + "Entity$" + s + "EntityLook"); //SubclassUtil.getSubClass(ENTITY, s + "EntityLook");
             if (REL_ENTITY_MOVE == null) {
                 //is not a subclass and should be accessed normally
-                REL_ENTITY_MOVE = PACKET_CLASS_RESOLVER.resolve(s + "RelEntityMove");
-                REL_ENTITY_MOVE_LOOK = PACKET_CLASS_RESOLVER.resolve(s + "RelEntityMoveLook");
-                ENTITY_LOOK = PACKET_CLASS_RESOLVER.resolve(s + "RelEntityLook");
+                REL_ENTITY_MOVE = PACKET_CLASS_RESOLVER.resolveSilent(s + "RelEntityMove");
+                REL_ENTITY_MOVE_LOOK = PACKET_CLASS_RESOLVER.resolveSilent(s + "RelEntityMoveLook");
+                ENTITY_LOOK = PACKET_CLASS_RESOLVER.resolveSilent(s + "RelEntityLook");
             }
-            VEHICLE_MOVE = PACKET_CLASS_RESOLVER.resolve(s + "VehicleMove");
-            OPEN_BOOK = PACKET_CLASS_RESOLVER.resolve(s + "OpenBook");
-            OPEN_WINDOW = PACKET_CLASS_RESOLVER.resolve(s + "OpenWindow");
-            OPEN_SIGN_EDITOR = PACKET_CLASS_RESOLVER.resolve(s + "OpenSignEditor");
-            AUTO_RECIPE = PACKET_CLASS_RESOLVER.resolve(s + "AutoRecipe");
-            ABILITIES = PACKET_CLASS_RESOLVER.resolve(s + "Abilities");
-            COMBAT_EVENT = PACKET_CLASS_RESOLVER.resolve(s + "CombatEvent");
-            PLAYER_INFO = PACKET_CLASS_RESOLVER.resolve(s + "PlayerInfo");
-            LOOK_AT = PACKET_CLASS_RESOLVER.resolve(s + "LookAt");
-            POSITION = PACKET_CLASS_RESOLVER.resolve(s + "Position");
-            RECIPES = PACKET_CLASS_RESOLVER.resolve(s + "Recipes");
-            ENTITY_DESTROY = PACKET_CLASS_RESOLVER.resolve(s + "EntityDestroy");
-            REMOVE_ENTITY_EFFECT = PACKET_CLASS_RESOLVER.resolve(s + "RemoveEntityEffect");
-            RESOURCE_PACK_SEND = PACKET_CLASS_RESOLVER.resolve(s + "ResourcePackSend");
-            RESPAWN = PACKET_CLASS_RESOLVER.resolve(s + "Respawn");
-            ENTITY_HEAD_ROTATION = PACKET_CLASS_RESOLVER.resolve(s + "EntityHeadRotation");
-            SELECT_ADVANCEMENT_TAB = PACKET_CLASS_RESOLVER.resolve(s + "SelectAdvancementTab");
-            WORLD_BORDER = PACKET_CLASS_RESOLVER.resolve(s + "WorldBorder");
-            CAMERA = PACKET_CLASS_RESOLVER.resolve(s + "Camera");
-            HELD_ITEM_SLOT = PACKET_CLASS_RESOLVER.resolve(s + "HeldItemSlot");
-            VIEW_CENTRE = PACKET_CLASS_RESOLVER.resolve(s + "ViewCentre");
-            VIEW_DISTANCE = PACKET_CLASS_RESOLVER.resolve(s + "ViewDistance");
-            SCOREBOARD_DISPLAY_OBJECTIVE = PACKET_CLASS_RESOLVER.resolve(s + "ScoreboardDisplayObjective");
-            ENTITY_METADATA = PACKET_CLASS_RESOLVER.resolve(s + "EntityMetadata");
-            ATTACH_ENTITY = PACKET_CLASS_RESOLVER.resolve(s + "AttachEntity");
-            ENTITY_VELOCITY = PACKET_CLASS_RESOLVER.resolve(s + "EntityVelocity");
-            ENTITY_EQUIPMENT = PACKET_CLASS_RESOLVER.resolve(s + "EntityEquipment");
-            EXPERIENCE = PACKET_CLASS_RESOLVER.resolve(s + "Experience");
-            UPDATE_HEALTH = PACKET_CLASS_RESOLVER.resolve(s + "UpdateHealth");
-            SCOREBOARD_OBJECTIVE = PACKET_CLASS_RESOLVER.resolve(s + "ScoreboardObjective");
-            MOUNT = PACKET_CLASS_RESOLVER.resolve(s + "Mount");
-            SCOREBOARD_TEAM = PACKET_CLASS_RESOLVER.resolve(s + "ScoreboardTeam");
-            SCOREBOARD_SCORE = PACKET_CLASS_RESOLVER.resolve(s + "ScoreboardScore");
-            SPAWN_POSITION = PACKET_CLASS_RESOLVER.resolve(s + "SpawnPosition");
-            UPDATE_TIME = PACKET_CLASS_RESOLVER.resolve(s + "UpdateTime");
-            TITLE = PACKET_CLASS_RESOLVER.resolve(s + "Title");
-            ENTITY_SOUND = PACKET_CLASS_RESOLVER.resolve(s + "EntitySound");
-            NAMED_SOUND_EFFECT = PACKET_CLASS_RESOLVER.resolve(s + "NamedSoundEffect");
-            STOP_SOUND = PACKET_CLASS_RESOLVER.resolve(s + "StopSound");
-            PLAYER_LIST_HEADER_FOOTER = PACKET_CLASS_RESOLVER.resolve(s + "PlayerListHeaderFooter");
-            NBT_QUERY = PACKET_CLASS_RESOLVER.resolve(s + "NBTQuery");
-            COLLECT = PACKET_CLASS_RESOLVER.resolve(s + "Collect");
-            ENTITY_TELEPORT = PACKET_CLASS_RESOLVER.resolve(s + "EntityTeleport");
-            ADVANCEMENTS = PACKET_CLASS_RESOLVER.resolve(s + "Advancements");
-            UPDATE_ATTRIBUTES = PACKET_CLASS_RESOLVER.resolve(s + "UpdateAttributes");
-            ENTITY_EFFECT = PACKET_CLASS_RESOLVER.resolve(s + "EntityEffect");
-            RECIPE_UPDATE = PACKET_CLASS_RESOLVER.resolve(s + "RecipeUpdate");
-            TAGS = PACKET_CLASS_RESOLVER.resolve(s + "Tags");
-            MAP_CHUNK_BULK = PACKET_CLASS_RESOLVER.resolve(s + "MapChunkBulk");
+            VEHICLE_MOVE = PACKET_CLASS_RESOLVER.resolveSilent(s + "VehicleMove");
+            OPEN_BOOK = PACKET_CLASS_RESOLVER.resolveSilent(s + "OpenBook");
+            OPEN_WINDOW = PACKET_CLASS_RESOLVER.resolveSilent(s + "OpenWindow");
+            OPEN_SIGN_EDITOR = PACKET_CLASS_RESOLVER.resolveSilent(s + "OpenSignEditor");
+            AUTO_RECIPE = PACKET_CLASS_RESOLVER.resolveSilent(s + "AutoRecipe");
+            ABILITIES = PACKET_CLASS_RESOLVER.resolveSilent(s + "Abilities");
+            COMBAT_EVENT = PACKET_CLASS_RESOLVER.resolveSilent(s + "CombatEvent");
+            PLAYER_INFO = PACKET_CLASS_RESOLVER.resolveSilent(s + "PlayerInfo");
+            LOOK_AT = PACKET_CLASS_RESOLVER.resolveSilent(s + "LookAt");
+            POSITION = PACKET_CLASS_RESOLVER.resolveSilent(s + "Position");
+            RECIPES = PACKET_CLASS_RESOLVER.resolveSilent(s + "Recipes");
+            ENTITY_DESTROY = PACKET_CLASS_RESOLVER.resolveSilent(s + "EntityDestroy");
+            REMOVE_ENTITY_EFFECT = PACKET_CLASS_RESOLVER.resolveSilent(s + "RemoveEntityEffect");
+            RESOURCE_PACK_SEND = PACKET_CLASS_RESOLVER.resolveSilent(s + "ResourcePackSend");
+            RESPAWN = PACKET_CLASS_RESOLVER.resolveSilent(s + "Respawn");
+            ENTITY_HEAD_ROTATION = PACKET_CLASS_RESOLVER.resolveSilent(s + "EntityHeadRotation");
+            SELECT_ADVANCEMENT_TAB = PACKET_CLASS_RESOLVER.resolveSilent(s + "SelectAdvancementTab");
+            WORLD_BORDER = PACKET_CLASS_RESOLVER.resolveSilent(s + "WorldBorder");
+            CAMERA = PACKET_CLASS_RESOLVER.resolveSilent(s + "Camera");
+            HELD_ITEM_SLOT = PACKET_CLASS_RESOLVER.resolveSilent(s + "HeldItemSlot");
+            VIEW_CENTRE = PACKET_CLASS_RESOLVER.resolveSilent(s + "ViewCentre");
+            VIEW_DISTANCE = PACKET_CLASS_RESOLVER.resolveSilent(s + "ViewDistance");
+            SCOREBOARD_DISPLAY_OBJECTIVE = PACKET_CLASS_RESOLVER.resolveSilent(s + "ScoreboardDisplayObjective");
+            ENTITY_METADATA = PACKET_CLASS_RESOLVER.resolveSilent(s + "EntityMetadata");
+            ATTACH_ENTITY = PACKET_CLASS_RESOLVER.resolveSilent(s + "AttachEntity");
+            ENTITY_VELOCITY = PACKET_CLASS_RESOLVER.resolveSilent(s + "EntityVelocity");
+            ENTITY_EQUIPMENT = PACKET_CLASS_RESOLVER.resolveSilent(s + "EntityEquipment");
+            EXPERIENCE = PACKET_CLASS_RESOLVER.resolveSilent(s + "Experience");
+            UPDATE_HEALTH = PACKET_CLASS_RESOLVER.resolveSilent(s + "UpdateHealth");
+            SCOREBOARD_OBJECTIVE = PACKET_CLASS_RESOLVER.resolveSilent(s + "ScoreboardObjective");
+            MOUNT = PACKET_CLASS_RESOLVER.resolveSilent(s + "Mount");
+            SCOREBOARD_TEAM = PACKET_CLASS_RESOLVER.resolveSilent(s + "ScoreboardTeam");
+            SCOREBOARD_SCORE = PACKET_CLASS_RESOLVER.resolveSilent(s + "ScoreboardScore");
+            SPAWN_POSITION = PACKET_CLASS_RESOLVER.resolveSilent(s + "SpawnPosition");
+            UPDATE_TIME = PACKET_CLASS_RESOLVER.resolveSilent(s + "UpdateTime");
+            TITLE = PACKET_CLASS_RESOLVER.resolveSilent(s + "Title");
+            ENTITY_SOUND = PACKET_CLASS_RESOLVER.resolveSilent(s + "EntitySound");
+            NAMED_SOUND_EFFECT = PACKET_CLASS_RESOLVER.resolveSilent(s + "NamedSoundEffect");
+            STOP_SOUND = PACKET_CLASS_RESOLVER.resolveSilent(s + "StopSound");
+            PLAYER_LIST_HEADER_FOOTER = PACKET_CLASS_RESOLVER.resolveSilent(s + "PlayerListHeaderFooter");
+            NBT_QUERY = PACKET_CLASS_RESOLVER.resolveSilent(s + "NBTQuery");
+            COLLECT = PACKET_CLASS_RESOLVER.resolveSilent(s + "Collect");
+            ENTITY_TELEPORT = PACKET_CLASS_RESOLVER.resolveSilent(s + "EntityTeleport");
+            ADVANCEMENTS = PACKET_CLASS_RESOLVER.resolveSilent(s + "Advancements");
+            UPDATE_ATTRIBUTES = PACKET_CLASS_RESOLVER.resolveSilent(s + "UpdateAttributes");
+            ENTITY_EFFECT = PACKET_CLASS_RESOLVER.resolveSilent(s + "EntityEffect");
+            RECIPE_UPDATE = PACKET_CLASS_RESOLVER.resolveSilent(s + "RecipeUpdate");
+            TAGS = PACKET_CLASS_RESOLVER.resolveSilent(s + "Tags");
+            MAP_CHUNK_BULK = PACKET_CLASS_RESOLVER.resolveSilent(s + "MapChunkBulk");
             PacketType.Server.init();
         }
     }

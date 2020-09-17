@@ -89,6 +89,10 @@ public class ImanityCommon {
         return (T) SERVICE_HANDLER.getServiceInstance(type);
     }
 
+    public static void registerAutowired(Object instance) {
+        SERVICE_HANDLER.registerAutowired(instance);
+    }
+
     public static void shutdown() {
         if (ImanityCommon.CORE_CONFIG.USE_REDIS) {
             ImanityCommon.REDIS.getServerHandler().changeServerState(ServerState.STOPPING);

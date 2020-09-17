@@ -30,7 +30,7 @@ import org.imanity.framework.bukkit.packet.type.PacketType;
 import org.imanity.framework.bukkit.packet.type.PacketTypeClasses;
 import org.imanity.framework.bukkit.packet.wrapper.WrappedPacket;
 import org.imanity.framework.bukkit.packet.wrapper.annotation.AutowiredWrappedPacket;
-import org.imanity.framework.bukkit.util.reflection.resolver.FieldResolver;
+import org.imanity.framework.bukkit.reflection.resolver.FieldResolver;
 
 @Getter
 @AutowiredWrappedPacket(value = PacketType.Client.ABILITIES, direction = PacketDirection.READ)

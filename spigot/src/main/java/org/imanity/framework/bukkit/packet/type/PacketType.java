@@ -27,26 +27,16 @@ package org.imanity.framework.bukkit.packet.type;
 import com.google.common.collect.ImmutableMap;
 import org.imanity.framework.bukkit.packet.PacketDirection;
 import org.imanity.framework.bukkit.packet.wrapper.WrappedPacket;
+import org.imanity.framework.bukkit.util.NullableMapBuilder;
 
 import java.util.HashMap;
 import java.util.Map;
 
 public class PacketType {
 
-    private byte id;
-
-    private Class<?> packetType;
-    private PacketDirection direction;
-
-    public PacketType(byte id, Class<?> packetType, PacketDirection direction) {
-        this.id = id;
-        this.packetType = packetType;
-        this.direction = direction;
-    }
-
     public static class Client { // TODO
         public static Map<Class<?>, Byte> PACKET_IDS;
-        public static final PacketType
+        public static final byte
                 TELEPORT_ACCEPT = 0,
                 TILE_NBT_QUERY = 1,
                 DIFFICULTY_CHANGE = 2,
@@ -93,14 +83,16 @@ public class PacketType {
                 ARM_ANIMATION = 43,
                 SPECTATE = 44,
                 USE_ITEM = 45,
-                BLOCK_PLACE = 46;
+                BLOCK_PLACE = 46,
+
+                LOGIN_START = 47;
 
         public static byte getIdByType(Class<?> type) {
             return PACKET_IDS.get(type);
         }
 
         public static void init() {
-            ImmutableMap.Builder<Class<?>, Byte> packetIds = ImmutableMap.builder();
+            ImmutableMap.Builder<Class<?>, Byte> packetIds = new NullableMapBuilder<>();
 
             packetIds.put(PacketTypeClasses.Client.TELEPORT_ACCEPT, TELEPORT_ACCEPT);
             packetIds.put(PacketTypeClasses.Client.TILE_NBT_QUERY, TILE_NBT_QUERY);
@@ -150,6 +142,8 @@ public class PacketType {
             packetIds.put(PacketTypeClasses.Client.USE_ITEM, USE_ITEM);
             packetIds.put(PacketTypeClasses.Client.BLOCK_PLACE, BLOCK_PLACE);
 
+            packetIds.put(PacketTypeClasses.Client.LOGIN_START, LOGIN_START);
+
             Client.PACKET_IDS = packetIds.build();
         }
 
@@ -170,8 +164,9 @@ public class PacketType {
 
     public static class Server {
         public static Map<Class<?>, Byte> PACKET_IDS;
-        public static final byte SPAWN_ENTITY = 0, SPAWN_ENTITY_EXPERIENCE_ORB = 1, SPAWN_ENTITY_WEATHER = 2, SPAWN_ENTITY_LIVING = 3,
-                SPAWN_ENTITY_PAINTING = 4, SPAWN_ENTITY_SPAWN = 5, ANIMATION = 6, STATISTIC = 7,
+        public static final byte SPAWN_ENTITY = 0,
+                SPAWN_ENTITY_EXPERIENCE_ORB = 1, SPAWN_ENTITY_WEATHER = 2, SPAWN_ENTITY_LIVING = 3,
+                SPAWN_ENTITY_PAINTING = 4, ANIMATION = 6, STATISTIC = 7,
                 BLOCK_BREAK = 8, BLOCK_BREAK_ANIMATION = 9, TILE_ENTITY_DATA = 10, BLOCK_ACTION = 11,
                 BLOCK_CHANGE = 12, BOSS = 13, SERVER_DIFFICULTY = 14, CHAT = 15, MULTI_BLOCK_CHANGE = 16,
                 TAB_COMPLETE = 17, COMMANDS = 18, TRANSACTION = 19, CLOSE_WINDOW = 20,
@@ -199,14 +194,13 @@ public class PacketType {
         }
 
         public static void init() {
-            ImmutableMap.Builder<Class<?>, Byte> packetIds = ImmutableMap.builder();
+            ImmutableMap.Builder<Class<?>, Byte> packetIds = new NullableMapBuilder<>();
 
             packetIds.put(PacketTypeClasses.Server.SPAWN_ENTITY, SPAWN_ENTITY);
             packetIds.put(PacketTypeClasses.Server.SPAWN_ENTITY_EXPERIENCE_ORB, SPAWN_ENTITY_EXPERIENCE_ORB);
             packetIds.put(PacketTypeClasses.Server.SPAWN_ENTITY_WEATHER, SPAWN_ENTITY_WEATHER);
             packetIds.put(PacketTypeClasses.Server.SPAWN_ENTITY_LIVING, SPAWN_ENTITY_LIVING);
             packetIds.put(PacketTypeClasses.Server.SPAWN_ENTITY_PAINTING, SPAWN_ENTITY_PAINTING);
-            packetIds.put(PacketTypeClasses.Server.SPAWN_ENTITY_SPAWN, SPAWN_ENTITY_SPAWN);
             packetIds.put(PacketTypeClasses.Server.ANIMATION, ANIMATION);
             packetIds.put(PacketTypeClasses.Server.STATISTIC, STATISTIC);
             packetIds.put(PacketTypeClasses.Server.BLOCK_BREAK, BLOCK_BREAK);
@@ -215,7 +209,6 @@ public class PacketType {
             packetIds.put(PacketTypeClasses.Server.BLOCK_ACTION, BLOCK_ACTION);
             packetIds.put(PacketTypeClasses.Server.BLOCK_CHANGE, BLOCK_CHANGE);
             packetIds.put(PacketTypeClasses.Server.BOSS, BOSS);
-            packetIds.put(PacketTypeClasses.Server.SPAWN_ENTITY, SPAWN_ENTITY);
             packetIds.put(PacketTypeClasses.Server.SERVER_DIFFICULTY, SERVER_DIFFICULTY);
             packetIds.put(PacketTypeClasses.Server.CHAT, CHAT);
             packetIds.put(PacketTypeClasses.Server.MULTI_BLOCK_CHANGE, MULTI_BLOCK_CHANGE);
@@ -238,7 +231,6 @@ public class PacketType {
             packetIds.put(PacketTypeClasses.Server.KEEP_ALIVE, KEEP_ALIVE);
             packetIds.put(PacketTypeClasses.Server.MAP_CHUNK, MAP_CHUNK);
             packetIds.put(PacketTypeClasses.Server.WORLD_EVENT, WORLD_EVENT);
-            packetIds.put(PacketTypeClasses.Server.WORLD_EVENT, SPAWN_ENTITY);
             packetIds.put(PacketTypeClasses.Server.WORLD_PARTICLES, WORLD_PARTICLES);
             packetIds.put(PacketTypeClasses.Server.LIGHT_UPDATE, LIGHT_UPDATE);
             packetIds.put(PacketTypeClasses.Server.LOGIN, LOGIN);

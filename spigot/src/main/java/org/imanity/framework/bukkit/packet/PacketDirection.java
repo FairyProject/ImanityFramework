@@ -5,10 +5,9 @@ import com.google.common.collect.Multimap;
 import org.bukkit.entity.Player;
 import org.imanity.framework.bukkit.packet.type.PacketType;
 import org.imanity.framework.bukkit.packet.wrapper.WrappedPacket;
-import org.imanity.framework.bukkit.util.reflection.resolver.ConstructorResolver;
+import org.imanity.framework.bukkit.reflection.resolver.ConstructorResolver;
+import org.imanity.framework.bukkit.reflection.wrapper.ConstructorWrapper;
 
-import java.lang.reflect.InvocationTargetException;
-import java.util.HashMap;
 import java.util.Map;
 
 public enum PacketDirection {
@@ -54,14 +53,21 @@ public enum PacketDirection {
             return new WrappedPacket(player, packet);
         }
 
-        return (WrappedPacket) new ConstructorResolver(wrappedPacketClass)
-                .resolveWrapper(
-                        new Class[] { Player.class, Object.class },
-                        new Class[] { Object.class })
-                .resolveBunch(
-                        new Object[] { player, packet },
-                        new Object[] { packet }
-                );
+
+        ConstructorResolver constructorResolver = new ConstructorResolver(wrappedPacketClass);
+        ConstructorWrapper<? extends WrappedPacket> constructor = constructorResolver.resolveWrapper(new Class[] { Player.class, Object.class });
+
+        if (constructor.exists()) {
+            return constructor.newInstance(player, packet);
+        }
+
+        constructor = constructorResolver.resolveWrapper(new Class[] { Object.class });
+
+        if (constructor.exists()) {
+            return constructor.newInstance(packet);
+        }
+
+        throw new IllegalArgumentException();
     }
 
     public WrappedPacket getWrappedFromNMS(Player player, byte id) {
@@ -73,7 +79,7 @@ public enum PacketDirection {
         }
 
         return (WrappedPacket)  new ConstructorResolver(wrappedPacketClass)
-                .resolveWrapper(
+                .resolveMatches(
                         new Class[] { Player.class },
                         new Class[0])
                 .resolveBunch(
