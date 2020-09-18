@@ -11,9 +11,13 @@ import org.imanity.framework.bukkit.packet.netty.INettyInjection;
 import org.imanity.framework.bukkit.packet.netty.NettyInjection1_8;
 import org.imanity.framework.bukkit.packet.type.PacketType;
 import org.imanity.framework.bukkit.packet.type.PacketTypeClasses;
+import org.imanity.framework.bukkit.packet.wrapper.PacketContainer;
+import org.imanity.framework.bukkit.packet.wrapper.SendableWrapper;
 import org.imanity.framework.bukkit.packet.wrapper.WrappedPacket;
 import org.imanity.framework.bukkit.packet.wrapper.annotation.AutowiredWrappedPacket;
+import org.imanity.framework.bukkit.reflection.MinecraftReflection;
 import org.imanity.framework.bukkit.util.TaskUtil;
+import org.imanity.framework.plugin.service.Autowired;
 import org.imanity.framework.plugin.service.IService;
 import org.imanity.framework.plugin.service.Service;
 import org.imanity.framework.util.FileUtils;
@@ -26,6 +30,13 @@ import java.lang.reflect.Method;
 public class PacketService implements IService {
 
     public static final String CHANNEL_HANDLER = ImanityCommon.METADATA_PREFIX + "ChannelHandler";
+
+    @Autowired
+    private static PacketService INSTANCE;
+
+    public static void send(Player player, SendableWrapper sendableWrapper) {
+        PacketService.INSTANCE.sendPacket(player, sendableWrapper);
+    }
 
     private final Multimap<Class<?>, PacketListener> registeredPacketListeners = HashMultimap.create();
 
@@ -47,7 +58,7 @@ public class PacketService implements IService {
         }
 
         PacketTypeClasses.load();
-        WrappedPacket.go();
+        WrappedPacket.init();
 
         try {
             nettyInjection.registerChannels();
@@ -164,8 +175,6 @@ public class PacketService implements IService {
     public Object write(Player player, Object packet) {
         Class<?> type = packet.getClass();
 
-        System.out.println(type.getSimpleName());
-
         if (!this.registeredPacketListeners.containsKey(type)) {
             return packet;
         }
@@ -180,6 +189,15 @@ public class PacketService implements IService {
         }
 
         return cancelled ? null : packet;
+    }
+
+    public void sendPacket(Player player, SendableWrapper packet) {
+        PacketContainer packetContainer = packet.asPacketContainer();
+        MinecraftReflection.sendPacket(player, packetContainer.getMainPacket());
+
+        for (Object extra : packetContainer.getExtraPackets()) {
+            MinecraftReflection.sendPacket(player, extra);
+        }
     }
 
 }

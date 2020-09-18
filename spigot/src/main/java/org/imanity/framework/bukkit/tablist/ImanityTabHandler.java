@@ -66,11 +66,7 @@ public class ImanityTabHandler {
 
         if (MinecraftReflection.VERSION == MinecraftReflection.Version.v1_8_R3) {
 
-            if (SpigotUtil.SPIGOT_TYPE == SpigotUtil.SpigotType.IMANITY) {
-                this.implementation = new ImanitySpigotTabImpl();
-            } else {
-                this.implementation = new NMS1_8TabImpl();
-            }
+            this.implementation = new NMS1_8TabImpl();
             return;
         }
         Imanity.PLUGIN.getLogger().info("Unable to register ImanityTablist with a proper implementation");

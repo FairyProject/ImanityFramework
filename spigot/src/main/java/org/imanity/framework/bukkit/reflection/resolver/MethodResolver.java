@@ -8,6 +8,8 @@ import java.lang.reflect.Method;
 
 /**
  * Resolver for methods
+ *
+ * @credit ProtocolLib
  */
 public class MethodResolver extends MemberResolver<Method> {
 

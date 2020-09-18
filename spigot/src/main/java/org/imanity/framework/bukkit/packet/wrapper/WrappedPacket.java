@@ -33,6 +33,7 @@ import org.imanity.framework.bukkit.reflection.MinecraftReflection;
 import org.imanity.framework.bukkit.reflection.resolver.minecraft.NMSClassResolver;
 import org.imanity.framework.bukkit.reflection.resolver.minecraft.NettyClassResolver;
 import org.imanity.framework.bukkit.reflection.resolver.minecraft.OBCClassResolver;
+import org.imanity.framework.bukkit.reflection.wrapper.ChatComponentWrapper;
 import org.imanity.framework.bukkit.reflection.wrapper.GameProfileWrapper;
 import org.imanity.framework.bukkit.reflection.wrapper.MethodWrapper;
 import org.imanity.framework.bukkit.reflection.wrapper.PacketWrapper;
@@ -44,18 +45,14 @@ import java.util.List;
 @Getter
 public class WrappedPacket implements WrapperPacketReader {
 
-    private static final Class<?> NMS_ITEM_STACK;
-    private static final MethodWrapper<ItemStack> ITEM_COPY_OF_METHOD;
+    private static Class<?> NMS_ITEM_STACK;
+    private static MethodWrapper<ItemStack> ITEM_COPY_OF_METHOD;
 
     public static final NMSClassResolver NMS_CLASS_RESOLVER = new NMSClassResolver();
     public static final OBCClassResolver CRAFT_CLASS_RESOLVER = new OBCClassResolver();
     public static final NettyClassResolver NETTY_CLASS_RESOLVER = new NettyClassResolver();
 
-    public static void go() {
-
-    }
-
-    static {
+    public static void init() {
         try {
             NMS_ITEM_STACK = NMS_CLASS_RESOLVER.resolve("ItemStack");
 
@@ -120,37 +117,37 @@ public class WrappedPacket implements WrapperPacketReader {
 
     @Override
     public boolean readBoolean(int index) {
-        return (boolean) readObject(index, boolean.class);
+        return readObject(index, boolean.class);
     }
 
     @Override
     public byte readByte(int index) {
-        return (byte) readObject(index, byte.class);
+        return readObject(index, byte.class);
     }
 
     @Override
     public short readShort(int index) {
-        return (short) readObject(index, short.class);
+        return readObject(index, short.class);
     }
 
     @Override
     public int readInt(int index) {
-        return (int) readObject(index, int.class);
+        return readObject(index, int.class);
     }
 
     @Override
     public long readLong(int index) {
-        return (long) readObject(index, long.class);
+        return readObject(index, long.class);
     }
 
     @Override
     public float readFloat(int index) {
-        return (float) readObject(index, float.class);
+        return readObject(index, float.class);
     }
 
     @Override
     public double readDouble(int index) {
-        return (double) readObject(index, double.class);
+        return readObject(index, double.class);
     }
 
     @Override
@@ -164,8 +161,13 @@ public class WrappedPacket implements WrapperPacketReader {
     }
 
     @Override
+    public ChatComponentWrapper readChatComponent(int index) {
+        return ChatComponentWrapper.fromHandle(this.readObject(index, MinecraftReflection.getIChatBaseComponentClass()));
+    }
+
+    @Override
     public <T> T readObject(int index, Class<T> type) {
-        return (T) this.packet.getPacketValueByIndex(type, index);
+        return this.packet.getPacketValueByIndex(type, index);
     }
 
     @Override
@@ -186,6 +188,6 @@ public class WrappedPacket implements WrapperPacketReader {
 
     @Override
     public String readString(int index) {
-        return readObject(index, String.class).toString();
+        return readObject(index, String.class);
     }
 }

@@ -11,9 +11,12 @@ import org.imanity.framework.bukkit.packet.type.PacketTypeClasses;
 import org.imanity.framework.bukkit.packet.wrapper.SendableWrapper;
 import org.imanity.framework.bukkit.packet.wrapper.WrappedPacket;
 import org.imanity.framework.bukkit.packet.wrapper.annotation.AutowiredWrappedPacket;
+import org.imanity.framework.bukkit.reflection.MinecraftReflection;
 import org.imanity.framework.bukkit.reflection.resolver.MethodResolver;
 import org.imanity.framework.bukkit.reflection.wrapper.ConstructorWrapper;
 import org.imanity.framework.bukkit.reflection.wrapper.MethodWrapper;
+
+import javax.annotation.Nullable;
 
 @AutowiredWrappedPacket(value = PacketType.Server.LOGIN, direction = PacketDirection.WRITE)
 @Getter
@@ -27,7 +30,7 @@ public class WrappedPacketOutLogin extends WrappedPacket implements SendableWrap
 
     private int playerId;
     private boolean hardcore;
-    private GameMode gameMode;
+    @Nullable private GameMode gameMode;
     private int dimension;
     private Difficulty difficulty;
     private int maxPlayers;
@@ -59,11 +62,7 @@ public class WrappedPacketOutLogin extends WrappedPacket implements SendableWrap
         PACKET_CLASS = PacketTypeClasses.Server.LOGIN;
 
         try {
-            try {
-                ENUM_GAMEMODE_CLASS = NMS_CLASS_RESOLVER.resolve("EnumGamemode");
-            } catch (Throwable throwable) {
-                ENUM_GAMEMODE_CLASS = NMS_CLASS_RESOLVER.resolve("WorldSettings$EnumGamemode");
-            }
+            ENUM_GAMEMODE_CLASS = MinecraftReflection.getEnumGamemodeClass();
 
             ENUM_DIFFICULTY_CLASS = NMS_CLASS_RESOLVER.resolve("EnumDifficulty");
             WORLD_TYPE_CLASS = NMS_CLASS_RESOLVER.resolve("WorldType");
@@ -94,10 +93,7 @@ public class WrappedPacketOutLogin extends WrappedPacket implements SendableWrap
 
         this.hardcore = readBoolean(0);
 
-        Enum gameModeEnum = readObject(0, ENUM_GAMEMODE_CLASS);
-        if (gameModeEnum != null && !gameModeEnum.name().equals("NOT_SET")) {
-            this.gameMode = GameMode.valueOf(gameModeEnum.name());
-        }
+        Enum gameModeEnum = MinecraftReflection.getGameModeConverter().getSpecific(readObject(0, ENUM_GAMEMODE_CLASS));
 
         this.dimension = readInt(1);
 
@@ -108,7 +104,7 @@ public class WrappedPacketOutLogin extends WrappedPacket implements SendableWrap
 
         Object worldType = readObject(0, WORLD_TYPE_CLASS);
         if (worldType != null) {
-            this.worldType = WorldType.getByName((String) NMS_WORLD_TYPE_NAME.invoke(null, worldType));
+            this.worldType = WorldType.getByName((String) NMS_WORLD_TYPE_NAME.invoke(worldType));
         }
 
         this.maxPlayers = readInt(2);
@@ -121,7 +117,7 @@ public class WrappedPacketOutLogin extends WrappedPacket implements SendableWrap
         return PACKET_CONSTRUCTOR.newInstance(
                 this.playerId,
                 this.hardcore,
-                Enum.valueOf(ENUM_GAMEMODE_CLASS, this.gameMode.name()),
+                MinecraftReflection.getGameModeConverter().getGeneric(this.gameMode),
                 this.dimension,
                 Enum.valueOf(ENUM_DIFFICULTY_CLASS, this.difficulty.name()),
                 this.maxPlayers,

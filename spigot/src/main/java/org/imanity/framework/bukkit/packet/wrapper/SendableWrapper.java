@@ -29,6 +29,12 @@ package org.imanity.framework.bukkit.packet.wrapper;
  */
 public interface SendableWrapper {
 
-    Object asNMSPacket();
+    default PacketContainer asPacketContainer() {
+        return PacketContainer.of(this.asNMSPacket());
+    }
+
+    default Object asNMSPacket() {
+        return null;
+    }
 
 }

@@ -21,6 +21,8 @@ public abstract class GameProfileImplementation {
         }
     }
 
+    public abstract Class<?> getGameProfileClass();
+
     public abstract Object create(String name, UUID uuid);
 
     public abstract UUID getUuid(Object handle);
@@ -46,6 +48,11 @@ public abstract class GameProfileImplementation {
             } catch (ReflectiveOperationException ex) {
                 throw new RuntimeException(ex);
             }
+        }
+
+        @Override
+        public Class<?> getGameProfileClass() {
+            return com.mojang.authlib.GameProfile.class;
         }
 
         @Override
@@ -114,6 +121,11 @@ public abstract class GameProfileImplementation {
             } catch (ReflectiveOperationException ex) {
                 throw new RuntimeException(ex);
             }
+        }
+
+        @Override
+        public Class<?> getGameProfileClass() {
+            return net.minecraft.util.com.mojang.authlib.GameProfile.class;
         }
 
         @Override

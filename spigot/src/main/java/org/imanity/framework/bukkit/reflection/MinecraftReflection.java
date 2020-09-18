@@ -1,9 +1,12 @@
 package org.imanity.framework.bukkit.reflection;
 
 import org.bukkit.Bukkit;
+import org.bukkit.ChatColor;
+import org.bukkit.GameMode;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 import org.imanity.framework.bukkit.Imanity;
+import org.imanity.framework.bukkit.reflection.wrapper.ChatComponentWrapper;
 import org.imanity.framework.bukkit.util.SpigotUtil;
 import org.imanity.framework.bukkit.reflection.minecraft.MinecraftVersion;
 import org.imanity.framework.bukkit.reflection.resolver.ConstructorResolver;
@@ -18,10 +21,13 @@ import org.imanity.framework.util.AccessUtil;
 import org.imanity.framework.bukkit.reflection.wrapper.PacketWrapper;
 import org.imanity.framework.bukkit.reflection.version.PlayerVersion;
 import org.imanity.framework.bukkit.reflection.version.protocol.*;
+import org.imanity.framework.util.EquivalentConverter;
+import org.jetbrains.annotations.Nullable;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
+import java.util.function.Function;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -279,6 +285,22 @@ public class MinecraftReflection {
         return null;
     }
 
+    private static FieldWrapper<Integer> PING_FIELD;
+
+    public static int getPing(Player player) {
+        if (PING_FIELD == null) {
+            try {
+                Class<?> type = NMS_CLASS_RESOLVER.resolve("EntityPlayer");
+                PING_FIELD = new FieldResolver(type).resolveWrapper("ping");
+            } catch (Throwable throwable) {
+                throw new RuntimeException(throwable);
+            }
+        }
+
+        Object nmsPlayer = PLAYER_GET_HANDLE.invoke(player);
+        return PING_FIELD.get(nmsPlayer);
+    }
+
     public enum Version {
         UNKNOWN(-1) {
             @Override
@@ -453,5 +475,122 @@ public class MinecraftReflection {
             constructorAccessor = accessorField.get(constructor);
         }
         return new MethodResolver(constructorAccessor.getClass()).resolve("newInstance").invoke(constructorAccessor, (Object) values);
+    }
+
+
+    public static Class<? extends Enum> getEnumGamemodeClass() {
+        try {
+            return NMS_CLASS_RESOLVER.resolve("EnumGamemode");
+        } catch (Throwable throwable) {
+            try {
+                Class<? extends Enum> type = NMS_CLASS_RESOLVER.resolve("WorldSettings$EnumGamemode");
+                NMS_CLASS_RESOLVER.cache("EnumGamemode", type);
+                return type;
+            } catch (Throwable throwable1) {
+                throw new RuntimeException(throwable1);
+            }
+        }
+    }
+
+    public static Class<?> getIChatBaseComponentClass() {
+        try {
+            return NMS_CLASS_RESOLVER.resolve("IChatBaseComponent");
+        } catch (ClassNotFoundException ex) {
+            try {
+                return OBC_CLASS_RESOLVER
+                        .resolve("util.CraftChatMessage")
+                        .getMethod("fromString", String.class)
+                        .getReturnType().getComponentType();
+            } catch (Throwable throwable) {
+                throw new RuntimeException(throwable);
+            }
+        }
+    }
+
+    public static Class<?> getChatModifierClass() {
+        try {
+            return NMS_CLASS_RESOLVER.resolve("ChatModifier");
+        } catch (Throwable throwable) {
+            try {
+                return NMS_CLASS_RESOLVER.resolveSubClass(getIChatBaseComponentClass(), "ChatModifier");
+            } catch (Throwable throwable1) {
+                throw new RuntimeException(throwable1);
+            }
+        }
+    }
+
+    public static Class<? extends Enum> getEnumChatFormatClass() {
+        try {
+            return NMS_CLASS_RESOLVER.resolve("EnumChatFormat");
+        } catch (Throwable throwable) {
+            try {
+                Class<? extends Enum> type = NMS_CLASS_RESOLVER.resolveSubClass(getIChatBaseComponentClass(), "EnumChatFormat");
+                NMS_CLASS_RESOLVER.cache("ChatModifier", type);
+                return type;
+            } catch (Throwable throwable1) {
+                throw new RuntimeException(throwable1);
+            }
+        }
+    }
+
+    private static EquivalentConverter.EnumConverter<GameMode> GAME_MODE_CONVERTER;
+    private static EquivalentConverter.EnumConverter<ChatColor> CHAT_COLOR_CONVERTER;
+
+    private static EquivalentConverter<ChatComponentWrapper> CHAT_COMPONENT_CONVERTER;
+
+    public static EquivalentConverter.EnumConverter<GameMode> getGameModeConverter() {
+        if (GAME_MODE_CONVERTER == null) {
+            GAME_MODE_CONVERTER = new EquivalentConverter.EnumConverter<GameMode>(getEnumGamemodeClass(), GameMode.class) {
+                @Nullable
+                @Override
+                public Object getDefaultGeneric() {
+                    try {
+                        return Enum.valueOf(this.getGenericType(), "NOT_SET");
+                    } catch (IllegalArgumentException ex) { // 1.7
+                        return Enum.valueOf(this.getGenericType(), "NONE");
+                    }
+                }
+            };
+        }
+
+        return GAME_MODE_CONVERTER;
+    }
+
+    public static EquivalentConverter.EnumConverter<ChatColor> getChatColorConverter() {
+        if (CHAT_COLOR_CONVERTER == null) {
+            Class<? extends Enum> enumChatFormat = getEnumChatFormatClass();
+
+            CHAT_COLOR_CONVERTER = new EquivalentConverter.EnumConverter<>(enumChatFormat, ChatColor.class);
+        }
+
+        return CHAT_COLOR_CONVERTER;
+    }
+
+    public static EquivalentConverter<ChatComponentWrapper> getChatComponentConverter() {
+        if (CHAT_COMPONENT_CONVERTER != null) {
+            return CHAT_COMPONENT_CONVERTER;
+        }
+
+        return CHAT_COMPONENT_CONVERTER = handle(ChatComponentWrapper::getHandle, ChatComponentWrapper::fromHandle);
+    }
+
+    public static <T> EquivalentConverter<T> handle(final Function<T, Object> toHandle,
+                                                                                   final Function<Object, T> fromHandle) {
+        return new EquivalentConverter<T>() {
+            @Override
+            public T getSpecific(Object generic) {
+                return fromHandle.apply(generic);
+            }
+
+            @Override
+            public Object getGeneric(T specific) {
+                return toHandle.apply(specific);
+            }
+
+            @Override
+            public Class<T> getSpecificType() {
+                return null;
+            }
+        };
     }
 }

@@ -25,6 +25,7 @@
 package org.imanity.framework.bukkit.packet.wrapper;
 
 import org.bukkit.inventory.ItemStack;
+import org.imanity.framework.bukkit.reflection.wrapper.ChatComponentWrapper;
 import org.imanity.framework.bukkit.reflection.wrapper.GameProfileWrapper;
 
 public interface WrapperPacketReader {
@@ -44,6 +45,8 @@ public interface WrapperPacketReader {
     double readDouble(int index);
 
     ItemStack readItemStack(int index);
+
+    ChatComponentWrapper readChatComponent(int index);
 
     GameProfileWrapper readGameProfile(int index);
 

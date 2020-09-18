@@ -78,6 +78,10 @@ public class PacketWrapper extends WrapperAbstract {
         return this.fieldResolver.resolve(type, index);
     }
 
+    public void setFieldByIndex(Class type, int index, Object value) {
+        this.fieldResolver.resolve(type, index).set(this.packetObject, value);
+    }
+
     public <T> T getPacketValueByIndex(Class<T> type, int index) {
         return this.getFieldWrapperByIndex(type, index).get(this.packetObject);
     }

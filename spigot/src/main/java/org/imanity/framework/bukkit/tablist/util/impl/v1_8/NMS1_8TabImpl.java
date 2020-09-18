@@ -1,58 +1,34 @@
 package org.imanity.framework.bukkit.tablist.util.impl.v1_8;
 
-import com.mojang.authlib.GameProfile;
-import com.mojang.authlib.properties.Property;
-import net.md_5.bungee.api.chat.TextComponent;
-import net.md_5.bungee.chat.ComponentSerializer;
-import net.minecraft.server.v1_8_R3.*;
-import org.bukkit.ChatColor;
-import org.bukkit.craftbukkit.v1_8_R3.entity.CraftPlayer;
+import org.bukkit.GameMode;
 import org.bukkit.entity.Player;
 import org.imanity.framework.bukkit.Imanity;
+import org.imanity.framework.bukkit.packet.PacketService;
+import org.imanity.framework.bukkit.packet.wrapper.server.WrappedPacketOutPlayerListHeaderAndFooter;
+import org.imanity.framework.bukkit.packet.wrapper.server.playerinfo.PlayerInfoAction;
+import org.imanity.framework.bukkit.packet.wrapper.server.playerinfo.WrappedPacketOutPlayerInfo;
+import org.imanity.framework.bukkit.packet.wrapper.server.playerinfo.WrappedPlayerInfoData;
+import org.imanity.framework.bukkit.reflection.wrapper.*;
 import org.imanity.framework.bukkit.util.Skin;
 import org.imanity.framework.bukkit.util.BukkitUtil;
 import org.imanity.framework.bukkit.tablist.ImanityTablist;
 import org.imanity.framework.bukkit.tablist.util.*;
 import org.imanity.framework.bukkit.reflection.MinecraftReflection;
-import org.imanity.framework.bukkit.reflection.wrapper.PacketWrapper;
 import org.imanity.framework.bukkit.reflection.version.PlayerVersion;
-import org.imanity.framework.bukkit.reflection.resolver.FieldResolver;
-import org.imanity.framework.bukkit.reflection.resolver.minecraft.NMSClassResolver;
-import org.imanity.framework.bukkit.reflection.wrapper.ConstructorWrapper;
-import org.imanity.framework.bukkit.reflection.wrapper.FieldWrapper;
 
 import java.util.Collections;
-import java.util.List;
 import java.util.UUID;
 
 public class NMS1_8TabImpl implements IImanityTabImpl {
 
-    private final FieldWrapper<PacketPlayOutPlayerInfo.EnumPlayerInfoAction> INFO_ACTION_FIELD;
-    private final FieldWrapper<List> INFO_DATA_FIELD;
-
-    private final Class<?> INFO_DATA_TYPE;
-    private final ConstructorWrapper INFO_DATA_CONSTRUCTOR;
-
-    {
-        NMSClassResolver classResolver = new NMSClassResolver();
-        FieldResolver resolver = new FieldResolver(PacketPlayOutPlayerInfo.class);
-        try {
-            INFO_DATA_TYPE = classResolver.resolve("PacketPlayOutPlayerInfo$PlayerInfoData");
-            INFO_DATA_CONSTRUCTOR = new ConstructorWrapper(INFO_DATA_TYPE.getConstructor(GameProfile.class, int.class, WorldSettings.EnumGamemode.class, IChatBaseComponent.class));
-
-            INFO_ACTION_FIELD = resolver.resolveByFirstTypeWrapper(PacketPlayOutPlayerInfo.EnumPlayerInfoAction.class);
-            INFO_DATA_FIELD = resolver.resolveByFirstTypeWrapper(List.class);
-        } catch (ReflectiveOperationException e) {
-            throw new RuntimeException(e);
-        }
-    }
-
     @Override
     public void removeSelf(Player player) {
+        WrappedPacketOutPlayerInfo packet = new WrappedPacketOutPlayerInfo(PlayerInfoAction.REMOVE_PLAYER, player);
+
         Imanity.getPlayers()
                 .stream()
                 .filter(online -> MinecraftReflection.getProtocol(online) == PlayerVersion.v1_7)
-                .forEach(online -> sendPacket(online, new PacketPlayOutPlayerInfo(PacketPlayOutPlayerInfo.EnumPlayerInfoAction.REMOVE_PLAYER, ( (CraftPlayer) player).getHandle())));
+                .forEach(online -> PacketService.send(online, packet));
     }
 
     @Override
@@ -60,18 +36,19 @@ public class NMS1_8TabImpl implements IImanityTabImpl {
         final Player player = imanityTablist.getPlayer();
         final PlayerVersion playerVersion = MinecraftReflection.getProtocol(player);
 
-        GameProfile profile = new GameProfile(UUID.randomUUID(), playerVersion != PlayerVersion.v1_7  ? string : LegacyClientUtil.entry(rawSlot - 1) + "");
+        GameProfileWrapper profile = new GameProfileWrapper(UUID.randomUUID(), playerVersion != PlayerVersion.v1_7  ? string : LegacyClientUtil.entry(rawSlot - 1) + "");
 
         if (playerVersion != PlayerVersion.v1_7) {
-            profile.getProperties().put("textures", new Property("textures", Skin.GRAY.skinValue, Skin.GRAY.skinSignature));
+            profile.getProperties().put("textures", new SignedPropertyWrapper("textures", Skin.GRAY.skinValue, Skin.GRAY.skinSignature));
         }
 
-        PacketPlayOutPlayerInfo packetPlayOutPlayerInfo = new PacketPlayOutPlayerInfo();
-        INFO_ACTION_FIELD.set(packetPlayOutPlayerInfo, PacketPlayOutPlayerInfo.EnumPlayerInfoAction.ADD_PLAYER);
-        INFO_DATA_FIELD.get(packetPlayOutPlayerInfo).add(INFO_DATA_CONSTRUCTOR.newInstance(profile, 1, WorldSettings.EnumGamemode.SURVIVAL, IChatBaseComponent.ChatSerializer.a(fromText(""))));
-        sendPacket(player, packetPlayOutPlayerInfo);
+        WrappedPacketOutPlayerInfo packet = new WrappedPacketOutPlayerInfo();
+        packet.setAction(PlayerInfoAction.ADD_PLAYER);
+        packet.getPlayerInfoData().add(new WrappedPlayerInfoData(1, GameMode.SURVIVAL, profile, ChatComponentWrapper.fromText("")));
 
-        return new TabEntry(string, profile.getId(), "", imanityTablist, Skin.GRAY, column, slot, rawSlot, 0);
+        PacketService.send(player, packet);
+
+        return new TabEntry(string, profile.getUuid(), "", imanityTablist, Skin.GRAY, column, slot, rawSlot, 0);
     }
 
     @Override
@@ -97,14 +74,15 @@ public class NMS1_8TabImpl implements IImanityTabImpl {
             );
 
         } else {
-            IChatBaseComponent listName = ChatComponentText.ChatSerializer.a(fromText(BukkitUtil.color(text)));
+            ChatComponentWrapper listName = ChatComponentWrapper.fromText(BukkitUtil.color(text));
 
-            GameProfile profile = this.getGameProfile(playerVersion, tabEntry);
+            GameProfileWrapper profile = this.getGameProfile(playerVersion, tabEntry);
 
-            PacketPlayOutPlayerInfo packetPlayOutPlayerInfo = new PacketPlayOutPlayerInfo();
-            INFO_ACTION_FIELD.set(packetPlayOutPlayerInfo, PacketPlayOutPlayerInfo.EnumPlayerInfoAction.UPDATE_DISPLAY_NAME);
-            INFO_DATA_FIELD.get(packetPlayOutPlayerInfo).add(INFO_DATA_CONSTRUCTOR.newInstance(profile, tabEntry.getLatency(), WorldSettings.EnumGamemode.SURVIVAL, listName));
-            sendPacket(player, packetPlayOutPlayerInfo);
+            WrappedPacketOutPlayerInfo packet = new WrappedPacketOutPlayerInfo();
+            packet.setAction(PlayerInfoAction.UPDATE_DISPLAY_NAME);
+            packet.getPlayerInfoData().add(new WrappedPlayerInfoData(tabEntry.getLatency(), GameMode.SURVIVAL, profile, listName));
+
+            PacketService.send(player, packet);
         }
 
         tabEntry.setText(text);
@@ -114,15 +92,16 @@ public class NMS1_8TabImpl implements IImanityTabImpl {
     public void updateFakeLatency(ImanityTablist imanityTablist, TabEntry tabEntry, Integer latency) {
         if (tabEntry.getLatency() == latency) return;
 
-        IChatBaseComponent listName = ChatComponentText.ChatSerializer.a(fromText(tabEntry.getText()));
+        ChatComponentWrapper listName = ChatComponentWrapper.fromText(BukkitUtil.color(tabEntry.getText()));
 
         final PlayerVersion playerVersion = MinecraftReflection.getProtocol(imanityTablist.getPlayer());
-        GameProfile profile = this.getGameProfile(playerVersion, tabEntry);
+        GameProfileWrapper profile = this.getGameProfile(playerVersion, tabEntry);
 
-        PacketPlayOutPlayerInfo packetPlayOutPlayerInfo = new PacketPlayOutPlayerInfo();
-        INFO_ACTION_FIELD.set(packetPlayOutPlayerInfo, PacketPlayOutPlayerInfo.EnumPlayerInfoAction.UPDATE_LATENCY);
-        INFO_DATA_FIELD.get(packetPlayOutPlayerInfo).add(INFO_DATA_CONSTRUCTOR.newInstance(profile, latency, WorldSettings.EnumGamemode.SURVIVAL, listName));
-        sendPacket(imanityTablist.getPlayer(), packetPlayOutPlayerInfo);
+        WrappedPacketOutPlayerInfo packet = new WrappedPacketOutPlayerInfo();
+        packet.setAction(PlayerInfoAction.UPDATE_LATENCY);
+        packet.getPlayerInfoData().add(new WrappedPlayerInfoData(latency, GameMode.SURVIVAL, profile, listName));
+
+        PacketService.send(imanityTablist.getPlayer(), packet);
 
         tabEntry.setLatency(latency);
     }
@@ -138,24 +117,20 @@ public class NMS1_8TabImpl implements IImanityTabImpl {
             return;
         }
 
-        GameProfile gameProfile = this.getGameProfile(playerVersion, tabEntry);
+        GameProfileWrapper gameProfile = this.getGameProfile(playerVersion, tabEntry);
 
         gameProfile.getProperties().clear();
-        gameProfile.getProperties().put("textures", new Property("textures", skin.skinValue, skin.skinSignature));
+        gameProfile.getProperties().put("textures", new SignedPropertyWrapper("textures", skin.skinValue, skin.skinSignature));
 
-        IChatBaseComponent listName = ChatComponentText.ChatSerializer.a(fromText(tabEntry.getText()));
+        ChatComponentWrapper listName = ChatComponentWrapper.fromText(BukkitUtil.color(tabEntry.getText()));
 
-        Object playerInfoData = INFO_DATA_CONSTRUCTOR.newInstance(gameProfile, tabEntry.getLatency(), WorldSettings.EnumGamemode.SURVIVAL, listName);
+        WrappedPlayerInfoData playerInfoData = new WrappedPlayerInfoData(tabEntry.getLatency(), GameMode.SURVIVAL, gameProfile, listName);
 
-        PacketPlayOutPlayerInfo packetPlayOutPlayerInfo = new PacketPlayOutPlayerInfo();
-        INFO_ACTION_FIELD.set(packetPlayOutPlayerInfo, PacketPlayOutPlayerInfo.EnumPlayerInfoAction.REMOVE_PLAYER);
-        INFO_DATA_FIELD.get(packetPlayOutPlayerInfo).add(playerInfoData);
-        sendPacket(imanityTablist.getPlayer(), packetPlayOutPlayerInfo);
+        WrappedPacketOutPlayerInfo packetRemove = new WrappedPacketOutPlayerInfo(PlayerInfoAction.REMOVE_PLAYER, playerInfoData);
+        WrappedPacketOutPlayerInfo packetAdd = new WrappedPacketOutPlayerInfo(PlayerInfoAction.ADD_PLAYER, playerInfoData);
 
-        packetPlayOutPlayerInfo = new PacketPlayOutPlayerInfo();
-        INFO_ACTION_FIELD.set(packetPlayOutPlayerInfo, PacketPlayOutPlayerInfo.EnumPlayerInfoAction.ADD_PLAYER);
-        INFO_DATA_FIELD.get(packetPlayOutPlayerInfo).add(playerInfoData);
-        sendPacket(imanityTablist.getPlayer(), packetPlayOutPlayerInfo);
+        PacketService.send(imanityTablist.getPlayer(), packetRemove);
+        PacketService.send(imanityTablist.getPlayer(), packetAdd);
 
         tabEntry.setTexture(skin);
     }
@@ -168,31 +143,16 @@ public class NMS1_8TabImpl implements IImanityTabImpl {
             return;
         }
 
-        PacketWrapper packet = new PacketWrapper(new PacketPlayOutPlayerListHeaderFooter());
+        WrappedPacketOutPlayerListHeaderAndFooter packet = new WrappedPacketOutPlayerListHeaderAndFooter(
+                ChatComponentWrapper.fromText(header),
+                ChatComponentWrapper.fromText(footer)
+        );
 
-        final IChatBaseComponent tabHeader = IChatBaseComponent.ChatSerializer.a("{text: '" + header + "'}");
-        final IChatBaseComponent tabFooter = IChatBaseComponent.ChatSerializer.a("{text: '" + footer + "'}");
-
-        packet.setPacketValue("a", tabHeader);
-        packet.setPacketValue("b", tabFooter);
-
-        MinecraftReflection.sendPacket(player, packet);
+        PacketService.send(player, packet);
 
     }
 
-    private void sendPacket(Player player, Packet packet) {
-        getEntity(player).playerConnection.sendPacket(packet);
-    }
-
-    private EntityPlayer getEntity(Player player) {
-        return ((CraftPlayer) player).getHandle();
-    }
-
-    private GameProfile getGameProfile(PlayerVersion playerVersion, TabEntry tabEntry) {
-        return new GameProfile(tabEntry.getUuid(), playerVersion != PlayerVersion.v1_7  ? tabEntry.getId() : LegacyClientUtil.entry(tabEntry.getRawSlot() - 1) + "");
-    }
-
-    private static String fromText(String text) {
-        return ComponentSerializer.toString(TextComponent.fromLegacyText(ChatColor.translateAlternateColorCodes('&', text)));
+    private GameProfileWrapper getGameProfile(PlayerVersion playerVersion, TabEntry tabEntry) {
+        return new GameProfileWrapper(tabEntry.getUuid(), playerVersion != PlayerVersion.v1_7  ? tabEntry.getId() : LegacyClientUtil.entry(tabEntry.getRawSlot() - 1) + "");
     }
 }
