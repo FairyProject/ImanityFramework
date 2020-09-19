@@ -45,6 +45,12 @@ public enum Library {
             "guava",
             "29.0-jre",
             "SIXFTM1H57LSJTHQSY+RW1FY6AQGTA7NKCYL+WEW2IU="
+    ),
+    REFLECTIVE_ASM(
+            "com.esotericsoftware",
+            "reflectasm",
+            "1.11.9",
+            null
     );
 
     private final String mavenRepoPath;

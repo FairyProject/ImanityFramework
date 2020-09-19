@@ -8,6 +8,8 @@ public interface IImanityTabImpl {
 
     default void removeSelf(Player player) {}
 
+    void registerLoginListener();
+
     TabEntry createFakePlayer(
             ImanityTablist imanityTablist, String string, TabColumn column, Integer slot, Integer rawSlot
     );

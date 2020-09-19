@@ -25,6 +25,7 @@
 package org.imanity.framework.bukkit.packet.wrapper.client;
 
 import lombok.Getter;
+import lombok.SneakyThrows;
 import org.imanity.framework.bukkit.packet.PacketDirection;
 import org.imanity.framework.bukkit.packet.type.PacketType;
 import org.imanity.framework.bukkit.packet.type.PacketTypeClasses;
@@ -32,6 +33,8 @@ import org.imanity.framework.bukkit.packet.wrapper.WrappedPacket;
 import org.imanity.framework.bukkit.packet.wrapper.annotation.AutowiredWrappedPacket;
 import org.imanity.framework.bukkit.reflection.resolver.FieldResolver;
 import org.imanity.framework.bukkit.reflection.wrapper.FieldWrapper;
+
+import java.lang.reflect.Field;
 
 @AutowiredWrappedPacket(value = PacketType.Client.CUSTOM_PAYLOAD, direction = PacketDirection.READ)
 @Getter
@@ -63,6 +66,7 @@ public final class WrappedPacketInCustomPayload extends WrappedPacket {
         }
     }
 
+    @SneakyThrows
     @Override
     public void setup() {
         if (!strPresentInIndex0) {
@@ -72,9 +76,9 @@ public final class WrappedPacketInCustomPayload extends WrappedPacket {
         } else {
             this.data = readString(0);
 
-            FieldWrapper<?> fieldWrapper = this.packet.getFieldWrapperByIndex(nmsPacketDataSerializer, 0);
-            if (fieldWrapper.exists()) {
-                this.dataSerializer = fieldWrapper.get(this.packet.getPacket());
+            Field field = this.packet.getFieldByIndex(nmsPacketDataSerializer, 0);
+            if (field != null) {
+                this.dataSerializer = field.get(this.packet.getPacket());
             }
         }
     }

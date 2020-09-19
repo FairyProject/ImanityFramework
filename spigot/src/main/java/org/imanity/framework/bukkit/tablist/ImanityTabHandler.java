@@ -15,7 +15,6 @@ import org.imanity.framework.metadata.MetadataKey;
 import org.imanity.framework.bukkit.tablist.util.IImanityTabImpl;
 import lombok.Getter;
 import lombok.Setter;
-import org.imanity.framework.bukkit.tablist.util.impl.v1_8.ImanitySpigotTabImpl;
 import org.imanity.framework.bukkit.tablist.util.impl.v1_8.NMS1_8TabImpl;
 import org.imanity.framework.bukkit.tablist.util.impl.ProtocolLibTabImpl;
 import org.imanity.framework.bukkit.util.SpigotUtil;

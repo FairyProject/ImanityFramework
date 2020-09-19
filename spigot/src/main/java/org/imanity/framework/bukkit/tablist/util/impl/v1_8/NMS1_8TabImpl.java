@@ -32,6 +32,11 @@ public class NMS1_8TabImpl implements IImanityTabImpl {
     }
 
     @Override
+    public void registerLoginListener() {
+
+    }
+
+    @Override
     public TabEntry createFakePlayer(ImanityTablist imanityTablist, String string, TabColumn column, Integer slot, Integer rawSlot) {
         final Player player = imanityTablist.getPlayer();
         final PlayerVersion playerVersion = MinecraftReflection.getProtocol(player);
