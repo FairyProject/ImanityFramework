@@ -25,8 +25,10 @@
 package org.imanity.framework.bukkit.packet.event.type;
 
 import org.bukkit.entity.Player;
+import org.imanity.framework.bukkit.packet.PacketDirection;
 import org.imanity.framework.bukkit.packet.event.PacketEvent;
 import org.imanity.framework.bukkit.packet.type.PacketType;
+import org.imanity.framework.bukkit.packet.wrapper.WrappedPacket;
 
 /**
  * This event is called each time the server sends a packet to the client.
@@ -73,6 +75,10 @@ public final class PacketSendEvent extends PacketEvent {
      */
     public Object getNMSPacket() {
         return this.packet;
+    }
+
+    public WrappedPacket getWrappedPacket() {
+        return PacketDirection.WRITE.getWrappedFromNMS(this.player, this.getPacketId(), this.packet);
     }
 
     /**

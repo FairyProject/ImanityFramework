@@ -11,6 +11,8 @@ import org.imanity.framework.bukkit.Imanity;
 import org.imanity.framework.bukkit.packet.PacketDirection;
 import org.imanity.framework.bukkit.packet.PacketService;
 import org.imanity.framework.bukkit.packet.collection.BootstrapList;
+import org.imanity.framework.bukkit.packet.event.type.PacketReceiveEvent;
+import org.imanity.framework.bukkit.packet.event.type.PacketSendEvent;
 import org.imanity.framework.bukkit.packet.type.PacketType;
 import org.imanity.framework.bukkit.packet.type.PacketTypeClasses;
 import org.imanity.framework.bukkit.packet.wrapper.WrappedPacket;
@@ -225,6 +227,7 @@ public class NettyInjection1_8 implements INettyInjection {
             if (packet == null) {
                 return;
             }
+
             super.write(ctx, packet, promise);
         }
 

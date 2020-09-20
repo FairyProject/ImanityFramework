@@ -17,6 +17,7 @@ import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 public class MessageHandler {
 
@@ -58,6 +59,11 @@ public class MessageHandler {
         } catch (Throwable throwable) {
             throw new RuntimeException("Could not create new instance of message", throwable);
         }
+    }
+
+    public void registerMessage(Class<? extends Message> messageClass) {
+        int id = Objects.hash(messageClass.getPackage().getName(), messageClass.getSimpleName());
+        this.registerMessage(id, messageClass);
     }
 
     public void registerMessage(int id, Class<? extends Message> messageClass) {
