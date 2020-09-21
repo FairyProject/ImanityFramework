@@ -11,7 +11,6 @@ import org.imanity.framework.bukkit.packet.wrapper.WrappedPacket;
 import org.imanity.framework.bukkit.packet.wrapper.annotation.AutowiredWrappedPacket;
 import org.imanity.framework.bukkit.reflection.resolver.FieldResolver;
 import org.imanity.framework.bukkit.reflection.wrapper.ObjectWrapper;
-import org.imanity.framework.bukkit.reflection.wrapper.PacketWrapper;
 
 import javax.annotation.Nullable;
 import java.util.*;

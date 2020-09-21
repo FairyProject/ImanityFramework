@@ -5,6 +5,7 @@ import lombok.Setter;
 import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
 import org.imanity.framework.bukkit.packet.PacketService;
+import org.imanity.framework.bukkit.packet.wrapper.server.WrappedPacketOutScoreboardScore;
 import org.imanity.framework.bukkit.packet.wrapper.server.WrappedPacketOutScoreboardTeam;
 import org.imanity.framework.metadata.MetadataKey;
 import org.imanity.framework.bukkit.util.BukkitUtil;
@@ -19,17 +20,12 @@ public class ImanityBoard {
 
     private static EnumWrapper SCOREBOARD_HEALTH_DISPLAY;
 
-    private static EnumWrapper SCOREBOARD_ACTION;
-
     private static final NMSClassResolver CLASS_RESOLVER = new NMSClassResolver();
 
     static {
         try {
             Class<?> enumScoreboardHealthDisplay = CLASS_RESOLVER.resolveSilent("IScoreboardCriteria$EnumScoreboardHealthDisplay");
             SCOREBOARD_HEALTH_DISPLAY = new EnumWrapper(enumScoreboardHealthDisplay);
-
-            Class<?> TYPE_SCOREBOARD_ACTION = CLASS_RESOLVER.resolveSilent("PacketPlayOutScoreboardScore$EnumScoreboardAction");
-            SCOREBOARD_ACTION = new EnumWrapper(TYPE_SCOREBOARD_ACTION);
         } catch (Exception ex) {
             ex.printStackTrace();
         }
@@ -50,7 +46,7 @@ public class ImanityBoard {
 
         this.player = player;
         this.teams = new String[16];
-
+Math.ceil()
         PacketWrapper packetA = PacketWrapper.createByPacketName("PacketPlayOutScoreboardObjective")
                 .setPacketValue("b", "Objective")
                 .setPacketValue("a", player.getName())
@@ -149,17 +145,18 @@ public class ImanityBoard {
         if (line > 0 && line < 16) {
             if (teams[line] != null) {
 
-                PacketWrapper packetA = PacketWrapper.createByPacketName("PacketPlayOutScoreboardScore")
-                        .setPacketValue("a", this.getEntry(line))
-                        .setPacketValue("b", player.getName())
-                        .setPacketValue("c", line)
-                        .setPacketValue("d", SCOREBOARD_ACTION.getType("REMOVE"));
+                WrappedPacketOutScoreboardScore packetA = new WrappedPacketOutScoreboardScore(
+                        this.getEntry(line),
+                        player.getName(),
+                        line,
+                        WrappedPacketOutScoreboardScore.ScoreboardAction.REMOVE
+                );
                 WrappedPacketOutScoreboardTeam packetB = getOrRegisterTeam(line);
                 packetB.setAction(1);
 
                 teams[line] = null;
 
-                MinecraftReflection.sendPacket(player, packetA);
+                PacketService.send(player, packetA);
                 PacketService.send(player, packetB);
             }
         }
@@ -178,14 +175,6 @@ public class ImanityBoard {
                 .action(0)
                 .chatFormat(0)
                 .build();
-//        PacketWrapper packetB = PacketWrapper.createByPacketName("PacketPlayOutScoreboardTeam")
-//                .setPacketValue("a", "-sb" + line)
-//                .setPacketValue("b", "")
-//                .setPacketValue("c", "")
-//                .setPacketValue("d", "")
-//                .setPacketValue("i", 0)
-//                .setPacketValue("e", "always")
-//                .setPacketValue("f", 0);
 
         if (teams[line] != null) {
             packetB.setAction(2);
@@ -194,16 +183,17 @@ public class ImanityBoard {
         } else {
             teams[line] = "";
 
-            PacketWrapper packetA = PacketWrapper.createByPacketName("PacketPlayOutScoreboardScore")
-                    .setPacketValue("a", getEntry(line))
-                    .setPacketValue("b", player.getName())
-                    .setPacketValue("c", line)
-                    .setPacketValue("d", SCOREBOARD_ACTION.getType("CHANGE"));
+            WrappedPacketOutScoreboardScore packetA = new WrappedPacketOutScoreboardScore(
+                    this.getEntry(line),
+                    player.getName(),
+                    line,
+                    WrappedPacketOutScoreboardScore.ScoreboardAction.CHANGE
+            );
 
             packetB.setAction(0);
             packetB.getNameSet().add(getEntry(line));
 
-            MinecraftReflection.sendPacket(player, packetA);
+            PacketService.send(player, packetA);
 
             return packetB;
         }
