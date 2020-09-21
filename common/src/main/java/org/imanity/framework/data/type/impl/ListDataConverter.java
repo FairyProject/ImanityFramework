@@ -4,7 +4,7 @@ import lombok.Setter;
 import org.imanity.framework.util.builder.SQLColumnType;
 import org.imanity.framework.data.type.DataConverter;
 import org.imanity.framework.data.type.DataConverterType;
-import org.imanity.framework.util.CommonUtility;
+import org.imanity.framework.util.Utility;
 
 import java.lang.reflect.Field;
 import java.util.ArrayList;
@@ -104,6 +104,6 @@ public class ListDataConverter extends AbstractDataConverter<List<DataConverter<
 
     @Override
     public String toStringData(boolean sql) {
-        return (sql ? "\"" : "") + CommonUtility.join(list, "^", data -> data.toStringData(true)) + (sql ? "\"" : "");
+        return (sql ? "\"" : "") + Utility.join(list, "^", data -> data.toStringData(true)) + (sql ? "\"" : "");
     }
 }

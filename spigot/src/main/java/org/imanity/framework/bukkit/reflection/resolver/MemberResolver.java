@@ -1,5 +1,6 @@
 package org.imanity.framework.bukkit.reflection.resolver;
 
+import org.imanity.framework.bukkit.reflection.accessor.ClassAccessorCache;
 import org.imanity.framework.bukkit.reflection.wrapper.WrapperAbstract;
 
 import java.lang.reflect.Member;
@@ -15,10 +16,16 @@ import java.lang.reflect.Member;
 public abstract class MemberResolver<T extends Member> extends ResolverAbstract<T> {
 
 	protected Class<?> clazz;
+	protected ClassAccessorCache accessorCache;
 
-	public MemberResolver(Class<?> clazz) {
+	public MemberResolver(Class<?> clazz, ClassAccessorCache accessorCache) {
 		if (clazz == null) { throw new IllegalArgumentException("class cannot be null"); }
 		this.clazz = clazz;
+		this.accessorCache = accessorCache;
+	}
+
+	public MemberResolver(Class<?> clazz) {
+		this(clazz, ClassAccessorCache.get(clazz));
 	}
 
 	public MemberResolver(String className) throws ClassNotFoundException {

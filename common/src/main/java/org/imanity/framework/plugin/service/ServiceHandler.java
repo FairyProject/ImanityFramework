@@ -5,7 +5,7 @@ import org.apache.commons.lang3.reflect.ConstructorUtils;
 import org.imanity.framework.ImanityCommon;
 import org.imanity.framework.events.annotation.AutoWiredListener;
 import org.imanity.framework.util.AccessUtil;
-import org.imanity.framework.util.CommonUtility;
+import org.imanity.framework.util.Utility;
 import org.imanity.framework.util.FileUtils;
 import org.imanity.framework.util.annotation.AnnotationDetector;
 
@@ -87,7 +87,7 @@ public class ServiceHandler {
                 @Override
                 public void reportFieldAnnotation(Class<? extends Annotation> annotation, String className, String fieldName) {
 
-                    CommonUtility.tryCatch(() -> {
+                    Utility.tryCatch(() -> {
                         Class<?> type = Class.forName(className);
                         Field field = type.getDeclaredField(fieldName);
 
@@ -149,7 +149,7 @@ public class ServiceHandler {
     }
 
     public void registerAutowired(Object instance) {
-        CommonUtility.tryCatch(() -> {
+        Utility.tryCatch(() -> {
             for (Field field : instance.getClass().getDeclaredFields()) {
                 AccessUtil.setAccessible(field);
 

@@ -9,7 +9,6 @@ import org.bukkit.entity.Player;
 import org.imanity.framework.bukkit.hologram.HologramSingle;
 import org.imanity.framework.bukkit.reflection.MinecraftReflection;
 
-import java.util.Collection;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -34,36 +33,6 @@ public class ImanityImplementation extends NormalImplementation {
     @Override
     public float getBlockSlipperiness(Material material) {
         return Block.getById(material.getId()).frictionFactor;
-    }
-
-    @Override
-    public void sendTeam(Player player, String name, String prefix, String suffix, Collection<String> nameSet, int type) {
-        PacketPlayOutScoreboardTeam packet = new PacketPlayOutScoreboardTeam();
-        packet.setA(name);
-        packet.setH(type);
-
-        if (type == 0 || type == 2) {
-            packet.setB(name);
-            packet.setC(prefix);
-            packet.setD(suffix);
-            packet.setI(3);
-        }
-
-        packet.getG().addAll(nameSet);
-
-        MinecraftReflection.sendPacket(player, packet);
-    }
-
-    @Override
-    public void sendMember(Player player, String name, Collection<String> players, int type) {
-        PacketPlayOutScoreboardTeam packet = new PacketPlayOutScoreboardTeam();
-        packet.setA(name);
-        packet.setH(type);
-        packet.setI(3);
-
-        packet.getG().addAll(players);
-
-        MinecraftReflection.sendPacket(player, packet);
     }
 
     @Override

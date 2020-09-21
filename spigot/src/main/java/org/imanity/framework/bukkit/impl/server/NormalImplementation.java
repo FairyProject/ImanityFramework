@@ -11,6 +11,8 @@ import org.bukkit.material.MaterialData;
 import org.imanity.framework.ImanityCommon;
 import org.imanity.framework.bukkit.hologram.HologramSingle;
 import org.imanity.framework.bukkit.metadata.Metadata;
+import org.imanity.framework.bukkit.packet.PacketService;
+import org.imanity.framework.bukkit.packet.wrapper.server.WrappedPacketOutScoreboardTeam;
 import org.imanity.framework.bukkit.reflection.resolver.MethodResolver;
 import org.imanity.framework.bukkit.reflection.resolver.ResolverQuery;
 import org.imanity.framework.metadata.MetadataKey;
@@ -296,12 +298,22 @@ public class NormalImplementation implements ServerImplementation {
 
     @Override
     public void sendTeam(Player player, String name, String prefix, String suffix, Collection<String> nameSet, int type) {
-        // TODO
+        PacketService.send(player, WrappedPacketOutScoreboardTeam.builder()
+                .name(name)
+                .prefix(prefix)
+                .suffix(suffix)
+                .nameSets(nameSet)
+                .action(type)
+                .build());
     }
 
     @Override
     public void sendMember(Player player, String name, Collection<String> players, int type) {
-        // TODO
+        PacketService.send(player, WrappedPacketOutScoreboardTeam.builder()
+                .name(name)
+                .nameSets(players)
+                .action(type)
+                .build());
     }
 
     @Override

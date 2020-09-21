@@ -76,7 +76,7 @@ public final class WrappedPacketInCustomPayload extends WrappedPacket {
         } else {
             this.data = readString(0);
 
-            Field field = this.packet.getFieldByIndex(nmsPacketDataSerializer, 0);
+            FieldWrapper<?> field = this.packet.getFieldByIndex(nmsPacketDataSerializer, 0);
             if (field != null) {
                 this.dataSerializer = field.get(this.packet.getPacket());
             }
