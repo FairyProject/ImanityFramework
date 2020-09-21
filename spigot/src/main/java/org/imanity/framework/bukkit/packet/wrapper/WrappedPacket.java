@@ -63,7 +63,6 @@ public class WrappedPacket implements WrapperPacketReader {
         }
     }
 
-    protected final List<Field> fields = new ArrayList<>();
     protected final Player player;
 
     protected PacketWrapper packet;
@@ -90,10 +89,6 @@ public class WrappedPacket implements WrapperPacketReader {
             packetClass = PacketTypeClasses.Server.ENTITY;
         }
 
-        for (Field f : packetClass.getDeclaredFields()) {
-            f.setAccessible(true);
-            fields.add(f);
-        }
         this.player = player;
         this.packet = new PacketWrapper(packet);
         setup();
@@ -172,22 +167,15 @@ public class WrappedPacket implements WrapperPacketReader {
 
     @Override
     public Object readAnyObject(int index) {
-        MethodHandles.Lookup lookup = MethodHandles.lookup();
-        int currentIndex = 0;
-        for (Field f : fields) {
-            if (index == currentIndex++) {
-                try {
-                    return lookup.unreflectGetter(f).invoke(packet.getPacket());
-                } catch (Throwable throwable) {
-                    throwable.printStackTrace();
-                }
-            }
-        }
-        return null;
+        return this.packet.getFieldByIndex(null, index);
     }
 
     @Override
     public String readString(int index) {
         return readObject(index, String.class);
+    }
+
+    public void set(Class<?> type, int index, Object object) {
+        this.packet.setFieldByIndex(type, index, object);
     }
 }

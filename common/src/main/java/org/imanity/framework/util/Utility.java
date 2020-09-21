@@ -1,16 +1,17 @@
 package org.imanity.framework.util;
 
 import com.google.common.collect.ImmutableMap;
-import lombok.NonNull;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
+import java.lang.reflect.ParameterizedType;
+import java.lang.reflect.Type;
 import java.util.*;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-public class CommonUtility {
+public class Utility {
 
     public static <T> Constructor<T> getConstructor(Class<T> parentClass, Class<?>... parameterTypes) {
         try {
@@ -76,7 +77,7 @@ public class CommonUtility {
     }
 
     public static void tryCatch(ExceptionRunnable runnable) {
-        CommonUtility.tryCatch(runnable, throwable -> {
+        Utility.tryCatch(runnable, throwable -> {
             throw new RuntimeException(throwable);
         });
     }
@@ -89,7 +90,7 @@ public class CommonUtility {
         }
     }
 
-    public static <T> Class<T> wrapPrimitiveToObject(Class<T> c) {
+    public static <T> Class<T> wrapPrimitive(Class<T> c) {
         return c.isPrimitive() ? (Class<T>) PRIMITIVES_TO_WRAPPERS.get(c) : c;
     }
 
@@ -157,6 +158,38 @@ public class CommonUtility {
             // clearly already been loaded.
             throw new NoClassDefFoundError(ex.getMessage());
         }
+    }
+
+    public static Type[] getGenericTypes(Field field) {
+        Type type = field.getGenericType();
+        if (type instanceof ParameterizedType) {
+            return ((ParameterizedType) type).getActualTypeArguments();
+        }
+        return null;
+    }
+
+    public static boolean isParametersEquals(Type[] parametersA, Type[] parametersB) {
+        boolean equal = true;
+        if (parametersA.length != parametersB.length) {
+            return false;
+        }
+
+        for (int i = 0; i < parametersA.length; i++) {
+            Type typeA = parametersA[i];
+            if (typeA instanceof Class) {
+                typeA = Utility.wrapPrimitive((Class<?>) typeA);
+            }
+
+            Type typeB = parametersB[i];
+            if (typeB instanceof Class) {
+                typeB = Utility.wrapPrimitive((Class<?>) typeB);
+            }
+            if (typeA != typeB) {
+                equal = false;
+                break;
+            }
+        }
+        return equal;
     }
 
 }

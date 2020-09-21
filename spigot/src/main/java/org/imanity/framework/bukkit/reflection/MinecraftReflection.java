@@ -6,6 +6,8 @@ import org.bukkit.GameMode;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 import org.imanity.framework.bukkit.Imanity;
+import org.imanity.framework.bukkit.packet.type.PacketTypeClasses;
+import org.imanity.framework.bukkit.packet.wrapper.server.WrappedPacketOutScoreboardScore;
 import org.imanity.framework.bukkit.reflection.wrapper.ChatComponentWrapper;
 import org.imanity.framework.bukkit.util.SpigotUtil;
 import org.imanity.framework.bukkit.reflection.minecraft.MinecraftVersion;
@@ -533,8 +535,23 @@ public class MinecraftReflection {
         }
     }
 
+    public static Class<? extends Enum> getEnumScoreboardActionClass() {
+        try {
+            return NMS_CLASS_RESOLVER.resolve("EnumScoreboardAction");
+        } catch (Throwable throwable) {
+            try {
+                Class<? extends Enum> type = NMS_CLASS_RESOLVER.resolveSubClass(PacketTypeClasses.Server.SCOREBOARD_SCORE, "EnumScoreboardAction");
+                NMS_CLASS_RESOLVER.cache("EnumScoreboardAction", type);
+                return type;
+            } catch (Throwable throwable1) {
+                throw new RuntimeException(throwable1);
+            }
+        }
+    }
+
     private static EquivalentConverter.EnumConverter<GameMode> GAME_MODE_CONVERTER;
     private static EquivalentConverter.EnumConverter<ChatColor> CHAT_COLOR_CONVERTER;
+    private static EquivalentConverter.EnumConverter<WrappedPacketOutScoreboardScore.ScoreboardAction> SCOREBOARD_ACTION_CONVERTER;
 
     private static EquivalentConverter<ChatComponentWrapper> CHAT_COMPONENT_CONVERTER;
 
@@ -554,6 +571,13 @@ public class MinecraftReflection {
         }
 
         return GAME_MODE_CONVERTER;
+    }
+
+    public static EquivalentConverter.EnumConverter<WrappedPacketOutScoreboardScore.ScoreboardAction> getScoreboardActionConverter() {
+        if (SCOREBOARD_ACTION_CONVERTER == null) {
+            SCOREBOARD_ACTION_CONVERTER = new EquivalentConverter.EnumConverter<>(getEnumScoreboardActionClass(), WrappedPacketOutScoreboardScore.ScoreboardAction.class);
+        }
+        return SCOREBOARD_ACTION_CONVERTER;
     }
 
     public static EquivalentConverter.EnumConverter<ChatColor> getChatColorConverter() {

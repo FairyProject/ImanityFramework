@@ -2,7 +2,7 @@ package org.imanity.framework.bukkit.reflection.resolver;
 
 import org.imanity.framework.bukkit.reflection.wrapper.ConstructorWrapper;
 import org.imanity.framework.util.AccessUtil;
-import org.imanity.framework.util.CommonUtility;
+import org.imanity.framework.util.Utility;
 
 import java.lang.reflect.Constructor;
 
@@ -122,7 +122,7 @@ public class ConstructorResolver extends MemberResolver<Constructor> {
 		boolean equal = true;
 		if (l1.length != l2.length) { return false; }
 		for (int i = 0; i < l1.length; i++) {
-			if (CommonUtility.wrapPrimitiveToObject(l1[i]) != CommonUtility.wrapPrimitiveToObject(l2[i])) {
+			if (Utility.wrapPrimitive(l1[i]) != Utility.wrapPrimitive(l2[i])) {
 				equal = false;
 				break;
 			}

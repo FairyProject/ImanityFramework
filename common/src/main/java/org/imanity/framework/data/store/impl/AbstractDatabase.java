@@ -10,12 +10,10 @@ import org.imanity.framework.data.PlayerData;
 import org.imanity.framework.data.store.StoreDatabase;
 import org.imanity.framework.data.store.StoreType;
 import org.imanity.framework.data.type.DataConverter;
-import org.imanity.framework.data.type.DataConverterType;
 import org.imanity.framework.data.type.DataFieldConvert;
 import org.imanity.framework.metadata.CommonMetadataRegistries;
 import org.imanity.framework.metadata.MetadataKey;
-import org.imanity.framework.util.CommonUtility;
-import org.imanity.framework.util.entry.EntryArrayList;
+import org.imanity.framework.util.Utility;
 
 import java.lang.reflect.Constructor;
 import java.util.*;
@@ -75,7 +73,7 @@ public abstract class AbstractDatabase implements StoreDatabase {
             Constructor<? extends AbstractData> constructor;
 
             if (this.getType() == StoreType.PLAYER) {
-                constructor = CommonUtility.getConstructor(dataClass, PlayerData.PLAYER_BRIDGE.getPlayerClass());
+                constructor = Utility.getConstructor(dataClass, PlayerData.PLAYER_BRIDGE.getPlayerClass());
 
                 uuid = PlayerData.PLAYER_BRIDGE.getUUID(player);
 
@@ -84,14 +82,14 @@ public abstract class AbstractDatabase implements StoreDatabase {
                     break lookup;
                 }
 
-                constructor = CommonUtility.getConstructor(dataClass, Object.class);
+                constructor = Utility.getConstructor(dataClass, Object.class);
 
                 if (constructor != null) {
                     playerData = constructor.newInstance(player);
                     break lookup;
                 }
 
-                constructor = CommonUtility.getConstructor(dataClass, UUID.class, String.class);
+                constructor = Utility.getConstructor(dataClass, UUID.class, String.class);
 
                 if (constructor != null) {
                     playerData = constructor.newInstance(
@@ -102,7 +100,7 @@ public abstract class AbstractDatabase implements StoreDatabase {
                 }
             }
 
-            constructor = CommonUtility.getConstructor(dataClass, UUID.class);
+            constructor = Utility.getConstructor(dataClass, UUID.class);
 
             if (constructor != null) {
 

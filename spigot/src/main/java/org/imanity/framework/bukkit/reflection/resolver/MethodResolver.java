@@ -2,14 +2,15 @@ package org.imanity.framework.bukkit.reflection.resolver;
 
 import org.imanity.framework.bukkit.reflection.wrapper.MethodWrapper;
 import org.imanity.framework.util.AccessUtil;
-import org.imanity.framework.util.CommonUtility;
 
 import java.lang.reflect.Method;
 
 /**
  * Resolver for methods
  *
- * @credit ProtocolLib
+ * @credit inventivetalent
+ * @modified LeeGod
+ *
  */
 public class MethodResolver extends MemberResolver<Method> {
 
@@ -47,22 +48,13 @@ public class MethodResolver extends MemberResolver<Method> {
 
 	public MethodWrapper resolve(int index, Class<?>... parameters) throws ReflectiveOperationException {
 
-		return this.resolve(null, index, parameters);
+		return new MethodWrapper(this.resolve(new ResolverQuery(index, parameters)));
 
 	}
 
 	public MethodWrapper resolve(Class<?> returnType, int index, Class<?>... parameters) throws ReflectiveOperationException {
 
-		int currentIndex = 0;
-		for (Method method : this.clazz.getDeclaredMethods()) {
-			if ((returnType == null || method.getReturnType() == returnType) &&
-					(parameters.length == 0 || isParametersEquals(parameters, method.getParameterTypes())) &&
-					index == currentIndex++) {
-				return new MethodWrapper(AccessUtil.setAccessible(method));
-			}
-		}
-
-		throw new NoSuchMethodException();
+		return new MethodWrapper<>(this.resolve(new ResolverQuery(returnType, index, parameters)));
 
 	}
 
@@ -125,28 +117,11 @@ public class MethodResolver extends MemberResolver<Method> {
 
 	@Override
 	protected Method resolveObject(ResolverQuery query) throws ReflectiveOperationException {
-		for (Method method : this.clazz.getDeclaredMethods()) {
-			if (method.getName().equals(query.getName()) && (query.getTypes().length == 0 || isParametersEquals(query.getTypes(), method.getParameterTypes()))) {
-				return AccessUtil.setAccessible(method);
-			}
-		}
-		throw new NoSuchMethodException();
+		return this.accessorCache.resolveMethod(query);
 	}
 
 	@Override
 	protected NoSuchMethodException notFoundException(String joinedNames) {
 		return new NoSuchMethodException("Could not resolve method for " + joinedNames + " in class " + this.clazz);
-	}
-
-	static boolean isParametersEquals(Class<?>[] l1, Class<?>[] l2) {
-		boolean equal = true;
-		if (l1.length != l2.length) { return false; }
-		for (int i = 0; i < l1.length; i++) {
-			if (CommonUtility.wrapPrimitiveToObject(l1[i]) != CommonUtility.wrapPrimitiveToObject(l2[i])) {
-				equal = false;
-				break;
-			}
-		}
-		return equal;
 	}
 }

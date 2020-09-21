@@ -11,7 +11,7 @@ import org.imanity.framework.bukkit.reflection.resolver.minecraft.NMSClassResolv
 import org.imanity.framework.bukkit.reflection.wrapper.DataWatcherWrapper;
 import org.imanity.framework.bukkit.reflection.wrapper.PacketWrapper;
 import org.imanity.framework.bukkit.reflection.version.PlayerVersion;
-import org.imanity.framework.util.CommonUtility;
+import org.imanity.framework.util.Utility;
 
 import static org.imanity.framework.bukkit.reflection.minecraft.DataWatcher.V1_9.ValueType.*;
 
@@ -116,7 +116,7 @@ public class BossBar {
         this.previousText = bossBarData.getText();
         this.previousHealth = bossBarData.getHealth();
 
-        CommonUtility.tryCatch(() -> {
+        Utility.tryCatch(() -> {
             NMSClassResolver classResolver = new NMSClassResolver();
             ConstructorResolver constructorResolver = new ConstructorResolver(classResolver.resolve("PacketPlayOutEntityMetadata"));
             Object packetMetadata = constructorResolver

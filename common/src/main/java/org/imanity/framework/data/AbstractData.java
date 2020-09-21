@@ -9,7 +9,7 @@ import org.imanity.framework.data.store.StoreDatabase;
 import org.imanity.framework.data.type.DataConverter;
 import org.imanity.framework.data.type.DataConverterType;
 import org.imanity.framework.data.type.DataFieldConvert;
-import org.imanity.framework.util.CommonUtility;
+import org.imanity.framework.util.Utility;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
@@ -72,7 +72,7 @@ public abstract class AbstractData {
     public static List<DataFieldConvert> getDataTypes(Class<? extends AbstractData> playerDataClass) {
         List<DataFieldConvert> types = new ArrayList<>();
 
-        for (Field field : CommonUtility.getAllFields(playerDataClass)) {
+        for (Field field : Utility.getAllFields(playerDataClass)) {
 
             field.setAccessible(true);
 

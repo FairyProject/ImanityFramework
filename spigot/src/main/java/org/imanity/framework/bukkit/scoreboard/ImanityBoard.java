@@ -4,6 +4,9 @@ import lombok.Getter;
 import lombok.Setter;
 import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
+import org.imanity.framework.bukkit.packet.PacketService;
+import org.imanity.framework.bukkit.packet.wrapper.server.WrappedPacketOutScoreboardScore;
+import org.imanity.framework.bukkit.packet.wrapper.server.WrappedPacketOutScoreboardTeam;
 import org.imanity.framework.metadata.MetadataKey;
 import org.imanity.framework.bukkit.util.BukkitUtil;
 import org.imanity.framework.bukkit.reflection.MinecraftReflection;
@@ -17,17 +20,12 @@ public class ImanityBoard {
 
     private static EnumWrapper SCOREBOARD_HEALTH_DISPLAY;
 
-    private static EnumWrapper SCOREBOARD_ACTION;
-
     private static final NMSClassResolver CLASS_RESOLVER = new NMSClassResolver();
 
     static {
         try {
             Class<?> enumScoreboardHealthDisplay = CLASS_RESOLVER.resolveSilent("IScoreboardCriteria$EnumScoreboardHealthDisplay");
             SCOREBOARD_HEALTH_DISPLAY = new EnumWrapper(enumScoreboardHealthDisplay);
-
-            Class<?> TYPE_SCOREBOARD_ACTION = CLASS_RESOLVER.resolveSilent("PacketPlayOutScoreboardScore$EnumScoreboardAction");
-            SCOREBOARD_ACTION = new EnumWrapper(TYPE_SCOREBOARD_ACTION);
         } catch (Exception ex) {
             ex.printStackTrace();
         }
@@ -48,7 +46,7 @@ public class ImanityBoard {
 
         this.player = player;
         this.teams = new String[16];
-
+Math.ceil()
         PacketWrapper packetA = PacketWrapper.createByPacketName("PacketPlayOutScoreboardObjective")
                 .setPacketValue("b", "Objective")
                 .setPacketValue("a", player.getName())
@@ -109,7 +107,7 @@ public class ImanityBoard {
             return;
         }
 
-        PacketWrapper packet = getOrRegisterTeam(line);
+        WrappedPacketOutScoreboardTeam packet = getOrRegisterTeam(line);
         String prefix;
         String suffix;
 
@@ -135,30 +133,31 @@ public class ImanityBoard {
             }
         }
 
-        packet.setPacketValue("c", prefix);
-        packet.setPacketValue("d", suffix);
+        packet.setPrefix(prefix);
+        packet.setSuffix(suffix);
 
         teams[line] = value;
 
-        MinecraftReflection.sendPacket(player, packet);
+        PacketService.send(player, packet);
     }
 
     public void clear(int line) {
         if (line > 0 && line < 16) {
             if (teams[line] != null) {
 
-                PacketWrapper packetA = PacketWrapper.createByPacketName("PacketPlayOutScoreboardScore")
-                        .setPacketValue("a", this.getEntry(line))
-                        .setPacketValue("b", player.getName())
-                        .setPacketValue("c", line)
-                        .setPacketValue("d", SCOREBOARD_ACTION.getType("REMOVE"));
-                PacketWrapper packetB = getOrRegisterTeam(line)
-                        .setPacketValue("h", 1);
+                WrappedPacketOutScoreboardScore packetA = new WrappedPacketOutScoreboardScore(
+                        this.getEntry(line),
+                        player.getName(),
+                        line,
+                        WrappedPacketOutScoreboardScore.ScoreboardAction.REMOVE
+                );
+                WrappedPacketOutScoreboardTeam packetB = getOrRegisterTeam(line);
+                packetB.setAction(1);
 
                 teams[line] = null;
 
-                MinecraftReflection.sendPacket(player, packetA);
-                MinecraftReflection.sendPacket(player, packetB);
+                PacketService.send(player, packetA);
+                PacketService.send(player, packetB);
             }
         }
     }
@@ -169,36 +168,32 @@ public class ImanityBoard {
         }
     }
 
-    private PacketWrapper getOrRegisterTeam(int line) {
-        if (line <= 0 || line >= 16)
-            return null;
+    private WrappedPacketOutScoreboardTeam getOrRegisterTeam(int line) {
 
-        PacketWrapper packetB = PacketWrapper.createByPacketName("PacketPlayOutScoreboardTeam")
-                .setPacketValue("a", "-sb" + line)
-                .setPacketValue("b", "")
-                .setPacketValue("c", "")
-                .setPacketValue("d", "")
-                .setPacketValue("i", 0)
-                .setPacketValue("e", "always")
-                .setPacketValue("f", 0);
+        WrappedPacketOutScoreboardTeam packetB = WrappedPacketOutScoreboardTeam.builder()
+                .name("-sb" + line)
+                .action(0)
+                .chatFormat(0)
+                .build();
 
         if (teams[line] != null) {
-            packetB.setPacketValue("h", 2);
+            packetB.setAction(2);
 
             return packetB;
         } else {
             teams[line] = "";
 
-            PacketWrapper packetA = PacketWrapper.createByPacketName("PacketPlayOutScoreboardScore")
-                    .setPacketValue("a", getEntry(line))
-                    .setPacketValue("b", player.getName())
-                    .setPacketValue("c", line)
-                    .setPacketValue("d", SCOREBOARD_ACTION.getType("CHANGE"));
+            WrappedPacketOutScoreboardScore packetA = new WrappedPacketOutScoreboardScore(
+                    this.getEntry(line),
+                    player.getName(),
+                    line,
+                    WrappedPacketOutScoreboardScore.ScoreboardAction.CHANGE
+            );
 
-            packetB.setPacketValue("h", 0);
-            ((List<String>) packetB.getPacketValue("g")).add(getEntry(line));
+            packetB.setAction(0);
+            packetB.getNameSet().add(getEntry(line));
 
-            MinecraftReflection.sendPacket(player, packetA);
+            PacketService.send(player, packetA);
 
             return packetB;
         }

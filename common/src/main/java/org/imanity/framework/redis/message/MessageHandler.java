@@ -9,7 +9,7 @@ import org.imanity.framework.ImanityCommon;
 import org.imanity.framework.redis.message.annotation.AutoWiredMessageListener;
 import org.imanity.framework.redis.message.annotation.HandleMessage;
 import org.imanity.framework.redis.subscription.RedisPubSub;
-import org.imanity.framework.util.CommonUtility;
+import org.imanity.framework.util.Utility;
 import org.imanity.framework.util.annotation.AnnotationDetector;
 
 import java.io.File;
@@ -78,12 +78,12 @@ public class MessageHandler {
 
     public void registerListenersByAnnotation() {
 
-        CommonUtility.tryCatch(() -> {
+        Utility.tryCatch(() -> {
             new AnnotationDetector(new AnnotationDetector.TypeReporter() {
                 @Override
                 public void reportTypeAnnotation(Class<? extends Annotation> annotation, String className) {
 
-                    CommonUtility.tryCatch(() -> {
+                    Utility.tryCatch(() -> {
 
                         Class<?> type = Class.forName(className);
                         Object listener = type.newInstance();

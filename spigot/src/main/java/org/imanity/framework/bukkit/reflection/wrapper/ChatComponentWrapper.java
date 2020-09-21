@@ -84,7 +84,7 @@ public class ChatComponentWrapper extends WrapperAbstract implements Cloneable {
         }
 
         try {
-            GSON = (Gson) fieldResolver.resolveByFirstExtendingType(Gson.class).get(null);
+            GSON = (Gson) fieldResolver.resolveByFirstType(Gson.class).get(null);
         } catch (ReflectiveOperationException ex) {
             throw new RuntimeException("Failed to obtain GSON field", ex);
         }

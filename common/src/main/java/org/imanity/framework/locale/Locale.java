@@ -3,7 +3,7 @@ package org.imanity.framework.locale;
 import it.unimi.dsi.fastutil.chars.Char2ObjectOpenHashMap;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import lombok.Getter;
-import org.imanity.framework.util.CommonUtility;
+import org.imanity.framework.util.Utility;
 
 import java.util.Map;
 
@@ -33,11 +33,11 @@ public class Locale {
     }
 
     public void registerEntry(String key, Iterable<String> strings) {
-        this.registerEntry(key, CommonUtility.joinToString(strings, "\n"));
+        this.registerEntry(key, Utility.joinToString(strings, "\n"));
     }
 
     public void registerEntry(String key, String[] strings) {
-        this.registerEntry(key, CommonUtility.joinToString(strings, "\n"));
+        this.registerEntry(key, Utility.joinToString(strings, "\n"));
     }
 
     public void unregisterEntry(String key) {

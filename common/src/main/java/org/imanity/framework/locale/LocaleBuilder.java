@@ -1,7 +1,7 @@
 package org.imanity.framework.locale;
 
 import org.imanity.framework.ImanityCommon;
-import org.imanity.framework.util.CommonUtility;
+import org.imanity.framework.util.Utility;
 import org.imanity.framework.util.entry.Entry;
 
 import java.util.ArrayList;
@@ -24,11 +24,11 @@ public class LocaleBuilder {
     }
 
     public LocaleBuilder entry(String key, Iterable<String> value) {
-        return this.entry(key, CommonUtility.joinToString(value, "\n"));
+        return this.entry(key, Utility.joinToString(value, "\n"));
     }
 
     public LocaleBuilder entry(String key, String[] value) {
-        return this.entry(key, CommonUtility.joinToString(value, "\n"));
+        return this.entry(key, Utility.joinToString(value, "\n"));
     }
 
     public LocaleBuilder entries(String... entries) {
