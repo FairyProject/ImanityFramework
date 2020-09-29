@@ -149,7 +149,7 @@ public class NettyInjection1_8 implements INettyInjection {
         for (FieldWrapper<List> field : serverConnectionFieldResolver.resolveList(List.class)) {
 
             List list = field.get(serverConnection);
-            if (list.size() == 0 || list.get(0) instanceof ChannelFuture) {
+            if (list.size() == 0 || list.iterator().next() instanceof ChannelFuture) {
                 field.set(serverConnection, new BootstrapList(list, serverChannelHandler));
             }
 

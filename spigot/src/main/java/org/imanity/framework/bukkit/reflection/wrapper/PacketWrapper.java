@@ -36,10 +36,18 @@ public class PacketWrapper extends WrapperAbstract {
     @SneakyThrows
     public PacketWrapper(Object packetObject) {
         this.packetObject = packetObject;
-
         this.fieldResolver = new FieldResolver(this.packetObject.getClass());
-
         this.cached = true;
+    }
+
+    public PacketWrapper(Class<?> type) {
+        try {
+            this.packetObject = type.newInstance();
+            this.fieldResolver = new FieldResolver(type);
+            this.cached = true;
+        } catch (Throwable throwable) {
+            throw new RuntimeException(throwable);
+        }
     }
 
     public PacketWrapper noCache() {
@@ -89,11 +97,12 @@ public class PacketWrapper extends WrapperAbstract {
     }
 
     @SneakyThrows
-    public void setFieldByIndex(Class<?> type, int index, Object value) {
+    public PacketWrapper setFieldByIndex(Class<?> type, int index, Object value) {
         FieldWrapper field = this.getFieldByIndex(type, index);
         if (field == null) throw new RuntimeException("The field attempted to fetch with type " + type.getSimpleName() + " and index " + index + " on packet class " + this.packetObject.getClass().getSimpleName() + " does not exist");
 
         field.set(this.packetObject, value);
+        return this;
     }
 
     @SneakyThrows

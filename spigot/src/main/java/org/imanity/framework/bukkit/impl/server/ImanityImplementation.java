@@ -14,13 +14,6 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 
 public class ImanityImplementation extends NormalImplementation {
-    @Override
-    public List<Player> getPlayerRadius(Location location, double radius) {
-        return ((CraftWorld) location.getWorld()).getHandle().playerMap
-                .getNearbyPlayersIgnoreHeight(location.getX(), location.getY(), location.getZ(), 32)
-                .stream().map(EntityPlayer::getBukkitEntity)
-                .collect(Collectors.toList());
-    }
 
     @Override
     public Entity getEntity(UUID uuid) {

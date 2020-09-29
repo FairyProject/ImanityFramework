@@ -63,6 +63,7 @@ public class PacketService implements IService {
         try {
             nettyInjection.registerChannels();
         } catch (Throwable throwable) {
+            Imanity.LOGGER.info("Late Bind was enabled, late inject channels.");
             TaskUtil.runScheduled(() -> {
                 try {
                     nettyInjection.registerChannels();
