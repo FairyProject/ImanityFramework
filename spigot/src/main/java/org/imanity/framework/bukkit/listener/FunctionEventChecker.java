@@ -19,7 +19,15 @@ public class FunctionEventChecker {
     private Map<Class<? extends Event>, Function<Event, Player>> specialGetPlayer = new HashMap<>();
 
     public FunctionEventChecker playerOnly(Function<Player, Boolean> function) {
-        this.playerChecker = function;
+        return this.playerOnly(function, false);
+    }
+
+    public FunctionEventChecker playerOnly(Function<Player, Boolean> function, boolean includingNonPlayerCheck) {
+        if (includingNonPlayerCheck) {
+            this.playerChecker = player -> function.apply(player) && nonPlayerChecker.get();
+        } else {
+            this.playerChecker = function;
+        }
         return this;
     }
 

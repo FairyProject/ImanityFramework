@@ -84,8 +84,6 @@ public final class Imanity {
 
         Imanity.initCommon();
 
-        BukkitPlayerData.init();
-
         Imanity.TASK_CHAIN_FACTORY = BukkitTaskChainFactory.create(plugin);
 
         CommandHandler.init();

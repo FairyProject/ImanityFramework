@@ -8,6 +8,7 @@ import org.imanity.framework.ImanityCommon;
 import org.imanity.framework.data.AbstractData;
 import org.redisson.api.RReadWriteLock;
 
+import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
 public class MongoDatabase extends AbstractDatabase {
@@ -20,23 +21,19 @@ public class MongoDatabase extends AbstractDatabase {
     }
 
     @Override
-    public void load(AbstractData data) {
+    public Document load(UUID uuid) {
         RReadWriteLock lock = null;
         if (ImanityCommon.CORE_CONFIG.USE_REDIS_DISTRIBUTED_LOCK) {
-            lock = ImanityCommon.REDIS.getLock("Data-" + data.getUuid());
+            lock = ImanityCommon.REDIS.getLock("Data-" + uuid);
             lock.readLock().lock(3L, TimeUnit.SECONDS);
         }
 
-        Document document = this.players.find(Filters.eq("uuid", data.getUuid().toString())).first();
-
-        if (document == null) {
-            return;
-        }
-
-        data.loadFromDocument(document, this);
-
-        if (lock != null) {
-            lock.readLock().unlock();
+        try {
+            return this.players.find(Filters.eq("uuid", uuid.toString())).first();
+        } finally {
+            if (lock != null) {
+                lock.readLock().unlock();
+            }
         }
     }
 
@@ -49,7 +46,7 @@ public class MongoDatabase extends AbstractDatabase {
         }
 
         this.players.replaceOne(Filters.eq("uuid", data.getUuid().toString()),
-                this.toDocument(data),
+                data.toDocument(),
                 new ReplaceOptions().upsert(true));
 
         if (lock != null) {

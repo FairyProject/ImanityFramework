@@ -1,14 +1,16 @@
 package org.imanity.framework.data;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.imanity.framework.player.IPlayerBridge;
-import org.imanity.framework.data.annotation.StoreDataElement;
 
 import java.util.*;
 
 @Getter
 @Setter
+@NoArgsConstructor
 public class PlayerData extends AbstractData {
 
     public static IPlayerBridge PLAYER_BRIDGE;
@@ -18,7 +20,7 @@ public class PlayerData extends AbstractData {
                 PlayerData.PLAYER_BRIDGE.getName(player));
     }
 
-    @StoreDataElement
+    @JsonProperty
     private String name;
 
     public PlayerData(UUID uuid, String name) {

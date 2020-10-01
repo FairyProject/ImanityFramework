@@ -30,7 +30,8 @@ public class MySQL implements IService {
     @Override
     public void init() {
         this.generateConfig();
-        if (!ImanityCommon.CORE_CONFIG.isDatabaseTypeUsed(DatabaseType.MYSQL)) {
+        if (true) {
+//        if (!ImanityCommon.CORE_CONFIG.isDatabaseTypeUsed(DatabaseType.MYSQL)) {
             return;
         }
 

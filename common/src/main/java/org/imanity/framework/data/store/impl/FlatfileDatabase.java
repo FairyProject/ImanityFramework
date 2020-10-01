@@ -5,11 +5,10 @@ import org.apache.commons.io.FileUtils;
 import org.bson.Document;
 import org.imanity.framework.ImanityCommon;
 import org.imanity.framework.data.AbstractData;
-import org.imanity.framework.data.type.DataConverterType;
-import org.imanity.framework.data.type.impl.DocumentDataConverter;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.UUID;
 
 public class FlatfileDatabase extends AbstractDatabase {
 
@@ -24,21 +23,15 @@ public class FlatfileDatabase extends AbstractDatabase {
     }
 
     @Override
-    public void load(AbstractData data) {
+    public Document load(UUID uuid) {
 
-        File file = new File(this.databaseFolder, data.getUuid().toString() + ".json");
+        File file = new File(this.databaseFolder, uuid.toString() + ".json");
         if (!file.exists()) {
-            return;
+            return null;
         }
 
         try {
-            String string = FileUtils.readFileToString(file, Charsets.UTF_8);
-
-            DocumentDataConverter documentData = (DocumentDataConverter) DataConverterType.DOCUMENT.newData();
-            documentData.set(string);
-
-            Document document = documentData.get();
-            data.loadFromDocument(document, this);
+            return Document.parse(FileUtils.readFileToString(file, Charsets.UTF_8));
         } catch (IOException ex) {
             throw new RuntimeException("Unexpected error while reading json files", ex);
         }
@@ -58,10 +51,9 @@ public class FlatfileDatabase extends AbstractDatabase {
         }
 
         try {
-            DocumentDataConverter documentData = (DocumentDataConverter) DataConverterType.DOCUMENT.newData();
-            documentData.set(this.toDocument(data));
+            Document document = data.toDocument();
 
-            FileUtils.writeStringToFile(file, documentData.toStringData(false), Charsets.UTF_8);
+            FileUtils.writeStringToFile(file, document.toJson(), Charsets.UTF_8);
         } catch (IOException ex) {
             throw new RuntimeException("Unexpected error while writing json files", ex);
         }

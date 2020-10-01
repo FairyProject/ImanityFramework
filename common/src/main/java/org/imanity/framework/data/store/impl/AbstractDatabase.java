@@ -9,12 +9,11 @@ import org.imanity.framework.data.DataHandler;
 import org.imanity.framework.data.PlayerData;
 import org.imanity.framework.data.store.StoreDatabase;
 import org.imanity.framework.data.store.StoreType;
-import org.imanity.framework.data.type.DataConverter;
-import org.imanity.framework.data.type.DataFieldConvert;
 import org.imanity.framework.metadata.CommonMetadataRegistries;
 import org.imanity.framework.metadata.MetadataKey;
 import org.imanity.framework.util.Utility;
 
+import javax.annotation.Nullable;
 import java.lang.reflect.Constructor;
 import java.util.*;
 
@@ -26,7 +25,6 @@ public abstract class AbstractDatabase implements StoreDatabase {
     private MetadataKey<PlayerData> metadataKey;
 
     protected Class<? extends AbstractData> dataClass;
-    protected List<DataFieldConvert> dataConverterTypes;
     private String name;
     @Setter
     private boolean autoLoad, autoSave;
@@ -37,7 +35,6 @@ public abstract class AbstractDatabase implements StoreDatabase {
         this.name = name;
         this.dataClass = data;
         this.type = type;
-        this.dataConverterTypes = AbstractData.getDataTypes(data);
 
         if (this.type == StoreType.PLAYER) {
             this.metadataKey = MetadataKey.create(ImanityCommon.METADATA_PREFIX + this.getName(), PlayerData.class);
@@ -48,28 +45,34 @@ public abstract class AbstractDatabase implements StoreDatabase {
     }
 
     @Override
-    public List<DataFieldConvert> getFieldConverters() {
-        return this.dataConverterTypes;
-    }
-
-    public Document toDocument(AbstractData data) {
-        Document document = new Document();
-
-        for (DataConverter<?> converter : data.toDataList(this)) {
-            document.put(converter.name(), converter.get());
-        }
-
-        return document;
-    }
-
-    @Override
-    public AbstractData load(Object player) {
+    public AbstractData load(Object object) {
         AbstractData playerData;
 
         UUID uuid = null;
 
+        if (this.getType() == StoreType.PLAYER) {
+            uuid = PlayerData.PLAYER_BRIDGE.getUUID(object);
+        } else if (object instanceof UUID) {
+            uuid = (UUID) object;
+        } else {
+            throw new UnsupportedOperationException("load() passed in something wrong");
+        }
+
+        Document document = this.load(uuid);
+        playerData = DataHandler.fromDocument(document, this.dataClass);
+
+        if (playerData == null) {
+            playerData = this.constructData(object);
+        }
+
+        this.dataList.put(uuid, playerData);
+        return playerData;
+    }
+
+    private AbstractData constructData(Object player) {
         lookup: try {
 
+            UUID uuid = null;
             Constructor<? extends AbstractData> constructor;
 
             if (this.getType() == StoreType.PLAYER) {
@@ -78,25 +81,22 @@ public abstract class AbstractDatabase implements StoreDatabase {
                 uuid = PlayerData.PLAYER_BRIDGE.getUUID(player);
 
                 if (constructor != null) {
-                    playerData = constructor.newInstance(player);
-                    break lookup;
+                    return constructor.newInstance(player);
                 }
 
                 constructor = Utility.getConstructor(dataClass, Object.class);
 
                 if (constructor != null) {
-                    playerData = constructor.newInstance(player);
-                    break lookup;
+                    return constructor.newInstance(player);
                 }
 
                 constructor = Utility.getConstructor(dataClass, UUID.class, String.class);
 
                 if (constructor != null) {
-                    playerData = constructor.newInstance(
+                    return constructor.newInstance(
                             uuid,
                             PlayerData.PLAYER_BRIDGE.getName(player)
                     );
-                    break lookup;
                 }
             }
 
@@ -106,11 +106,10 @@ public abstract class AbstractDatabase implements StoreDatabase {
 
                 if (this.getType() == StoreType.OBJECT) {
                     uuid = (UUID) player;
-                    playerData = constructor.newInstance(uuid);
+                    return constructor.newInstance(uuid);
                 } else {
-                    playerData = constructor.newInstance(PlayerData.PLAYER_BRIDGE.getUUID(player));
+                    return constructor.newInstance(PlayerData.PLAYER_BRIDGE.getUUID(player));
                 }
-                break lookup;
             }
 
             throw new UnsupportedOperationException(dataClass.getSimpleName() + " doesn't required constructor!");
@@ -118,11 +117,6 @@ public abstract class AbstractDatabase implements StoreDatabase {
         } catch (Exception ex) {
             throw new RuntimeException("Unexpected error while loading player data", ex);
         }
-
-        this.load(playerData);
-
-        this.dataList.put(uuid, playerData);
-        return playerData;
     }
 
     public PlayerData getByPlayer(Object player) {
@@ -154,7 +148,8 @@ public abstract class AbstractDatabase implements StoreDatabase {
         this.dataList.clear();
     }
 
-    public abstract void load(AbstractData playerData);
+    @Nullable
+    public abstract Document load(UUID uuid);
 
     public abstract void init(String name);
 

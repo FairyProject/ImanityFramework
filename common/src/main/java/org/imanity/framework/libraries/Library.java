@@ -51,6 +51,12 @@ public enum Library {
             "reflectasm",
             "1.11.9",
             null
+    ),
+    JACKSON_DATABIND(
+            "com.fasterxml.jackson.core",
+            "jackson-databind",
+            "2.11.2",
+            "y4kLSq2O0hp7V+PI95JNvcoa7/nd0nyw/zckMDeuE0I="
     );
 
     private final String mavenRepoPath;

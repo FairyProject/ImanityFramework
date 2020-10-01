@@ -3,10 +3,9 @@ package org.imanity.framework.database;
 import org.imanity.framework.data.store.StoreDatabase;
 import org.imanity.framework.data.store.impl.FlatfileDatabase;
 import org.imanity.framework.data.store.impl.MongoDatabase;
-import org.imanity.framework.data.store.impl.SQLDatabase;
 
 public enum DatabaseType {
-    MYSQL(SQLDatabase.class),
+//    MYSQL(SQLDatabase.class),
     MONGO(MongoDatabase.class),
     FLAT_FILE(FlatfileDatabase.class);
 

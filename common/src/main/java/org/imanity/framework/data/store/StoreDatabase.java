@@ -1,12 +1,9 @@
 package org.imanity.framework.data.store;
 
-import org.imanity.framework.ImanityCommon;
 import org.imanity.framework.data.AbstractData;
 import org.imanity.framework.data.PlayerData;
-import org.imanity.framework.data.type.DataFieldConvert;
 import org.imanity.framework.metadata.MetadataKey;
 
-import java.util.List;
 import java.util.UUID;
 
 public interface StoreDatabase {
@@ -16,8 +13,6 @@ public interface StoreDatabase {
     MetadataKey<PlayerData> getMetadataTag();
 
     void init(String name, Class<? extends AbstractData> data, StoreType type);
-
-    List<DataFieldConvert> getFieldConverters();
 
     AbstractData load(Object object);
 
