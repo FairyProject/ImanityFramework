@@ -10,6 +10,4 @@ public interface IEventHandler {
 
     void onPostServicesInitial();
 
-    Object registerWiredListener(String className);
-
 }

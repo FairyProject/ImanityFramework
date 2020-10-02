@@ -4,8 +4,11 @@ import lombok.Getter;
 import org.imanity.framework.ImanityCommon;
 import org.imanity.framework.config.format.FieldNameFormatters;
 import org.imanity.framework.config.yaml.YamlConfiguration;
+import org.imanity.framework.plugin.component.ComponentHolder;
+import org.imanity.framework.plugin.component.ComponentRegistry;
 import org.imanity.framework.plugin.service.IService;
 import org.imanity.framework.plugin.service.Service;
+import org.imanity.framework.redis.message.MessageListener;
 import org.imanity.framework.redis.server.ServerHandler;
 import org.redisson.Redisson;
 import org.redisson.api.RMap;
@@ -26,6 +29,30 @@ public class ImanityRedis implements IService {
     public void generateConfig() {
         this.redisConfig = new RedisConfig();
         redisConfig.loadAndSave();
+    }
+
+    @Override
+    public void preInit() {
+        if (!ImanityCommon.CORE_CONFIG.USE_REDIS) {
+            return;
+        }
+
+        ComponentRegistry.registerComponentHolder(new ComponentHolder() {
+
+            @Override
+            public Object newInstance(Class<?> type) {
+                Object instance = super.newInstance(type);
+                serverHandler.getMessageHandler().registerListener(instance);
+
+                return instance;
+            }
+
+            @Override
+            public Class<?>[] type() {
+                return new Class[] {MessageListener.class};
+            }
+
+        });
     }
 
     @Override

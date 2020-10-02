@@ -84,14 +84,15 @@ public class VisibilityService implements IService {
 
     public boolean canSee(Player receiver, Player target) {
         for (VisibilityAdapter visibilityAdapter : this.visibilityAdapters) {
-            if (visibilityAdapter.shouldShow(receiver, target)) {
-                return true;
-            }
-        }
+            VisibilityOption option = visibilityAdapter.check(receiver, target);
 
-        for (VisibilityAdapter visibilityAdapter : this.visibilityAdapters) {
-            if (visibilityAdapter.shouldHide(receiver, target)) {
-                return false;
+            switch (option) {
+                case SHOW:
+                    return true;
+                case HIDE:
+                    return false;
+                case NOTHING:
+                    break;
             }
         }
 

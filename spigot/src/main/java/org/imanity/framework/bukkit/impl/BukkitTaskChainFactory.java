@@ -21,7 +21,7 @@
  *  WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-package org.imanity.framework.bukkit.task;
+package org.imanity.framework.bukkit.impl;
 
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;

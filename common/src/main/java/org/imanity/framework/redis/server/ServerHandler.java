@@ -58,8 +58,6 @@ public class ServerHandler {
         this.messageHandler.registerMessage(1, ServerAddMessage.class);
         this.messageHandler.registerMessage(2, ServerDeleteMessage.class);
         this.messageHandler.registerMessage(3, ServerCommandMessage.class);
-
-        this.messageHandler.registerListenersByAnnotation();
     }
 
     public ImanityServer getServer(String name) {

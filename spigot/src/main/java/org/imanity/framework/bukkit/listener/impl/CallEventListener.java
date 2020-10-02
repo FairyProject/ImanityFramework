@@ -1,4 +1,4 @@
-package org.imanity.framework.bukkit.listener;
+package org.imanity.framework.bukkit.listener.impl;
 
 import lombok.AllArgsConstructor;
 import org.bukkit.entity.Player;

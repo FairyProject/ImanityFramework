@@ -3,6 +3,7 @@ package org.imanity.framework.bukkit;
 import com.google.common.collect.ImmutableList;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
+import lombok.NonNull;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.bukkit.Bukkit;
@@ -24,25 +25,29 @@ import org.imanity.framework.bukkit.hologram.HologramHandler;
 import org.imanity.framework.bukkit.impl.*;
 import org.imanity.framework.bukkit.impl.server.ServerImplementation;
 import org.imanity.framework.bukkit.menu.task.MenuUpdateTask;
-import org.imanity.framework.bukkit.player.BukkitPlayerData;
 import org.imanity.framework.bukkit.player.movement.MovementListener;
 import org.imanity.framework.bukkit.player.movement.impl.AbstractMovementImplementation;
 import org.imanity.framework.bukkit.player.movement.impl.BukkitMovementImplementation;
 import org.imanity.framework.bukkit.player.movement.impl.ImanityMovementImplementation;
 import org.imanity.framework.bukkit.plugin.ImanityPlugin;
+import org.imanity.framework.bukkit.reflection.MinecraftReflection;
+import org.imanity.framework.bukkit.reflection.minecraft.MinecraftVersion;
 import org.imanity.framework.bukkit.scoreboard.ImanityBoardAdapter;
 import org.imanity.framework.bukkit.scoreboard.ImanityBoardHandler;
-import org.imanity.framework.bukkit.task.BukkitTaskChainFactory;
+import org.imanity.framework.bukkit.impl.BukkitTaskChainFactory;
 import org.imanity.framework.bukkit.timer.TimerHandler;
 import org.imanity.framework.bukkit.util.*;
 import org.imanity.framework.bukkit.tablist.ImanityTabAdapter;
 import org.imanity.framework.bukkit.tablist.ImanityTabHandler;
 import org.imanity.framework.bukkit.visual.VisualBlockHandler;
 import org.imanity.framework.libraries.classloader.PluginClassLoader;
+import org.imanity.framework.plugin.component.ComponentHolder;
+import org.imanity.framework.plugin.component.ComponentRegistry;
 import org.imanity.framework.plugin.service.Autowired;
 import org.imanity.framework.task.chain.TaskChainFactory;
 import org.imanity.framework.util.FastRandom;
 
+import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -91,6 +96,8 @@ public final class Imanity {
     }
 
     private static void initCommon() {
+        ComponentRegistry.registerComponentHolder(new ComponentHolderBukkitListener());
+
         ImanityCommon.builder()
                 .bridge(new BukkitImanityBridge())
                 .playerBridge(new BukkitPlayerBridge())
@@ -228,51 +235,56 @@ public final class Imanity {
 
 
     public static void broadcast(String key, LocaleRV... rvs) {
-        Imanity.broadcast(Imanity.PLUGIN.getServer().getOnlinePlayers(), key, rvs);
+        Imanity.broadcast(Imanity.getPlayers(), key, null, null, null, rvs);
     }
 
     public static void broadcast(Iterable<? extends Player> players, String key, LocaleRV... rvs) {
-        for (Player player : players) {
-            String result = Imanity.translate(player, key);
-
-            for (LocaleRV rv : rvs) {
-                result = BukkitUtil.replace(result, rv.getTarget(), rv.getReplacement(player));
-            }
-
-            player.sendMessage(result);
-        }
+        Imanity.broadcast(players, key, null, null, null, rvs);
     }
 
     public static void broadcastWithSound(String key, Sound sound, LocaleRV... rvs) {
-        Imanity.broadcastWithSound(Imanity.PLUGIN.getServer().getOnlinePlayers(), key, sound, rvs);
+        Imanity.broadcastWithSound(Imanity.getPlayers(), key, sound, rvs);
     }
 
     public static void broadcastWithSound(Iterable<? extends Player> players, String key, Sound sound, LocaleRV... rvs) {
-        for (Player player : players) {
-            String result = Imanity.translate(player, key);
-
-            for (LocaleRV rv : rvs) {
-                result = BukkitUtil.replace(result, rv.getTarget(), rv.getReplacement(player));
-            }
-
-            player.sendMessage(result);
-            player.playSound(player.getLocation(), sound, 1f, 1f);
-        }
+        Imanity.broadcast(players, key, null, null, sound, rvs);
     }
 
     public static void broadcastTitleWithSound(String messageLocale, String titleLocale, String subTitleLocale, Sound sound, LocaleRV... rvs) {
-        Imanity.broadcastTitleWithSound(Bukkit.getOnlinePlayers(), messageLocale, titleLocale, subTitleLocale, sound, rvs);
+        Imanity.broadcast(Imanity.getPlayers(), messageLocale, titleLocale, subTitleLocale, sound, rvs);
     }
 
-    public static void broadcastTitleWithSound(Iterable<? extends Player> players, String messageLocale, String titleLocale, String subTitleLocale, Sound sound, LocaleRV... rvs) {
-        players
-                .forEach(player -> {
-                    player.playSound(player.getLocation(), sound, 1f, 1f);
-                    player.sendMessage(Imanity.translate(player, messageLocale, rvs));
-                    if (SpigotUtil.getProtocolVersion(player) > 5) {
-                        player.sendTitle(new Title(Imanity.translate(player, titleLocale, rvs), Imanity.translate(player, subTitleLocale, rvs), 20, 100, 20));
-                    }
-                });
+    public static void broadcast(@NonNull Iterable<? extends Player> players, @Nullable String messageLocale, @Nullable String titleLocale, @Nullable String subTitleLocale, @Nullable Sound sound, LocaleRV... rvs) {
+
+        boolean hasTitle = MinecraftVersion.VERSION.olderThan(MinecraftReflection.Version.v1_7_R4);
+
+        players.forEach(player -> {
+            if (sound != null) {
+                player.playSound(player.getLocation(), sound, 1f, 1f);
+            }
+
+            if (messageLocale != null) {
+                player.sendMessage(Imanity.translate(player, messageLocale, rvs));
+            }
+
+            if (!hasTitle) {
+                return;
+            }
+
+            Title title = null;
+            if (titleLocale != null && subTitleLocale != null) {
+                title = new Title(Imanity.translate(player, titleLocale, rvs), Imanity.translate(player, subTitleLocale, rvs));
+            } else if (titleLocale != null) {
+                title = new Title(Imanity.translate(player, titleLocale, rvs));
+            } else if (subTitleLocale != null) {
+                title = new Title("", Imanity.translate(player, subTitleLocale, rvs));
+            }
+
+            if (title != null) {
+                player.sendTitle(title);
+            }
+        });
+
     }
 
     public static void shutdown() {

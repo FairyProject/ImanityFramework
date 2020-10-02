@@ -2,7 +2,6 @@ package org.imanity.framework.redis.message;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
-import org.imanity.framework.redis.message.annotation.AutoWiredMessageListener;
 
 import java.lang.reflect.Method;
 

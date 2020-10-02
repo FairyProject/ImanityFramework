@@ -22,44 +22,4 @@ public class BukkitEventHandler implements IEventHandler {
     public void onPostServicesInitial() {
         Imanity.callEvent(new PostServicesInitialEvent());
     }
-
-    @Override
-    public Object registerWiredListener(String className) {
-        try {
-            Class<?> type = Class.forName(className);
-
-            AutoWiredListener listenerAnnotation = type.getAnnotation(AutoWiredListener.class);
-            if (listenerAnnotation == null) {
-                System.out.println("Didn't find AutoWiredListener annotation on " + type.getSimpleName() + " !");
-                return null;
-            }
-
-            JavaPlugin plugin = JavaPlugin.getProvidingPlugin(type);
-
-            ConstructorResolver resolver = new ConstructorResolver(type);
-            Object object = resolver.resolveMatches(
-                    new Class[0],
-                    new Class[] {plugin.getClass()},
-                    new Class[] {JavaPlugin.class}
-                    )
-            .resolveBunch(
-                    new Object[0],
-                    new Object[] { plugin }
-            );
-
-            if (Listener.class.isAssignableFrom(type)) {
-
-                Imanity.registerEvents((Listener) object);
-
-            } else if (!FunctionListener.class.isAssignableFrom(type)) {
-                Imanity.LOGGER.error("The Class " + type.getSimpleName() + " wasn't implement Listener or FunctionListener!");
-
-                return null;
-            }
-
-            return object;
-        } catch (Throwable throwable) {
-            throw new RuntimeException("Something wrong while registering wired listener", throwable);
-        }
-    }
 }
