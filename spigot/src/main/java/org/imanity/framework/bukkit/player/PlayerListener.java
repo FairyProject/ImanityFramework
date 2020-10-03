@@ -15,11 +15,11 @@ import org.imanity.framework.bukkit.reflection.MinecraftReflection;
 import org.imanity.framework.data.DataHandler;
 import org.imanity.framework.data.PlayerData;
 import org.imanity.framework.data.store.StoreDatabase;
-import org.imanity.framework.events.annotation.AutoWiredListener;
+import org.imanity.framework.plugin.component.Component;
 import org.imanity.framework.util.entry.Entry;
 import org.imanity.framework.util.entry.EntryArrayList;
 
-@AutoWiredListener
+@Component
 public class PlayerListener implements Listener {
 
     @EventHandler(priority = EventPriority.LOWEST)
@@ -108,6 +108,7 @@ public class PlayerListener implements Listener {
                             return;
                         }
                         PlayerData playerData = database.getByPlayer(player);
+                        playerData.disconnect();
                         database.save(playerData);
                     }
                 }).sync(() -> {

@@ -32,7 +32,7 @@ import org.imanity.framework.bukkit.util.CoordXZ;
 import org.imanity.framework.bukkit.util.TaskUtil;
 import org.imanity.framework.bukkit.util.chunk.CachedChunk;
 import org.imanity.framework.bukkit.util.chunk.CraftCachedChunk;
-import org.imanity.framework.events.annotation.AutoWiredListener;
+import org.imanity.framework.plugin.component.Component;
 import org.imanity.framework.util.thread.ServerThreadLock;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -44,7 +44,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 @Getter
-@AutoWiredListener
+@Component
 public class NPCPool implements Listener {
 
     private static final Map<String, NPCPool> NPC_POOLS = new HashMap<>();

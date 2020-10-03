@@ -4,14 +4,12 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
-import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerLoginEvent;
-import org.bukkit.event.player.PlayerQuitEvent;
 import org.imanity.framework.bukkit.packet.PacketService;
-import org.imanity.framework.events.annotation.AutoWiredListener;
+import org.imanity.framework.plugin.component.Component;
 import org.imanity.framework.plugin.service.Autowired;
 
-@AutoWiredListener
+@Component
 public class PacketPlayerListener implements Listener {
 
     @Autowired

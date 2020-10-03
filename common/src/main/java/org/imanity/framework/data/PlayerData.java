@@ -11,7 +11,7 @@ import java.util.*;
 @Getter
 @Setter
 @NoArgsConstructor
-public class PlayerData extends AbstractData {
+public abstract class PlayerData extends AbstractData {
 
     public static IPlayerBridge PLAYER_BRIDGE;
 
@@ -34,6 +34,10 @@ public class PlayerData extends AbstractData {
 
     public static PlayerDataBuilder builder() {
         return new PlayerDataBuilder();
+    }
+
+    public void disconnect() {
+
     }
 
 }

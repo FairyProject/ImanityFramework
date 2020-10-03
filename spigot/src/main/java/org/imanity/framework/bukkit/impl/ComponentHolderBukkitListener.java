@@ -5,19 +5,12 @@ import org.bukkit.plugin.java.JavaPlugin;
 import org.imanity.framework.bukkit.Imanity;
 import org.imanity.framework.bukkit.listener.FunctionListener;
 import org.imanity.framework.bukkit.reflection.resolver.ConstructorResolver;
-import org.imanity.framework.events.annotation.AutoWiredListener;
 import org.imanity.framework.plugin.component.ComponentHolder;
 
 public class ComponentHolderBukkitListener extends ComponentHolder {
 
     @Override
     public Object newInstance(Class<?> type) {
-        AutoWiredListener listenerAnnotation = type.getAnnotation(AutoWiredListener.class);
-        if (listenerAnnotation == null) {
-            System.out.println("Didn't find AutoWiredListener annotation on " + type.getSimpleName() + " !");
-            return null;
-        }
-
         JavaPlugin plugin = JavaPlugin.getProvidingPlugin(type);
 
         ConstructorResolver resolver = new ConstructorResolver(type);

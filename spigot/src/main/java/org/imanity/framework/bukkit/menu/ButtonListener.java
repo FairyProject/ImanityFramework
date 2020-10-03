@@ -10,9 +10,9 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.inventory.ClickType;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryCloseEvent;
-import org.imanity.framework.events.annotation.AutoWiredListener;
+import org.imanity.framework.plugin.component.Component;
 
-@AutoWiredListener
+@Component
 public class ButtonListener implements Listener {
 
 	@EventHandler(priority = EventPriority.MONITOR)

@@ -7,14 +7,13 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerChatTabCompleteEvent;
-import org.bukkit.event.player.PlayerJoinEvent;
 import org.imanity.framework.bukkit.events.player.PlayerPostJoinEvent;
-import org.imanity.framework.events.annotation.AutoWiredListener;
+import org.imanity.framework.plugin.component.Component;
 import org.imanity.framework.plugin.service.Autowired;
 
 import java.util.Collection;
 
-@AutoWiredListener
+@Component
 public class VisibilityListener implements Listener {
 
     @Autowired

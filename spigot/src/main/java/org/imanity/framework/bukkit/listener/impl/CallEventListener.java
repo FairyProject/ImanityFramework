@@ -1,6 +1,5 @@
 package org.imanity.framework.bukkit.listener.impl;
 
-import lombok.AllArgsConstructor;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -11,9 +10,9 @@ import org.imanity.framework.bukkit.events.player.EntityDamageByPlayerEvent;
 import org.imanity.framework.bukkit.events.player.PlayerDamageByEntityEvent;
 import org.imanity.framework.bukkit.events.player.PlayerDamageByPlayerEvent;
 import org.imanity.framework.bukkit.events.player.PlayerDamageEvent;
-import org.imanity.framework.events.annotation.AutoWiredListener;
+import org.imanity.framework.plugin.component.Component;
 
-@AutoWiredListener
+@Component
 public class CallEventListener implements Listener {
 
     @EventHandler
