@@ -163,9 +163,11 @@ public class PacketService implements IService {
 
         WrappedPacket wrappedPacket = PacketDirection.READ.getWrappedFromNMS(player, PacketType.Client.getIdByType(type), packet);
 
+        PacketDto packetDto = new PacketDto(wrappedPacket);
+
         boolean cancelled = false;
         for (PacketListener packetListener : this.registeredPacketListeners.get(type)) {
-            if (!packetListener.read(player, wrappedPacket)) {
+            if (!packetListener.read(player, packetDto)) {
                 cancelled = true;
             }
         }
@@ -182,14 +184,16 @@ public class PacketService implements IService {
 
         WrappedPacket wrappedPacket = PacketDirection.WRITE.getWrappedFromNMS(player, PacketType.Server.getIdByType(type), packet);
 
+        PacketDto packetDto = new PacketDto(wrappedPacket);
+
         boolean cancelled = false;
         for (PacketListener packetListener : this.registeredPacketListeners.get(type)) {
-            if (!packetListener.write(player, wrappedPacket)) {
+            if (!packetListener.write(player, packetDto)) {
                 cancelled = true;
             }
         }
 
-        return cancelled ? null : packet;
+        return cancelled ? null : packetDto.isRefresh() ? ((SendableWrapper) wrappedPacket).asNMSPacket() : packet;
     }
 
     public void sendPacket(Player player, SendableWrapper packet) {

@@ -175,6 +175,12 @@ public class WrappedPacket implements WrapperPacketReader {
         return readObject(index, String.class);
     }
 
+    public void validBasePacketExists() {
+        if (this.packet != null) {
+            throw new UnsupportedOperationException("The packet " + this.getClass().getSimpleName() + " does not have a base packet!");
+        }
+    }
+
     public void set(Class<?> type, int index, Object object) {
         this.packet.setFieldByIndex(type, index, object);
     }

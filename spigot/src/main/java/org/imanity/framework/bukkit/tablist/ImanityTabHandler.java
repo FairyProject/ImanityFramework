@@ -6,6 +6,7 @@ import org.bukkit.entity.Player;
 import org.imanity.framework.ImanityCommon;
 import org.imanity.framework.bukkit.Imanity;
 import org.imanity.framework.bukkit.metadata.Metadata;
+import org.imanity.framework.bukkit.packet.PacketDto;
 import org.imanity.framework.bukkit.packet.PacketListener;
 import org.imanity.framework.bukkit.packet.PacketService;
 import org.imanity.framework.bukkit.packet.type.PacketTypeClasses;
@@ -103,12 +104,11 @@ public class ImanityTabHandler {
                 }
 
                 @Override
-                public boolean write(Player player, WrappedPacket packet1) {
-                    WrappedPacketOutLogin packet = packet1.wrap(WrappedPacketOutLogin.class);
+                public boolean write(Player player, PacketDto dto) {
+                    WrappedPacketOutLogin packet = dto.wrap(WrappedPacketOutLogin.class);
                     packet.setMaxPlayers(60);
 
-                    System.out.println("yo my brother!");
-
+                    dto.refresh();
                     return true;
                 }
             });

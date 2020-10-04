@@ -4,6 +4,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
+import net.minecraft.server.v1_8_R3.PacketPlayOutSpawnEntityLiving;
 import org.imanity.framework.bukkit.packet.PacketDirection;
 import org.imanity.framework.bukkit.packet.type.PacketType;
 import org.imanity.framework.bukkit.packet.type.PacketTypeClasses;
@@ -14,6 +15,8 @@ import org.imanity.framework.bukkit.reflection.minecraft.DataWatcher;
 import org.imanity.framework.bukkit.reflection.wrapper.DataWatcherWrapper;
 import org.imanity.framework.bukkit.reflection.wrapper.PacketWrapper;
 import org.imanity.framework.bukkit.reflection.wrapper.WatchableObjectWrapper;
+import org.imanity.framework.util.collection.ConvertedList;
+import org.imanity.framework.util.collection.ConvertedSet;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -37,7 +40,7 @@ public class WrappedPacketOutSpawnEntityLiving extends WrappedPacket implements 
     private double velX, velY, velZ;
 
     private DataWatcherWrapper dataWatcher;
-    private List<WatchableObjectWrapper> watchableObjects;
+    private ConvertedList<Object, WatchableObjectWrapper> watchableObjects;
 
     @Override
     protected void setup() {
@@ -57,10 +60,17 @@ public class WrappedPacketOutSpawnEntityLiving extends WrappedPacket implements 
         this.velZ = readInt(7) / 8000.0D;
 
         this.dataWatcher = new DataWatcherWrapper(readObject(0, DataWatcher.TYPE));
-        this.watchableObjects = new ArrayList<>();
-        for (Object watchableObject : readObject(0, List.class)) {
-            this.watchableObjects.add(WatchableObjectWrapper.getConverter().getSpecific(watchableObject));
-        }
+        this.watchableObjects = new ConvertedList<Object, WatchableObjectWrapper>(readObject(0, List.class)) {
+            @Override
+            protected WatchableObjectWrapper toOuter(Object o) {
+                return WatchableObjectWrapper.getConverter().getSpecific(o);
+            }
+
+            @Override
+            protected Object toInner(WatchableObjectWrapper watchableObjectWrapper) {
+                return WatchableObjectWrapper.getConverter().getGeneric(watchableObjectWrapper);
+            }
+        };
     }
 
     @Override

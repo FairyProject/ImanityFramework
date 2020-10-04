@@ -68,4 +68,11 @@ public final class WrappedPacketInAbilities extends WrappedPacket {
             this.flying = readBoolean(0);
         }
     }
+
+    public void setVulnerable(boolean vulnerable) {
+        this.validBasePacketExists();
+
+        this.packet.setFieldByIndex(boolean.class, 0, vulnerable);
+        this.vulnerable = vulnerable;
+    }
 }
