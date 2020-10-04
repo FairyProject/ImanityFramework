@@ -1,16 +1,27 @@
 package org.imanity.framework.data;
 
+import org.bson.Document;
+import org.imanity.framework.data.mapping.DataElementMapper;
 import org.imanity.framework.data.store.StoreDatabase;
 import org.imanity.framework.data.store.StoreType;
 import org.imanity.framework.metadata.CommonMetadataRegistries;
 import org.imanity.framework.metadata.MetadataMap;
 
+import javax.annotation.Nullable;
 import java.util.*;
 import java.util.stream.Collectors;
 
 public class DataHandler {
 
     protected static final Map<Class<? extends AbstractData>, StoreDatabase> DATABASES = new HashMap<>();
+    protected static final DataElementMapper MAPPER = new DataElementMapper();
+
+    public static <T extends AbstractData> T fromDocument(@Nullable Document document, Class<T> type) {
+        if (document == null) {
+            return null;
+        }
+        return MAPPER.fromJson(document, type);
+    }
 
     public static void add(Class<? extends AbstractData> dataClass, StoreDatabase database) {
         DATABASES.put(dataClass, database);

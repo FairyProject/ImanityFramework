@@ -58,7 +58,9 @@ public class Mongo implements IService {
 
     @Override
     public void stop() {
-        this.client.close();
+        if (this.client != null) {
+            this.client.close();
+        }
     }
 
     public static class MongoConfig extends YamlConfiguration {

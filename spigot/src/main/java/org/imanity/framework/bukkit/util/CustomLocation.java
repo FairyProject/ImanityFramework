@@ -1,5 +1,14 @@
 package org.imanity.framework.bukkit.util;
 
+import com.fasterxml.jackson.core.JsonGenerator;
+import com.fasterxml.jackson.core.JsonParser;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.DeserializationContext;
+import com.fasterxml.jackson.databind.SerializerProvider;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.fasterxml.jackson.databind.deser.std.StdDeserializer;
+import com.fasterxml.jackson.databind.ser.std.StdSerializer;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -12,6 +21,7 @@ import org.bukkit.util.NumberConversions;
 import org.imanity.framework.bukkit.Imanity;
 import org.imanity.framework.config.annotation.ConfigurationElement;
 
+import java.io.IOException;
 import java.util.Objects;
 import java.util.StringJoiner;
 
@@ -21,6 +31,8 @@ import java.util.StringJoiner;
 @AllArgsConstructor
 @NoArgsConstructor
 @ConfigurationElement
+@JsonSerialize(using = CustomLocation.Serializer.class)
+@JsonDeserialize(using = CustomLocation.Deserializer.class)
 public class CustomLocation {
 
 	private String world = "world";
@@ -173,6 +185,30 @@ public class CustomLocation {
 	public void teleport(Player player, double range, boolean safe) {
 		double rand = -range + (range * 2) * Imanity.RANDOM.nextDouble();
 		player.teleport(this.toBukkitLocation().add(rand, safe ? 0.5D : 0.0D, rand));
+	}
+
+	public static class Serializer extends StdSerializer<CustomLocation> {
+
+		protected Serializer() {
+			super(CustomLocation.class);
+		}
+
+		@Override
+		public void serialize(CustomLocation customLocation, JsonGenerator jsonGenerator, SerializerProvider serializerProvider) throws IOException {
+			jsonGenerator.writeString(customLocation.toString());
+		}
+	}
+
+	public static class Deserializer extends StdDeserializer<CustomLocation> {
+
+		protected Deserializer() {
+			super(CustomLocation.class);
+		}
+
+		@Override
+		public CustomLocation deserialize(JsonParser jsonParser, DeserializationContext deserializationContext) throws IOException, JsonProcessingException {
+			return CustomLocation.stringToLocation(jsonParser.getValueAsString());
+		}
 	}
 
 }

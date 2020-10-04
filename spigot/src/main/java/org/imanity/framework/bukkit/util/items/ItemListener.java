@@ -1,7 +1,6 @@
 package org.imanity.framework.bukkit.util.items;
 
 import org.bukkit.Material;
-import org.bukkit.Sound;
 import org.bukkit.entity.Item;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -12,11 +11,10 @@ import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerPickupItemEvent;
 import org.bukkit.inventory.ItemStack;
 import org.imanity.framework.ImanityCommon;
-import org.imanity.framework.bukkit.Imanity;
 import org.imanity.framework.bukkit.util.SampleMetadata;
-import org.imanity.framework.events.annotation.AutoWiredListener;
+import org.imanity.framework.plugin.component.Component;
 
-@AutoWiredListener
+@Component
 public class ItemListener implements Listener {
 
     private static final String SET_ITEM_METADATA = ImanityCommon.METADATA_PREFIX + "SetItem";

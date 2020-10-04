@@ -11,6 +11,7 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Type;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
 
 public class ClassAccessorCache {
@@ -30,8 +31,8 @@ public class ClassAccessorCache {
     public ClassAccessorCache(Class<?> parentClass) {
         this.parentClass = parentClass;
 
-        this.methodCache = new HashMap<>();
-        this.fieldCache = new HashMap<>();
+        this.methodCache = new ConcurrentHashMap<>();
+        this.fieldCache = new ConcurrentHashMap<>();
     }
 
     public Method resolveMethod(ResolverQuery query) throws ReflectiveOperationException {

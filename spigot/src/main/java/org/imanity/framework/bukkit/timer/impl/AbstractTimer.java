@@ -34,7 +34,7 @@ public abstract class AbstractTimer implements Timer {
         this(System.currentTimeMillis(), duration);
     }
 
-    public void announcing(boolean shouldAnnounce) {
+    public final void announcing(boolean shouldAnnounce) {
         if (this.shouldAnnounce = shouldAnnounce
             && countdownData == null) {
             countdownData = new CountdownData(this.secondsRemaining() + 1);

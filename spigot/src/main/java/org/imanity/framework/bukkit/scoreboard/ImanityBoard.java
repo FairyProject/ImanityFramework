@@ -1,63 +1,47 @@
 package org.imanity.framework.bukkit.scoreboard;
 
-import lombok.Getter;
-import lombok.Setter;
 import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
+import org.bukkit.scoreboard.DisplaySlot;
+import org.imanity.framework.ImanityCommon;
 import org.imanity.framework.bukkit.packet.PacketService;
+import org.imanity.framework.bukkit.packet.wrapper.server.WrappedPacketOutScoreboardDisplayObjective;
+import org.imanity.framework.bukkit.packet.wrapper.server.WrappedPacketOutScoreboardObjective;
 import org.imanity.framework.bukkit.packet.wrapper.server.WrappedPacketOutScoreboardScore;
 import org.imanity.framework.bukkit.packet.wrapper.server.WrappedPacketOutScoreboardTeam;
 import org.imanity.framework.metadata.MetadataKey;
 import org.imanity.framework.bukkit.util.BukkitUtil;
-import org.imanity.framework.bukkit.reflection.MinecraftReflection;
-import org.imanity.framework.bukkit.reflection.resolver.minecraft.NMSClassResolver;
-import org.imanity.framework.bukkit.reflection.wrapper.EnumWrapper;
-import org.imanity.framework.bukkit.reflection.wrapper.PacketWrapper;
 
 import java.util.List;
 
 public class ImanityBoard {
 
-    private static EnumWrapper SCOREBOARD_HEALTH_DISPLAY;
-
-    private static final NMSClassResolver CLASS_RESOLVER = new NMSClassResolver();
-
-    static {
-        try {
-            Class<?> enumScoreboardHealthDisplay = CLASS_RESOLVER.resolveSilent("IScoreboardCriteria$EnumScoreboardHealthDisplay");
-            SCOREBOARD_HEALTH_DISPLAY = new EnumWrapper(enumScoreboardHealthDisplay);
-        } catch (Exception ex) {
-            ex.printStackTrace();
-        }
-    }
-
-    public static final MetadataKey<ImanityBoard> METADATA_TAG = MetadataKey.create("Imanity-Scoreboard", ImanityBoard.class);
+    public static final MetadataKey<ImanityBoard> METADATA_TAG = MetadataKey.create(ImanityCommon.METADATA_PREFIX + "Scoreboard", ImanityBoard.class);
 
     private final Player player;
 
     private String title;
     private final String[] teams;
 
-    @Getter
-    @Setter
-    private boolean tagUpdated;
-
     public ImanityBoard(Player player) {
 
         this.player = player;
         this.teams = new String[16];
-        PacketWrapper packetA = PacketWrapper.createByPacketName("PacketPlayOutScoreboardObjective")
-                .setPacketValue("b", "Objective")
-                .setPacketValue("a", player.getName())
-                .setPacketValue("c", SCOREBOARD_HEALTH_DISPLAY.getType("INTEGER"))
-                .setPacketValue("d", 0);
 
-        PacketWrapper packetB = PacketWrapper.createByPacketName("PacketPlayOutScoreboardDisplayObjective")
-                .setPacketValue("a", 1)
-                .setPacketValue("b", player.getName());
+        WrappedPacketOutScoreboardObjective packetA = new WrappedPacketOutScoreboardObjective(
+                player.getName(),
+                "Objective",
+                WrappedPacketOutScoreboardObjective.HealthDisplayType.INTEGER,
+                WrappedPacketOutScoreboardObjective.Action.ADD
+        );
 
-        MinecraftReflection.sendPacket(player, packetA);
-        MinecraftReflection.sendPacket(player, packetB);
+        WrappedPacketOutScoreboardDisplayObjective packetB = new WrappedPacketOutScoreboardDisplayObjective(
+                DisplaySlot.PLAYER_LIST,
+                player.getName()
+        );
+
+        PacketService.send(player, packetA);
+        PacketService.send(player, packetB);
 
     }
 
@@ -69,11 +53,12 @@ public class ImanityBoard {
 
         this.title = title;
 
-        MinecraftReflection.sendPacket(player, PacketWrapper.createByPacketName("PacketPlayOutScoreboardObjective")
-        .setPacketValue("a", player.getName())
-        .setPacketValue("b", title)
-        .setPacketValue("c", SCOREBOARD_HEALTH_DISPLAY.getType("INTEGER"))
-        .setPacketValue("d", 2));
+        PacketService.send(player, new WrappedPacketOutScoreboardObjective(
+                player.getName(),
+                title,
+                WrappedPacketOutScoreboardObjective.HealthDisplayType.INTEGER,
+                WrappedPacketOutScoreboardObjective.Action.CHANGED
+        ));
 
     }
 

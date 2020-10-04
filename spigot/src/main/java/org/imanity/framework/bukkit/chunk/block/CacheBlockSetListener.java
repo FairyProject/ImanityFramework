@@ -8,11 +8,11 @@ import org.bukkit.event.world.WorldInitEvent;
 import org.bukkit.event.world.WorldUnloadEvent;
 import org.imanity.framework.bukkit.Imanity;
 import org.imanity.framework.bukkit.util.SampleMetadata;
-import org.imanity.framework.events.annotation.AutoWiredListener;
+import org.imanity.framework.plugin.component.Component;
 
 import static org.imanity.framework.bukkit.Imanity.PLUGIN;
 
-@AutoWiredListener
+@Component
 public class CacheBlockSetListener implements Listener {
 
     @EventHandler

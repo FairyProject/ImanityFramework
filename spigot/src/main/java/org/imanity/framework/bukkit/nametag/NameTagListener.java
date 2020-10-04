@@ -7,10 +7,10 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.imanity.framework.bukkit.events.player.PlayerPostJoinEvent;
 import org.imanity.framework.bukkit.metadata.Metadata;
-import org.imanity.framework.events.annotation.AutoWiredListener;
+import org.imanity.framework.plugin.component.Component;
 import org.imanity.framework.plugin.service.Autowired;
 
-@AutoWiredListener
+@Component
 public class NameTagListener implements Listener {
 
     @Autowired

@@ -6,14 +6,9 @@ import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
 import it.unimi.dsi.fastutil.objects.Object2IntMap;
 import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap;
 import org.imanity.framework.ImanityCommon;
-import org.imanity.framework.redis.message.annotation.AutoWiredMessageListener;
 import org.imanity.framework.redis.message.annotation.HandleMessage;
 import org.imanity.framework.redis.subscription.RedisPubSub;
-import org.imanity.framework.util.Utility;
-import org.imanity.framework.util.annotation.AnnotationDetector;
 
-import java.io.File;
-import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
@@ -74,33 +69,6 @@ public class MessageHandler {
         this.messageListeners.put(id, new ArrayList<>());
         this.idToClass.put(id, messageClass);
         this.classToId.put(messageClass, id);
-    }
-
-    public void registerListenersByAnnotation() {
-
-        Utility.tryCatch(() -> {
-            new AnnotationDetector(new AnnotationDetector.TypeReporter() {
-                @Override
-                public void reportTypeAnnotation(Class<? extends Annotation> annotation, String className) {
-
-                    Utility.tryCatch(() -> {
-
-                        Class<?> type = Class.forName(className);
-                        Object listener = type.newInstance();
-
-                        registerListener(listener);
-
-                    });
-
-                }
-
-                @Override
-                public Class<? extends Annotation>[] annotations() {
-                    return new Class[] { AutoWiredMessageListener.class };
-                }
-            }).detect(ImanityCommon.BRIDGE.getPluginFiles().toArray(new File[0]));
-        });
-
     }
 
     public void registerListener(Object messageListener) {

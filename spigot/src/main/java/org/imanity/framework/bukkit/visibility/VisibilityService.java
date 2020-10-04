@@ -2,6 +2,8 @@ package org.imanity.framework.bukkit.visibility;
 
 import org.bukkit.entity.Player;
 import org.imanity.framework.bukkit.Imanity;
+import org.imanity.framework.plugin.component.ComponentHolder;
+import org.imanity.framework.plugin.component.ComponentRegistry;
 import org.imanity.framework.plugin.service.IService;
 import org.imanity.framework.plugin.service.Service;
 
@@ -14,8 +16,24 @@ public class VisibilityService implements IService {
     private List<VisibilityAdapter> visibilityAdapters;
 
     @Override
-    public void init() {
+    public void preInit() {
         this.visibilityAdapters = new LinkedList<>();
+
+        ComponentRegistry.registerComponentHolder(new ComponentHolder() {
+
+            @Override
+            public Object newInstance(Class<?> type) {
+                Object instance = super.newInstance(type);
+                register((VisibilityAdapter) instance);
+
+                return instance;
+            }
+
+            @Override
+            public Class<?>[] type() {
+                return new Class[] { VisibilityAdapter.class };
+            }
+        });
     }
 
     public void register(VisibilityAdapter visibilityAdapter) {
@@ -84,14 +102,15 @@ public class VisibilityService implements IService {
 
     public boolean canSee(Player receiver, Player target) {
         for (VisibilityAdapter visibilityAdapter : this.visibilityAdapters) {
-            if (visibilityAdapter.shouldShow(receiver, target)) {
-                return true;
-            }
-        }
+            VisibilityOption option = visibilityAdapter.check(receiver, target);
 
-        for (VisibilityAdapter visibilityAdapter : this.visibilityAdapters) {
-            if (visibilityAdapter.shouldHide(receiver, target)) {
-                return false;
+            switch (option) {
+                case SHOW:
+                    return true;
+                case HIDE:
+                    return false;
+                case NOTHING:
+                    break;
             }
         }
 

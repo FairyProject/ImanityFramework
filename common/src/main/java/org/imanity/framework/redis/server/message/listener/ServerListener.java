@@ -1,7 +1,8 @@
 package org.imanity.framework.redis.server.message.listener;
 
 import org.imanity.framework.ImanityCommon;
-import org.imanity.framework.redis.message.annotation.AutoWiredMessageListener;
+import org.imanity.framework.plugin.component.Component;
+import org.imanity.framework.redis.message.MessageListener;
 import org.imanity.framework.redis.message.annotation.HandleMessage;
 import org.imanity.framework.redis.server.ImanityServer;
 import org.imanity.framework.redis.server.ServerHandler;
@@ -11,8 +12,8 @@ import org.imanity.framework.redis.server.message.ServerCommandMessage;
 import org.imanity.framework.redis.server.message.ServerDeleteMessage;
 import org.imanity.framework.redis.server.message.ServerStateChangedMessage;
 
-@AutoWiredMessageListener
-public class ServerListener {
+@Component
+public class ServerListener implements MessageListener {
 
     private final ServerHandler serverHandler = ImanityCommon.REDIS.getServerHandler();
 

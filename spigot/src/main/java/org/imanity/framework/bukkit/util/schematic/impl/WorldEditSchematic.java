@@ -1,0 +1,90 @@
+package org.imanity.framework.bukkit.util.schematic.impl;
+
+import com.google.common.base.Preconditions;
+import com.sk89q.worldedit.EditSession;
+import com.sk89q.worldedit.MaxChangedBlocksException;
+import com.sk89q.worldedit.Vector;
+import com.sk89q.worldedit.WorldEdit;
+import com.sk89q.worldedit.bukkit.BukkitWorld;
+import com.sk89q.worldedit.extent.clipboard.BlockArrayClipboard;
+import com.sk89q.worldedit.extent.clipboard.Clipboard;
+import com.sk89q.worldedit.extent.clipboard.io.ClipboardFormat;
+import com.sk89q.worldedit.extent.clipboard.io.ClipboardWriter;
+import com.sk89q.worldedit.function.operation.ForwardExtentCopy;
+import com.sk89q.worldedit.function.operation.Operations;
+import com.sk89q.worldedit.math.transform.AffineTransform;
+import com.sk89q.worldedit.regions.CuboidRegion;
+import com.sk89q.worldedit.regions.Region;
+import com.sk89q.worldedit.world.World;
+import com.sk89q.worldedit.world.registry.WorldData;
+import org.bukkit.Location;
+import org.imanity.framework.bukkit.util.BlockPosition;
+import org.imanity.framework.bukkit.util.schematic.Schematic;
+
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+
+public class WorldEditSchematic extends Schematic {
+
+    public WorldEditSchematic(File file) {
+        super(file);
+    }
+
+    public WorldEditSchematic(File file, BlockPosition top, BlockPosition bottom) {
+        super(file, top, bottom);
+    }
+
+    @Override
+    public void save(org.bukkit.World world) throws IOException {
+        Preconditions.checkNotNull(this.file);
+        Preconditions.checkNotNull(this.top);
+        Preconditions.checkNotNull(this.bottom);
+
+        Vector top = new Vector(this.top.getX(), this.top.getY(), this.top.getZ());
+        Vector bottom = new Vector(this.bottom.getX(), this.bottom.getY(), this.bottom.getZ());
+
+        CuboidRegion region = new CuboidRegion(new BukkitWorld(world), top, bottom);
+        BlockArrayClipboard clipboard = new BlockArrayClipboard(region);
+        try (ClipboardWriter writer = ClipboardFormat.SCHEMATIC.getWriter(new FileOutputStream(this.file))) {
+            writer.write(clipboard, new BukkitWorld(world).getWorldData());
+        }
+    }
+
+    @Override
+    public void paste(Location location, int rotateX, int rotateY, int rotateZ) throws IOException {
+        Preconditions.checkNotNull(location);
+        Preconditions.checkNotNull(this.file);
+
+        Vector vector = new Vector(location.getBlockX(), location.getBlockY(), location.getBlockZ());
+
+        World world = new BukkitWorld(location.getWorld());
+        WorldData worldData = world.getWorldData();
+        Clipboard clipboard = ClipboardFormat.SCHEMATIC.getReader(new FileInputStream(this.file)).read(worldData);
+        Region region = clipboard.getRegion();
+
+        EditSession editSession = WorldEdit.getInstance().getEditSessionFactory().getEditSession(world, -1);
+        AffineTransform transform = new AffineTransform();
+
+        if (rotateX != 0) transform = transform.rotateX(rotateX);
+        if (rotateY != 0) transform = transform.rotateY(rotateY);
+        if (rotateZ != 0) transform = transform.rotateZ(rotateZ);
+
+        ForwardExtentCopy copy = new ForwardExtentCopy(clipboard, region, clipboard.getOrigin(), editSession, vector);
+        if (!transform.isIdentity()) copy.setTransform(transform);
+
+        Vector top = region.getMaximumPoint();
+        Vector bottom = region.getMinimumPoint();
+
+        this.top = new BlockPosition(top.getBlockX(), top.getBlockY(), top.getBlockZ(), location.getWorld().getName());
+        this.bottom = new BlockPosition(bottom.getBlockX(), bottom.getBlockY(), bottom.getBlockZ(), location.getWorld().getName());
+
+        try {
+            Operations.completeLegacy(copy);
+        } catch (MaxChangedBlocksException e) {
+            throw new RuntimeException(e);
+        }
+        editSession.flushQueue();
+    }
+}

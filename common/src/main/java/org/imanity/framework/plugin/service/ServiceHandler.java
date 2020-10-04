@@ -3,7 +3,8 @@ package org.imanity.framework.plugin.service;
 import lombok.NonNull;
 import org.apache.commons.lang3.reflect.ConstructorUtils;
 import org.imanity.framework.ImanityCommon;
-import org.imanity.framework.events.annotation.AutoWiredListener;
+import org.imanity.framework.plugin.component.Component;
+import org.imanity.framework.plugin.component.ComponentRegistry;
 import org.imanity.framework.util.AccessUtil;
 import org.imanity.framework.util.Utility;
 import org.imanity.framework.util.FileUtils;
@@ -108,30 +109,6 @@ public class ServiceHandler {
         }
     }
 
-    public void registerListeners() {
-        try {
-            List<File> files = ImanityCommon.BRIDGE.getPluginFiles();
-            files.add(FileUtils.getSelfJar());
-
-            new AnnotationDetector(new AnnotationDetector.TypeReporter() {
-                @Override
-                public void reportTypeAnnotation(Class<? extends Annotation> annotation, String className) {
-                    Object listener = ImanityCommon.EVENT_HANDLER.registerWiredListener(className);
-
-                    if (listener != null)
-                        registerAutowired(listener);
-                }
-
-                @Override
-                public Class<? extends Annotation>[] annotations() {
-                    return new Class[] {AutoWiredListener.class};
-                }
-            }).detect(files.toArray(new File[0]));
-        } catch (Throwable throwable) {
-            throwable.printStackTrace();
-        }
-    }
-
     public void registerAutowiredForField(Field field) throws ReflectiveOperationException {
         AccessUtil.setAccessible(field);
 
@@ -165,8 +142,10 @@ public class ServiceHandler {
     }
 
     public void init() {
+        this.getImplementedService().forEach(IService::preInit);
+
         this.registerAutowireds();
-        this.registerListeners();
+        ComponentRegistry.loadComponents(this);
 
         this.getImplementedService().forEach(IService::init);
 

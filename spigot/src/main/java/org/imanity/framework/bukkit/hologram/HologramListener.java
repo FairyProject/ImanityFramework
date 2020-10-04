@@ -12,12 +12,12 @@ import org.imanity.framework.bukkit.Imanity;
 import org.imanity.framework.bukkit.player.movement.MovementListener;
 import org.imanity.framework.bukkit.util.SampleMetadata;
 import org.imanity.framework.bukkit.util.TaskUtil;
-import org.imanity.framework.events.annotation.AutoWiredListener;
+import org.imanity.framework.plugin.component.Component;
 
 import java.util.HashSet;
 import java.util.Set;
 
-@AutoWiredListener
+@Component
 public class HologramListener implements Listener {
 
     private final Set<Player> toUpdate = new HashSet<>();
