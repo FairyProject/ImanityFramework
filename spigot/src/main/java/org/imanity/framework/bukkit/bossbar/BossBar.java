@@ -97,7 +97,7 @@ public class BossBar {
 
             this.dataWatcher.setValue(20, ENTITY_WITHER_bw, 880);
         }
-        this.dataWatcher.setValue(0, ENTITY_FLAG, (byte) (0 | 1 << 5));
+        this.dataWatcher.setValue(0, ENTITY_FLAG, (byte) (1 << 5));
     }
 
     private void updateDataWatcher(BossBarData bossBarData) {
