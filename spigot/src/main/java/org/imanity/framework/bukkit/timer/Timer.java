@@ -14,6 +14,12 @@ public interface Timer {
 
     void pause();
 
+    default void clear() {
+        this.clear(true);
+    }
+
+    void clear(boolean removeFromHandler);
+
     default void start() {
 
     }

@@ -4,6 +4,7 @@ import lombok.Getter;
 import org.bukkit.entity.Player;
 import org.imanity.framework.bukkit.Imanity;
 import org.imanity.framework.bukkit.timer.Timer;
+import org.imanity.framework.bukkit.timer.TimerList;
 import org.imanity.framework.bukkit.timer.event.TimerElapsedEvent;
 import org.imanity.framework.bukkit.timer.event.TimerExtendEvent;
 import org.imanity.framework.bukkit.util.CountdownData;
@@ -22,12 +23,26 @@ public abstract class AbstractTimer implements Timer {
 
     private boolean shouldAnnounce;
 
+    private TimerList timerList;
     private CountdownData countdownData;
 
-    public AbstractTimer(long beginTime, long duration) {
+    public AbstractTimer(long beginTime, long duration, TimerList timerList) {
         this.beginTime = beginTime;
         this.duration = duration;
         this.elapsedTime = this.beginTime + this.duration;
+        this.timerList = timerList;
+
+        if (this.timerList != null) {
+            this.timerList.add(this);
+        }
+    }
+
+    public AbstractTimer(long beginTime, long duration) {
+        this(beginTime, duration, null);
+    }
+
+    public AbstractTimer(long duration, TimerList<?> timerList) {
+        this(System.currentTimeMillis(), duration, timerList);
     }
 
     public AbstractTimer(long duration) {
@@ -100,8 +115,12 @@ public abstract class AbstractTimer implements Timer {
         return "&fTimer: &e" + this.secondsRemaining() + "s";
     }
 
-    public void clear() {
-        Imanity.TIMER_HANDLER.clear(this);
+    @Override
+    public void clear(boolean removeFromHandler) {
+        if (removeFromHandler) {
+            Imanity.TIMER_HANDLER.clear(this);
+        }
+        this.timerList.remove(this);
     }
 
     @Override

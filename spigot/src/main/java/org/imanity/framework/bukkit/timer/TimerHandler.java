@@ -64,14 +64,19 @@ public class TimerHandler implements Runnable, IService {
     @Override
     public void run() {
 
-        for (Timer timer : ImmutableList.copyOf(this.timers)) {
-            if (!timer.isPaused()) {
+        synchronized (this.timers) {
+            Iterator<Timer> iterator = this.timers.iterator();
 
-                timer.tick();
-                if (timer.isTimerElapsed() && timer.finish()) {
-                    this.timers.remove(timer);
+            while (iterator.hasNext()) {
+                Timer timer = iterator.next();
+                if (!timer.isPaused()) {
+
+                    timer.tick();
+                    if (timer.isTimerElapsed() && timer.finish()) {
+                        timer.clear(false);
+                        iterator.remove();
+                    }
                 }
-
             }
         }
     }
