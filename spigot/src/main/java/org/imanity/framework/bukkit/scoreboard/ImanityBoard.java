@@ -46,7 +46,6 @@ public class ImanityBoard {
 
         this.player = player;
         this.teams = new String[16];
-Math.ceil()
         PacketWrapper packetA = PacketWrapper.createByPacketName("PacketPlayOutScoreboardObjective")
                 .setPacketValue("b", "Objective")
                 .setPacketValue("a", player.getName())
