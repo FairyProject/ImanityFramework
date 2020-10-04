@@ -1,5 +1,6 @@
 package org.imanity.framework.bukkit.packet.wrapper.server;
 
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
@@ -16,6 +17,7 @@ import org.imanity.framework.bukkit.reflection.wrapper.PacketWrapper;
 @AutowiredWrappedPacket(value = PacketType.Server.TITLE, direction = PacketDirection.WRITE)
 @Getter
 @Setter
+@AllArgsConstructor
 @Builder
 public class WrappedPacketOutTitle extends WrappedPacket implements SendableWrapper {
 
