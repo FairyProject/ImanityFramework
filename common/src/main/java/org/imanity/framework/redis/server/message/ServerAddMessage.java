@@ -17,11 +17,6 @@ public class ServerAddMessage implements Message {
     }
 
     @Override
-    public int id() {
-        return 1;
-    }
-
-    @Override
     public JsonObject serialize() {
         return new JsonChain()
                 .addProperty("serverName", serverName)

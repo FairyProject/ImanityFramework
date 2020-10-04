@@ -54,10 +54,10 @@ public class ServerHandler {
         this.pushThread.start();
 
         this.messageHandler = new MessageHandler("imanity-server");
-        this.messageHandler.registerMessage(0, ServerStateChangedMessage.class);
-        this.messageHandler.registerMessage(1, ServerAddMessage.class);
-        this.messageHandler.registerMessage(2, ServerDeleteMessage.class);
-        this.messageHandler.registerMessage(3, ServerCommandMessage.class);
+        this.messageHandler.registerMessage(ServerStateChangedMessage.class);
+        this.messageHandler.registerMessage(ServerAddMessage.class);
+        this.messageHandler.registerMessage(ServerDeleteMessage.class);
+        this.messageHandler.registerMessage(ServerCommandMessage.class);
     }
 
     public ImanityServer getServer(String name) {
