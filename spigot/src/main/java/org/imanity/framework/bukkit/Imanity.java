@@ -25,6 +25,8 @@ import org.imanity.framework.bukkit.hologram.HologramHandler;
 import org.imanity.framework.bukkit.impl.*;
 import org.imanity.framework.bukkit.impl.server.ServerImplementation;
 import org.imanity.framework.bukkit.menu.task.MenuUpdateTask;
+import org.imanity.framework.bukkit.packet.PacketService;
+import org.imanity.framework.bukkit.packet.wrapper.server.WrappedPacketOutTitle;
 import org.imanity.framework.bukkit.player.movement.MovementListener;
 import org.imanity.framework.bukkit.player.movement.impl.AbstractMovementImplementation;
 import org.imanity.framework.bukkit.player.movement.impl.BukkitMovementImplementation;
@@ -32,6 +34,7 @@ import org.imanity.framework.bukkit.player.movement.impl.ImanityMovementImplemen
 import org.imanity.framework.bukkit.plugin.ImanityPlugin;
 import org.imanity.framework.bukkit.reflection.MinecraftReflection;
 import org.imanity.framework.bukkit.reflection.minecraft.MinecraftVersion;
+import org.imanity.framework.bukkit.reflection.wrapper.ChatComponentWrapper;
 import org.imanity.framework.bukkit.scoreboard.ImanityBoardAdapter;
 import org.imanity.framework.bukkit.scoreboard.ImanityBoardHandler;
 import org.imanity.framework.bukkit.impl.BukkitTaskChainFactory;
@@ -41,7 +44,6 @@ import org.imanity.framework.bukkit.tablist.ImanityTabAdapter;
 import org.imanity.framework.bukkit.tablist.ImanityTabHandler;
 import org.imanity.framework.bukkit.visual.VisualBlockHandler;
 import org.imanity.framework.libraries.classloader.PluginClassLoader;
-import org.imanity.framework.plugin.component.ComponentHolder;
 import org.imanity.framework.plugin.component.ComponentRegistry;
 import org.imanity.framework.plugin.service.Autowired;
 import org.imanity.framework.task.chain.TaskChainFactory;
@@ -271,19 +273,58 @@ public final class Imanity {
                 return;
             }
 
-            Title title = null;
             if (titleLocale != null && subTitleLocale != null) {
-                title = new Title(Imanity.translate(player, titleLocale, rvs), Imanity.translate(player, subTitleLocale, rvs));
+                Imanity.sendTitle(player, Imanity.translate(player, titleLocale, rvs), Imanity.translate(player, subTitleLocale, rvs));
             } else if (titleLocale != null) {
-                title = new Title(Imanity.translate(player, titleLocale, rvs));
+                Imanity.sendTitle(player, Imanity.translate(player, titleLocale, rvs));
             } else if (subTitleLocale != null) {
-                title = new Title("", Imanity.translate(player, subTitleLocale, rvs));
-            }
-
-            if (title != null) {
-                player.sendTitle(title);
+                Imanity.sendSubTitle(player, Imanity.translate(player, subTitleLocale, rvs));
             }
         });
+
+    }
+
+    public static void sendSubTitle(Player player, String subTitle) {
+        Imanity.sendTitle(player, null, subTitle);
+    }
+
+    public static void sendSubTitle(Player player, String subTitle, int fadeIn, int stay, int fadeOut) {
+        Imanity.sendTitle(player, null, subTitle, fadeIn, stay, fadeOut);
+    }
+
+    public static void sendTitle(Player player, String title) {
+        Imanity.sendTitle(player, title, null);
+    }
+
+    public static void sendTitle(Player player, String title, String subTitle) {
+        Imanity.sendTitle(player, title, subTitle, WrappedPacketOutTitle.DEFAULT_FADE_IN, WrappedPacketOutTitle.DEFAULT_STAY, WrappedPacketOutTitle.DEFAULT_FADE_OUT);
+    }
+
+    public static void sendTitle(Player player, String title, int fadeIn, int stay, int fadeOut) {
+        Imanity.sendTitle(player, title, null, fadeIn, stay, fadeOut);
+    }
+
+    public static void sendTitle(Player player, @Nullable String title, @Nullable String subTitle, int fadeIn, int stay, int fadeOut) {
+
+        if (title != null) {
+            PacketService.send(player, WrappedPacketOutTitle.builder()
+                .action(WrappedPacketOutTitle.Action.TITLE)
+                .message(ChatComponentWrapper.fromText(title))
+                .fadeIn(fadeIn)
+                .stay(stay)
+                .fadeOut(fadeOut)
+                .build());
+        }
+
+        if (subTitle != null) {
+            PacketService.send(player, WrappedPacketOutTitle.builder()
+                    .action(WrappedPacketOutTitle.Action.SUBTITLE)
+                    .message(ChatComponentWrapper.fromText(title))
+                    .fadeIn(fadeIn)
+                    .stay(stay)
+                    .fadeOut(fadeOut)
+                    .build());
+        }
 
     }
 

@@ -9,6 +9,7 @@ import org.imanity.framework.bukkit.Imanity;
 import org.imanity.framework.bukkit.packet.type.PacketTypeClasses;
 import org.imanity.framework.bukkit.packet.wrapper.server.WrappedPacketOutScoreboardObjective;
 import org.imanity.framework.bukkit.packet.wrapper.server.WrappedPacketOutScoreboardScore;
+import org.imanity.framework.bukkit.packet.wrapper.server.WrappedPacketOutTitle;
 import org.imanity.framework.bukkit.reflection.wrapper.ChatComponentWrapper;
 import org.imanity.framework.bukkit.util.SpigotUtil;
 import org.imanity.framework.bukkit.reflection.minecraft.MinecraftVersion;
@@ -550,10 +551,25 @@ public class MinecraftReflection {
         }
     }
 
+    public static Class<? extends Enum> getEnumTitleActionClass() {
+        try {
+            return NMS_CLASS_RESOLVER.resolve("EnumTitleAction");
+        } catch (Throwable throwable) {
+            try {
+                Class<? extends Enum> type = NMS_CLASS_RESOLVER.resolveSubClass(PacketTypeClasses.Server.TITLE, "EnumTitleAction");
+                NMS_CLASS_RESOLVER.cache("EnumTitleAction", type);
+                return type;
+            } catch (Throwable throwable1) {
+                throw new RuntimeException(throwable1);
+            }
+        }
+    }
+
     private static EquivalentConverter.EnumConverter<GameMode> GAME_MODE_CONVERTER;
     private static EquivalentConverter.EnumConverter<ChatColor> CHAT_COLOR_CONVERTER;
     private static EquivalentConverter.EnumConverter<WrappedPacketOutScoreboardObjective.HealthDisplayType> HEALTH_DISPLAY_TYPE_CONVERTER;
     private static EquivalentConverter.EnumConverter<WrappedPacketOutScoreboardScore.ScoreboardAction> SCOREBOARD_ACTION_CONVERTER;
+    private static EquivalentConverter.EnumConverter<WrappedPacketOutTitle.Action> TITLE_ACTION_CONVERTER;
 
     private static EquivalentConverter<ChatComponentWrapper> CHAT_COMPONENT_CONVERTER;
 
@@ -576,6 +592,14 @@ public class MinecraftReflection {
                 throw new RuntimeException(throwable1);
             }
         }
+    }
+
+    public static EquivalentConverter.EnumConverter<WrappedPacketOutTitle.Action> getTitleActionConverter() {
+        if (TITLE_ACTION_CONVERTER == null) {
+            TITLE_ACTION_CONVERTER = new EquivalentConverter.EnumConverter<>(getEnumTitleActionClass(), WrappedPacketOutTitle.Action.class);
+        }
+
+        return TITLE_ACTION_CONVERTER;
     }
 
     public static EquivalentConverter.EnumConverter<GameMode> getGameModeConverter() {
