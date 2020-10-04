@@ -4,7 +4,7 @@
 
 The framework to let you develop plugin quick and easy!
 
-##Maven
+## Maven
 ```
 <repositories>
     <repository>
@@ -26,5 +26,5 @@ The framework to let you develop plugin quick and easy!
 * [ProtocolLib](https://github.com/dmulloy2/ProtocolLib/) - Revised to fit the library needs
 * [helper](https://github.com/lucko/helper) - Revised to fit the library needs
 
-##Example Plugins:
+## Example Plugins:
 - [DeathSwap](https://github.com/LeeGodSRC/deathswap)
