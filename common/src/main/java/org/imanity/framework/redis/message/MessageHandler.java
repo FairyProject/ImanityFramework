@@ -57,8 +57,7 @@ public class MessageHandler {
     }
 
     public void registerMessage(Class<? extends Message> messageClass) {
-        int id = Objects.hash(messageClass.getPackage().getName(), messageClass.getSimpleName());
-        this.registerMessage(id, messageClass);
+        this.registerMessage(Objects.hash(messageClass.getPackage().getName(), messageClass.getSimpleName()), messageClass);
     }
 
     public void registerMessage(int id, Class<? extends Message> messageClass) {

@@ -13,11 +13,6 @@ public class ServerDeleteMessage extends ServerMessage {
     }
 
     @Override
-    public int id() {
-        return 2;
-    }
-
-    @Override
     public JsonObject serialize() {
         return this.getServer()
                 .json()

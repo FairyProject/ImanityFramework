@@ -25,11 +25,6 @@ public class ServerCommandMessage extends ServerMessage {
     }
 
     @Override
-    public int id() {
-        return 3;
-    }
-
-    @Override
     public JsonObject serialize() {
         return this.getServer().json()
                 .addProperty("command", command)

@@ -4,6 +4,8 @@ import lombok.Getter;
 import lombok.Setter;
 import org.bukkit.Location;
 import org.bukkit.entity.Player;
+import org.imanity.framework.bukkit.packet.wrapper.WrappedPacket;
+import org.imanity.framework.bukkit.packet.wrapper.server.WrappedPacketOutSpawnEntityLiving;
 import org.imanity.framework.bukkit.reflection.MinecraftReflection;
 import org.imanity.framework.bukkit.reflection.minecraft.DataWatcher;
 import org.imanity.framework.bukkit.reflection.resolver.ConstructorResolver;
@@ -65,21 +67,24 @@ public class BossBar {
         }
     }
 
-    private PacketWrapper packetWither;
+    private WrappedPacket packetWither;
 
     private void buildPackets() {
-        this.packetWither = PacketWrapper.createByPacketName("PacketPlayOutSpawnEntityLiving");
-        this.packetWither.setPacketValue("a", this.entityId);
-        this.packetWither.setPacketValue("b", 64);
-
-        this.packetWither.setPacketValue("c", 0);
-        this.packetWither.setPacketValue("d", 0);
-        this.packetWither.setPacketValue("e", 0);
-
-        this.packetWither.setPacketValue("i", (byte) 0);
-        this.packetWither.setPacketValue("j", (byte) 0);
-        this.packetWither.setPacketValue("k", (byte) 0);
-        this.packetWither.setPacketValue("l", dataWatcher != null ? dataWatcher.getDataWatcherObject() : null);
+        this.packetWither = new WrappedPacketOutSpawnEntityLiving(
+                this.entityId,
+                64,
+                0,
+                0,
+                0,
+                0.0F,
+                0.0F,
+                0.0F,
+                0.0D,
+                0.0D,
+                0.0D,
+                dataWatcher,
+                null
+        );
     }
 
     private void buildDataWatcher() {
@@ -92,7 +97,7 @@ public class BossBar {
 
             this.dataWatcher.setValue(20, ENTITY_WITHER_bw, 880);
         }
-        this.dataWatcher.setValue(0, ENTITY_FLAG, (byte) (0 | 1 << 5));
+        this.dataWatcher.setValue(0, ENTITY_FLAG, (byte) (1 << 5));
     }
 
     private void updateDataWatcher(BossBarData bossBarData) {
@@ -151,8 +156,7 @@ public class BossBar {
             this.updateDataWatcher(bossBarData);
             this.buildPackets();
 
-            MinecraftReflection.sendPacket(player, this.packetWither);
-
+            this.packetWither.getPacket().sendPacket(player);
             movement = true;
         } else {
             this.updateDataWatcher(bossBarData);

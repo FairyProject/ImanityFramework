@@ -21,11 +21,6 @@ public class ServerStateChangedMessage extends ServerMessage {
     }
 
     @Override
-    public int id() {
-        return 0;
-    }
-
-    @Override
     public JsonObject serialize() {
         return this.getServer()
                 .json()
