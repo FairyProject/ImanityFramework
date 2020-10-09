@@ -9,12 +9,12 @@ import java.lang.annotation.Target;
 
 @Target(ElementType.METHOD)
 @Retention(RetentionPolicy.RUNTIME)
-public @interface FunctionEventHandler {
+public @interface FilteredEventHandler {
 
     EventPriority priority() default EventPriority.NORMAL;
 
     boolean ignoreCancelled() default false;
 
-    boolean ignoreFunctionCheck() default false;
+    boolean ignoreFilters() default false;
 
 }

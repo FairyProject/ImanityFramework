@@ -3,7 +3,7 @@ package org.imanity.framework.bukkit.impl;
 import org.bukkit.event.Listener;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.imanity.framework.bukkit.Imanity;
-import org.imanity.framework.bukkit.listener.FunctionListener;
+import org.imanity.framework.bukkit.listener.FilteredListener;
 import org.imanity.framework.bukkit.reflection.resolver.ConstructorResolver;
 import org.imanity.framework.plugin.component.ComponentHolder;
 
@@ -28,7 +28,7 @@ public class ComponentHolderBukkitListener extends ComponentHolder {
 
             Imanity.registerEvents((Listener) object);
 
-        } else if (!FunctionListener.class.isAssignableFrom(type)) {
+        } else if (!FilteredListener.class.isAssignableFrom(type)) {
             Imanity.LOGGER.error("The Class " + type.getSimpleName() + " wasn't implement Listener or FunctionListener!");
 
             return null;
@@ -39,6 +39,6 @@ public class ComponentHolderBukkitListener extends ComponentHolder {
 
     @Override
     public Class<?>[] type() {
-        return new Class[] {FunctionListener.class, Listener.class};
+        return new Class[] {FilteredListener.class, Listener.class};
     }
 }

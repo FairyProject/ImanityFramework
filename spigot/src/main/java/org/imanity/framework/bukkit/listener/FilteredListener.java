@@ -1,6 +1,7 @@
 package org.imanity.framework.bukkit.listener;
 
 import co.aikar.timings.TimedEventExecutor;
+import com.google.common.collect.ImmutableSet;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.bukkit.event.Event;
@@ -19,17 +20,17 @@ import java.util.Map;
 import java.util.Set;
 
 @NoArgsConstructor
-public class FunctionListener<T extends Plugin> implements Listener {
+public class FilteredListener<T extends Plugin> implements Listener {
 
     @Getter
-    private FunctionEventChecker checker;
+    private FilteredEventList checker;
     public T plugin;
 
-    public FunctionListener(FunctionEventChecker checker, T plugin) {
+    public FilteredListener(FilteredEventList checker, T plugin) {
         this.initial(plugin, checker);
     }
 
-    public void initial(T plugin, FunctionEventChecker eventChecker) {
+    public void initial(T plugin, FilteredEventList eventChecker) {
         this.plugin = plugin;
         this.checker = eventChecker;
 
@@ -42,20 +43,22 @@ public class FunctionListener<T extends Plugin> implements Listener {
         try {
             Method[] publicMethods = this.getClass().getMethods();
             Method[] privateMethods = this.getClass().getDeclaredMethods();
-            methods = new HashSet<>(publicMethods.length + privateMethods.length, 1.0f);
+            ImmutableSet.Builder<Method> builder = ImmutableSet.builder();
             for (Method method : publicMethods) {
-                methods.add(method);
+                builder.add(method);
             }
             for (Method method : privateMethods) {
-                methods.add(method);
+                builder.add(method);
             }
+
+            methods = builder.build();
         } catch (NoClassDefFoundError e) {
             plugin.getLogger().severe("Plugin " + plugin.getDescription().getFullName() + " has failed to register events for " + this.getClass() + " because " + e.getMessage() + " does not exist.");
             return;
         }
 
         for (Method method : methods) {
-            FunctionEventHandler eventHandler = method.getAnnotation(FunctionEventHandler.class);
+            FilteredEventHandler eventHandler = method.getAnnotation(FilteredEventHandler.class);
             if (eventHandler == null) continue;
             if (method.isBridge() || method.isSynthetic()) {
                 continue;
@@ -76,7 +79,7 @@ public class FunctionListener<T extends Plugin> implements Listener {
                         if (!eventClass.isAssignableFrom(event.getClass())) {
                             return;
                         }
-                        if (!eventHandler.ignoreFunctionCheck() && !checker.check(event)) {
+                        if (!eventHandler.ignoreFilters() && !checker.check(event)) {
                             return;
                         }
                         method.invoke(listener, event);
