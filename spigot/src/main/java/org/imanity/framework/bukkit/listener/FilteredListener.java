@@ -4,14 +4,12 @@ import co.aikar.timings.TimedEventExecutor;
 import com.google.common.collect.ImmutableSet;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import org.bukkit.event.Event;
-import org.bukkit.event.EventException;
-import org.bukkit.event.HandlerList;
-import org.bukkit.event.Listener;
+import org.bukkit.event.*;
 import org.bukkit.plugin.EventExecutor;
 import org.bukkit.plugin.IllegalPluginAccessException;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.RegisteredListener;
+import org.imanity.framework.bukkit.listener.annotation.IgnoredFilters;
 
 import java.lang.reflect.Method;
 import java.util.HashMap;
@@ -58,8 +56,10 @@ public class FilteredListener<T extends Plugin> implements Listener {
         }
 
         for (Method method : methods) {
-            FilteredEventHandler eventHandler = method.getAnnotation(FilteredEventHandler.class);
-            if (eventHandler == null) continue;
+            EventHandler eventHandler = method.getAnnotation(EventHandler.class);
+            if (eventHandler == null) {
+                continue;
+            }
             if (method.isBridge() || method.isSynthetic()) {
                 continue;
             }
@@ -72,20 +72,19 @@ public class FilteredListener<T extends Plugin> implements Listener {
             method.setAccessible(true);
             Set<RegisteredListener> eventSet = ret.computeIfAbsent(eventClass, k -> new HashSet<RegisteredListener>());
 
-            EventExecutor executor = new TimedEventExecutor(new EventExecutor() {
-                @Override
-                public void execute(Listener listener, Event event) throws EventException {
-                    try {
-                        if (!eventClass.isAssignableFrom(event.getClass())) {
-                            return;
-                        }
-                        if (!eventHandler.ignoreFilters() && !checker.check(event)) {
-                            return;
-                        }
-                        method.invoke(listener, event);
-                    } catch (Exception ex) {
-                        ex.printStackTrace();
+            boolean ignoredFilters = method.getAnnotation(IgnoredFilters.class) != null;
+
+            EventExecutor executor = new TimedEventExecutor((listener, event) -> {
+                try {
+                    if (!eventClass.isAssignableFrom(event.getClass())) {
+                        return;
                     }
+                    if (!ignoredFilters && !checker.check(event)) {
+                        return;
+                    }
+                    method.invoke(listener, event);
+                } catch (Exception ex) {
+                    ex.printStackTrace();
                 }
             }, plugin, method, eventClass);
             eventSet.add(new RegisteredListener(this, executor, eventHandler.priority(), plugin, eventHandler.ignoreCancelled()));
