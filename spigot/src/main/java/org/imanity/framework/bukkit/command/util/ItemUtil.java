@@ -7,9 +7,7 @@ import org.apache.commons.lang.WordUtils;
 import org.bukkit.Material;
 import org.bukkit.inventory.ItemStack;
 import org.imanity.framework.bukkit.Imanity;
-import org.imanity.framework.bukkit.command.CommandHandler;
-import org.imanity.framework.bukkit.command.util.BukkitReflection;
-import org.imanity.framework.bukkit.command.util.NumberUtil;
+import org.imanity.framework.bukkit.util.items.ArmorPart;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -142,10 +140,6 @@ public class ItemUtil {
         }
 
         return null;
-    }
-
-    public enum ArmorPart {
-        HELMET, CHESTPLATE, LEGGINGS, BOOTS
     }
 
     public enum ArmorType {
