@@ -8,6 +8,7 @@ import org.imanity.framework.plugin.component.ComponentHolder;
 import org.imanity.framework.plugin.component.ComponentRegistry;
 import org.imanity.framework.plugin.service.IService;
 import org.imanity.framework.plugin.service.Service;
+import org.imanity.framework.redis.message.Message;
 import org.imanity.framework.redis.message.MessageListener;
 import org.imanity.framework.redis.server.ServerHandler;
 import org.redisson.Redisson;
@@ -96,6 +97,14 @@ public class ImanityRedis implements IService {
 
     public Iterable<String> getKeys(String pattern) {
         return this.client.getKeys().getKeysByPattern(pattern);
+    }
+
+    public void registerListener(MessageListener messageListener) {
+        this.getServerHandler().getMessageHandler().registerListener(messageListener);
+    }
+
+    public void registerMessage(Class<? extends Message> messageClass) {
+        this.getServerHandler().getMessageHandler().registerMessage(messageClass);
     }
 
     public static class RedisConfig extends YamlConfiguration {
