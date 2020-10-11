@@ -107,6 +107,10 @@ public class ImanityRedis implements IService {
         this.getServerHandler().getMessageHandler().registerMessage(messageClass);
     }
 
+    public void sendMessage(Message message) {
+        this.getServerHandler().getMessageHandler().sendMessage(message);
+    }
+
     public static class RedisConfig extends YamlConfiguration {
 
         public String IP_ADDRESS = "localhost";
