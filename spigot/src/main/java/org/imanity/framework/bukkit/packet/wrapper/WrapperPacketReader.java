@@ -28,6 +28,8 @@ import org.bukkit.inventory.ItemStack;
 import org.imanity.framework.bukkit.reflection.wrapper.ChatComponentWrapper;
 import org.imanity.framework.bukkit.reflection.wrapper.GameProfileWrapper;
 
+import java.util.List;
+
 public interface WrapperPacketReader {
 
     boolean readBoolean(int index);
@@ -49,6 +51,8 @@ public interface WrapperPacketReader {
     ChatComponentWrapper readChatComponent(int index);
 
     GameProfileWrapper readGameProfile(int index);
+
+    <T> List<T> readList(int index);
 
     <T> T readObject(int index, Class<T> type);
 

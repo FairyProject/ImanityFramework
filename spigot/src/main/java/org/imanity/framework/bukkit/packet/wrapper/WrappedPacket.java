@@ -156,6 +156,11 @@ public class WrappedPacket implements WrapperPacketReader {
     }
 
     @Override
+    public <T> List<T> readList(int index) {
+        return (List<T>) readObject(index, List.class);
+    }
+
+    @Override
     public ChatComponentWrapper readChatComponent(int index) {
         return ChatComponentWrapper.fromHandle(this.readObject(index, MinecraftReflection.getIChatBaseComponentClass()));
     }
