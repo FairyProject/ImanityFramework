@@ -60,7 +60,7 @@ public class WrappedPacketOutSpawnEntityLiving extends WrappedPacket implements 
         this.velZ = readInt(7) / 8000.0D;
 
         this.dataWatcher = new DataWatcherWrapper(readObject(0, DataWatcher.TYPE));
-        this.watchableObjects = new ConvertedList<Object, WatchableObjectWrapper>(readObject(0, List.class)) {
+        this.watchableObjects = new ConvertedList<Object, WatchableObjectWrapper>(readList(0)) {
             @Override
             protected WatchableObjectWrapper toOuter(Object o) {
                 return WatchableObjectWrapper.getConverter().getSpecific(o);
@@ -75,7 +75,7 @@ public class WrappedPacketOutSpawnEntityLiving extends WrappedPacket implements 
 
     @Override
     public Object asNMSPacket() {
-        return new PacketWrapper(PacketTypeClasses.Server.TITLE)
+        return new PacketWrapper(PacketTypeClasses.Server.SPAWN_ENTITY_LIVING)
                 .setFieldByIndex(int.class, 0, this.entityId)
                 .setFieldByIndex(int.class, 1, this.entityTypeId)
                 .setFieldByIndex(int.class, 2, Math.floor(this.locX * 32.0D))
