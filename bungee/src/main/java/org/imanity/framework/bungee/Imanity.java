@@ -9,8 +9,10 @@ import org.imanity.framework.bungee.impl.*;
 import org.imanity.framework.bungee.plugin.ImanityPlugin;
 import org.imanity.framework.libraries.classloader.PluginClassLoader;
 import org.imanity.framework.plugin.component.ComponentRegistry;
+import org.imanity.framework.task.chain.TaskChainFactory;
 
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 public class Imanity {
 
@@ -22,11 +24,15 @@ public class Imanity {
 
     public static boolean SHUTTING_DOWN;
 
+    public static TaskChainFactory TASK_CHAIN_FACTORY;
+
     public static void init(Plugin plugin) {
         Imanity.PLUGIN = plugin;
         Imanity.CLASS_LOADER = new PluginClassLoader(PLUGIN.getClass().getClassLoader());
 
         Imanity.initCommon();
+
+        TASK_CHAIN_FACTORY = new BungeeTaskChainFactory();
     }
 
     private static void initCommon() {
@@ -47,6 +53,8 @@ public class Imanity {
 
     public static void shutdown() {
         SHUTTING_DOWN = true;
+
+        TASK_CHAIN_FACTORY.shutdown(60, TimeUnit.SECONDS);
 
         ImanityCommon.shutdown();
     }

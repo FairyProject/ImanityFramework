@@ -73,6 +73,15 @@ public interface GameInterface {
     void registerShutdownHandler(org.imanity.framework.task.chain.TaskChainFactory factory);
 
     /**
+     * Check if this interface has Main thread
+     *
+     * @return result
+     */
+    default boolean hasMainThread() {
+        return true;
+    }
+
+    /**
      * Adds a delay to the chain execution based on real time
      *
      * Method will be ran async from main thread.

@@ -1181,7 +1181,7 @@ public class TaskChain <T> {
         if (isNextAsync == null || factory.shutdown) {
             this.currentHolder.run();
         } else if (isNextAsync) {
-            if (this.async) {
+            if (this.async || !this.factory.getImplementation().hasMainThread()) {
                 this.currentHolder.run();
             } else {
                 impl.postAsync(() -> {
@@ -1190,7 +1190,7 @@ public class TaskChain <T> {
                 });
             }
         } else {
-            if (this.async) {
+            if (this.async || this.factory.getImplementation().hasMainThread()) {
                 impl.postToMain(() -> {
                     this.async = false;
                     this.currentHolder.run();
