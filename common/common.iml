@@ -54,5 +54,6 @@
     <orderEntry type="library" scope="PROVIDED" name="Maven: org.jodd:jodd-core:5.0.13" level="project" />
     <orderEntry type="library" scope="PROVIDED" name="Maven: com.github.ben-manes.caffeine:caffeine:2.8.5" level="project" />
     <orderEntry type="library" scope="PROVIDED" name="Maven: com.esotericsoftware:reflectasm:1.11.9" level="project" />
+    <orderEntry type="library" scope="PROVIDED" name="Maven: net.md-5:bungeecord-chat:1.16-R0.3" level="project" />
   </component>
 </module>

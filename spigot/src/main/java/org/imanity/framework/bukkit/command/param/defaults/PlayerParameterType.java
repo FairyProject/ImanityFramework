@@ -6,6 +6,7 @@ import org.bukkit.ChatColor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.imanity.framework.bukkit.command.param.ParameterType;
+import org.imanity.framework.util.CC;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -21,7 +22,7 @@ public class PlayerParameterType implements ParameterType<Player> {
 		final Player player = Bukkit.getServer().getPlayer(source);
 
 		if (player == null) {
-			sender.sendMessage(ChatColor.RED + "No player with the name " + source + " found.");
+			sender.sendMessage(CC.RED + "No player with the name " + source + " found.");
 			return (null);
 		}
 
