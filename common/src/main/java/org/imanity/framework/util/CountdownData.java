@@ -1,4 +1,4 @@
-package org.imanity.framework.bukkit.util;
+package org.imanity.framework.util;
 
 public class CountdownData {
 

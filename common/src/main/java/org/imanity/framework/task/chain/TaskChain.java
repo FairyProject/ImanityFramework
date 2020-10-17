@@ -114,8 +114,9 @@ public class TaskChain <T> {
      * @param errorHandler The error handler
      */
     @SuppressWarnings("WeakerAccess")
-    public void setErrorHandler(BiConsumer<Exception, Task<?, ?>> errorHandler) {
+    public TaskChain<T> setErrorHandler(BiConsumer<Exception, Task<?, ?>> errorHandler) {
         this.errorHandler = errorHandler;
+        return this;
     }
     // </editor-fold>
     /* ======================================================================================== */

@@ -2,12 +2,10 @@ package org.imanity.framework.util;
 
 import com.google.common.collect.ImmutableMap;
 
-import java.lang.reflect.Constructor;
-import java.lang.reflect.Field;
-import java.lang.reflect.ParameterizedType;
-import java.lang.reflect.Type;
+import java.lang.reflect.*;
 import java.util.*;
 import java.util.function.Consumer;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -190,6 +188,14 @@ public class Utility {
             }
         }
         return equal;
+    }
+
+    public static <I, R> R[] toArrayType(I[] originalArray, Class<R> resultType, Function<I, R> transfer) {
+        R[] result = (R[]) Array.newInstance(resultType, originalArray.length);
+        for (int i = 0; i < result.length; i++) {
+            result[i] = transfer.apply(originalArray[i]);
+        }
+        return result;
     }
 
 }

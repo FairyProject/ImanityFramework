@@ -18,7 +18,7 @@ import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.scheduler.BukkitTask;
 import org.imanity.framework.bukkit.Imanity;
-import org.imanity.framework.bukkit.util.CountdownCallback;
+import org.imanity.framework.util.CountdownCallback;
 
 public class MultiBlockChanger {
 

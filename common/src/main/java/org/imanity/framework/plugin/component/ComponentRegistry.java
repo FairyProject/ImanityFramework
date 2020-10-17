@@ -50,7 +50,9 @@ public class ComponentRegistry {
                         ComponentHolder componentHolder = getComponentHolder(componentClass);
                         Object instance = componentHolder.newInstance(componentClass);
 
-                        serviceHandler.registerAutowired(instance);
+                        if (instance != null) {
+                            serviceHandler.registerAutowired(instance);
+                        }
                     });
                 }
 

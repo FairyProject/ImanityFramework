@@ -1,12 +1,12 @@
 package org.imanity.framework.bukkit.reflection.resolver;
 
 import lombok.Getter;
-import org.apache.commons.lang3.builder.ToStringBuilder;
 
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.StringJoiner;
 
 /**
  * Container class for resolver-queries Used by {@link MethodResolver}
@@ -99,12 +99,12 @@ public class ResolverQuery {
 
 	@Override
 	public String toString() {
-		return new ToStringBuilder(this)
-				.append("name", name)
-				.append("index", index)
-				.append("returnType", returnType)
-				.append("types", types)
-				.append("modifierOptions", modifierOptions)
+		return new StringJoiner(", ", ResolverQuery.class.getSimpleName() + "[", "]")
+				.add("name='" + name + "'")
+				.add("index=" + index)
+				.add("returnType=" + returnType)
+				.add("types=" + Arrays.toString(types))
+				.add("modifierOptions=" + modifierOptions)
 				.toString();
 	}
 

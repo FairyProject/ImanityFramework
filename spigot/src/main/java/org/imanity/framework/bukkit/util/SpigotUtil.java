@@ -1,8 +1,6 @@
 package org.imanity.framework.bukkit.util;
 
 import org.bukkit.Bukkit;
-import org.bukkit.World;
-import org.bukkit.craftbukkit.v1_8_R3.CraftWorld;
 import org.bukkit.entity.Player;
 import org.imanity.framework.bukkit.reflection.MinecraftReflection;
 
@@ -38,10 +36,6 @@ public class SpigotUtil {
 
         SPIGOT_TYPE = SpigotType.CRAFTBUKKIT;
 
-    }
-
-    public static int getWorldId(World world) {
-        return ((CraftWorld) world).getHandle().dimension;
     }
 
     public static boolean isServerThread() {

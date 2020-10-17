@@ -110,18 +110,16 @@ public class ServiceHandler {
     }
 
     public void registerAutowiredForField(Field field) throws ReflectiveOperationException {
-        AccessUtil.setAccessible(field);
-
         if (field.getAnnotation(Autowired.class) == null) {
             return;
         }
-
         if (!Modifier.isStatic(field.getModifiers())) {
             return;
         }
 
-        Object service = this.getServiceInstance(field.getType());
+        AccessUtil.setAccessible(field);
 
+        Object service = this.getServiceInstance(field.getType());
         field.set(null, service);
     }
 

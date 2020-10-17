@@ -87,10 +87,9 @@ public final class Imanity {
         Imanity.CLASS_LOADER = new PluginClassLoader(plugin.getClass().getClassLoader());
 
         SpigotUtil.init();
-        Imanity.IMPLEMENTATION = ServerImplementation.load();
-
         Imanity.initCommon();
 
+        Imanity.IMPLEMENTATION = ServerImplementation.load();
         Imanity.TASK_CHAIN_FACTORY = BukkitTaskChainFactory.create(plugin);
 
         CommandHandler.init();

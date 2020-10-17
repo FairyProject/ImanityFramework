@@ -1,4 +1,4 @@
-package org.imanity.framework.bukkit.util;
+package org.imanity.framework.util;
 
 import lombok.RequiredArgsConstructor;
 

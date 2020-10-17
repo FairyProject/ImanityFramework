@@ -9,6 +9,7 @@ import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 import org.bukkit.material.MaterialData;
 import org.imanity.framework.ImanityCommon;
+import org.imanity.framework.bukkit.Imanity;
 import org.imanity.framework.bukkit.hologram.HologramSingle;
 import org.imanity.framework.bukkit.metadata.Metadata;
 import org.imanity.framework.bukkit.packet.PacketService;
@@ -29,6 +30,10 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.stream.Collectors;
 
+/**
+ * TODO
+ * - Modern version compatibility
+ */
 public class NormalImplementation implements ServerImplementation {
 
     public static final MetadataKey<ConcurrentMap> FAKE_BLOCK_MAP = MetadataKey.create(ImanityCommon.METADATA_PREFIX + "FakeBlockMap", ConcurrentMap.class);
@@ -36,18 +41,15 @@ public class NormalImplementation implements ServerImplementation {
     private static final ObjectWrapper MINECRAFT_SERVER;
 
     private static final Class<?> CHUNK_COORD_PAIR_TYPE;
-    private static final Class<?> BLOCK_INFO_TYPE;
+    private static Class<?> BLOCK_INFO_TYPE;
 
-    private static final FieldWrapper<Float> BLOCK_SLIPPERINESS_FIELD;
+    private static FieldWrapper<Float> BLOCK_SLIPPERINESS_FIELD;
 
-    private static final FieldWrapper<?> PLAYER_CONNECTION_FIELD;
-
-    private static final MethodWrapper<?> BLOCK_GET_BY_ID_METHOD;
-    private static final MethodWrapper<?> FROM_LEGACY_DATA_METHOD;
-    private static final MethodWrapper<?> GET_ENTITY_BY_UUID_METHOD;
+    private static MethodWrapper<?> BLOCK_GET_BY_ID_METHOD;
+    private static MethodWrapper<?> FROM_LEGACY_DATA_METHOD;
     private static final MethodWrapper<?> GET_ENTITY_BY_ID_METHOD;
 
-    private static final ConstructorWrapper<?> BLOCK_INFO_CONSTRUCTOR;
+    private static ConstructorWrapper<?> BLOCK_INFO_CONSTRUCTOR;
     private static final ConstructorWrapper<?> SPAWN_NAMED_ENTITY_CONSTRUCTOR;
     private static final ConstructorWrapper<?> CHUNK_COORD_PAIR_CONSTRUCTOR;
     private static final ConstructorWrapper<?> DESTROY_ENTITY_CONSTRUCTOR;
@@ -61,27 +63,40 @@ public class NormalImplementation implements ServerImplementation {
             Object minecraftServer = minecraftServerType.getMethod("getServer").invoke(null);
             MINECRAFT_SERVER = new ObjectWrapper(minecraftServer);
 
-            GET_ENTITY_BY_UUID_METHOD = new MethodResolver(minecraftServerType).resolveWrapper(
-                    new ResolverQuery("getEntity", int.class),
-                    new ResolverQuery("a", int.class)
-            );
+            try {
+                Class<?> BLOCK_INFO_PACKET_TYPE = CLASS_RESOLVER.resolve("PacketPlayOutMultiBlockChange");
+                Class<?> BLOCK_INFO_TYPE;
+                try {
+                    BLOCK_INFO_TYPE = CLASS_RESOLVER.resolve("PacketPlayOutMultiBlockChange$MultiBlockChangeInfo");
+                } catch (ClassNotFoundException ex) {
+                    BLOCK_INFO_TYPE = CLASS_RESOLVER.resolve("MultiBlockChangeInfo");
+                }
 
-            Class<?> entityPlayerType = CLASS_RESOLVER.resolve("EntityPlayer");
-            PLAYER_CONNECTION_FIELD = new FieldWrapper<>(entityPlayerType.getField("playerConnection"));
+                NormalImplementation.BLOCK_INFO_TYPE = BLOCK_INFO_TYPE;
+                Class<?> blockData = CLASS_RESOLVER.resolve("IBlockData");
 
-            Class<?> BLOCK_INFO_PACKET_TYPE = CLASS_RESOLVER.resolve("PacketPlayOutMultiBlockChange");
-            BLOCK_INFO_TYPE = CLASS_RESOLVER.resolve("PacketPlayOutMultiBlockChange$MultiBlockChangeInfo");
-            Class<?> blockData = CLASS_RESOLVER.resolve("IBlockData");
+                ConstructorResolver constructorResolver = new ConstructorResolver(BLOCK_INFO_TYPE);
+                BLOCK_INFO_CONSTRUCTOR = new ConstructorWrapper<>(constructorResolver.resolve(
+                        new Class[] {short.class, blockData},
+                        new Class[] {BLOCK_INFO_PACKET_TYPE, short.class, blockData}
+                ));
+            } catch (Exception ex) {
 
-            ConstructorResolver constructorResolver = new ConstructorResolver(BLOCK_INFO_TYPE);
-            BLOCK_INFO_CONSTRUCTOR = new ConstructorWrapper<>(constructorResolver.resolve(
-                    new Class[] {short.class, blockData},
-                    new Class[] {BLOCK_INFO_PACKET_TYPE, short.class, blockData}
-                    ));
+                Imanity.LOGGER.error("Having trouble while looking up MultiBlockChange packet (1_16_R2 ?)");
+                // v1_16_R2 changed it for no reason fuck off
+                // PacketPlayOutMultiBlockChange(final SectionPosition sectionposition, final ShortSet shortset, final ChunkSection chunksection, final boolean flag)
+
+            }
 
             Class<?> blockType = CLASS_RESOLVER.resolve("Block");
-            BLOCK_GET_BY_ID_METHOD = new MethodWrapper<>(blockType.getMethod("getById", int.class));
-            FROM_LEGACY_DATA_METHOD = new MethodWrapper<>(blockType.getMethod("fromLegacyData", int.class));
+            try {
+                BLOCK_GET_BY_ID_METHOD = new MethodWrapper<>(blockType.getMethod("getById", int.class));
+                FROM_LEGACY_DATA_METHOD = new MethodWrapper<>(blockType.getMethod("fromLegacyData", int.class));
+            } catch (Exception ex) {
+
+                Imanity.LOGGER.error("The id of Block doesn't exists in your current version, some feature may not working correctly.");
+
+            }
 
             Class<?> worldType = CLASS_RESOLVER.resolve("World");
             MethodResolver methodResolver = new MethodResolver(worldType);
@@ -90,7 +105,14 @@ public class NormalImplementation implements ServerImplementation {
                     new ResolverQuery("a", int.class)
             );
 
-            BLOCK_SLIPPERINESS_FIELD = new FieldWrapper<>(blockType.getField("frictionFactor"));
+            FieldWrapper<Float> BLOCK_SLIPPERINESS_FIELD;
+            try {
+                BLOCK_SLIPPERINESS_FIELD = new FieldWrapper<>(blockType.getField("frictionFactor"));
+            } catch (NoSuchFieldException ex) {
+                BLOCK_SLIPPERINESS_FIELD = new FieldWrapper<>(CLASS_RESOLVER.resolve("BlockBase").getDeclaredField("frictionFactor"));
+            }
+
+            NormalImplementation.BLOCK_SLIPPERINESS_FIELD = BLOCK_SLIPPERINESS_FIELD;
 
             CHUNK_COORD_PAIR_TYPE = CLASS_RESOLVER.resolve("ChunkCoordIntPair");
             CHUNK_COORD_PAIR_CONSTRUCTOR = new ConstructorWrapper<>(CHUNK_COORD_PAIR_TYPE.getConstructor(int.class, int.class));

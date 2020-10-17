@@ -7,7 +7,7 @@ import org.imanity.framework.bukkit.timer.Timer;
 import org.imanity.framework.bukkit.timer.TimerList;
 import org.imanity.framework.bukkit.timer.event.TimerElapsedEvent;
 import org.imanity.framework.bukkit.timer.event.TimerExtendEvent;
-import org.imanity.framework.bukkit.util.CountdownData;
+import org.imanity.framework.util.CountdownData;
 import org.imanity.framework.bukkit.util.RV;
 import org.imanity.framework.bukkit.util.BukkitUtil;
 

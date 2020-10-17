@@ -1,7 +1,6 @@
-package org.imanity.framework.bukkit.util;
+package org.imanity.framework.util;
 
 import org.apache.commons.lang3.StringEscapeUtils;
-import org.bukkit.ChatColor;
 
 import java.util.concurrent.TimeUnit;
 
@@ -36,7 +35,7 @@ public class FormatUtil {
     }
 
     public static String getBooleanSymbol(boolean bol) {
-        return bol ? ChatColor.GREEN + StringEscapeUtils.unescapeJava("\u221a") : ChatColor.RED + "X";
+        return bol ? "§a" + StringEscapeUtils.unescapeJava("\u221a") : "§cX";
     }
 
     public static String formatTimes(long millis) {

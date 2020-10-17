@@ -27,6 +27,7 @@ import org.imanity.framework.bukkit.command.param.ParameterType;
 import org.imanity.framework.bukkit.command.param.defaults.*;
 import org.imanity.framework.bukkit.command.util.ClassUtil;
 import org.imanity.framework.bukkit.command.util.ItemUtil;
+import org.imanity.framework.util.AccessUtil;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
@@ -67,7 +68,7 @@ public final class CommandHandler implements Listener {
 				try {
 					// Command map field (we have to use reflection to get this)
 					final Field commandMapField = Imanity.PLUGIN.getServer().getClass().getDeclaredField("commandMap");
-					commandMapField.setAccessible(true);
+					AccessUtil.setAccessible(commandMapField);
 
 					final Object oldCommandMap = commandMapField.get(Imanity.PLUGIN.getServer());
 					final org.imanity.framework.bukkit.command.CommandMap newCommandMap = new org.imanity.framework.bukkit.command.CommandMap(Imanity.PLUGIN.getServer());
@@ -75,13 +76,10 @@ public final class CommandHandler implements Listener {
 					// Start copying the knownCommands field over
 					// (so any commands registered before we hook in are kept)
 					final Field knownCommandsField = SimpleCommandMap.class.getDeclaredField("knownCommands");
-					knownCommandsField.setAccessible(true);
 
 					// The knownCommands field is final,
 					// so to be able to set it in the new command map we have to remove it.
-					final Field modifiersField = Field.class.getDeclaredField("modifiers");
-					modifiersField.setAccessible(true);
-					modifiersField.setInt(knownCommandsField, knownCommandsField.getModifiers() & ~Modifier.FINAL);
+					AccessUtil.setAccessible(knownCommandsField);
 
 					knownCommandsField.set(newCommandMap, knownCommandsField.get(oldCommandMap));
 					// End copying the knownCommands field over

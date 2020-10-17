@@ -4,7 +4,6 @@ import lombok.Getter;
 import org.bukkit.entity.Player;
 import org.imanity.framework.bukkit.hologram.Hologram;
 import org.imanity.framework.bukkit.hologram.HologramHandler;
-import org.imanity.framework.bukkit.util.SpigotUtil;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -12,20 +11,20 @@ import java.util.List;
 @Getter
 public class RenderedHolograms {
 
-    private int worldId;
+    private String worldName;
     private final List<Integer> holograms = new ArrayList<>();
 
     public RenderedHolograms(Player player) {
-        this.worldId = SpigotUtil.getWorldId(player.getWorld());
+        this.worldName = player.getWorld().getName();
     }
 
     public void removeFarHolograms(Player player, HologramHandler hologramHandler) {
 
-        int newWorldId = SpigotUtil.getWorldId(player.getWorld());
-        if (this.worldId != newWorldId) {
+        String newWorldName = player.getWorld().getName();
+        if (this.worldName.equals(newWorldName)) {
 
             this.reset(player, hologramHandler);
-            this.worldId = newWorldId;
+            this.worldName = newWorldName;
 
             return;
         }

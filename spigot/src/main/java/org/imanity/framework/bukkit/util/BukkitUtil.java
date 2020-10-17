@@ -1,9 +1,6 @@
 package org.imanity.framework.bukkit.util;
 
-import net.minecraft.server.v1_8_R3.*;
 import org.bukkit.*;
-import org.bukkit.World;
-import org.bukkit.craftbukkit.v1_8_R3.CraftWorld;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 import org.bukkit.entity.Projectile;
@@ -83,16 +80,6 @@ public class BukkitUtil {
     public static String color(String string) {
         return string == null || string.isEmpty() ? "" :
                 ChatColor.translateAlternateColorCodes('&', string);
-    }
-
-    public static void setBlockInNativeDataPalette(World world, int x, int y, int z, int blockId, byte data) {
-        net.minecraft.server.v1_8_R3.World nmsWorld = ((CraftWorld) world).getHandle();
-        net.minecraft.server.v1_8_R3.Chunk nmsChunk = nmsWorld.getChunkAt(x >> 4, z >> 4);
-        IBlockData ibd = net.minecraft.server.v1_8_R3.Block.getByCombinedId(blockId + (data << 12));
-
-        ChunkSection cs = nmsChunk.getSections()[y >> 4];
-
-        cs.setType(x & 15, y & 15, z & 15, ibd);
     }
 
     public static boolean isEmpty(final CharSequence cs) {

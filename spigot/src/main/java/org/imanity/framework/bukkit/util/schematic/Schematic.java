@@ -2,7 +2,6 @@ package org.imanity.framework.bukkit.util.schematic;
 
 import lombok.Getter;
 import lombok.Setter;
-import org.apache.commons.lang.builder.ToStringBuilder;
 import org.bukkit.Location;
 import org.bukkit.World;
 import org.imanity.framework.bukkit.util.BlockPosition;
@@ -11,6 +10,7 @@ import org.imanity.framework.bukkit.util.schematic.impl.WorldEditSchematic;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.StringJoiner;
 
 @Getter
 @Setter
@@ -84,10 +84,10 @@ public abstract class Schematic {
 
     @Override
     public String toString() {
-        return new ToStringBuilder(this)
-                .append("file", file)
-                .append("top", top)
-                .append("bottom", bottom)
+        return new StringJoiner(", ", Schematic.class.getSimpleName() + "[", "]")
+                .add("file=" + file)
+                .add("top=" + top)
+                .add("bottom=" + bottom)
                 .toString();
     }
 }

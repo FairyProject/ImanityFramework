@@ -2,14 +2,15 @@ package org.imanity.framework.bukkit.command.util;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
-import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.WordUtils;
 import org.bukkit.Material;
 import org.bukkit.inventory.ItemStack;
 import org.imanity.framework.bukkit.Imanity;
 import org.imanity.framework.bukkit.util.items.ArmorPart;
 
+import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -134,7 +135,14 @@ public class ItemUtil {
 
     private static List<String> readLines() {
         try {
-            return IOUtils.readLines(Imanity.PLUGIN.getClass().getClassLoader().getResourceAsStream("items.csv"));
+            BufferedReader reader = new BufferedReader(new InputStreamReader(Imanity.PLUGIN.getClass().getClassLoader().getResourceAsStream("items.csv")));
+            List<String> lines = new ArrayList<>();
+
+            for(String text = reader.readLine(); text != null; text = reader.readLine()) {
+                lines.add(text);
+            }
+
+            return lines;
         } catch (final IOException e) {
             e.printStackTrace();
         }
