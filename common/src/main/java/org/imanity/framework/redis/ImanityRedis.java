@@ -10,6 +10,7 @@ import org.imanity.framework.plugin.service.IService;
 import org.imanity.framework.plugin.service.Service;
 import org.imanity.framework.redis.message.Message;
 import org.imanity.framework.redis.message.MessageListener;
+import org.imanity.framework.redis.message.transformer.FieldTransformer;
 import org.imanity.framework.redis.server.ServerHandler;
 import org.redisson.Redisson;
 import org.redisson.api.RMap;
@@ -109,6 +110,14 @@ public class ImanityRedis implements IService {
 
     public void sendMessage(Message message) {
         this.getServerHandler().getMessageHandler().sendMessage(message);
+    }
+
+    public <T> void registerTransformer(Class<?> type, FieldTransformer<T> transformer) {
+        this.getServerHandler().getMessageHandler().registerTransformer(type, transformer);
+    }
+
+    public <T> FieldTransformer<T> getTransformer(Class<?> type) {
+        return this.getServerHandler().getMessageHandler().getTransformer(type);
     }
 
     public static class RedisConfig extends YamlConfiguration {

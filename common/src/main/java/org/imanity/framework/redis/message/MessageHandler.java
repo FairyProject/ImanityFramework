@@ -5,8 +5,10 @@ import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
 import it.unimi.dsi.fastutil.objects.Object2IntMap;
 import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap;
+import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import org.imanity.framework.ImanityCommon;
 import org.imanity.framework.redis.message.annotation.HandleMessage;
+import org.imanity.framework.redis.message.transformer.FieldTransformer;
 import org.imanity.framework.redis.subscription.RedisPubSub;
 
 import java.lang.reflect.Method;
@@ -22,6 +24,7 @@ public class MessageHandler {
     private final Int2ObjectMap<List<MessageListenerData>> messageListeners = new Int2ObjectOpenHashMap<>();
     private final Int2ObjectMap<Class<? extends Message>> idToClass = new Int2ObjectOpenHashMap<>();
     private final Object2IntMap<Class<? extends Message>> classToId = new Object2IntOpenHashMap<>();
+    private final Object2ObjectOpenHashMap<Class<?>, FieldTransformer<?>> fieldTransformers = new Object2ObjectOpenHashMap<>();
 
 
     public MessageHandler(String channel) {
@@ -116,4 +119,11 @@ public class MessageHandler {
         }));
     }
 
+    public <T> void registerTransformer(Class<?> type, FieldTransformer<T> transformer) {
+        this.fieldTransformers.put(type, transformer);
+    }
+
+    public <T> FieldTransformer<T> getTransformer(Class<?> type) {
+        return (FieldTransformer<T>) this.fieldTransformers.get(type);
+    }
 }
