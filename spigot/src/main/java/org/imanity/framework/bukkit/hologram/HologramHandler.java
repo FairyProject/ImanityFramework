@@ -5,7 +5,9 @@ import org.bukkit.entity.Player;
 import org.imanity.framework.bukkit.Imanity;
 import org.imanity.framework.ImanityCommon;
 import org.imanity.framework.bukkit.hologram.player.RenderedHolograms;
+import org.imanity.framework.bukkit.metadata.Metadata;
 import org.imanity.framework.bukkit.util.SampleMetadata;
+import org.imanity.framework.metadata.MetadataKey;
 
 import java.util.Collection;
 import java.util.HashMap;
@@ -14,9 +16,9 @@ import java.util.Map;
 public class HologramHandler {
 
     public static final int DISTANCE_TO_RENDER = 60;
-    public static final String WORLD_METADATA = ImanityCommon.METADATA_PREFIX + "WorldHolograms";
-    public static final String HOLOGRAM_METADATA = ImanityCommon.METADATA_PREFIX + "Holograms";
-    private Map<Integer, Hologram> holograms = new HashMap<>();
+    public static final MetadataKey<HologramHandler> WORLD_METADATA = MetadataKey.create(ImanityCommon.METADATA_PREFIX + "WorldHolograms", HologramHandler.class);
+    public static final MetadataKey<RenderedHolograms> HOLOGRAM_METADATA = MetadataKey.create(ImanityCommon.METADATA_PREFIX + "Holograms", RenderedHolograms.class);
+    private final Map<Integer, Hologram> holograms = new HashMap<>();
 
     public Hologram addHologram(Location location, String... texts) {
         Hologram hologram = new Hologram(location, this);
@@ -44,8 +46,7 @@ public class HologramHandler {
 
         RenderedHolograms holograms = this.getRenderedHolograms(player);
         holograms.reset(player, this);
-
-        player.removeMetadata(HOLOGRAM_METADATA, Imanity.PLUGIN);
+        Metadata.provideForPlayer(player).remove(HOLOGRAM_METADATA);
 
     }
 
@@ -58,15 +59,8 @@ public class HologramHandler {
     }
 
     public RenderedHolograms getRenderedHolograms(Player player) {
-
-        if (player.hasMetadata(HOLOGRAM_METADATA)) {
-            return (RenderedHolograms) player.getMetadata(HOLOGRAM_METADATA).get(0).value();
-        }
-
-        RenderedHolograms holograms = new RenderedHolograms(player);
-        player.setMetadata(HOLOGRAM_METADATA, new SampleMetadata(holograms));
-
-        return holograms;
+        return Metadata.provideForPlayer(player)
+                .getOrPut(HOLOGRAM_METADATA, () -> new RenderedHolograms(player));
     }
 
     public void removeHologram(Hologram hologram) {

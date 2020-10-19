@@ -8,7 +8,9 @@ import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.event.player.PlayerTeleportEvent;
 import org.bukkit.event.world.WorldLoadEvent;
+import org.bukkit.event.world.WorldUnloadEvent;
 import org.imanity.framework.bukkit.Imanity;
+import org.imanity.framework.bukkit.metadata.Metadata;
 import org.imanity.framework.bukkit.player.movement.MovementListener;
 import org.imanity.framework.bukkit.util.SampleMetadata;
 import org.imanity.framework.bukkit.util.TaskUtil;
@@ -75,7 +77,12 @@ public class HologramListener implements Listener {
 
     @EventHandler
     public void onWorldLoad(WorldLoadEvent event) {
-        event.getWorld().setMetadata(HologramHandler.WORLD_METADATA, new SampleMetadata(new HologramHandler()));
+        Metadata.provideForWorld(event.getWorld()).put(HologramHandler.WORLD_METADATA, new HologramHandler());
+    }
+
+    @EventHandler
+    public void onWorldUnload(WorldUnloadEvent event) {
+        Metadata.provideForWorld(event.getWorld()).remove(HologramHandler.WORLD_METADATA);
     }
 
     private void update(Player player) {

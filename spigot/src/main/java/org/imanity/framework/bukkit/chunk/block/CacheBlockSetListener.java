@@ -7,6 +7,7 @@ import org.bukkit.event.world.ChunkPopulateEvent;
 import org.bukkit.event.world.WorldInitEvent;
 import org.bukkit.event.world.WorldUnloadEvent;
 import org.imanity.framework.bukkit.Imanity;
+import org.imanity.framework.bukkit.metadata.Metadata;
 import org.imanity.framework.bukkit.util.SampleMetadata;
 import org.imanity.framework.plugin.component.Component;
 
@@ -28,12 +29,12 @@ public class CacheBlockSetListener implements Listener {
     @EventHandler
     public void onWorldLoad(WorldInitEvent event) {
         CacheBlockSetHandler blockSetHandler = new CacheBlockSetHandler(event.getWorld());
-        event.getWorld().setMetadata(CacheBlockSetHandler.METADATA, new SampleMetadata(blockSetHandler));
+        Metadata.provideForWorld(event.getWorld()).put(CacheBlockSetHandler.METADATA, blockSetHandler);
     }
 
     @EventHandler
     public void onWorldUnload(WorldUnloadEvent event) {
-        event.getWorld().removeMetadata(CacheBlockSetHandler.METADATA, PLUGIN);
+        Metadata.provideForWorld(event.getWorld()).remove(CacheBlockSetHandler.METADATA);
     }
 
 }

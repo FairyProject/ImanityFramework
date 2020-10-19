@@ -25,6 +25,7 @@ import org.imanity.framework.bukkit.hologram.HologramHandler;
 import org.imanity.framework.bukkit.impl.*;
 import org.imanity.framework.bukkit.impl.server.ServerImplementation;
 import org.imanity.framework.bukkit.menu.task.MenuUpdateTask;
+import org.imanity.framework.bukkit.metadata.Metadata;
 import org.imanity.framework.bukkit.packet.PacketService;
 import org.imanity.framework.bukkit.packet.wrapper.server.WrappedPacketOutTitle;
 import org.imanity.framework.bukkit.player.movement.MovementListener;
@@ -44,6 +45,7 @@ import org.imanity.framework.bukkit.tablist.ImanityTabAdapter;
 import org.imanity.framework.bukkit.tablist.ImanityTabHandler;
 import org.imanity.framework.bukkit.visual.VisualBlockHandler;
 import org.imanity.framework.libraries.classloader.PluginClassLoader;
+import org.imanity.framework.metadata.MetadataMap;
 import org.imanity.framework.plugin.component.ComponentRegistry;
 import org.imanity.framework.plugin.service.Autowired;
 import org.imanity.framework.task.chain.TaskChainFactory;
@@ -52,6 +54,7 @@ import org.imanity.framework.util.FastRandom;
 import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public final class Imanity {
@@ -117,17 +120,13 @@ public final class Imanity {
     }
 
     public static CacheBlockSetHandler getBlockSetHandler(World world) {
-        if (world.hasMetadata(CacheBlockSetHandler.METADATA)) {
-            return (CacheBlockSetHandler) world.getMetadata(CacheBlockSetHandler.METADATA).get(0).value();
-        }
-        return null;
+        return Metadata.provideForWorld(world).getOrNull(CacheBlockSetHandler.METADATA);
     }
 
     public static HologramHandler getHologramHandler(World world) {
-        if (world.hasMetadata(HologramHandler.WORLD_METADATA)) {
-            return (HologramHandler) world.getMetadata(HologramHandler.WORLD_METADATA).get(0).value();
-        }
-        throw new RuntimeException("Something wrong");
+        return Metadata.provideForWorld(world)
+                .get(HologramHandler.WORLD_METADATA)
+                .orElseThrow(() -> new RuntimeException("Something wrong while getting world hologram handler"));
     }
 
     public static AbstractMovementImplementation registerMovementListener(MovementListener movementListener) {

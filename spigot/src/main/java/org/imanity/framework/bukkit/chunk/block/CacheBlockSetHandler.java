@@ -12,6 +12,7 @@ import org.bukkit.craftbukkit.v1_8_R3.util.LongHash;
 import org.imanity.framework.ImanityCommon;
 import org.imanity.framework.bukkit.chunk.block.location.YLocationFixed;
 import org.imanity.framework.bukkit.chunk.block.location.YLocationHighest;
+import org.imanity.framework.metadata.MetadataKey;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -19,7 +20,7 @@ import java.util.Map;
 @RequiredArgsConstructor
 public class CacheBlockSetHandler {
 
-    public static final String METADATA = ImanityCommon.METADATA_PREFIX + "BlockSetHandler";
+    public static final MetadataKey<CacheBlockSetHandler> METADATA = MetadataKey.create(ImanityCommon.METADATA_PREFIX + "BlockSetHandler", CacheBlockSetHandler.class);
 
     private final World world;
     private Map<Long, CacheChunkChanges> cachedChanges = new HashMap<>();
