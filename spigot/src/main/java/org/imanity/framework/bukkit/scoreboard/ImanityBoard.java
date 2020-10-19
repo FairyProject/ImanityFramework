@@ -36,7 +36,7 @@ public class ImanityBoard {
         );
 
         WrappedPacketOutScoreboardDisplayObjective packetB = new WrappedPacketOutScoreboardDisplayObjective(
-                DisplaySlot.PLAYER_LIST,
+                DisplaySlot.SIDEBAR,
                 player.getName()
         );
 
