@@ -12,6 +12,7 @@
         <module>spigot</module>
         <module>common</module>
         <module>bungee</module>
+        <module>independent</module>
     </modules>
 
     <distributionManagement>
