@@ -2,12 +2,17 @@ package org.imanity.framework.boot;
 
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Sets;
+import joptsimple.OptionException;
+import joptsimple.OptionParser;
+import joptsimple.OptionSet;
 import lombok.Getter;
+import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.imanity.framework.ImanityCommon;
 import org.imanity.framework.boot.annotation.PostInitialize;
 import org.imanity.framework.boot.annotation.PreInitialize;
+import org.imanity.framework.boot.console.OptionHandler;
 import org.imanity.framework.boot.error.ErrorHandler;
 import org.imanity.framework.boot.impl.IndependentCommandExecutor;
 import org.imanity.framework.boot.impl.IndependentEventHandler;
@@ -15,6 +20,7 @@ import org.imanity.framework.boot.impl.IndependentImanityBridge;
 import org.imanity.framework.boot.impl.IndependentPlayerBridge;
 import org.imanity.framework.boot.task.AsyncTaskScheduler;
 import org.imanity.framework.boot.user.UserInterface;
+import org.imanity.framework.boot.console.LoggerOutputStream;
 import org.imanity.framework.libraries.classloader.PluginClassLoader;
 import org.imanity.framework.util.AccessUtil;
 import org.jetbrains.annotations.Nullable;
@@ -22,13 +28,13 @@ import org.yaml.snakeyaml.Yaml;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.PrintStream;
 import java.io.PrintWriter;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.Set;
+import java.util.*;
 
 /**
  *
@@ -39,11 +45,14 @@ import java.util.Set;
 @Getter
 public class FrameworkBootable {
 
-    public static final Logger LOGGER = LogManager.getLogger("Imanity");
+    public static final Logger LOGGER = LogManager.getLogger();
     public static final SimpleDateFormat LOG_FILE_FORMAT = new SimpleDateFormat("yyyyMdd-hhmmss");
 
     private final Class<?> bootableClass;
     private final Set<ErrorHandler> errorHandlers;
+
+    private OptionSet options;
+    private final List<OptionHandler> optionHandlers;
 
     @Nullable
     private UserInterface<?> userInterface;
@@ -53,11 +62,13 @@ public class FrameworkBootable {
     private AsyncTaskScheduler taskScheduler;
     private Yaml yaml;
 
-    private boolean shuttingDown;
+    private boolean shuttingDown, useJline;
 
     public FrameworkBootable(Class<?> bootableClass) {
         this.bootableClass = bootableClass;
         this.errorHandlers = Sets.newConcurrentHashSet();
+
+        this.optionHandlers = new ArrayList<>();
     }
 
     public FrameworkBootable withUserInterface(UserInterface<?> userInterface) {
@@ -65,26 +76,43 @@ public class FrameworkBootable {
         return this;
     }
 
-    public void boot() {
+    public FrameworkBootable withOptionHandler(OptionHandler optionHandler) {
+        this.optionHandlers.add(optionHandler);
+        return this;
+    }
+
+    public void boot(String[] args) {
         try {
+
+            this.initArguments(args);
+            this.initConsole();
+
+            LOGGER.info("Initializing Framework bootable...");
+
             this.bootableObject = this.bootableClass.newInstance();
 
             this.call(PreInitialize.class);
-            this.taskScheduler = new AsyncTaskScheduler();
-            this.pluginClassLoader = new PluginClassLoader(this.getBootableClass().getClassLoader());
+            this.initFiles();
+
+            this.pluginClassLoader = new PluginClassLoader(ClassLoader.getSystemClassLoader());
+            ImanityCommon.BRIDGE = new IndependentImanityBridge(this);
+            ImanityCommon.loadLibraries(); // Pre load libraries since we need it
+
             this.yaml = new Yaml();
+            this.taskScheduler = new AsyncTaskScheduler();
 
             ImanityCommon.Builder builder = ImanityCommon.builder()
                     .taskScheduler(this.taskScheduler)
                     .eventHandler(new IndependentEventHandler())
-                    .commandExecutor(new IndependentCommandExecutor())
-                    .bridge(new IndependentImanityBridge(this));
+                    .commandExecutor(new IndependentCommandExecutor());
 
             if (this.userInterface != null) {
                 builder.playerBridge(new IndependentPlayerBridge(this.userInterface));
             }
 
             builder.init();
+
+            Runtime.getRuntime().addShutdownHook(new Thread(this::shutdown));
 
             this.call(PostInitialize.class);
         } catch (Throwable exception) {
@@ -134,6 +162,10 @@ public class FrameworkBootable {
 
             try {
                 File file = this.getCrashLogFile();
+                if (!file.exists()) {
+                    file.createNewFile();
+                }
+
                 try (PrintWriter writer = new PrintWriter(file)) {
                     exception.printStackTrace(writer);
                     writer.flush();
@@ -141,14 +173,74 @@ public class FrameworkBootable {
             } catch (IOException ex) {
                 LOGGER.error("An error occurs while creating crash log", ex);
             }
+
+            System.exit(0);
         } else {
             LOGGER.error("Unexpected error occurs", exception);
         }
     }
 
+    private void initArguments(String[] args) {
+
+        OptionParser optionParser = new OptionParser();
+
+        for (OptionHandler optionHandler : this.optionHandlers) {
+            String[] options = optionHandler.option();
+            String description = optionHandler.description();
+            if (description == null) {
+                description = "";
+            }
+
+            if (options.length == 1) {
+                optionParser.accepts(options[0]);
+            } else {
+                optionParser.acceptsAll(Arrays.asList(options), description);
+            }
+        }
+
+        try {
+            this.options = optionParser.parse(args);
+        } catch (OptionException ex) {
+            ex.printStackTrace();
+        }
+
+        if (this.options != null) {
+            for (OptionHandler optionHandler : this.optionHandlers) {
+                for (String option : optionHandler.option()) {
+                    if (options.has(option)) {
+                        optionHandler.call(options.valueOf(option));
+                    }
+                }
+            }
+        }
+    }
+
+    private void initConsole() throws IOException {
+        System.setOut(new PrintStream(new LoggerOutputStream(LOGGER, Level.INFO), true));
+        System.setErr(new PrintStream(new LoggerOutputStream(LOGGER, Level.WARN), true));
+    }
+
+    private void initFiles() {
+        File logsFolder = new File("logs");
+        if (!logsFolder.exists()) {
+            logsFolder.mkdirs();
+        }
+    }
+
     public File getCrashLogFile() {
+        File folder = new File("crashes");
+        if (!folder.exists()) {
+            folder.mkdirs();
+        }
+
         Date date = new Date(System.currentTimeMillis());
-        return new File("logs", "crash-" + LOG_FILE_FORMAT.format(date) + ".log");
+        return new File(folder, "crash-" + LOG_FILE_FORMAT.format(date) + ".log");
+    }
+
+    public void shutdown() {
+        this.shuttingDown = true;
+
+        LOGGER.info("Shutting down...");
     }
 
 }

@@ -57,6 +57,12 @@ public enum Library {
             "jackson-databind",
             "2.11.2",
             "y4kLSq2O0hp7V+PI95JNvcoa7/nd0nyw/zckMDeuE0I="
+    ),
+    FAST_UTIL(
+            "it.unimi.dsi",
+            "fastutil",
+            "8.1.0",
+            null
     );
 
     private final String mavenRepoPath;

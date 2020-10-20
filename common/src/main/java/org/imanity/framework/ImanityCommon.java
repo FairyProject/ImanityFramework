@@ -52,6 +52,8 @@ public class ImanityCommon {
     @Autowired
     public static ImanityRedis REDIS;
 
+    private static boolean librariesInitialized, bridgeInitialized;
+
     public static void init() {
         ImanityCommon.CORE_CONFIG = new CoreConfig();
         ImanityCommon.CORE_CONFIG.loadAndSave();
@@ -63,7 +65,12 @@ public class ImanityCommon {
         ImanityCommon.SERVICE_HANDLER.init();
     }
 
-    private static void loadLibraries() {
+    public static void loadLibraries() {
+
+        if (ImanityCommon.librariesInitialized) {
+            return;
+        }
+        ImanityCommon.librariesInitialized = true;
 
         getLogger().info("Loading Libraries");
 
@@ -76,6 +83,14 @@ public class ImanityCommon {
         } catch (ClassNotFoundException ex) {
             // Below 1.8
             EnumSet<Library> guava = EnumSet.of(Library.GUAVA);
+            ImanityCommon.LIBRARY_HANDLER.downloadLibraries(guava);
+            ImanityCommon.LIBRARY_HANDLER.obtainClassLoaderWith(guava);
+        }
+
+        try {
+            Class.forName("it.unimi.dsi.fastutil.Arrays");
+        } catch (ClassNotFoundException ex) {
+            EnumSet<Library> guava = EnumSet.of(Library.FAST_UTIL);
             ImanityCommon.LIBRARY_HANDLER.downloadLibraries(guava);
             ImanityCommon.LIBRARY_HANDLER.obtainClassLoaderWith(guava);
         }
@@ -117,10 +132,11 @@ public class ImanityCommon {
     }
 
     public static Builder builder() {
-        if (ImanityCommon.BRIDGE != null) {
+        if (ImanityCommon.bridgeInitialized) {
             throw new IllegalStateException("Already build!");
         }
 
+        ImanityCommon.bridgeInitialized = true;
         return new Builder();
     }
 
@@ -158,11 +174,21 @@ public class ImanityCommon {
         }
 
         public void init() {
-            ImanityCommon.BRIDGE = this.bridge;
-            ImanityCommon.COMMAND_EXECUTOR = this.commandExecutor;
-            ImanityCommon.EVENT_HANDLER = this.eventHandler;
-            ImanityCommon.TASK_SCHEDULER = this.taskScheduler;
-            PlayerData.PLAYER_BRIDGE = this.playerBridge;
+            if (this.bridge != null) {
+                ImanityCommon.BRIDGE = this.bridge;
+            }
+            if (this.commandExecutor != null) {
+                ImanityCommon.COMMAND_EXECUTOR = this.commandExecutor;
+            }
+            if (this.eventHandler != null) {
+                ImanityCommon.EVENT_HANDLER = this.eventHandler;
+            }
+            if (this.taskScheduler != null) {
+                ImanityCommon.TASK_SCHEDULER = this.taskScheduler;
+            }
+            if (this.playerBridge != null) {
+                PlayerData.PLAYER_BRIDGE = this.playerBridge;
+            }
             ImanityCommon.init();
         }
 

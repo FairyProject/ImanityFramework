@@ -1,11 +1,10 @@
 package org.imanity.framework.util.entry;
 
-import it.unimi.dsi.fastutil.objects.ObjectArrayList;
-
+import java.util.ArrayList;
 import java.util.function.BiConsumer;
 import java.util.function.BiPredicate;
 
-public class EntryArrayList<K, V> extends ObjectArrayList<Entry<K, V>> {
+public class EntryArrayList<K, V> extends ArrayList<Entry<K, V>> {
 
     public void add(K k, V v) {
         this.add(new Entry<>(k, v));
