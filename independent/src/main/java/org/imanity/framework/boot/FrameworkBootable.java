@@ -45,7 +45,7 @@ import java.util.*;
 @Getter
 public class FrameworkBootable {
 
-    public static final Logger LOGGER = LogManager.getLogger();
+    public static Logger LOGGER;
     public static final SimpleDateFormat LOG_FILE_FORMAT = new SimpleDateFormat("yyyyMdd-hhmmss");
 
     private final Class<?> bootableClass;
@@ -69,6 +69,7 @@ public class FrameworkBootable {
         this.errorHandlers = Sets.newConcurrentHashSet();
 
         this.optionHandlers = new ArrayList<>();
+        LOGGER = LogManager.getLogger(bootableClass);
     }
 
     public FrameworkBootable withUserInterface(UserInterface<?> userInterface) {
