@@ -2,20 +2,22 @@ package org.imanity.framework.boot.task;
 
 import org.imanity.framework.task.ITaskScheduler;
 
-import java.util.List;
-import java.util.PriorityQueue;
-import java.util.Queue;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 
 public class AsyncTaskScheduler implements ITaskScheduler {
 
     private final AtomicInteger id = new AtomicInteger(0);
     private final ConcurrentHashMap<Integer, AsyncTask> tasks = new ConcurrentHashMap<>();
-//    private final
+    private final AtomicBoolean changed = new AtomicBoolean(false);
+
+    private final Queue<AsyncTask> pending = new ArrayDeque<>();
+    private final List<AsyncTask> temp = new ArrayList<>();
 
     private final ScheduledExecutorService executorService;
 
@@ -23,16 +25,28 @@ public class AsyncTaskScheduler implements ITaskScheduler {
         this.executorService = Executors.newSingleThreadScheduledExecutor();
         this.executorService.scheduleAtFixedRate(() -> {
 
-            for (AsyncTask task : this.tasks.values()) {
+            if (this.changed.get()) {
+                this.parsePending();
+            }
+
+            AsyncTask task;
+            while ((task = this.pending.poll()) != null) {
                 task.setNext(task.getNext() - 1);
                 if (task.getNext() == 0) {
                     task.getRunnable().run();
 
                     if (task.getPeriod() < 1) {
-
+                        this.tasks.remove(task.getId());
+                    } else {
+                        task.setNext(task.getPeriod());
+                        this.temp.add(task);
                     }
                 }
             }
+
+            this.pending.addAll(this.temp);
+            this.temp.clear();
+
         }, 50L, 50L, TimeUnit.MILLISECONDS);
     }
 
@@ -76,6 +90,11 @@ public class AsyncTaskScheduler implements ITaskScheduler {
         return this.runAsyncRepeated(runnable, delay, time);
     }
 
+    private void parsePending() {
+        this.pending.clear();
+        this.pending.addAll(this.tasks.values());
+    }
+
     public int handle(long period, Runnable runnable) {
         return this.handle(period, runnable);
     }
@@ -83,12 +102,25 @@ public class AsyncTaskScheduler implements ITaskScheduler {
     public int handle(long next, long period, Runnable runnable) {
         int id = this.id.getAndIncrement();
         this.tasks.put(id, new AsyncTask(id, next, period, runnable));
+        this.changed.set(true);
 
         return id;
+    }
+
+    public void shutdown() {
+        this.executorService.shutdown();
+        while (!this.executorService.isTerminated()) {
+            try {
+                this.executorService.awaitTermination(30L, TimeUnit.SECONDS);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        }
     }
 
     @Override
     public void cancel(int taskId) {
         this.tasks.remove(taskId);
+        this.changed.set(true);
     }
 }
