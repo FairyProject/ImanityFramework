@@ -6,11 +6,13 @@ import org.bukkit.ChatColor;
 import org.bukkit.World;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
+import org.imanity.framework.plugin.component.Component;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
+@Component
 public class WorldParameterType extends BukkitParameterHolder<World> {
 
 	@Override
