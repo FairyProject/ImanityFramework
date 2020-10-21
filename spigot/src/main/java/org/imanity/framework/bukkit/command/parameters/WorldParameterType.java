@@ -1,4 +1,4 @@
-package org.imanity.framework.bukkit.command.param.defaults;
+package org.imanity.framework.bukkit.command.parameters;
 
 import org.apache.commons.lang.StringUtils;
 import org.bukkit.Bukkit;
@@ -6,13 +6,12 @@ import org.bukkit.ChatColor;
 import org.bukkit.World;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
-import org.imanity.framework.bukkit.command.param.ParameterType;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
-public class WorldParameterType implements ParameterType<World> {
+public class WorldParameterType extends BukkitParameterHolder<World> {
 
 	@Override
 	public World transform(final CommandSender sender, final String source) {
@@ -39,4 +38,8 @@ public class WorldParameterType implements ParameterType<World> {
 		return (completions);
 	}
 
+	@Override
+	public Class[] type() {
+		return new Class[] {World.class};
+	}
 }

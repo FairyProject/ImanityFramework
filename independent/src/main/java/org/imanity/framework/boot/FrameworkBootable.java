@@ -43,10 +43,12 @@ import java.util.*;
  *
  */
 @Getter
-public class FrameworkBootable {
+public final class FrameworkBootable {
 
     public static final Logger LOGGER = LogManager.getLogger();
     public static final SimpleDateFormat LOG_FILE_FORMAT = new SimpleDateFormat("yyyyMdd-hhmmss");
+
+    private final Map<String, String> configurations;
 
     private final Class<?> bootableClass;
     private final Set<ErrorHandler> errorHandlers;
@@ -68,6 +70,7 @@ public class FrameworkBootable {
         this.bootableClass = bootableClass;
         this.errorHandlers = Sets.newConcurrentHashSet();
 
+        this.configurations = new HashMap<>();
         this.optionHandlers = new ArrayList<>();
     }
 
@@ -78,6 +81,11 @@ public class FrameworkBootable {
 
     public FrameworkBootable withOptionHandler(OptionHandler optionHandler) {
         this.optionHandlers.add(optionHandler);
+        return this;
+    }
+
+    public FrameworkBootable withConfigValue(String key, String value) {
+        this.configurations.put(key, value);
         return this;
     }
 
@@ -213,6 +221,25 @@ public class FrameworkBootable {
                 }
             }
         }
+    }
+
+    public boolean has(String key) {
+        return this.configurations.containsKey(key);
+    }
+
+    public String get(String key, String orDefault) {
+        String value = this.configurations.getOrDefault(key, null);
+        return value != null ? value : orDefault;
+    }
+
+    public boolean getBoolean(String key, boolean orDefault) {
+        String value = this.get(key, null);
+        return value != null ? Boolean.parseBoolean(value) : orDefault;
+    }
+
+    public int getInteger(String key, int orDefault) {
+        String value = this.get(key, null);
+        return value != null ? Integer.parseInt(value) : orDefault;
     }
 
     private void initConsole() throws IOException {

@@ -6,7 +6,6 @@ import lombok.NoArgsConstructor;
 import lombok.NonNull;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.bukkit.Bukkit;
 import org.bukkit.Sound;
 import org.bukkit.World;
 import org.bukkit.entity.Player;
@@ -14,13 +13,11 @@ import org.bukkit.event.Event;
 import org.bukkit.event.Listener;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.java.JavaPlugin;
-import org.github.paperspigot.Title;
 import org.imanity.framework.ImanityCommon;
 import org.imanity.framework.bukkit.bossbar.BossBarAdapter;
 import org.imanity.framework.bukkit.bossbar.BossBarHandler;
 import org.imanity.framework.bukkit.chunk.KeepChunkHandler;
 import org.imanity.framework.bukkit.chunk.block.CacheBlockSetHandler;
-import org.imanity.framework.bukkit.command.CommandHandler;
 import org.imanity.framework.bukkit.hologram.HologramHandler;
 import org.imanity.framework.bukkit.impl.*;
 import org.imanity.framework.bukkit.impl.server.ServerImplementation;
@@ -45,7 +42,6 @@ import org.imanity.framework.bukkit.tablist.ImanityTabAdapter;
 import org.imanity.framework.bukkit.tablist.ImanityTabHandler;
 import org.imanity.framework.bukkit.visual.VisualBlockHandler;
 import org.imanity.framework.libraries.classloader.PluginClassLoader;
-import org.imanity.framework.metadata.MetadataMap;
 import org.imanity.framework.plugin.component.ComponentRegistry;
 import org.imanity.framework.plugin.service.Autowired;
 import org.imanity.framework.task.chain.TaskChainFactory;
@@ -54,7 +50,6 @@ import org.imanity.framework.util.FastRandom;
 import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public final class Imanity {
@@ -95,7 +90,6 @@ public final class Imanity {
         Imanity.IMPLEMENTATION = ServerImplementation.load();
         Imanity.TASK_CHAIN_FACTORY = BukkitTaskChainFactory.create(plugin);
 
-        CommandHandler.init();
         MenuUpdateTask.init();
     }
 

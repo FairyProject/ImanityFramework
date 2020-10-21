@@ -1,11 +1,11 @@
-package org.imanity.framework.bukkit.command.param.defaults;
+package org.imanity.framework.bukkit.command.parameters;
 
 import org.apache.commons.lang.StringUtils;
 import org.bukkit.ChatColor;
 import org.bukkit.GameMode;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
-import org.imanity.framework.bukkit.command.param.ParameterType;
+import org.imanity.framework.plugin.component.Component;
 
 import java.util.HashMap;
 import java.util.List;
@@ -13,7 +13,8 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-public class GameModeParameterType implements ParameterType<GameMode> {
+@Component
+public class GameModeParameterType extends BukkitParameterHolder<GameMode> {
 
 	private static final Map<String, GameMode> MAP = new HashMap<>();
 
@@ -41,4 +42,8 @@ public class GameModeParameterType implements ParameterType<GameMode> {
 		           .collect(Collectors.toList()));
 	}
 
+	@Override
+	public Class[] type() {
+		return new Class[] {GameMode.class};
+	}
 }

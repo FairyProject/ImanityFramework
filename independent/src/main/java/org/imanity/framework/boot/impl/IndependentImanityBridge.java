@@ -12,10 +12,7 @@ import java.io.*;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.net.URLConnection;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 @RequiredArgsConstructor
 public class IndependentImanityBridge implements ImanityBridge {
@@ -114,7 +111,7 @@ public class IndependentImanityBridge implements ImanityBridge {
 
     @Override
     public List<Object> getPluginInstances() {
-        return Collections.singletonList(this.bootable.getBootableObject());
+        return Arrays.asList(this.bootable, this.bootable.getBootableObject());
     }
 
     @Override

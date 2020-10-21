@@ -1,4 +1,4 @@
-package org.imanity.framework.bukkit.command.param;
+package org.imanity.framework.command.annotation;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
@@ -9,12 +9,12 @@ import java.lang.annotation.Target;
 @Target(ElementType.PARAMETER)
 public @interface Parameter {
 
-	String name();
+    String name();
 
-	boolean wildcard() default (false);
+    boolean wildcard() default (false);
 
-	String defaultValue() default ("");
+    String defaultValue() default ("");
 
-	String[] tabCompleteFlags() default ("");
+    String[] tabCompleteFlags() default ("");
 
 }

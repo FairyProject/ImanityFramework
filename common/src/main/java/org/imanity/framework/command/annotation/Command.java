@@ -1,4 +1,4 @@
-package org.imanity.framework.bukkit.command;
+package org.imanity.framework.command.annotation;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
@@ -9,10 +9,8 @@ import java.lang.annotation.Target;
 @Target(ElementType.METHOD)
 public @interface Command {
 
-	String[] names();
+    String[] names();
 
-	String permissionNode() default "";
-
-	boolean async() default false;
+    String permissionNode() default "";
 
 }

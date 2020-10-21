@@ -9,17 +9,26 @@ import org.bukkit.command.SimpleCommandMap;
 import org.bukkit.entity.Player;
 import org.bukkit.event.server.ServerCommandEvent;
 import org.bukkit.util.StringUtil;
-import org.imanity.framework.bukkit.command.CommandHandler;
-import org.imanity.framework.bukkit.command.param.ParameterData;
+import org.imanity.framework.ImanityCommon;
+import org.imanity.framework.command.CommandMeta;
+import org.imanity.framework.command.CommandService;
+import org.imanity.framework.command.InternalCommandEvent;
+import org.imanity.framework.command.parameter.ParameterMeta;
+import org.imanity.framework.plugin.service.Autowired;
 
 import java.util.*;
 
 final class CommandMap extends SimpleCommandMap {
 
-	protected static Map<UUID, String[]> parameters = new HashMap<>();
+	protected static final Map<UUID, String[]> parameters = new HashMap<>();
+
+	@Autowired
+	private CommandService commandService;
 
 	public CommandMap(Server server) {
 		super(server);
+
+		ImanityCommon.registerAutowired(this);
 	}
 
 	@Override
@@ -38,7 +47,7 @@ final class CommandMap extends SimpleCommandMap {
 			boolean doneHere = false;
 
 			CommandLoop:
-			for (org.imanity.framework.bukkit.command.CommandData command : CommandHandler.getCommands()) {
+			for (CommandMeta command : this.commandService.getCommands().values()) {
 				if (!command.canAccess(player)) {
 					continue;
 				}
@@ -69,10 +78,10 @@ final class CommandMap extends SimpleCommandMap {
 								paramIndex = 0;
 							}
 
-							ParameterData paramData = command.getParameters().get(paramIndex);
+							ParameterMeta paramData = command.getParameters().get(paramIndex);
 							String[] params = cmdLine.split(" ");
 
-							for (String completion : CommandHandler.tabCompleteParameter(player, params,
+							for (String completion : this.commandService.tabCompleteParameters(player, params,
 									cmdLine.endsWith(" ") ? "" : params[params.length - 1],
 									paramData.getParameterClass(), paramData.getTabCompleteFlags()
 							)) {
@@ -142,7 +151,8 @@ final class CommandMap extends SimpleCommandMap {
 			CommandMap.parameters.put(((Player) sender).getUniqueId(), command.split(" "));
 		}
 
-		if (CommandHandler.evalCommand(sender, commandLine) != null) {
+		InternalCommandEvent commandEvent = new InternalCommandEvent(sender, command);
+		if (this.commandService.evalCommand(commandEvent)) {
 			return true;
 		}
 

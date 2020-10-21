@@ -1,17 +1,18 @@
-package org.imanity.framework.bukkit.command.param.defaults;
+package org.imanity.framework.bukkit.command.parameters;
 
 import com.google.common.collect.ImmutableList;
 import org.bukkit.ChatColor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
-import org.imanity.framework.bukkit.command.param.ParameterType;
 import org.imanity.framework.bukkit.command.util.ItemUtil;
+import org.imanity.framework.plugin.component.Component;
 
 import java.util.List;
 import java.util.Set;
 
-public class ItemStackParameterType implements ParameterType<ItemStack> {
+@Component
+public class ItemStackParameterType extends BukkitParameterHolder<ItemStack> {
 
 	@Override
 	public ItemStack transform(final CommandSender sender, final String source) {
@@ -30,4 +31,8 @@ public class ItemStackParameterType implements ParameterType<ItemStack> {
 		return ImmutableList.of(); // it would probably be too intensive to go through all the aliases
 	}
 
+	@Override
+	public Class[] type() {
+		return new Class[] {ItemStack.class};
+	}
 }

@@ -1,18 +1,18 @@
-package org.imanity.framework.bukkit.command.param.defaults;
+package org.imanity.framework.bukkit.command.parameters;
 
 import org.apache.commons.lang.StringUtils;
 import org.bukkit.Bukkit;
-import org.bukkit.ChatColor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
-import org.imanity.framework.bukkit.command.param.ParameterType;
+import org.imanity.framework.plugin.component.Component;
 import org.imanity.framework.util.CC;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
-public class PlayerParameterType implements ParameterType<Player> {
+@Component
+public class PlayerParameterType extends BukkitParameterHolder<Player> {
 
 	@Override
 	public Player transform(final CommandSender sender, final String source) {
@@ -42,4 +42,8 @@ public class PlayerParameterType implements ParameterType<Player> {
 		return completions;
 	}
 
+	@Override
+	public Class[] type() {
+		return new Class[] {Player.class};
+	}
 }
