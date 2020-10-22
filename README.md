@@ -2,7 +2,7 @@
 
 ![](https://img.shields.io/nexus/imanity-libraries/org.imanity.framework/parent?label=ImanityFramework&server=https%3A%2F%2Fmaven.imanity.dev&style=flat-square)
 
-The framework to let you develop plugin quick and easy!
+The framework to let you build plugin/backend/discord-bot easily with clean spotless codes
 
 ## Maven
 ```
@@ -22,9 +22,13 @@ The framework to let you develop plugin quick and easy!
 ```
 
 ## Credits
+* [SpringBoot](https://spring.io) - Inspired on code structures design
 * [packetevents](https://github.com/retrooper/packetevents) - Revised to fit the library needs
-* [ProtocolLib](https://github.com/dmulloy2/ProtocolLib/) - Revised to fit the library needs
+* [ProtocolLib](https://github.com/dmulloy2/ProtocolLib) - Revised to fit the library needs
 * [helper](https://github.com/lucko/helper) - Revised to fit the library needs
 
 ## Example Plugins:
-- [DeathSwap](https://github.com/LeeGodSRC/deathswap)
+- [DeathSwap](https://github.com/LeeGodSRC/deathswap) (outdated)
+
+## License
+The Imanity Framework is under MIT License
