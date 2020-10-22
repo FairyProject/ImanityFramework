@@ -3,20 +3,18 @@ package org.imanity.framework.bukkit.command;
 import org.bukkit.ChatColor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.SimpleCommandMap;
-import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerCommandPreprocessEvent;
 import org.bukkit.event.server.ServerCommandEvent;
-import org.bukkit.scheduler.BukkitRunnable;
 import org.imanity.framework.bukkit.Imanity;
 import org.imanity.framework.bukkit.command.event.BukkitCommandEvent;
 import org.imanity.framework.bukkit.events.PostServicesInitialEvent;
 import org.imanity.framework.bukkit.util.TaskUtil;
 import org.imanity.framework.command.CommandProvider;
 import org.imanity.framework.command.CommandService;
-import org.imanity.framework.command.InternalCommandEvent;
+import org.imanity.framework.command.CommandEvent;
 import org.imanity.framework.plugin.component.Component;
 import org.imanity.framework.plugin.service.Autowired;
 import org.imanity.framework.util.AccessUtil;
@@ -34,7 +32,7 @@ public class CommandListener implements Listener {
         final String command = event.getMessage().substring(1);
 
         CommandMap.parameters.put(event.getPlayer().getUniqueId(), command.split(" "));
-        InternalCommandEvent commandEvent = new BukkitCommandEvent(event.getPlayer(), command);
+        CommandEvent commandEvent = new BukkitCommandEvent(event.getPlayer(), command);
 
         if (this.commandService.evalCommand(commandEvent)) {
             event.setCancelled(true);
@@ -43,7 +41,7 @@ public class CommandListener implements Listener {
 
     @EventHandler
     public void onConsoleCommand(ServerCommandEvent event) {
-        InternalCommandEvent commandEvent = new BukkitCommandEvent(event.getSender(), event.getCommand());
+        CommandEvent commandEvent = new BukkitCommandEvent(event.getSender(), event.getCommand());
 
         if (this.commandService.evalCommand(commandEvent)) {
             event.setCancelled(true);
@@ -57,42 +55,6 @@ public class CommandListener implements Listener {
             public boolean hasPermission(Object user, String permission) {
                 if (user instanceof CommandSender) {
                     return ((CommandSender) user).hasPermission(permission);
-                }
-                throw new UnsupportedOperationException();
-            }
-
-            @Override
-            public void sendUsage(InternalCommandEvent commandEvent, String usage) {
-                if (commandEvent.getUser() instanceof CommandSender) {
-                    ((CommandSender) commandEvent.getUser()).sendMessage(ChatColor.RED + "Usage: " + usage);
-                    return;
-                }
-                throw new UnsupportedOperationException();
-            }
-
-            @Override
-            public void sendError(InternalCommandEvent commandEvent, Throwable throwable) {
-                if (commandEvent.getUser() instanceof CommandSender) {
-                    ((CommandSender) commandEvent.getUser()).sendMessage(ChatColor.RED + "It appears there was some issues processing your command...");
-                    return;
-                }
-                throw new UnsupportedOperationException();
-            }
-
-            @Override
-            public void sendNoPermission(InternalCommandEvent commandEvent) {
-                if (commandEvent.getUser() instanceof CommandSender) {
-                    ((CommandSender) commandEvent.getUser()).sendMessage(ChatColor.RED + "No permission.");
-                    return;
-                }
-                throw new UnsupportedOperationException();
-            }
-
-            @Override
-            public void sendInternalError(InternalCommandEvent commandEvent, String message) {
-                if (commandEvent.getUser() instanceof CommandSender) {
-                    ((CommandSender) commandEvent.getUser()).sendMessage(ChatColor.RED + message);
-                    return;
                 }
                 throw new UnsupportedOperationException();
             }

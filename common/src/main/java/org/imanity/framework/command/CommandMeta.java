@@ -47,7 +47,12 @@ public class CommandMeta {
         return ("/" + aliasUsed.toLowerCase() + " " + stringBuilder.toString().trim().toLowerCase());
     }
 
-    public void execute(InternalCommandEvent event, String[] arguments) {
+    public void execute(CommandEvent event, String[] arguments) {
+        if (!method.getParameterTypes()[0].isAssignableFrom(event.getClass())) {
+            event.sendInternalError("This command cannot be executed by " + event.name());
+            return;
+        }
+
         List<Object> transformedParameters = new ArrayList<>();
 
         transformedParameters.add(event);
@@ -57,7 +62,7 @@ public class CommandMeta {
             String passedParameter = (i < arguments.length ? arguments[i] : parameter.getDefaultValue()).trim();
             if (i >= arguments.length &&
                     (parameter.getDefaultValue() == null || parameter.getDefaultValue().isEmpty())) {
-                CommandService.INSTANCE.getProvider().sendUsage(event, this.getUsage());
+                event.sendUsage(this.getUsage());
                 return;
             }
             if (parameter.isWildcard() && !passedParameter.trim().equals(parameter.getDefaultValue().trim())) {
@@ -65,7 +70,7 @@ public class CommandMeta {
             }
             Object result = CommandService.INSTANCE.transformParameter(event, passedParameter, parameter.getParameterClass());
             if (result == null) {
-                CommandService.INSTANCE.getProvider().sendInternalError(event, "Couldn't find the parameters type!");
+                event.sendInternalError("Couldn't find the parameters type!");
                 return;
             }
             transformedParameters.add(result);
@@ -77,7 +82,7 @@ public class CommandMeta {
         try {
             method.invoke(this.instance, transformedParameters.toArray());
         } catch (Exception e) {
-            CommandService.INSTANCE.getProvider().sendError(event, e);
+            event.sendError(e);
             e.printStackTrace();
         }
     }

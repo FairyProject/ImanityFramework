@@ -1,5 +1,6 @@
 package org.imanity.framework.boot.task;
 
+import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import org.imanity.framework.task.ITaskScheduler;
 
 import java.util.*;
@@ -22,7 +23,11 @@ public class AsyncTaskScheduler implements ITaskScheduler {
     private final ScheduledExecutorService executorService;
 
     public AsyncTaskScheduler() {
-        this.executorService = Executors.newSingleThreadScheduledExecutor();
+        this.executorService = Executors.newSingleThreadScheduledExecutor(new ThreadFactoryBuilder()
+                .setDaemon(true)
+                .setNameFormat("Task Scheduler Thread")
+                .build()
+        );
         this.executorService.scheduleAtFixedRate(() -> {
 
             if (this.changed.get()) {

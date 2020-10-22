@@ -2,7 +2,6 @@ package org.imanity.framework.discord;
 
 import com.google.common.base.Preconditions;
 import lombok.Getter;
-import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.JDABuilder;
 import net.dv8tion.jda.api.entities.*;
@@ -13,11 +12,10 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 import org.imanity.framework.boot.FrameworkBootable;
 import org.imanity.framework.command.CommandProvider;
 import org.imanity.framework.command.CommandService;
-import org.imanity.framework.command.InternalCommandEvent;
 import org.imanity.framework.discord.activity.ActivityProvider;
 import org.imanity.framework.discord.command.DiscordCommandEvent;
-import org.imanity.framework.discord.impl.DiscordCommandProvider;
 import org.imanity.framework.discord.impl.DiscordListenerComponentHolder;
+import org.imanity.framework.discord.provider.DiscordPresenceProvider;
 import org.imanity.framework.plugin.component.ComponentRegistry;
 import org.imanity.framework.plugin.service.Autowired;
 import org.imanity.framework.plugin.service.IService;
@@ -27,13 +25,13 @@ import javax.security.auth.login.LoginException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.TreeSet;
-import java.util.function.Function;
 
 @Service(name = "discord")
 @Getter
 public class DiscordService implements IService {
 
     public static final Logger LOGGER = LogManager.getLogger(DiscordService.class);
+    public static DiscordService INSTANCE;
 
     public static final String
             TOKEN = "discord.token",
@@ -50,14 +48,16 @@ public class DiscordService implements IService {
     private TreeSet<ActivityProvider> activityProviders;
     private List<ListenerAdapter> listenerAdapters;
 
+    private DiscordPresenceProvider presenceProvider;
+
     private long guildId;
 
     private JDA jda;
 
-    private Function<Member, @Nullable String> prefixProvider;
-
     @Override
     public void preInit() {
+        INSTANCE = this;
+
         this.listenerAdapters = new ArrayList<>();
         this.activityProviders = new TreeSet<>((o1, o2) -> Integer.compare(o2.getPriority(), o1.getPriority()));
 
@@ -68,7 +68,7 @@ public class DiscordService implements IService {
     public void init() {
         LOGGER.info("Attempting to Login into discord...");
 
-        this.withPrefixProvider(member -> "!");
+        this.withPresenceProvider(new DiscordPresenceProvider());
 
         String token = this.bootable.get(TOKEN, null);
         Preconditions.checkNotNull(token, "The token couldn't be found! please add [discord.token] into framework bootable configuration!");
@@ -97,7 +97,12 @@ public class DiscordService implements IService {
         this.guildId = this.bootable.getLong(GUILD, -1);
 
         if (this.bootable.getBoolean(USE_DEFAULT_COMMAND_PROVIDER, true)) {
-            this.commandService.withProvider(new DiscordCommandProvider());
+            this.commandService.withProvider(new CommandProvider() {
+                @Override
+                public boolean hasPermission(Object user, String permission) {
+                    return true;
+                }
+            });
         }
 
         int activityUpdateTicks = this.bootable.getInteger(ACTIVITY_UPDATE_TICKS, 20);
@@ -124,16 +129,16 @@ public class DiscordService implements IService {
         return guild.getMemberById(id);
     }
 
+    public void withPresenceProvider(DiscordPresenceProvider presenceProvider) {
+        this.presenceProvider = presenceProvider;
+    }
+
     public void registerListener(ListenerAdapter listener) {
         if (this.isLoggedIn()) {
             this.jda.addEventListener(listener);
         } else {
             this.listenerAdapters.add(listener);
         }
-    }
-
-    public void withPrefixProvider(Function<Member, @Nullable String> prefixProvider) {
-        this.prefixProvider = prefixProvider;
     }
 
     private void updateActivity() {
@@ -154,7 +159,7 @@ public class DiscordService implements IService {
     public void handleMessageReceived(Member member, Message message, MessageChannel channel) {
         String rawMessage = message.getContentRaw();
 
-        String prefix = this.getPrefixProvider().apply(member);
+        String prefix = this.getPresenceProvider().prefix(member);
 
         // Disable if prefix is null for length is 0
         if (prefix == null || prefix.length() == 0) {

@@ -1,7 +1,7 @@
 package org.imanity.framework.command.parameter.impl;
 
 import org.imanity.framework.command.CommandService;
-import org.imanity.framework.command.InternalCommandEvent;
+import org.imanity.framework.command.CommandEvent;
 import org.imanity.framework.command.parameter.ParameterHolder;
 import org.imanity.framework.plugin.component.Component;
 import org.imanity.framework.plugin.service.Autowired;
@@ -16,16 +16,13 @@ public class UUIDParameterType implements ParameterHolder<UUID> {
 		return new Class[] {UUID.class};
 	}
 
-	@Autowired
-	private CommandService commandService;
-
 	@Override
-	public UUID transform(InternalCommandEvent commandEvent, String source) {
+	public UUID transform(CommandEvent event, String source) {
 
 		try {
 			return UUID.fromString(source);
 		} catch (final Exception e) {
-			this.commandService.getProvider().sendInternalError(commandEvent, "That UUID could not be parsed.");
+			event.sendInternalError("That UUID could not be parsed.");
 		}
 
 		return null;

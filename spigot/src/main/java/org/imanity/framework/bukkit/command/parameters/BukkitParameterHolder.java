@@ -2,17 +2,16 @@ package org.imanity.framework.bukkit.command.parameters;
 
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
-import org.imanity.framework.command.InternalCommandEvent;
+import org.imanity.framework.command.CommandEvent;
 import org.imanity.framework.command.parameter.ParameterHolder;
 
-import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 
 public abstract class BukkitParameterHolder<T> implements ParameterHolder<T> {
 
     @Override
-    public final T transform(InternalCommandEvent commandEvent, String source) {
+    public final T transform(CommandEvent commandEvent, String source) {
         if (commandEvent.getUser() instanceof CommandSender) {
             return this.transform((CommandSender) commandEvent.getUser(), source);
         }

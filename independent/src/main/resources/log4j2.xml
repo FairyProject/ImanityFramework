@@ -2,24 +2,26 @@
 <Configuration status="WARN">
     <Properties>
         <Property name="LOG_PATTERN">
-            %d{yyyy-MM-dd HH:mm:ss.SSS} %highlight{%4p}{FATAL=red, ERROR=red, WARN=yellow, INFO=green, DEBUG=green, TRACE=green} --- [%15.15t] %style{%-40.40c{1.}}{cyan} : %m%n%ex
+            %d{yyyy-MM-dd HH:mm:ss.SSS} %highlight{%5p}{FATAL=red, ERROR=red, WARN=yellow, INFO=green, DEBUG=green, TRACE=green} --- [%15.15t] %style{%-40.40c{1.}}{cyan} : %minecraftFormatting{%msg}%n%ex
         </Property>
     </Properties>
     <Appenders>
-        <Console name="Console" target="SYSTEM_OUT">
-            <PatternLayout pattern="${LOG_PATTERN}" />
-        </Console>
+        <TerminalConsole name="Console">
+            <PatternLayout pattern="${LOG_PATTERN}"/>
+        </TerminalConsole>
         <RollingRandomAccessFile name="File" fileName="logs/latest.log" filePattern="logs/%d{yyyy-MM-dd}-%i.log.gz">
             <PatternLayout pattern="[%d{HH:mm:ss}] [%t/%level]: %msg%n" />
             <Policies>
                 <TimeBasedTriggeringPolicy />
                 <OnStartupTriggeringPolicy />
             </Policies>
+            <DefaultRolloverStrategy max="1000"/>
         </RollingRandomAccessFile>
     </Appenders>
     <Loggers>
         <Root level="info">
-            <AppenderRef ref="Console"/>
+            <AppenderRef ref="Console" level="info"/>
+            <AppenderRef ref="File"/>
         </Root>
     </Loggers>
 </Configuration>

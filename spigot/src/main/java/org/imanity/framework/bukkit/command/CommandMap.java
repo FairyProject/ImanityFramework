@@ -13,7 +13,7 @@ import org.imanity.framework.ImanityCommon;
 import org.imanity.framework.bukkit.command.event.BukkitCommandEvent;
 import org.imanity.framework.command.CommandMeta;
 import org.imanity.framework.command.CommandService;
-import org.imanity.framework.command.InternalCommandEvent;
+import org.imanity.framework.command.CommandEvent;
 import org.imanity.framework.command.parameter.ParameterMeta;
 import org.imanity.framework.plugin.service.Autowired;
 
@@ -152,7 +152,7 @@ final class CommandMap extends SimpleCommandMap {
 			CommandMap.parameters.put(((Player) sender).getUniqueId(), command.split(" "));
 		}
 
-		InternalCommandEvent commandEvent = new BukkitCommandEvent(sender, command);
+		CommandEvent commandEvent = new BukkitCommandEvent(sender, command);
 		if (this.commandService.evalCommand(commandEvent)) {
 			return true;
 		}

@@ -1,8 +1,7 @@
 package org.imanity.framework.command.parameter;
 
-import org.imanity.framework.command.InternalCommandEvent;
+import org.imanity.framework.command.CommandEvent;
 
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Set;
@@ -11,7 +10,7 @@ public interface ParameterHolder<T> {
 
     Class[] type();
 
-    T transform(InternalCommandEvent commandEvent, String source);
+    T transform(CommandEvent commandEvent, String source);
 
     default List<String> tabComplete(Object user, Set<String> flags, String source) {
         return Collections.emptyList();

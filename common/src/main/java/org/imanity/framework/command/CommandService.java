@@ -2,7 +2,6 @@ package org.imanity.framework.command;
 
 import com.google.common.collect.ImmutableSet;
 import lombok.Getter;
-import org.imanity.framework.ImanityCommon;
 import org.imanity.framework.command.annotation.Command;
 import org.imanity.framework.command.annotation.CommandHolder;
 import org.imanity.framework.command.annotation.Parameter;
@@ -12,6 +11,7 @@ import org.imanity.framework.plugin.component.ComponentHolder;
 import org.imanity.framework.plugin.component.ComponentRegistry;
 import org.imanity.framework.plugin.service.IService;
 import org.imanity.framework.plugin.service.Service;
+
 import java.lang.reflect.Method;
 import java.util.*;
 
@@ -28,6 +28,7 @@ public class CommandService implements IService {
     @Override
     public void preInit() {
         this.parameters = new HashMap<>();
+
         this.commands = new ArrayList<>();
 
         ComponentRegistry.registerComponentHolder(new ComponentHolder() {
@@ -100,7 +101,7 @@ public class CommandService implements IService {
         this.provider = provider;
     }
 
-    public Object transformParameter(InternalCommandEvent event, String parameter, Class<?> type) {
+    public Object transformParameter(CommandEvent event, String parameter, Class<?> type) {
         if (type == String.class) {
             return parameter;
         }
@@ -122,7 +123,7 @@ public class CommandService implements IService {
     }
 
     // Should without the prefix like / or !
-    public boolean evalCommand(InternalCommandEvent commandEvent) {
+    public boolean evalCommand(CommandEvent commandEvent) {
         Object user = commandEvent.getUser();
         String command = commandEvent.getCommand();
 
@@ -162,18 +163,18 @@ public class CommandService implements IService {
         }
 
         if (!commandMeta.canAccess(user)) {
-            this.provider.sendNoPermission(commandEvent);
+            commandEvent.sendNoPermission();
             return false;
         }
 
-        if (!this.provider.shouldExecute(commandEvent, commandMeta, arguments)) {
+        if (!commandEvent.shouldExecute(commandMeta, arguments)) {
             return false;
         }
 
         try {
             commandMeta.execute(commandEvent, arguments);
         } catch (Throwable throwable) {
-            this.getProvider().sendError(commandEvent, throwable);
+            commandEvent.sendError(throwable);
             return false;
         }
         return true;

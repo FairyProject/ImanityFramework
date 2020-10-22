@@ -6,13 +6,20 @@ import joptsimple.OptionException;
 import joptsimple.OptionParser;
 import joptsimple.OptionSet;
 import lombok.Getter;
+import net.minecrell.terminalconsole.TerminalConsoleAppender;
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.imanity.framework.ImanityCommon;
+import org.imanity.framework.boot.annotation.PostDestroy;
 import org.imanity.framework.boot.annotation.PostInitialize;
+import org.imanity.framework.boot.annotation.PreDestroy;
 import org.imanity.framework.boot.annotation.PreInitialize;
+import org.imanity.framework.boot.console.ForwardLogHandler;
+import org.imanity.framework.boot.console.ImanityConsole;
 import org.imanity.framework.boot.console.OptionHandler;
+import org.imanity.framework.boot.console.command.ConsoleCommandEvent;
+import org.imanity.framework.boot.enums.ProgramStatus;
 import org.imanity.framework.boot.error.ErrorHandler;
 import org.imanity.framework.boot.impl.IndependentCommandExecutor;
 import org.imanity.framework.boot.impl.IndependentEventHandler;
@@ -20,15 +27,17 @@ import org.imanity.framework.boot.impl.IndependentImanityBridge;
 import org.imanity.framework.boot.impl.IndependentPlayerBridge;
 import org.imanity.framework.boot.task.AsyncTaskScheduler;
 import org.imanity.framework.boot.user.UserInterface;
-import org.imanity.framework.boot.console.LoggerOutputStream;
+import org.imanity.framework.command.CommandService;
 import org.imanity.framework.libraries.classloader.PluginClassLoader;
+import org.imanity.framework.plugin.service.Autowired;
 import org.imanity.framework.util.AccessUtil;
+import org.imanity.framework.util.CC;
+import org.imanity.framework.util.Utility;
 import org.jetbrains.annotations.Nullable;
 import org.yaml.snakeyaml.Yaml;
 
 import java.io.File;
 import java.io.IOException;
-import java.io.PrintStream;
 import java.io.PrintWriter;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
@@ -64,7 +73,10 @@ public final class FrameworkBootable {
     private AsyncTaskScheduler taskScheduler;
     private Yaml yaml;
 
-    private boolean shuttingDown, useJline;
+    private volatile ProgramStatus status;
+
+    @Autowired
+    private CommandService commandService;
 
     public FrameworkBootable(Class<?> bootableClass) {
         this.bootableClass = bootableClass;
@@ -72,7 +84,8 @@ public final class FrameworkBootable {
 
         this.configurations = new HashMap<>();
         this.optionHandlers = new ArrayList<>();
-        LOGGER = LogManager.getLogger(bootableClass);
+
+        this.status = ProgramStatus.BOOTING;
     }
 
     public FrameworkBootable withUserInterface(UserInterface<?> userInterface) {
@@ -96,6 +109,14 @@ public final class FrameworkBootable {
             this.initArguments(args);
             this.initConsole();
 
+            LOGGER.info("\n" + CC.CHAT_BAR + "\n" +
+                               "§b██╗███╗░░░███╗░█████╗░███╗░░██╗██╗████████╗██╗░░░██╗\n" +
+                                 "██║████╗░████║██╔══██╗████╗░██║██║╚══██╔══╝╚██╗░██╔╝\n" +
+                                 "██║██╔████╔██║███████║██╔██╗██║██║░░░██║░░░░╚████╔╝░\n" +
+                                 "██║██║╚██╔╝██║██╔══██║██║╚████║██║░░░██║░░░░░╚██╔╝░░\n" +
+                                 "██║██║░╚═╝░██║██║░░██║██║░╚███║██║░░░██║░░░░░░██║░░░\n" +
+                                 "╚═╝╚═╝░░░░░╚═╝╚═╝░░╚═╝╚═╝░░╚══╝╚═╝░░░╚═╝░░░░░░╚═╝░░░\n" +
+                                 CC.GRAY + CC.STRIKE_THROUGH + "========== " + CC.WHITE + "Made with " + CC.PINK + "Love <3 " + CC.GRAY + CC.STRIKE_THROUGH + "==========");
             LOGGER.info("Initializing Framework bootable...");
 
             this.bootableObject = this.bootableClass.newInstance();
@@ -121,12 +142,22 @@ public final class FrameworkBootable {
 
             builder.init();
 
-            Runtime.getRuntime().addShutdownHook(new Thread(this::shutdown));
+            Runtime.getRuntime().addShutdownHook(new Thread(this::shutdown, "Shutdown Thread"));
 
+            this.status = ProgramStatus.RUNNING;
             this.call(PostInitialize.class);
         } catch (Throwable exception) {
             this.handleError(exception);
         }
+    }
+
+    public void issueCommand(String command) {
+        if (this.commandService == null) {
+            LOGGER.warn(CC.RED + "You couldn't do this yet!");
+            return;
+        }
+
+        this.commandService.evalCommand(new ConsoleCommandEvent(command));
     }
 
     private void call(Class<? extends Annotation> annotation) throws ReflectiveOperationException {
@@ -248,9 +279,32 @@ public final class FrameworkBootable {
         return value != null ? Long.parseLong(value) : orDefault;
     }
 
-    private void initConsole() throws IOException {
-        System.setOut(new PrintStream(new LoggerOutputStream(LOGGER, Level.INFO), true));
-        System.setErr(new PrintStream(new LoggerOutputStream(LOGGER, Level.WARN), true));
+    private void initConsole() {
+        Thread thread = new Thread("Console Thread") {
+            @Override
+            public void run() {
+                new ImanityConsole(FrameworkBootable.this).start();
+            }
+        };
+
+        java.util.logging.Logger global = java.util.logging.Logger.getLogger("");
+        global.setUseParentHandlers(false);
+        for (java.util.logging.Handler handler : global.getHandlers()) {
+            global.removeHandler(handler);
+        }
+        global.addHandler(new ForwardLogHandler());
+
+        final Logger logger = LogManager.getRootLogger();
+
+        System.setOut(org.apache.logging.log4j.io.IoBuilder.forLogger(logger).setLevel(Level.INFO).buildPrintStream());
+        System.setErr(org.apache.logging.log4j.io.IoBuilder.forLogger(logger).setLevel(Level.WARN).buildPrintStream());
+
+        thread.setDaemon(true);
+        thread.start();
+
+        LOGGER = LogManager.getLogger(this.bootableClass);
+
+        LOGGER.info("Console initialized.");
     }
 
     private void initFiles() {
@@ -270,9 +324,41 @@ public final class FrameworkBootable {
         return new File(folder, "crash-" + LOG_FILE_FORMAT.format(date) + ".log");
     }
 
-    public void shutdown() {
-        this.shuttingDown = true;
+    public boolean isShuttingDown() {
+        return this.status == ProgramStatus.SHUTTING_DOWN;
+    }
 
-        LOGGER.info("Shutting down...");
+    public boolean isClosed() {
+        return this.status == ProgramStatus.CLOSED;
+    }
+
+    public void shutdown() {
+        if (this.status == ProgramStatus.SHUTTING_DOWN || this.status == ProgramStatus.CLOSED) {
+            return;
+        }
+
+        try {
+            this.status = ProgramStatus.SHUTTING_DOWN;
+
+            LOGGER.info("Shutting down...");
+            Utility.tryCatch(() -> this.call(PreDestroy.class));
+
+            ImanityCommon.shutdown();
+
+            Utility.tryCatch(() -> this.call(PostDestroy.class));
+            this.status = ProgramStatus.CLOSED;
+
+        } catch (Throwable throwable) {
+            throwable.printStackTrace();
+        }
+
+        System.exit(0);
+
+        try {
+            TerminalConsoleAppender.close();
+        } catch (IOException e) {
+            // IGNORE
+        }
+
     }
 }
