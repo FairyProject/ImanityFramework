@@ -65,6 +65,7 @@ public class CommandMeta {
             }
             Object result = CommandService.INSTANCE.transformParameter(event, passedParameter, parameter.getParameterClass());
             if (result == null) {
+                CommandService.INSTANCE.getProvider().sendInternalError(event, "Couldn't find the parameters type!");
                 return;
             }
             transformedParameters.add(result);

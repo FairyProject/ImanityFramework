@@ -161,15 +161,21 @@ public class CommandService implements IService {
             return false;
         }
 
-        if (commandMeta.canAccess(user)) {
+        if (!commandMeta.canAccess(user)) {
             this.provider.sendNoPermission(commandEvent);
+            return false;
         }
 
         if (!this.provider.shouldExecute(commandEvent, commandMeta, arguments)) {
             return false;
         }
 
-        commandMeta.execute(commandEvent, arguments);
+        try {
+            commandMeta.execute(commandEvent, arguments);
+        } catch (Throwable throwable) {
+            this.getProvider().sendError(commandEvent, throwable);
+            return false;
+        }
         return true;
     }
 }

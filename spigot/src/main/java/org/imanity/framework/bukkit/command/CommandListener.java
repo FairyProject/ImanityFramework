@@ -71,7 +71,7 @@ public class CommandListener implements Listener {
             }
 
             @Override
-            public void sendError(InternalCommandEvent commandEvent, Exception exception) {
+            public void sendError(InternalCommandEvent commandEvent, Throwable throwable) {
                 if (commandEvent.getUser() instanceof CommandSender) {
                     ((CommandSender) commandEvent.getUser()).sendMessage(ChatColor.RED + "It appears there was some issues processing your command...");
                     return;

@@ -18,7 +18,7 @@ public class DiscordCommandProvider implements CommandProvider<DiscordCommandEve
     }
 
     @Override
-    public void sendError(DiscordCommandEvent commandEvent, Exception exception) {
+    public void sendError(DiscordCommandEvent commandEvent, Throwable exception) {
         commandEvent.reply("An error occurs: " + exception.getClass().getSimpleName() + " - " + exception.getLocalizedMessage());
     }
 
@@ -33,8 +33,7 @@ public class DiscordCommandProvider implements CommandProvider<DiscordCommandEve
     }
 
     @Override
-    public boolean shouldExecute(DiscordCommandEvent commandEvent, CommandMeta meta, String[] arguments) {
-        DiscordCommandEvent event = (DiscordCommandEvent) commandEvent;
+    public boolean shouldExecute(DiscordCommandEvent event, CommandMeta meta, String[] arguments) {
 
         if (meta.getMethod().getAnnotation(OnlyPrivate.class) != null && !event.isPrivate()) {
             return false;

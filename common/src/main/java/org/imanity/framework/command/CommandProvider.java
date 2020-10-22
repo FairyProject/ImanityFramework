@@ -6,7 +6,7 @@ public interface CommandProvider<T extends InternalCommandEvent> {
 
     void sendUsage(T commandEvent, String usage);
 
-    void sendError(T commandEvent, Exception exception);
+    void sendError(T commandEvent, Throwable throwable);
 
     void sendNoPermission(T commandEvent);
 
