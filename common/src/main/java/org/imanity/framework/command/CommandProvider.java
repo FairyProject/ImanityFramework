@@ -1,18 +1,18 @@
 package org.imanity.framework.command;
 
-public interface CommandProvider {
+public interface CommandProvider<T extends InternalCommandEvent> {
     
     boolean hasPermission(Object user, String permission);
 
-    void sendUsage(InternalCommandEvent commandEvent, String usage);
+    void sendUsage(T commandEvent, String usage);
 
-    void sendError(InternalCommandEvent commandEvent, Exception exception);
+    void sendError(T commandEvent, Exception exception);
 
-    void sendNoPermission(InternalCommandEvent commandEvent);
+    void sendNoPermission(T commandEvent);
 
-    void sendInternalError(InternalCommandEvent commandEvent, String message);
+    void sendInternalError(T commandEvent, String message);
 
-    default boolean shouldExecute(InternalCommandEvent commandEvent, CommandMeta meta, String[] arguments) {
+    default boolean shouldExecute(T commandEvent, CommandMeta meta, String[] arguments) {
         return true;
     }
 
