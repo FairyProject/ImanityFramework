@@ -50,9 +50,7 @@ public class CommandMeta {
     public void execute(InternalCommandEvent event, String[] arguments) {
         List<Object> transformedParameters = new ArrayList<>();
 
-        Object sender = event.getUser();
-
-        transformedParameters.add(sender);
+        transformedParameters.add(event);
 
         for (int i = 0; i < this.getParameters().size(); i++) {
             ParameterMeta parameter = getParameters().get(i);

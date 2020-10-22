@@ -96,7 +96,7 @@ public class AsyncTaskScheduler implements ITaskScheduler {
     }
 
     public int handle(long period, Runnable runnable) {
-        return this.handle(period, runnable);
+        return this.handle(period, period, runnable);
     }
 
     public int handle(long next, long period, Runnable runnable) {

@@ -10,6 +10,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.server.ServerCommandEvent;
 import org.bukkit.util.StringUtil;
 import org.imanity.framework.ImanityCommon;
+import org.imanity.framework.bukkit.command.event.BukkitCommandEvent;
 import org.imanity.framework.command.CommandMeta;
 import org.imanity.framework.command.CommandService;
 import org.imanity.framework.command.InternalCommandEvent;
@@ -47,7 +48,7 @@ final class CommandMap extends SimpleCommandMap {
 			boolean doneHere = false;
 
 			CommandLoop:
-			for (CommandMeta command : this.commandService.getCommands().values()) {
+			for (CommandMeta command : this.commandService.getCommands()) {
 				if (!command.canAccess(player)) {
 					continue;
 				}
@@ -151,7 +152,7 @@ final class CommandMap extends SimpleCommandMap {
 			CommandMap.parameters.put(((Player) sender).getUniqueId(), command.split(" "));
 		}
 
-		InternalCommandEvent commandEvent = new InternalCommandEvent(sender, command);
+		InternalCommandEvent commandEvent = new BukkitCommandEvent(sender, command);
 		if (this.commandService.evalCommand(commandEvent)) {
 			return true;
 		}

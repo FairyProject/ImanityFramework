@@ -39,6 +39,8 @@ public class ImanityRedis implements IService {
             return;
         }
 
+        this.serverHandler = new ServerHandler(this);
+
         ComponentRegistry.registerComponentHolder(new ComponentHolder() {
 
             @Override
@@ -73,8 +75,6 @@ public class ImanityRedis implements IService {
         }
 
         this.client = Redisson.create(config);
-
-        this.serverHandler = new ServerHandler(this);
         this.serverHandler.init();
     }
 

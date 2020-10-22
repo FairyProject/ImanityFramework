@@ -44,7 +44,7 @@ public class ComponentRegistry {
             new AnnotationDetector(new AnnotationDetector.TypeReporter() {
                 @Override
                 public void reportTypeAnnotation(Class<? extends Annotation> annotation, String className) {
-                    Utility.tryCatch(() -> {
+                    try {
                         Class<?> componentClass = Class.forName(className);
 
                         ComponentHolder componentHolder = getComponentHolder(componentClass);
@@ -53,7 +53,9 @@ public class ComponentRegistry {
                         if (instance != null) {
                             serviceHandler.registerAutowired(instance);
                         }
-                    });
+                    } catch (Throwable throwable) {
+                        throwable.printStackTrace();
+                    }
                 }
 
                 @Override

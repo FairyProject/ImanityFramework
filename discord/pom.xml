@@ -103,6 +103,10 @@
             <name>jcenter-bintray</name>
             <url>https://jcenter.bintray.com</url>
         </repository>
+        <repository>
+            <id>imanity-repo</id>
+            <url>https://maven.imanity.dev/repository/imanity-libraries/</url>
+        </repository>
     </repositories>
 
     <dependencies>
@@ -113,15 +117,15 @@
             <scope>provided</scope>
         </dependency>
         <dependency>
-            <groupId>org.imanity.framework</groupId>
-            <artifactId>independent</artifactId>
-            <version>1.0-SNAPSHOT</version>
-            <scope>provided</scope>
-        </dependency>
-        <dependency>
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>
             <version>1.18.0</version>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.imanity.framework</groupId>
+            <artifactId>independent</artifactId>
+            <version>1.0-SNAPSHOT</version>
             <scope>provided</scope>
         </dependency>
         <dependency>

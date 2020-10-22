@@ -7,6 +7,7 @@ import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.JDABuilder;
 import net.dv8tion.jda.api.entities.Activity;
 import net.dv8tion.jda.api.entities.Member;
+import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.checkerframework.checker.nullness.qual.Nullable;
@@ -16,11 +17,15 @@ import org.imanity.framework.command.CommandService;
 import org.imanity.framework.command.InternalCommandEvent;
 import org.imanity.framework.discord.activity.ActivityProvider;
 import org.imanity.framework.discord.command.DiscordCommandEvent;
+import org.imanity.framework.discord.impl.DiscordListenerComponentHolder;
+import org.imanity.framework.plugin.component.ComponentRegistry;
 import org.imanity.framework.plugin.service.Autowired;
 import org.imanity.framework.plugin.service.IService;
 import org.imanity.framework.plugin.service.Service;
 
 import javax.security.auth.login.LoginException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.TreeSet;
 import java.util.function.Function;
 
@@ -36,16 +41,24 @@ public class DiscordService implements IService {
     private CommandService commandService;
 
     private TreeSet<ActivityProvider> activityProviders;
+    private List<ListenerAdapter> listenerAdapters;
 
     private JDA jda;
 
     private Function<Member, @Nullable String> prefixProvider;
 
     @Override
+    public void preInit() {
+        this.listenerAdapters = new ArrayList<>();
+        this.activityProviders = new TreeSet<>((o1, o2) -> Integer.compare(o2.getPriority(), o1.getPriority()));
+
+        ComponentRegistry.registerComponentHolder(new DiscordListenerComponentHolder());
+    }
+
+    @Override
     public void init() {
         LOGGER.info("Attempting to Login into discord...");
 
-        this.activityProviders = new TreeSet<>((o1, o2) -> Integer.compare(o2.getPriority(), o1.getPriority()));
         this.prefixProvider = member -> "!";
 
         String token = this.bootable.get("discord.token", null);
@@ -60,6 +73,12 @@ public class DiscordService implements IService {
                 builder = JDABuilder.createDefault(token);
             }
 
+            for (ListenerAdapter adapter : this.listenerAdapters) {
+                builder.addEventListeners(adapter);
+            }
+            this.listenerAdapters.clear();
+            this.listenerAdapters = null;
+
             this.jda = builder.build();
         } catch (LoginException e) {
             this.bootable.handleError(e);
@@ -69,6 +88,18 @@ public class DiscordService implements IService {
         this.bootable.getTaskScheduler().runAsyncRepeated(this::updateActivity, activityUpdateTicks);
 
         LOGGER.info("Logging into discord bot successful. discord: " + this.jda.getSelfUser().getName());
+    }
+
+    public boolean isLoggedIn() {
+        return this.jda != null;
+    }
+
+    public void registerListener(ListenerAdapter listener) {
+        if (this.isLoggedIn()) {
+            this.jda.addEventListener(listener);
+        } else {
+            this.listenerAdapters.add(listener);
+        }
     }
 
     public void withPrefixProvider(Function<Member, @Nullable String> prefixProvider) {

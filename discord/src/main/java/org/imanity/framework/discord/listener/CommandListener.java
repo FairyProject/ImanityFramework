@@ -23,6 +23,11 @@ public class CommandListener extends ListenerAdapter {
     public void onGuildMessageReceived(@NotNull GuildMessageReceivedEvent event) {
 
         Member member = event.getMember();
+
+        if (member.getIdLong() == discordService.getJda().getSelfUser().getIdLong()) {
+            return;
+        }
+
         Message message = event.getMessage();
         String rawMessage = message.getContentRaw();
 
@@ -32,6 +37,7 @@ public class CommandListener extends ListenerAdapter {
         if (prefix == null || prefix.length() == 0) {
             return;
         }
+
 
         // Doesn't match to prefix
         if (!rawMessage.startsWith(prefix)) {

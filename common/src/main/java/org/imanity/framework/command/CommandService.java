@@ -2,6 +2,7 @@ package org.imanity.framework.command;
 
 import com.google.common.collect.ImmutableSet;
 import lombok.Getter;
+import org.imanity.framework.ImanityCommon;
 import org.imanity.framework.command.annotation.Command;
 import org.imanity.framework.command.annotation.CommandHolder;
 import org.imanity.framework.command.annotation.Parameter;
@@ -22,10 +23,13 @@ public class CommandService implements IService {
 
     private CommandProvider provider;
     private Map<Class<?>, ParameterHolder> parameters;
-    private Map<String, CommandMeta> commands;
+    private List<CommandMeta> commands;
 
     @Override
     public void preInit() {
+        this.parameters = new HashMap<>();
+        this.commands = new ArrayList<>();
+
         ComponentRegistry.registerComponentHolder(new ComponentHolder() {
             @Override
             public Class<?>[] type() {
@@ -59,9 +63,6 @@ public class CommandService implements IService {
     @Override
     public void init() {
         INSTANCE = this;
-
-        this.parameters = new HashMap<>();
-        this.commands = new HashMap<>();
     }
 
     public void registerParameterHolder(ParameterHolder parameterHolder) {
@@ -90,9 +91,7 @@ public class CommandService implements IService {
                 }
 
                 CommandMeta meta = new CommandMeta(command.names(), command.permissionNode(), parameterData, holder, method);
-                for (String name : command.names()) {
-                    this.commands.put(name.toLowerCase(), meta);
-                }
+                this.commands.add(meta);
             }
         }
     }
@@ -131,14 +130,36 @@ public class CommandService implements IService {
             return false;
         }
 
-        String[] split = command.split(" ");
+        CommandMeta commandMeta = null;
+        String[] arguments = new String[0];
 
-        CommandMeta commandMeta = this.commands.get(split[0].toLowerCase());
+        search:
+        for (CommandMeta meta : this.commands) {
+            for (String alias : meta.getNames()) {
+                String message = command.toLowerCase() + " ";
+                String alia = alias.toLowerCase() + " ";
+
+                if (message.startsWith(alia)) {
+                    commandMeta = meta;
+
+                    if (message.length() > alia.length()) {
+                        if (commandMeta.getParameters().size() == 0) {
+                            continue;
+                        }
+                    }
+
+                    if (command.length() > alias.length() + 1) {
+                        arguments = command.substring(alias.length() + 1).split(" ");
+                    }
+
+                    break search;
+                }
+            }
+        }
+
         if (commandMeta == null) {
             return false;
         }
-
-        String[] arguments = Arrays.copyOfRange(split, 1, split.length);
 
         if (commandMeta.canAccess(user)) {
             this.provider.sendNoPermission(commandEvent);

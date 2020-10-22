@@ -11,6 +11,7 @@ import org.bukkit.event.player.PlayerCommandPreprocessEvent;
 import org.bukkit.event.server.ServerCommandEvent;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.imanity.framework.bukkit.Imanity;
+import org.imanity.framework.bukkit.command.event.BukkitCommandEvent;
 import org.imanity.framework.bukkit.events.PostServicesInitialEvent;
 import org.imanity.framework.bukkit.util.TaskUtil;
 import org.imanity.framework.command.CommandProvider;
@@ -33,7 +34,7 @@ public class CommandListener implements Listener {
         final String command = event.getMessage().substring(1);
 
         CommandMap.parameters.put(event.getPlayer().getUniqueId(), command.split(" "));
-        InternalCommandEvent commandEvent = new InternalCommandEvent(event.getPlayer(), command);
+        InternalCommandEvent commandEvent = new BukkitCommandEvent(event.getPlayer(), command);
 
         if (this.commandService.evalCommand(commandEvent)) {
             event.setCancelled(true);
@@ -42,7 +43,7 @@ public class CommandListener implements Listener {
 
     @EventHandler
     public void onConsoleCommand(ServerCommandEvent event) {
-        InternalCommandEvent commandEvent = new InternalCommandEvent(event.getSender(), event.getCommand());
+        InternalCommandEvent commandEvent = new BukkitCommandEvent(event.getSender(), event.getCommand());
 
         if (this.commandService.evalCommand(commandEvent)) {
             event.setCancelled(true);
