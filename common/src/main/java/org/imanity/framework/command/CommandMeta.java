@@ -74,7 +74,7 @@ public class CommandMeta {
         }
 
         try {
-            method.invoke(null, transformedParameters.toArray());
+            method.invoke(this.instance, transformedParameters.toArray());
         } catch (Exception e) {
             CommandService.INSTANCE.getProvider().sendError(event, e);
             e.printStackTrace();
