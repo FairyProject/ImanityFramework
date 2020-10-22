@@ -243,6 +243,11 @@ public final class FrameworkBootable {
         return value != null ? Integer.parseInt(value) : orDefault;
     }
 
+    public long getLong(String key, long orDefault) {
+        String value = this.get(key, null);
+        return value != null ? Long.parseLong(value) : orDefault;
+    }
+
     private void initConsole() throws IOException {
         System.setOut(new PrintStream(new LoggerOutputStream(LOGGER, Level.INFO), true));
         System.setErr(new PrintStream(new LoggerOutputStream(LOGGER, Level.WARN), true));
@@ -270,5 +275,4 @@ public final class FrameworkBootable {
 
         LOGGER.info("Shutting down...");
     }
-
 }

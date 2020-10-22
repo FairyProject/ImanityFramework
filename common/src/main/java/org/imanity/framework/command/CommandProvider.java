@@ -12,4 +12,8 @@ public interface CommandProvider {
 
     void sendInternalError(InternalCommandEvent commandEvent, String message);
 
+    default boolean shouldExecute(InternalCommandEvent commandEvent, CommandMeta meta, String[] arguments) {
+        return true;
+    }
+
 }

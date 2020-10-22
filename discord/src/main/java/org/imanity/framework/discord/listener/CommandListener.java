@@ -2,7 +2,9 @@ package org.imanity.framework.discord.listener;
 
 import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.Message;
+import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent;
+import net.dv8tion.jda.api.events.message.priv.PrivateMessageReceivedEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import org.imanity.framework.command.CommandService;
 import org.imanity.framework.discord.DiscordService;
@@ -22,30 +24,35 @@ public class CommandListener extends ListenerAdapter {
     @Override
     public void onGuildMessageReceived(@NotNull GuildMessageReceivedEvent event) {
 
+        if (event.getAuthor().isBot()) {
+            return;
+        }
+
         Member member = event.getMember();
 
-        if (member.getIdLong() == discordService.getJda().getSelfUser().getIdLong()) {
+        if (member == null) {
             return;
         }
 
-        Message message = event.getMessage();
-        String rawMessage = message.getContentRaw();
+        this.discordService.handleMessageReceived(member, event.getMessage(), event.getChannel());
 
-        String prefix = this.discordService.getPrefixProvider().apply(member);
+    }
 
-        // Disable if prefix is null for length is 0
-        if (prefix == null || prefix.length() == 0) {
+    @Override
+    public void onPrivateMessageReceived(@NotNull PrivateMessageReceivedEvent event) {
+
+        User author = event.getAuthor();
+
+        if (author.isBot()) {
             return;
         }
 
-
-        // Doesn't match to prefix
-        if (!rawMessage.startsWith(prefix)) {
+        Member member = this.discordService.getMemberById(author.getIdLong());
+        if (member == null) {
             return;
         }
 
-        DiscordCommandEvent commandEvent = new DiscordCommandEvent(member, rawMessage.substring(1), event.getChannel());
-        commandService.evalCommand(commandEvent);
+        this.discordService.handleMessageReceived(member, event.getMessage(), event.getChannel());
 
     }
 }

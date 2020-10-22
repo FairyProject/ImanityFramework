@@ -165,6 +165,10 @@ public class CommandService implements IService {
             this.provider.sendNoPermission(commandEvent);
         }
 
+        if (!this.provider.shouldExecute(commandEvent, commandMeta, arguments)) {
+            return false;
+        }
+
         commandMeta.execute(commandEvent, arguments);
         return true;
     }
