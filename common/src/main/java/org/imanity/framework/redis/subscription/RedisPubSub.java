@@ -24,49 +24,44 @@
 
 package org.imanity.framework.redis.subscription;
 
+import com.fasterxml.jackson.annotation.JsonAutoDetect;
+import com.fasterxml.jackson.annotation.PropertyAccessor;
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import lombok.Getter;
-import org.imanity.framework.redis.ImanityRedis;
+import org.imanity.framework.data.mapping.DataElementMapper;
+import org.imanity.framework.redis.RedisService;
 import org.redisson.api.RTopic;
 
+import java.util.function.Consumer;
+
 @Getter
-public class RedisPubSub {
-    private static final Gson GSON = new Gson();
+public class RedisPubSub<T> {
+    public static final DataElementMapper MAPPER;
+
+    static {
+
+        MAPPER = new DataElementMapper();
+        MAPPER.setVisibility(PropertyAccessor.FIELD, JsonAutoDetect.Visibility.ANY);
+
+    }
 
     private final String name;
     private final RTopic topic;
+    private final Class<T> type;
 
-    public RedisPubSub(String name, ImanityRedis redis) {
+    public RedisPubSub(String name, RedisService redis, Class<T> type) {
         this.name = name;
         this.topic = redis.getClient().getTopic(name);
+        this.type = type;
     }
 
-    public void subscribe(IRedisSubscription subscription) {
-        this.topic.addListenerAsync(String.class, (channel, message) -> {
-            JsonObject object = GSON.fromJson(message, JsonObject.class).getAsJsonObject();
-            String payload = object.get("payload").getAsString();
-            JsonObject data = object.get("data").getAsJsonObject();
-            subscription.onMessage(payload, data);
-        });
+    public void subscribe(Consumer<T> subscription) {
+        this.topic.addListenerAsync(this.type, (channel, message) -> subscription.accept(message));
     }
 
-    public void publish(String payload, JsonObject data) {
-        JsonObject payloadObject = new JsonObject();
-        payloadObject.addProperty("payload", payload);
-        payloadObject.add("data", data == null ? new JsonObject() : data);
-        this.topic.publishAsync(payloadObject);
-    }
-
-    public void publish(int id, JsonObject data) {
-        JsonObject payloadObject = new JsonObject();
-        payloadObject.addProperty("payload", String.valueOf(id));
-        payloadObject.add("data", data == null ? new JsonObject() : data);
-        this.topic.publishAsync(payloadObject);
-    }
-
-    public void publish(Enum payload, JsonObject data) {
-        this.publish(payload.name(), data);
+    public void publish(Object payload) {
+        this.topic.publishAsync(payload);
     }
 
     public void disable() {

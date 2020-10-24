@@ -43,7 +43,8 @@ import org.imanity.framework.player.IPlayerBridge;
 import org.imanity.framework.data.PlayerData;
 import org.imanity.framework.plugin.service.Autowired;
 import org.imanity.framework.plugin.service.ServiceHandler;
-import org.imanity.framework.redis.ImanityRedis;
+import org.imanity.framework.redis.RedisService;
+import org.imanity.framework.redis.server.ServerHandler;
 import org.imanity.framework.redis.server.enums.ServerState;
 import org.imanity.framework.task.ITaskScheduler;
 import java.util.EnumSet;
@@ -52,7 +53,7 @@ import java.util.Set;
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class ImanityCommon {
 
-    private static final Set<Library> GLOBAL_LIBRARIES = EnumSet.of(Library.REDISSON, Library.MONGO_DB, Library.HIKARI_CP, Library.YAML, Library.CAFFEINE);
+    private static final Set<Library> GLOBAL_LIBRARIES = EnumSet.of(Library.MONGO_DB, Library.HIKARI_CP, Library.YAML, Library.CAFFEINE);
 
     public static ImanityBridge BRIDGE;
     public static CoreConfig CORE_CONFIG;
@@ -74,7 +75,10 @@ public class ImanityCommon {
     public static Mongo MONGO;
 
     @Autowired
-    public static ImanityRedis REDIS;
+    public static RedisService REDIS;
+
+    @Autowired
+    public static ServerHandler SERVER_HANDLER;
 
     private static boolean librariesInitialized, bridgeInitialized;
 
@@ -118,6 +122,19 @@ public class ImanityCommon {
             ImanityCommon.LIBRARY_HANDLER.downloadLibraries(guava);
             ImanityCommon.LIBRARY_HANDLER.obtainClassLoaderWith(guava);
         }
+
+        EnumSet<Library> redisson;
+        try {
+            Class.forName("io.netty.channel.Channel");
+
+            redisson = EnumSet.of(Library.REDISSON_RELOCATED);
+        } catch (ClassNotFoundException ex) {
+            redisson = EnumSet.of(Library.REDISSON);
+        }
+
+        ImanityCommon.LIBRARY_HANDLER.downloadLibraries(redisson);
+        ImanityCommon.LIBRARY_HANDLER.obtainClassLoaderWith(redisson);
+
     }
 
     public static Logger getLogger() {
@@ -134,7 +151,7 @@ public class ImanityCommon {
 
     public static void shutdown() {
         if (ImanityCommon.CORE_CONFIG.USE_REDIS) {
-            ImanityCommon.REDIS.getServerHandler().changeServerState(ServerState.STOPPING);
+            SERVER_HANDLER.changeServerState(ServerState.STOPPING);
         }
 
         DataHandler.shutdown();

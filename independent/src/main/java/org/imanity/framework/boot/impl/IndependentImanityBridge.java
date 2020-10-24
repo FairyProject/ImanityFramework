@@ -30,6 +30,7 @@ import org.imanity.framework.ImanityBridge;
 import org.imanity.framework.boot.FrameworkBootable;
 import org.imanity.framework.libraries.classloader.PluginClassLoader;
 import org.imanity.framework.util.FileUtils;
+import org.imanity.framework.util.entry.Entry;
 import org.yaml.snakeyaml.Yaml;
 
 import java.io.*;
@@ -134,8 +135,11 @@ public class IndependentImanityBridge implements ImanityBridge {
     }
 
     @Override
-    public List<Object> getPluginInstances() {
-        return Arrays.asList(this.bootable, this.bootable.getBootableObject());
+    public List<Entry<String, Object>> getPluginInstances() {
+        return Arrays.asList(
+                new Entry<>("bootable", this.bootable),
+                new Entry<>("independent", this.bootable.getBootableObject())
+        );
     }
 
     @Override

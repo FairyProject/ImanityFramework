@@ -38,7 +38,7 @@ import java.util.stream.Collectors;
 public class DataHandler {
 
     protected static final Map<Class<? extends AbstractData>, StoreDatabase> DATABASES = new HashMap<>();
-    protected static final DataElementMapper MAPPER = new DataElementMapper();
+    public static final DataElementMapper MAPPER = new DataElementMapper();
 
     public static <T extends AbstractData> T fromDocument(@Nullable Document document, Class<T> type) {
         if (document == null) {

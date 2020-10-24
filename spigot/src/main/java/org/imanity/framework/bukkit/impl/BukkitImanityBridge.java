@@ -32,6 +32,8 @@ import org.imanity.framework.bukkit.Imanity;
 import org.imanity.framework.bukkit.util.SpigotUtil;
 import org.imanity.framework.bukkit.util.BukkitUtil;
 import org.imanity.framework.libraries.classloader.PluginClassLoader;
+import org.imanity.framework.util.entry.Entry;
+import org.imanity.framework.util.entry.EntryArrayList;
 
 import java.io.File;
 import java.io.InputStream;
@@ -78,8 +80,10 @@ public class BukkitImanityBridge implements ImanityBridge {
     }
 
     @Override
-    public List<Object> getPluginInstances() {
-        return ImmutableList.copyOf(Imanity.PLUGINS);
+    public List<Entry<String, Object>> getPluginInstances() {
+        return Imanity.PLUGINS.stream()
+                .map(plugin -> new Entry<>(plugin.getName(), (Object) plugin))
+                .collect(Collectors.toList());
     }
 
     @Override

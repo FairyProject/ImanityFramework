@@ -22,19 +22,33 @@
  * SOFTWARE.
  */
 
-package org.imanity.framework.redis.message.transformer.impl;
+package org.imanity.framework.plugin.service;
 
-import com.google.gson.JsonObject;
-import org.imanity.framework.redis.message.transformer.FieldTransformer;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.Setter;
 
-public class StringTransformer implements FieldTransformer<String> {
-    @Override
-    public void add(JsonObject object, String name, Object value) {
-        object.addProperty(name, (String) value);
+@AllArgsConstructor
+@Getter
+@Setter
+public class ServiceData {
+
+    private Class<?> type;
+
+    private Object instance;
+
+    private String name;
+    private String[] dependencies;
+
+    public ServiceData(Object instance, Service service) {
+        this.type = instance.getClass();
+        this.instance = instance;
+        this.name = service.name();
+        this.dependencies = service.dependencies();
     }
 
-    @Override
-    public String parse(JsonObject object, Class<?> type, String name) {
-        return object.get(name).getAsString();
+    public boolean hasDependencies() {
+        return this.dependencies.length > 0;
     }
+
 }

@@ -35,6 +35,6 @@ public class MessageListenerData {
 
     private final Object instance;
     private final Method method;
-    private final Class<? extends Message> messageClass;
+    private final Class<?> messageClass;
 
 }

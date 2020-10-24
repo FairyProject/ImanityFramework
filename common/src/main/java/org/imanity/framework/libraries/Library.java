@@ -36,10 +36,25 @@ public enum Library {
 
     REDISSON(
             "org.redisson",
-            "redisson",
+            "redisson-all", // Include all
             "3.13.3",
             "Wx16na9jIrQP0ezbW0W8ATDP0fBlID8GXnosT4QGU4w="
     ),
+
+    /**
+     *
+     * Only in Imanity-Libraries repository
+     * This is the netty relocated version of redisson
+     *
+     */
+    REDISSON_RELOCATED(
+            "org.redisson",
+            "redisson-relocated",
+            "3.13.7-SNAPSHOT",
+            "3.13.7-20201024.150336-1",
+            null
+    ),
+
     YAML(
             "org.yaml",
             "snakeyaml",
@@ -96,10 +111,14 @@ public enum Library {
     private static final String MAVEN_FORMAT = "%s/%s/%s/%s-%s.jar";
 
     Library(String groupId, String artifactId, String version, String checksum) {
+        this(groupId, artifactId, version, version, checksum);
+    }
+
+    Library(String groupId, String artifactId, String versionPackage, String version, String checksum) {
         this.mavenRepoPath = String.format(MAVEN_FORMAT,
                 groupId.replace(".", "/"),
                 artifactId,
-                version,
+                versionPackage,
                 artifactId,
                 version
         );
@@ -110,8 +129,6 @@ public enum Library {
             this.checksum = null;
         }
     }
-
-
 
     public String getFileName() {
         return name().toLowerCase().replace('_', '-') + "-" + this.version;

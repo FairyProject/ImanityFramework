@@ -114,6 +114,8 @@ public class PluginProcessor extends AbstractProcessor {
                 }
             }
 
+            soft.add("framework");
+
             if (!hard.isEmpty()) {
                 data.put("depend", hard);
             }

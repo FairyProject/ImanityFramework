@@ -24,16 +24,29 @@
 
 package org.imanity.framework.redis.server;
 
+import com.fasterxml.jackson.core.JsonGenerator;
+import com.fasterxml.jackson.core.JsonParser;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.DeserializationContext;
+import com.fasterxml.jackson.databind.SerializerProvider;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.fasterxml.jackson.databind.deser.std.StdDeserializer;
+import com.fasterxml.jackson.databind.ser.std.StdSerializer;
 import lombok.Getter;
 import lombok.Setter;
+import org.imanity.framework.ImanityCommon;
 import org.imanity.framework.redis.server.enums.ServerState;
 import org.imanity.framework.util.JsonChain;
 
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
 @Getter
 @Setter
+@JsonSerialize(using = ImanityServer.Serializer.class)
+@JsonDeserialize(using = ImanityServer.Deserializer.class)
 public class ImanityServer {
 
     private String name;
@@ -86,6 +99,35 @@ public class ImanityServer {
     public JsonChain json() {
         return new JsonChain()
                 .addProperty("serverName", this.name);
+    }
+
+    public static class Serializer extends StdSerializer<ImanityServer> {
+
+        protected Serializer() {
+            super(ImanityServer.class);
+        }
+
+        @Override
+        public void serialize(ImanityServer imanityServer, JsonGenerator jsonGenerator, SerializerProvider serializerProvider) throws IOException {
+            jsonGenerator.writeString(imanityServer.getName());
+        }
+    }
+
+    public static class Deserializer extends StdDeserializer<ImanityServer> {
+
+        private ServerHandler serverHandler;
+
+        protected Deserializer() {
+            super(ImanityServer.class);
+        }
+
+        @Override
+        public ImanityServer deserialize(JsonParser jsonParser, DeserializationContext deserializationContext) throws IOException, JsonProcessingException {
+            if (serverHandler == null) {
+                serverHandler = ImanityCommon.getService(ServerHandler.class);
+            }
+            return serverHandler.getServer(jsonParser.getValueAsString());
+        }
     }
 
 }

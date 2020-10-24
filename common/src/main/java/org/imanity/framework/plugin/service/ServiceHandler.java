@@ -24,37 +24,47 @@
 
 package org.imanity.framework.plugin.service;
 
+import com.google.common.base.Preconditions;
+import com.google.common.collect.Lists;
 import lombok.NonNull;
 import org.apache.commons.lang3.reflect.ConstructorUtils;
 import org.imanity.framework.ImanityCommon;
-import org.imanity.framework.plugin.component.Component;
 import org.imanity.framework.plugin.component.ComponentRegistry;
 import org.imanity.framework.util.AccessUtil;
 import org.imanity.framework.util.Utility;
 import org.imanity.framework.util.FileUtils;
 import org.imanity.framework.util.annotation.AnnotationDetector;
+import org.imanity.framework.util.entry.Entry;
 
 import java.io.File;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Modifier;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class ServiceHandler {
 
-    private final Map<Class<?>, Object> services = new HashMap<>();
+    private final Map<Class<?>, ServiceData> services = new LinkedHashMap<>();
 
     public Object getServiceInstance(@NonNull Class<?> type) {
-        return this.services.getOrDefault(type, null);
+        ServiceData data = this.services.getOrDefault(type, null);
+        if (data == null) {
+            return null;
+        }
+        return data.getInstance();
+    }
+
+    public Collection<ServiceData> getServices() {
+        return this.services.values();
     }
 
     public Collection<Object> getServiceInstances() {
-        return this.services.values();
+        return this.getServices().stream()
+                .map(ServiceData::getInstance)
+                .collect(Collectors.toList());
     }
 
     public Collection<? extends IService> getImplementedService() {
@@ -71,13 +81,25 @@ public class ServiceHandler {
             List<File> files = ImanityCommon.BRIDGE.getPluginFiles();
             files.add(FileUtils.getSelfJar());
 
+            List<ServiceData> services = new ArrayList<>();
+
             new AnnotationDetector(new AnnotationDetector.TypeReporter() {
                 @Override
                 public void reportTypeAnnotation(Class<? extends Annotation> annotation, String className) {
                     try {
                         Class<?> type = Class.forName(className);
 
-                        registerService(type);
+                        Service service = type.getAnnotation(Service.class);
+                        Preconditions.checkNotNull(service, "The type " + type.getName() + " doesn't have @Service annotation!");
+
+                        Object instance;
+                        try {
+                            instance = ConstructorUtils.invokeConstructor(type);
+                        } catch (InstantiationException | IllegalAccessException | InvocationTargetException | NoSuchMethodException e) {
+                            throw new RuntimeException("Something wrong while creating instance of " + type.getSimpleName() + " (no args constructor not exists?!)", e);
+                        }
+
+                        services.add(new ServiceData(instance, service));
                     } catch (IllegalStateException | ClassNotFoundException ex) {
                         ImanityCommon.getLogger().error(ex);
                     }
@@ -89,19 +111,20 @@ public class ServiceHandler {
                 }
             }).detect(files.toArray(new File[0]));
 
+            this.sort(services);
 
         } catch (Throwable throwable) {
             throw new RuntimeException("Something wrong will detecting @Service annotation", throwable);
         }
 
-        for (Object plugin : ImanityCommon.BRIDGE.getPluginInstances()) {
-            ImanityCommon.getLogger().info("Registering plugin " + plugin.getClass().getSimpleName() + " as service.");
-            this.registerService(plugin);
+        for (Entry<String, Object> entry : ImanityCommon.BRIDGE.getPluginInstances()) {
+            ImanityCommon.getLogger().info("Registering plugin " + entry.getValue().getClass().getSimpleName() + " as service.");
+            this.registerService(entry.getValue(), entry.getKey(), new String[0]);
         }
 
     }
 
-    private void registerAutowireds() {
+    private void initialAutowired() {
         this.getServiceInstances().forEach(this::registerAutowired);
 
         try {
@@ -166,11 +189,10 @@ public class ServiceHandler {
     public void init() {
         this.getImplementedService().forEach(IService::preInit);
 
-        this.registerAutowireds();
+        this.initialAutowired();
         ComponentRegistry.loadComponents(this);
 
         this.getImplementedService().forEach(IService::init);
-
         ImanityCommon.EVENT_HANDLER.onPostServicesInitial();
     }
 
@@ -178,21 +200,59 @@ public class ServiceHandler {
         this.getImplementedService().forEach(IService::stop);
     }
 
-    private void registerService(Class<?> type) {
+    private void sort(Collection<ServiceData> services) {
 
-        Object instance;
-        try {
-            instance = ConstructorUtils.invokeConstructor(type);
-        } catch (InstantiationException | IllegalAccessException | InvocationTargetException | NoSuchMethodException e) {
-            throw new RuntimeException("Something wrong while creating instance of " + type.getSimpleName() + " (no args constructor not exists?!)", e);
+        List<ServiceData> unloaded = new ArrayList<>(services);
+        Set<String> existing = services.stream()
+                .map(ServiceData::getName)
+                .collect(Collectors.toSet());
+
+        for (ServiceData data : services) {
+            for (String dependency : data.getDependencies()) {
+                if (!existing.contains(dependency)) {
+                    ImanityCommon.getLogger().error("Couldn't find the dependency " + dependency + " for " + data.getName() + "!");
+                    unloaded.remove(data);
+                    break;
+                }
+            }
         }
 
-        this.services.put(type, instance);
+        existing.clear();
 
+        Map<String, ServiceData> sorted = new LinkedHashMap<>();
+
+        while (!unloaded.isEmpty()) {
+            Iterator<ServiceData> iterator = unloaded.iterator();
+
+            while (iterator.hasNext()) {
+                ServiceData data = iterator.next();
+                boolean missingDependencies = true;
+
+                if (!data.hasDependencies()) {
+                    missingDependencies = false;
+                } else {
+                    List<String> list = Lists.newArrayList(data.getDependencies());
+                    list.removeIf(sorted::containsKey);
+
+                    if (list.isEmpty()) {
+                        missingDependencies = false;
+                    }
+                }
+
+                if (!missingDependencies) {
+                    sorted.put(data.getName(), data);
+                    iterator.remove();
+                }
+            }
+        }
+
+        for (ServiceData data : sorted.values()) {
+            this.services.put(data.getType(), data);
+        }
     }
 
-    public void registerService(Object serviceInstance) {
-        this.services.put(serviceInstance.getClass(), serviceInstance);
+    public void registerService(Object serviceInstance, String name, String[] dependencies) {
+        this.services.put(serviceInstance.getClass(), new ServiceData(serviceInstance.getClass(), serviceInstance, name, dependencies));
     }
 
 }

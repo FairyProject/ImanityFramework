@@ -38,35 +38,14 @@ public class ServerCommandMessage extends ServerMessage {
     private String command;
     private String context;
     private String executor;
+    private String target;
 
-    private String targetServerName;
-
-    public ServerCommandMessage(ImanityServer server, String command, String context, String executor) {
+    public ServerCommandMessage(ImanityServer server, String command, String context, String executor, String target) {
         this.setServer(server);
         this.command = command;
         this.context = context;
         this.executor = executor;
+        this.target = target;
     }
 
-    @Override
-    public JsonObject serialize() {
-        return this.getServer().json()
-                .addProperty("command", command)
-                .addProperty("context", context)
-                .addProperty("executor", executor)
-                .get();
-    }
-
-    @Override
-    public void deserialize(JsonObject jsonObject) {
-        super.deserialize(jsonObject);
-        this.command = jsonObject.get("command").getAsString();
-        if (jsonObject.has("context")) {
-            this.context = jsonObject.get("context").getAsString();
-        }
-        if (jsonObject.has("targetServerName")) {
-            this.targetServerName = jsonObject.get("targetServerName").getAsString();
-        }
-        this.executor = jsonObject.get("executor").getAsString();
-    }
 }

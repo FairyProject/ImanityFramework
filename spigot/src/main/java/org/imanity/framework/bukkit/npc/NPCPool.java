@@ -68,7 +68,6 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 @Getter
-@Component
 public class NPCPool implements Listener {
 
     private static final Map<String, NPCPool> NPC_POOLS = new HashMap<>();

@@ -51,6 +51,8 @@ public class CoreConfig extends YamlConfiguration {
 
     public boolean ASYNCHRONOUS_DATA_STORING = true;
 
+    public String CURRENT_SERVER = "server-1";
+
     public String DEFAULT_LOCALE = "en_us";
 
     public CoreConfig() {

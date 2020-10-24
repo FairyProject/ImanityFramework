@@ -33,6 +33,7 @@ import com.fasterxml.jackson.databind.deser.std.StdDeserializer;
 import com.fasterxml.jackson.databind.module.SimpleModule;
 import com.fasterxml.jackson.databind.ser.std.StdSerializer;
 import com.google.gson.Gson;
+import com.google.gson.JsonObject;
 import org.bson.Document;
 
 public class DataElementMapper {
@@ -52,6 +53,10 @@ public class DataElementMapper {
         this.mapper.registerModule(module);
     }
 
+    public void setVisibility(PropertyAccessor propertyAccessor, JsonAutoDetect.Visibility visibility) {
+        this.mapper.setVisibility(propertyAccessor, visibility);
+    }
+
     public <T> void registerSerializer(Class<T> type, StdSerializer<T> serializer) {
         this.module.addSerializer(type, serializer);
     }
@@ -62,8 +67,14 @@ public class DataElementMapper {
 
     public Document toJson(Object element) {
 
+        return this.toJson(element, Document.class);
+
+    }
+
+    public <T> T toJson(Object element, Class<T> type) {
+
         try {
-            return this.gson.fromJson(this.mapper.writeValueAsString(element), Document.class);
+            return this.gson.fromJson(this.mapper.writeValueAsString(element), type);
         } catch (JsonProcessingException e) {
             throw new RuntimeException(e);
         }
@@ -74,6 +85,16 @@ public class DataElementMapper {
 
         try {
             return this.mapper.readValue(jsonObject.toJson(), type);
+        } catch (JsonProcessingException e) {
+            throw new RuntimeException(e);
+        }
+
+    }
+
+    public <T> T fromJson(JsonObject jsonObject, Class<T> type) {
+
+        try {
+            return this.mapper.readValue(jsonObject.toString(), type);
         } catch (JsonProcessingException e) {
             throw new RuntimeException(e);
         }

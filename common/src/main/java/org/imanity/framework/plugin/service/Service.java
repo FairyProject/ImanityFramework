@@ -35,4 +35,6 @@ public @interface Service {
 
     String name();
 
+    String[] dependencies() default {};
+
 }

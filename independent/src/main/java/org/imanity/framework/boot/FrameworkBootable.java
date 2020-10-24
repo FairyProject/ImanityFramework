@@ -110,6 +110,8 @@ public final class FrameworkBootable {
         this.optionHandlers = new ArrayList<>();
 
         this.status = ProgramStatus.BOOTING;
+
+        LOGGER = LogManager.getLogger(this.bootableClass);
     }
 
     public FrameworkBootable withUserInterface(UserInterface<?> userInterface) {
@@ -325,8 +327,6 @@ public final class FrameworkBootable {
 
         thread.setDaemon(true);
         thread.start();
-
-        LOGGER = LogManager.getLogger(this.bootableClass);
 
         LOGGER.info("Console initialized.");
     }

@@ -26,6 +26,7 @@ package org.imanity.framework.redis.server.message.listener;
 
 import org.imanity.framework.ImanityCommon;
 import org.imanity.framework.plugin.component.Component;
+import org.imanity.framework.plugin.service.Autowired;
 import org.imanity.framework.redis.message.MessageListener;
 import org.imanity.framework.redis.message.annotation.HandleMessage;
 import org.imanity.framework.redis.server.ImanityServer;
@@ -39,7 +40,8 @@ import org.imanity.framework.redis.server.message.ServerStateChangedMessage;
 @Component
 public class ServerListener implements MessageListener {
 
-    private final ServerHandler serverHandler = ImanityCommon.REDIS.getServerHandler();
+    @Autowired
+    private ServerHandler serverHandler;
 
     @HandleMessage
     public void onServerAdd(ServerAddMessage message) {
@@ -75,7 +77,7 @@ public class ServerListener implements MessageListener {
             return;
         }
 
-        if (!this.serverHandler.getCurrentServer().getName().equals(message.getTargetServerName())) {
+        if (!this.serverHandler.getCurrentServer().getName().equals(message.getTarget())) {
             return;
         }
 

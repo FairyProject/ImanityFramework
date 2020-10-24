@@ -35,6 +35,7 @@ import net.md_5.bungee.config.YamlConfiguration;
 import org.imanity.framework.ImanityBridge;
 import org.imanity.framework.bungee.Imanity;
 import org.imanity.framework.libraries.classloader.PluginClassLoader;
+import org.imanity.framework.util.entry.Entry;
 
 import java.io.*;
 import java.net.URL;
@@ -146,8 +147,10 @@ public class BungeeImanityBridge implements ImanityBridge {
     }
 
     @Override
-    public List<Object> getPluginInstances() {
-        return ImmutableList.copyOf(Imanity.PLUGINS);
+    public List<Entry<String, Object>> getPluginInstances() {
+        return Imanity.PLUGINS.stream()
+                .map(plugin -> new Entry<>(plugin.getDescription().getName(), (Object) plugin))
+                .collect(Collectors.toList());
     }
 
     @Override

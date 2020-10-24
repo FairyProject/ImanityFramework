@@ -27,6 +27,8 @@ package org.imanity.framework;
 import org.apache.logging.log4j.Logger;
 import org.imanity.framework.libraries.classloader.PluginClassLoader;
 import org.imanity.framework.task.ITaskScheduler;
+import org.imanity.framework.util.entry.Entry;
+import org.imanity.framework.util.entry.EntryArrayList;
 
 import java.io.File;
 import java.io.InputStream;
@@ -47,7 +49,7 @@ public interface ImanityBridge {
 
     Map<String, Object> loadYaml(InputStream inputStream);
 
-    List<Object> getPluginInstances();
+    List<Entry<String, Object>> getPluginInstances();
 
     List<File> getPluginFiles();
 
