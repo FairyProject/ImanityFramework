@@ -101,7 +101,7 @@ public class MessageService implements IService {
             }
 
             Class<?> type = message.getClass();
-            if (type.getAnnotation(Message.class) == null) {
+            if (!this.isAnnotated(type)) {
                 throw new IllegalArgumentException("The Message " + message.getClass() + " does not have @Message Annotation!");
             }
 
@@ -109,6 +109,18 @@ public class MessageService implements IService {
         } catch (Throwable throwable) {
             throwable.printStackTrace();
         }
+    }
+
+    public boolean isAnnotated(Class<?> messageClass) {
+        while (messageClass != null && messageClass != Object.class) {
+            if (messageClass.getAnnotation(Message.class) != null) {
+                return true;
+            }
+
+            messageClass = messageClass.getSuperclass();
+        }
+
+        return false;
     }
 
     public void registerListener(MessageListener messageListener) {
