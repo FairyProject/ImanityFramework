@@ -100,6 +100,11 @@ public class MessageService implements IService {
                 throw new IllegalStateException("The Message given a null serialized data!");
             }
 
+            Class<?> type = message.getClass();
+            if (type.getAnnotation(Message.class) == null) {
+                throw new IllegalArgumentException("The Message " + message.getClass() + " does not have @Message Annotation!");
+            }
+
             this.redisPubSub.publish(message);
         } catch (Throwable throwable) {
             throwable.printStackTrace();

@@ -27,12 +27,14 @@ package org.imanity.framework.redis.server.message;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.imanity.framework.redis.message.Message;
 import org.imanity.framework.redis.server.ImanityServer;
 import org.imanity.framework.redis.server.enums.ServerState;
 
 @Getter
 @Setter
 @NoArgsConstructor
+@Message
 public class ServerStateChangedMessage extends ServerMessage {
 
     private ServerState state;

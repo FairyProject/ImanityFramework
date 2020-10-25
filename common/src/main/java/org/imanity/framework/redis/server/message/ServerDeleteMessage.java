@@ -25,9 +25,11 @@
 package org.imanity.framework.redis.server.message;
 
 import lombok.NoArgsConstructor;
+import org.imanity.framework.redis.message.Message;
 import org.imanity.framework.redis.server.ImanityServer;
 
 @NoArgsConstructor
+@Message
 public class ServerDeleteMessage extends ServerMessage {
 
     public ServerDeleteMessage(ImanityServer server) {

@@ -26,9 +26,11 @@ package org.imanity.framework.redis.server.message;
 
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.imanity.framework.redis.message.Message;
 
 @Getter
 @NoArgsConstructor
+@Message
 public class ServerAddMessage {
 
     private String serverName;

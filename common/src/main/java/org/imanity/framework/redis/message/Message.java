@@ -22,32 +22,14 @@
  * SOFTWARE.
  */
 
-package org.imanity.framework.redis.server.message;
+package org.imanity.framework.redis.message;
 
-import com.google.gson.JsonObject;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
-import org.imanity.framework.redis.message.Message;
-import org.imanity.framework.redis.server.ImanityServer;
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 
-@Getter
-@NoArgsConstructor
-@Message
-public class ServerCommandMessage extends ServerMessage {
-
-    @Setter
-    private String command;
-    private String context;
-    private String executor;
-    private String target;
-
-    public ServerCommandMessage(ImanityServer server, String command, String context, String executor, String target) {
-        this.setServer(server);
-        this.command = command;
-        this.context = context;
-        this.executor = executor;
-        this.target = target;
-    }
-
+@Target({ElementType.TYPE})
+@Retention(RetentionPolicy.RUNTIME)
+public @interface Message {
 }
