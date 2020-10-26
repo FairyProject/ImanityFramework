@@ -31,11 +31,12 @@ import com.mongodb.client.MongoDatabase;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.imanity.framework.ImanityCommon;
+import org.imanity.framework.annotation.PostDestroy;
+import org.imanity.framework.annotation.PostInitialize;
 import org.imanity.framework.config.annotation.Comment;
 import org.imanity.framework.config.annotation.ConfigurationElement;
 import org.imanity.framework.config.format.FieldNameFormatters;
 import org.imanity.framework.config.yaml.YamlConfiguration;
-import org.imanity.framework.plugin.service.IService;
 import org.imanity.framework.plugin.service.Service;
 
 import java.io.File;
@@ -44,7 +45,7 @@ import java.util.Collections;
 
 @Service(name = "mongo")
 @Getter
-public class Mongo implements IService {
+public class Mongo {
 
     private MongoClient client;
     private MongoDatabase database;
@@ -56,6 +57,7 @@ public class Mongo implements IService {
         this.config.loadAndSave();
     }
 
+    @PostInitialize
     public void init() {
 
         this.generateConfig();
@@ -80,7 +82,7 @@ public class Mongo implements IService {
         this.database = this.client.getDatabase(this.config.DATABASE);
     }
 
-    @Override
+    @PostDestroy
     public void stop() {
         if (this.client != null) {
             this.client.close();

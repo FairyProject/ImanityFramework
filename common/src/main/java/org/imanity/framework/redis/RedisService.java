@@ -27,7 +27,9 @@ package org.imanity.framework.redis;
 import lombok.Getter;
 import lombok.SneakyThrows;
 import org.imanity.framework.ImanityCommon;
-import org.imanity.framework.plugin.service.IService;
+import org.imanity.framework.annotation.PostDestroy;
+import org.imanity.framework.annotation.PostInitialize;
+import org.imanity.framework.annotation.PreInitialize;
 import org.imanity.framework.plugin.service.Service;
 import org.redisson.Redisson;
 import org.redisson.api.RMap;
@@ -40,12 +42,12 @@ import java.io.File;
 
 @Service(name = "redis")
 @Getter
-public class RedisService implements IService {
+public class RedisService {
 
     private RedissonClient client;
 
     @SneakyThrows
-    @Override
+    @PreInitialize
     public void preInit() {
         File configFile = new File(ImanityCommon.BRIDGE.getDataFolder(), "redisson.yml");
         if (!configFile.exists()) {
@@ -59,11 +61,11 @@ public class RedisService implements IService {
         this.client = Redisson.create(Config.fromYAML(configFile).setCodec(new JsonJacksonCodec()));
     }
 
-    @Override
+    @PostInitialize
     public void init() {
     }
 
-    @Override
+    @PostDestroy
     public void stop() {
         if (!ImanityCommon.CORE_CONFIG.USE_REDIS) {
             return;

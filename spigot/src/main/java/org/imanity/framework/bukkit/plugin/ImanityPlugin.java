@@ -24,15 +24,17 @@
 
 package org.imanity.framework.bukkit.plugin;
 
+import org.bukkit.Bukkit;
 import org.bukkit.plugin.PluginLoadOrder;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.imanity.framework.bukkit.Imanity;
+import org.imanity.framework.util.Terminable;
 
 import java.lang.invoke.MethodHandles;
 import java.util.ArrayDeque;
 import java.util.Queue;
 
-public abstract class ImanityPlugin extends JavaPlugin {
+public abstract class ImanityPlugin extends JavaPlugin implements Terminable {
 
     private Queue<Runnable> enableQueues = new ArrayDeque<>();
 
@@ -89,6 +91,16 @@ public abstract class ImanityPlugin extends JavaPlugin {
 
     public void postDisable() {
 
+    }
+
+    @Override
+    public void close() throws Exception {
+        Bukkit.getPluginManager().disablePlugin(this);
+    }
+
+    @Override
+    public boolean isClosed() {
+        return this.isEnabled();
     }
 
 }

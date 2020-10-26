@@ -34,6 +34,8 @@ import org.imanity.framework.database.Mongo;
 import org.imanity.framework.database.MySQL;
 import org.imanity.framework.events.IEventHandler;
 import org.imanity.framework.exception.OptionNotEnabledException;
+import org.imanity.framework.factory.ClassFactory;
+import org.imanity.framework.factory.FieldFactory;
 import org.imanity.framework.libraries.Library;
 import org.imanity.framework.libraries.LibraryHandler;
 import org.imanity.framework.locale.Locale;
@@ -51,7 +53,7 @@ import java.util.EnumSet;
 import java.util.Set;
 
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
-public class ImanityCommon {
+public final class ImanityCommon {
 
     private static final Set<Library> GLOBAL_LIBRARIES = EnumSet.of(Library.MONGO_DB, Library.HIKARI_CP, Library.YAML, Library.CAFFEINE);
 
@@ -87,6 +89,8 @@ public class ImanityCommon {
         ImanityCommon.CORE_CONFIG.loadAndSave();
 
         ImanityCommon.loadLibraries();
+        ClassFactory.loadClasses();
+        FieldFactory.loadFields();
 
         ImanityCommon.SERVICE_HANDLER = new ServiceHandler();
         ImanityCommon.SERVICE_HANDLER.registerServices();

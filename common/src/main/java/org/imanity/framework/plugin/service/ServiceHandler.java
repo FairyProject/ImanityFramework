@@ -27,23 +27,28 @@ package org.imanity.framework.plugin.service;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
 import lombok.NonNull;
+import lombok.SneakyThrows;
 import org.apache.commons.lang3.reflect.ConstructorUtils;
 import org.imanity.framework.ImanityCommon;
+import org.imanity.framework.factory.ClassFactory;
+import org.imanity.framework.factory.FieldFactory;
 import org.imanity.framework.plugin.component.ComponentRegistry;
 import org.imanity.framework.util.AccessUtil;
 import org.imanity.framework.util.Utility;
-import org.imanity.framework.util.FileUtils;
-import org.imanity.framework.util.annotation.AnnotationDetector;
 import org.imanity.framework.util.entry.Entry;
 
-import java.io.File;
+import org.imanity.framework.annotation.PreInitialize;
+import org.imanity.framework.annotation.PostInitialize;
+
+import org.imanity.framework.annotation.PreDestroy;
+import org.imanity.framework.annotation.PostDestroy;
+
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Modifier;
 import java.util.*;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 public class ServiceHandler {
 
@@ -67,58 +72,31 @@ public class ServiceHandler {
                 .collect(Collectors.toList());
     }
 
-    public Collection<? extends IService> getImplementedService() {
-        return this.getServiceInstances()
-                .stream()
-                .filter(object -> object instanceof IService)
-                .map(object -> (IService) object)
-                .collect(Collectors.toList());
-    }
-
     public void registerServices() {
 
         try {
-            List<File> files = ImanityCommon.BRIDGE.getPluginFiles();
-            files.add(FileUtils.getSelfJar());
 
             List<ServiceData> services = new ArrayList<>();
+            for (Class<?> type : ClassFactory.getClasses(Service.class)) {
+                Service service = type.getAnnotation(Service.class);
+                Preconditions.checkNotNull(service, "The type " + type.getName() + " doesn't have @Service annotation!");
 
-            new AnnotationDetector(new AnnotationDetector.TypeReporter() {
-                @Override
-                public void reportTypeAnnotation(Class<? extends Annotation> annotation, String className) {
-                    try {
-                        Class<?> type = Class.forName(className);
-
-                        Service service = type.getAnnotation(Service.class);
-                        Preconditions.checkNotNull(service, "The type " + type.getName() + " doesn't have @Service annotation!");
-
-                        Object instance;
-                        try {
-                            instance = ConstructorUtils.invokeConstructor(type);
-                        } catch (InstantiationException | IllegalAccessException | InvocationTargetException | NoSuchMethodException e) {
-                            throw new RuntimeException("Something wrong while creating instance of " + type.getSimpleName() + " (no args constructor not exists?!)", e);
-                        }
-
-                        services.add(new ServiceData(instance, service));
-                    } catch (IllegalStateException | ClassNotFoundException ex) {
-                        ImanityCommon.getLogger().error(ex);
-                    }
+                Object instance;
+                try {
+                    instance = ConstructorUtils.invokeConstructor(type);
+                } catch (InstantiationException | IllegalAccessException | InvocationTargetException | NoSuchMethodException e) {
+                    throw new IllegalArgumentException("Something wrong while creating instance of " + type.getSimpleName() + " (no args constructor not exists?!)", e);
                 }
 
-                @Override
-                public Class<? extends Annotation>[] annotations() {
-                    return new Class[] {Service.class};
-                }
-            }).detect(files.toArray(new File[0]));
+                services.add(new ServiceData(instance, service));
+            }
 
             this.sort(services);
-
         } catch (Throwable throwable) {
             throw new RuntimeException("Something wrong will detecting @Service annotation", throwable);
         }
 
         for (Entry<String, Object> entry : ImanityCommon.BRIDGE.getPluginInstances()) {
-            ImanityCommon.getLogger().info("Registering plugin " + entry.getValue().getClass().getSimpleName() + " as service.");
             this.registerService(entry.getValue(), entry.getKey(), new String[0]);
         }
 
@@ -128,57 +106,30 @@ public class ServiceHandler {
         this.getServiceInstances().forEach(this::registerAutowired);
 
         try {
-            List<File> files = ImanityCommon.BRIDGE.getPluginFiles();
-            files.add(FileUtils.getSelfJar());
-
-            new AnnotationDetector(new AnnotationDetector.FieldReporter() {
-                @Override
-                public void reportFieldAnnotation(Class<? extends Annotation> annotation, String className, String fieldName) {
-
-                    Utility.tryCatch(() -> {
-                        Class<?> type = Class.forName(className);
-                        Field field = type.getDeclaredField(fieldName);
-
-                        registerAutowiredForField(field);
-                    });
-
+            Collection<Field> fields = FieldFactory.getStaticFields(Autowired.class);
+            for (Field field : fields) {
+                if (field.getAnnotation(Autowired.class) == null) {
+                    return;
+                }
+                if (!Modifier.isStatic(field.getModifiers())) {
+                    return;
                 }
 
-                @Override
-                public Class<? extends Annotation>[] annotations() {
-                    return new Class[] {Autowired.class};
-                }
-            }).detect(files.toArray(new File[0]));
+                AccessUtil.setAccessible(field);
 
-
+                Object service = this.getServiceInstance(field.getType());
+                field.set(null, service);
+            }
         } catch (Throwable throwable) {
             throw new RuntimeException("Something wrong will detecting @Service annotation", throwable);
         }
     }
 
-    public void registerAutowiredForField(Field field) throws ReflectiveOperationException {
-        if (field.getAnnotation(Autowired.class) == null) {
-            return;
-        }
-        if (!Modifier.isStatic(field.getModifiers())) {
-            return;
-        }
-
-        AccessUtil.setAccessible(field);
-
-        Object service = this.getServiceInstance(field.getType());
-        field.set(null, service);
-    }
-
     public void registerAutowired(Object instance) {
         Utility.tryCatch(() -> {
-            for (Field field : instance.getClass().getDeclaredFields()) {
+            Collection<Field> fields = FieldFactory.getFields(Autowired.class, instance.getClass());
+            for (Field field : fields) {
                 AccessUtil.setAccessible(field);
-
-                if (field.getAnnotation(Autowired.class) == null) {
-                    continue;
-                }
-
                 Object service = this.getServiceInstance(field.getType());
 
                 field.set(instance, service);
@@ -186,18 +137,31 @@ public class ServiceHandler {
         });
     }
 
+    @SneakyThrows
     public void init() {
-        this.getImplementedService().forEach(IService::preInit);
+        this.call(PreInitialize.class);
 
         this.initialAutowired();
         ComponentRegistry.loadComponents(this);
 
-        this.getImplementedService().forEach(IService::init);
+        this.call(PostInitialize.class);
+
         ImanityCommon.EVENT_HANDLER.onPostServicesInitial();
     }
 
+    @SneakyThrows
     public void stop() {
-        this.getImplementedService().forEach(IService::stop);
+        this.call(PreDestroy.class);
+
+        // I don't have any idea what should i do on shutdown
+
+        this.call(PostDestroy.class);
+    }
+
+    public void call(Class<? extends Annotation> annotation) throws InvocationTargetException, IllegalAccessException {
+        for (ServiceData serviceData : this.getServices()) {
+            serviceData.call(annotation);
+        }
     }
 
     private void sort(Collection<ServiceData> services) {

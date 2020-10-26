@@ -30,6 +30,8 @@ import com.google.common.collect.Multimap;
 import lombok.Getter;
 import org.bukkit.entity.Player;
 import org.imanity.framework.ImanityCommon;
+import org.imanity.framework.annotation.PostDestroy;
+import org.imanity.framework.annotation.PostInitialize;
 import org.imanity.framework.bukkit.Imanity;
 import org.imanity.framework.bukkit.packet.netty.INettyInjection;
 import org.imanity.framework.bukkit.packet.netty.NettyInjection1_8;
@@ -41,17 +43,13 @@ import org.imanity.framework.bukkit.packet.wrapper.WrappedPacket;
 import org.imanity.framework.bukkit.packet.wrapper.annotation.AutowiredWrappedPacket;
 import org.imanity.framework.bukkit.reflection.MinecraftReflection;
 import org.imanity.framework.bukkit.util.TaskUtil;
+import org.imanity.framework.factory.ClassFactory;
 import org.imanity.framework.plugin.service.Autowired;
-import org.imanity.framework.plugin.service.IService;
 import org.imanity.framework.plugin.service.Service;
-import org.imanity.framework.util.FileUtils;
-import org.imanity.framework.util.annotation.AnnotationDetector;
-
-import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 
 @Service(name = "packet")
-public class PacketService implements IService {
+public class PacketService {
 
     public static final String CHANNEL_HANDLER = ImanityCommon.METADATA_PREFIX + "ChannelHandler";
 
@@ -67,7 +65,7 @@ public class PacketService implements IService {
     @Getter
     private INettyInjection nettyInjection;
 
-    @Override
+    @PostInitialize
     public void init() {
 
         try {
@@ -113,49 +111,42 @@ public class PacketService implements IService {
         ImmutableMap.Builder<Byte, Class<? extends WrappedPacket>> readBuilder = ImmutableMap.builder();
         ImmutableMap.Builder<Byte, Class<? extends WrappedPacket>> writeBuilder = ImmutableMap.builder();
 
-        new AnnotationDetector(new AnnotationDetector.TypeReporter() {
+        ClassFactory.scan(AutowiredWrappedPacket.class);
 
-            @Override
-            public void reportTypeAnnotation(Class<? extends Annotation> annotationType, String className) {
-                try {
-                    Class<? extends WrappedPacket> type = (Class<? extends WrappedPacket>) Class.forName(className);
+        for (java.lang.Class<?> originalType : ClassFactory.getClasses(AutowiredWrappedPacket.class)) {
 
-                    AutowiredWrappedPacket annotation = type.getAnnotation(AutowiredWrappedPacket.class);
+            if (!WrappedPacket.class.isAssignableFrom(originalType)) {
+                throw new IllegalArgumentException("The type " + originalType.getName() + " does not extend WrappedPacket!");
+            }
 
-                    if (annotation == null) {
-                        return;
-                    }
+            Class<? extends WrappedPacket> type = (Class<? extends WrappedPacket>) originalType;
 
-                    Method method = type.getDeclaredMethod("init");
-                    method.invoke(null);
+            try {
+                AutowiredWrappedPacket annotation = type.getAnnotation(AutowiredWrappedPacket.class);
 
-                    switch (annotation.direction()) {
-                        case READ:
-                            readBuilder.put(annotation.value(), type);
-                            break;
-                        case WRITE:
-                            writeBuilder.put(annotation.value(), type);
-                            break;
-                    }
-                } catch (NoSuchMethodException ex) {
-                    // Ignores
-                } catch (Throwable throwable) {
-                    throw new RuntimeException(throwable);
+                Method method = type.getDeclaredMethod("init");
+                method.invoke(null);
+
+                switch (annotation.direction()) {
+                    case READ:
+                        readBuilder.put(annotation.value(), type);
+                        break;
+                    case WRITE:
+                        writeBuilder.put(annotation.value(), type);
+                        break;
                 }
+            } catch (NoSuchMethodException ex) {
+                // Ignores
+            } catch (Throwable throwable) {
+                throw new RuntimeException(throwable);
             }
-
-            @Override
-            public Class<? extends Annotation>[] annotations() {
-                return new Class[] {AutowiredWrappedPacket.class};
-            }
-
-        }).detect(FileUtils.getSelfJar());
+        }
 
         PacketDirection.READ.register(readBuilder.build());
         PacketDirection.WRITE.register(writeBuilder.build());
     }
 
-    @Override
+    @PostDestroy
     public void stop() {
         this.nettyInjection.unregisterChannels();
     }

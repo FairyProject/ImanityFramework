@@ -24,14 +24,28 @@
 
 package org.imanity.framework.plugin.service;
 
-import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
 
-@AllArgsConstructor
+import java.lang.annotation.Annotation;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.util.*;
+
+import org.imanity.framework.annotation.PreInitialize;
+import org.imanity.framework.annotation.PostInitialize;
+
+import org.imanity.framework.annotation.PreDestroy;
+import org.imanity.framework.annotation.PostDestroy;
+
 @Getter
 @Setter
 public class ServiceData {
+
+    private static final Class<? extends Annotation>[] ANNOTATIONS = new Class[] {
+            PreInitialize.class, PostInitialize.class,
+            PreDestroy.class, PostDestroy.class
+    };
 
     private Class<?> type;
 
@@ -40,11 +54,59 @@ public class ServiceData {
     private String name;
     private String[] dependencies;
 
+    private Map<Class<? extends Annotation>, Collection<Method>> annotatedMethods;
+
     public ServiceData(Object instance, Service service) {
-        this.type = instance.getClass();
+        this(instance.getClass(), instance, service.name(), service.dependencies());
+    }
+
+    public ServiceData(Class<?> type, Object instance, String name, String[] dependencies) {
+        this.type = type;
         this.instance = instance;
-        this.name = service.name();
-        this.dependencies = service.dependencies();
+        this.name = name;
+        this.dependencies = dependencies;
+
+        this.loadAnnotatedMethods();
+    }
+
+    public void loadAnnotatedMethods() {
+        this.annotatedMethods = new HashMap<>();
+
+        Class<?> type = this.type;
+        while (type != null && type != Object.class) {
+            for (Method method : type.getDeclaredMethods()) {
+                this.loadMethod(method);
+            }
+            type = type.getSuperclass();
+        }
+    }
+
+    public void loadMethod(Method method) {
+        for (Class<? extends Annotation> annotation : ServiceData.ANNOTATIONS) {
+            if (method.getAnnotation(annotation) != null) {
+
+                if (method.getParameterCount() != 0) {
+                    continue;
+                }
+
+                if (this.annotatedMethods.containsKey(annotation)) {
+                    this.annotatedMethods.get(annotation).add(method);
+                } else {
+                    List<Method> methods = new LinkedList<>();
+                    methods.add(method);
+
+                    this.annotatedMethods.put(annotation, methods);
+                }
+            }
+        }
+    }
+
+    public void call(Class<? extends Annotation> annotation) throws InvocationTargetException, IllegalAccessException {
+        if (this.annotatedMethods.containsKey(annotation)) {
+            for (Method method : this.annotatedMethods.get(annotation)) {
+                method.invoke(instance);
+            }
+        }
     }
 
     public boolean hasDependencies() {

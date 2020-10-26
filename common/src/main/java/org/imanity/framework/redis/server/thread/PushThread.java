@@ -31,7 +31,7 @@ import org.redisson.api.RMap;
 
 public class PushThread extends Thread {
 
-    private ServerHandler serverHandler;
+    private final ServerHandler serverHandler;
 
     public PushThread(ServerHandler serverHandler) {
         this.serverHandler = serverHandler;

@@ -25,16 +25,10 @@
 package org.imanity.framework.plugin.component;
 
 import org.imanity.framework.ImanityCommon;
+import org.imanity.framework.factory.ClassFactory;
 import org.imanity.framework.plugin.service.ServiceHandler;
-import org.imanity.framework.util.FileUtils;
-import org.imanity.framework.util.Utility;
-import org.imanity.framework.util.annotation.AnnotationDetector;
 import org.imanity.framework.util.entry.Entry;
 import org.imanity.framework.util.entry.EntryArrayList;
-
-import java.io.File;
-import java.lang.annotation.Annotation;
-import java.util.List;
 
 public class ComponentRegistry {
 
@@ -60,33 +54,35 @@ public class ComponentRegistry {
 
     }
 
+    private static void registerComponentHolders() {
+        ComponentRegistry.registerComponentHolder(new ComponentHolder() {
+            @Override
+            public Class<?>[] type() {
+                return new Class[] {Thread.class};
+            }
+
+            @Override
+            public Object newInstance(Class<?> type) {
+                Thread thread = (Thread) super.newInstance(type);
+
+                ImanityCommon.TASK_SCHEDULER.runSync(thread::start); // Don't start Immediately
+                return thread;
+            }
+        });
+    }
+
     public static void loadComponents(ServiceHandler serviceHandler) {
         try {
-            List<File> files = ImanityCommon.BRIDGE.getPluginFiles();
-            files.add(FileUtils.getSelfJar());
+            ComponentRegistry.registerComponentHolders();
 
-            new AnnotationDetector(new AnnotationDetector.TypeReporter() {
-                @Override
-                public void reportTypeAnnotation(Class<? extends Annotation> annotation, String className) {
-                    try {
-                        Class<?> componentClass = Class.forName(className);
+            for (Class<?> type : ClassFactory.getClasses(Component.class)) {
+                ComponentHolder componentHolder = ComponentRegistry.getComponentHolder(type);
+                Object instance = componentHolder.newInstance(type);
 
-                        ComponentHolder componentHolder = getComponentHolder(componentClass);
-                        Object instance = componentHolder.newInstance(componentClass);
-
-                        if (instance != null) {
-                            serviceHandler.registerAutowired(instance);
-                        }
-                    } catch (Throwable throwable) {
-                        throwable.printStackTrace();
-                    }
+                if (instance != null) {
+                    serviceHandler.registerAutowired(instance);
                 }
-
-                @Override
-                public Class<? extends Annotation>[] annotations() {
-                    return new Class[] {Component.class};
-                }
-            }).detect(files.toArray(new File[0]));
+            }
         } catch (Throwable throwable) {
             throw new RuntimeException(throwable);
         }

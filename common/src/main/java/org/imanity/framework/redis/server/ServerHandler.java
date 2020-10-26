@@ -26,8 +26,9 @@ package org.imanity.framework.redis.server;
 
 import lombok.Getter;
 import org.imanity.framework.ImanityCommon;
+import org.imanity.framework.annotation.PostDestroy;
+import org.imanity.framework.annotation.PostInitialize;
 import org.imanity.framework.plugin.service.Autowired;
-import org.imanity.framework.plugin.service.IService;
 import org.imanity.framework.plugin.service.Service;
 import org.imanity.framework.redis.RedisService;
 import org.imanity.framework.redis.message.MessageService;
@@ -42,7 +43,7 @@ import java.util.Map;
 
 @Service(name = "serverHandler", dependencies = "redis")
 @Getter
-public class ServerHandler implements IService {
+public class ServerHandler {
 
     public static final String METADATA = ImanityCommon.METADATA_PREFIX + "Server";
 
@@ -58,7 +59,7 @@ public class ServerHandler implements IService {
     @Autowired
     private MessageService messageService;
 
-    @Override
+    @PostInitialize
     public void init() {
         this.currentServer = new ImanityServer(ImanityCommon.CORE_CONFIG.CURRENT_SERVER);
         this.currentServer.setServerState(ServerState.BOOTING);
@@ -100,7 +101,7 @@ public class ServerHandler implements IService {
         this.getCurrentServer().getMetadata().remove(key);
     }
 
-    @Override
+    @PostDestroy
     public void stop() {
         this.messageService.sendMessage(new ServerDeleteMessage(this.currentServer));
         this.pushThread.shutdown();

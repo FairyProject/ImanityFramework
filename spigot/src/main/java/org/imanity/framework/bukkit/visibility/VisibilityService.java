@@ -25,21 +25,21 @@
 package org.imanity.framework.bukkit.visibility;
 
 import org.bukkit.entity.Player;
+import org.imanity.framework.annotation.PreInitialize;
 import org.imanity.framework.bukkit.Imanity;
 import org.imanity.framework.plugin.component.ComponentHolder;
 import org.imanity.framework.plugin.component.ComponentRegistry;
-import org.imanity.framework.plugin.service.IService;
 import org.imanity.framework.plugin.service.Service;
 
 import java.util.LinkedList;
 import java.util.List;
 
 @Service(name = "visibility")
-public class VisibilityService implements IService {
+public class VisibilityService {
 
     private List<VisibilityAdapter> visibilityAdapters;
 
-    @Override
+    @PreInitialize
     public void preInit() {
         this.visibilityAdapters = new LinkedList<>();
 

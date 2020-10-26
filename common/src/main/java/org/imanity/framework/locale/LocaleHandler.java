@@ -28,7 +28,6 @@ import lombok.Getter;
 import org.imanity.framework.ImanityCommon;
 import org.imanity.framework.locale.player.LocaleData;
 import org.imanity.framework.data.PlayerDataBuilder;
-import org.imanity.framework.plugin.service.IService;
 import org.imanity.framework.plugin.service.Service;
 
 import java.io.File;
@@ -38,7 +37,7 @@ import java.util.List;
 import java.util.Map;
 
 @Service(name = "locale")
-public class LocaleHandler implements IService {
+public class LocaleHandler {
 
     private Map<String, Locale> locales;
     @Getter

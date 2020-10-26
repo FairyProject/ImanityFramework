@@ -24,10 +24,11 @@
 
 package org.imanity.framework.redis.message;
 
+import org.imanity.framework.annotation.PostInitialize;
+import org.imanity.framework.annotation.PreInitialize;
 import org.imanity.framework.plugin.component.ComponentHolder;
 import org.imanity.framework.plugin.component.ComponentRegistry;
 import org.imanity.framework.plugin.service.Autowired;
-import org.imanity.framework.plugin.service.IService;
 import org.imanity.framework.plugin.service.Service;
 import org.imanity.framework.redis.RedisService;
 import org.imanity.framework.redis.message.annotation.HandleMessage;
@@ -39,10 +40,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.stream.Collectors;
 
 @Service(name = "messageService", dependencies = {"serverHandler"})
-public class MessageService implements IService {
+public class MessageService {
 
     private RedisPubSub<Object> redisPubSub;
     private String channel;
@@ -52,7 +52,7 @@ public class MessageService implements IService {
     @Autowired
     private RedisService redisService;
 
-    @Override
+    @PreInitialize
     public void preInit() {
         this.messageListeners = new ConcurrentHashMap<>(12);
 
@@ -74,7 +74,7 @@ public class MessageService implements IService {
         });
     }
 
-    @Override
+    @PostInitialize
     public void init() {
         this.channel = "imanity-server";
 

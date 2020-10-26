@@ -33,6 +33,9 @@ import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.checkerframework.checker.nullness.qual.Nullable;
+import org.imanity.framework.annotation.PostDestroy;
+import org.imanity.framework.annotation.PostInitialize;
+import org.imanity.framework.annotation.PreInitialize;
 import org.imanity.framework.boot.FrameworkBootable;
 import org.imanity.framework.command.CommandProvider;
 import org.imanity.framework.command.CommandService;
@@ -42,7 +45,6 @@ import org.imanity.framework.discord.impl.DiscordListenerComponentHolder;
 import org.imanity.framework.discord.provider.DiscordPresenceProvider;
 import org.imanity.framework.plugin.component.ComponentRegistry;
 import org.imanity.framework.plugin.service.Autowired;
-import org.imanity.framework.plugin.service.IService;
 import org.imanity.framework.plugin.service.Service;
 
 import javax.security.auth.login.LoginException;
@@ -52,7 +54,7 @@ import java.util.TreeSet;
 
 @Service(name = "discord")
 @Getter
-public class DiscordService implements IService {
+public class DiscordService {
 
     public static final Logger LOGGER = LogManager.getLogger(DiscordService.class);
     public static DiscordService INSTANCE;
@@ -78,7 +80,7 @@ public class DiscordService implements IService {
 
     private JDA jda;
 
-    @Override
+    @PreInitialize
     public void preInit() {
         INSTANCE = this;
 
@@ -88,7 +90,7 @@ public class DiscordService implements IService {
         ComponentRegistry.registerComponentHolder(new DiscordListenerComponentHolder());
     }
 
-    @Override
+    @PostInitialize
     public void init() {
         LOGGER.info("Attempting to Login into discord...");
 
@@ -133,6 +135,11 @@ public class DiscordService implements IService {
         this.bootable.getTaskScheduler().runAsyncRepeated(this::updateActivity, activityUpdateTicks);
 
         LOGGER.info("Logging into discord bot successful. discord: " + this.jda.getSelfUser().getName());
+    }
+
+    @PostDestroy
+    public void destroy() {
+        this.jda.shutdown();
     }
 
     public boolean isLoggedIn() {

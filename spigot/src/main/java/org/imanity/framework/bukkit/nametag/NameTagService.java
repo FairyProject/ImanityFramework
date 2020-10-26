@@ -29,11 +29,12 @@ import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.imanity.framework.ImanityCommon;
+import org.imanity.framework.annotation.PostDestroy;
+import org.imanity.framework.annotation.PostInitialize;
 import org.imanity.framework.bukkit.Imanity;
 import org.imanity.framework.bukkit.metadata.Metadata;
 import org.imanity.framework.metadata.MetadataKey;
 import org.imanity.framework.bukkit.nametag.impl.DefaultNameTagAdapter;
-import org.imanity.framework.plugin.service.IService;
 import org.imanity.framework.plugin.service.Service;
 import org.jetbrains.annotations.Nullable;
 
@@ -44,7 +45,7 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
 @Service(name = "nametag")
-public class NameTagService implements IService {
+public class NameTagService {
 
     protected static MetadataKey<NameTagList> TEAM_INFO_KEY = MetadataKey.create(ImanityCommon.METADATA_PREFIX + "TeamInfo", NameTagList.class);
     private static final int UPDATE_INTERVAL = 2;
@@ -57,7 +58,7 @@ public class NameTagService implements IService {
 
     private ScheduledExecutorService executorService;
 
-    @Override
+    @PostInitialize
     public void init() {
 
         this.adapters = new LinkedList<>();
@@ -74,7 +75,7 @@ public class NameTagService implements IService {
         this.register(new DefaultNameTagAdapter());
     }
 
-    @Override
+    @PostDestroy
     public void stop() {
         this.executorService.shutdown();
     }

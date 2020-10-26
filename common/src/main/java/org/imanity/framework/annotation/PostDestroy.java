@@ -21,25 +21,15 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.imanity.framework.util.annotation;
 
-import java.io.IOException;
-import java.io.InputStream;
+package org.imanity.framework.annotation;
 
-/**
- * {@code ResourceIterator} is an abstraction for an iterator of (Java) Class Files, provided
- * as {@link InputStream}.
- *
- * @author <a href="mailto:rmuller@xiam.nl">Ronald K. Muller</a>
- * @since INFOMAS NG 3.0
- */
-public abstract class ResourceIterator {
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 
-    /**
-     * Return the next Java ClassFile as an {@code InputStream}.
-     * <p>
-     * NOTICE: Client code MUST close the returned {@code InputStream}!
-     */
-    public abstract InputStream next() throws IOException;
-
+@Target(ElementType.METHOD)
+@Retention(RetentionPolicy.RUNTIME)
+public @interface PostDestroy {
 }

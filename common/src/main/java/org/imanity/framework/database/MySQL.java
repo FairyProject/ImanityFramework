@@ -25,7 +25,8 @@
 package org.imanity.framework.database;
 
 import lombok.Getter;
-import org.imanity.framework.plugin.service.IService;
+import org.imanity.framework.annotation.PostDestroy;
+import org.imanity.framework.annotation.PostInitialize;
 import org.imanity.framework.plugin.service.Service;
 import org.imanity.framework.util.builder.SQLHost;
 import org.imanity.framework.util.builder.hikari.HikariHandler;
@@ -40,7 +41,7 @@ import java.util.Arrays;
 
 @Service(name = "mysql")
 @Getter
-public class MySQL implements IService {
+public class MySQL {
 
     private SQLConfig config;
     private SQLHost host;
@@ -51,7 +52,7 @@ public class MySQL implements IService {
         config.loadAndSave();
     }
 
-    @Override
+    @PostInitialize
     public void init() {
         this.generateConfig();
         if (true) {
@@ -65,7 +66,7 @@ public class MySQL implements IService {
         this.dataSource = HikariHandler.createDataSource(host);
     }
 
-    @Override
+    @PostDestroy
     public void stop() {
         HikariHandler.closeDataSource(this.host);
     }
