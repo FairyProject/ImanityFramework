@@ -24,6 +24,7 @@
 
 package org.imanity.framework.redis.message;
 
+import org.imanity.framework.ImanityCommon;
 import org.imanity.framework.annotation.PostInitialize;
 import org.imanity.framework.annotation.PreInitialize;
 import org.imanity.framework.plugin.component.ComponentHolder;
@@ -54,6 +55,10 @@ public class MessageService {
 
     @PreInitialize
     public void preInit() {
+        if (!ImanityCommon.CORE_CONFIG.USE_REDIS) {
+            return;
+        }
+
         this.messageListeners = new ConcurrentHashMap<>(12);
 
         ComponentRegistry.registerComponentHolder(new ComponentHolder() {
@@ -77,6 +82,10 @@ public class MessageService {
     @PostInitialize
     public void init() {
         this.channel = "imanity-server";
+
+        if (!ImanityCommon.CORE_CONFIG.USE_REDIS) {
+            return;
+        }
 
         this.redisPubSub = new RedisPubSub<>(this.channel, this.redisService, Object.class);
         this.redisPubSub.subscribe((message -> {

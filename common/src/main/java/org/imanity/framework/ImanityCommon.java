@@ -56,6 +56,7 @@ import java.util.Set;
 public final class ImanityCommon {
 
     private static final Set<Library> GLOBAL_LIBRARIES = EnumSet.of(Library.MONGO_DB, Library.HIKARI_CP, Library.YAML, Library.CAFFEINE);
+    public static final String METADATA_PREFIX = "Imanity_";
 
     public static ImanityBridge BRIDGE;
     public static CoreConfig CORE_CONFIG;
@@ -64,7 +65,6 @@ public final class ImanityCommon {
     @Autowired
     public static LocaleHandler LOCALE_HANDLER;
     public static LibraryHandler LIBRARY_HANDLER;
-    public static String METADATA_PREFIX = "Imanity_";
 
     public static ICommandExecutor COMMAND_EXECUTOR;
     public static IEventHandler EVENT_HANDLER;
@@ -82,7 +82,7 @@ public final class ImanityCommon {
     @Autowired
     public static ServerHandler SERVER_HANDLER;
 
-    private static boolean librariesInitialized, bridgeInitialized;
+    private static boolean LIBRARIES_INITIALIZED, BRIDGE_INITIALIZED;
 
     public static void init() {
         ImanityCommon.CORE_CONFIG = new CoreConfig();
@@ -99,10 +99,10 @@ public final class ImanityCommon {
 
     public static void loadLibraries() {
 
-        if (ImanityCommon.librariesInitialized) {
+        if (ImanityCommon.LIBRARIES_INITIALIZED) {
             return;
         }
-        ImanityCommon.librariesInitialized = true;
+        ImanityCommon.LIBRARIES_INITIALIZED = true;
 
         getLogger().info("Loading Libraries");
 
@@ -177,11 +177,11 @@ public final class ImanityCommon {
     }
 
     public static Builder builder() {
-        if (ImanityCommon.bridgeInitialized) {
+        if (ImanityCommon.BRIDGE_INITIALIZED) {
             throw new IllegalStateException("Already build!");
         }
 
-        ImanityCommon.bridgeInitialized = true;
+        ImanityCommon.BRIDGE_INITIALIZED = true;
         return new Builder();
     }
 

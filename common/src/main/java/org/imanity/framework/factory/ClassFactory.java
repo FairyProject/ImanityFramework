@@ -31,6 +31,7 @@ import org.imanity.framework.plugin.component.Component;
 import org.imanity.framework.plugin.service.Service;
 import org.imanity.framework.util.entry.Entry;
 import org.reflections.Reflections;
+import org.reflections.scanners.SubTypesScanner;
 import org.reflections.scanners.TypeAnnotationsScanner;
 
 import java.lang.annotation.Annotation;
@@ -45,7 +46,15 @@ public final class ClassFactory {
     public static String[] CLASS_PATHS;
 
     public static void loadClasses() {
+        ClassFactory.loadClassPath();
 
+        Reflections reflections = new Reflections(ClassFactory.CLASS_PATHS, new TypeAnnotationsScanner(), new SubTypesScanner(false), ImanityCommon.class.getClassLoader());
+
+        ClassFactory.scan(Component.class, reflections);
+        ClassFactory.scan(Service.class, reflections);
+    }
+
+    private static void loadClassPath() {
         List<String> classPaths = new ArrayList<>();
         classPaths.add("org.imanity.framework");
 
@@ -61,11 +70,6 @@ public final class ClassFactory {
         }
 
         ClassFactory.CLASS_PATHS = classPaths.toArray(new String[0]);
-
-        Reflections reflections = new Reflections(ClassFactory.CLASS_PATHS, new TypeAnnotationsScanner());
-
-        ClassFactory.scan(Component.class, reflections);
-        ClassFactory.scan(Service.class, reflections);
     }
 
     public static Collection<Class<?>> getClasses(Class<? extends Annotation> annotation) {

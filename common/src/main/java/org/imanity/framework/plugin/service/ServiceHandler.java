@@ -108,11 +108,8 @@ public class ServiceHandler {
         try {
             Collection<Field> fields = FieldFactory.getStaticFields(Autowired.class);
             for (Field field : fields) {
-                if (field.getAnnotation(Autowired.class) == null) {
-                    return;
-                }
                 if (!Modifier.isStatic(field.getModifiers())) {
-                    return;
+                    continue;
                 }
 
                 AccessUtil.setAccessible(field);
@@ -125,16 +122,21 @@ public class ServiceHandler {
         }
     }
 
+    @SneakyThrows
     public void registerAutowired(Object instance) {
-        Utility.tryCatch(() -> {
-            Collection<Field> fields = FieldFactory.getFields(Autowired.class, instance.getClass());
-            for (Field field : fields) {
-                AccessUtil.setAccessible(field);
-                Object service = this.getServiceInstance(field.getType());
+        Collection<Field> fields = FieldFactory.getFields(Autowired.class, instance.getClass());
+        for (Field field : fields) {
+            if (Modifier.isStatic(field.getModifiers())) {
+                continue;
+            }
 
+            Object service = this.getServiceInstance(field.getType());
+
+            if (service != null) {
+                AccessUtil.setAccessible(field);
                 field.set(instance, service);
             }
-        });
+        }
     }
 
     @SneakyThrows

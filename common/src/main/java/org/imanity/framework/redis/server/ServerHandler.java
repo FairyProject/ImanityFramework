@@ -61,6 +61,10 @@ public class ServerHandler {
 
     @PostInitialize
     public void init() {
+        if (!ImanityCommon.CORE_CONFIG.USE_REDIS) {
+            return;
+        }
+
         this.currentServer = new ImanityServer(ImanityCommon.CORE_CONFIG.CURRENT_SERVER);
         this.currentServer.setServerState(ServerState.BOOTING);
 
@@ -103,6 +107,10 @@ public class ServerHandler {
 
     @PostDestroy
     public void stop() {
+        if (!ImanityCommon.CORE_CONFIG.USE_REDIS) {
+            return;
+        }
+
         this.messageService.sendMessage(new ServerDeleteMessage(this.currentServer));
         this.pushThread.shutdown();
 

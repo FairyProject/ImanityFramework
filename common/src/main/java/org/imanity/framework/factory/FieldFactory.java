@@ -59,7 +59,7 @@ public class FieldFactory {
                     this.staticFields.add(field);
                 } else {
                     Collection<Field> collection;
-                    Class<?> type = field.getType();
+                    Class<?> type = field.getDeclaringClass();
 
                     if (nonStaticFields.containsKey(type)) {
                         collection = nonStaticFields.get(type);
