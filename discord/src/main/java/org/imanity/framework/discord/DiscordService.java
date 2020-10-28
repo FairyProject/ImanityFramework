@@ -134,7 +134,8 @@ public class DiscordService {
         int activityUpdateTicks = this.bootable.getInteger(ACTIVITY_UPDATE_TICKS, 20);
         this.bootable.getTaskScheduler().runAsyncRepeated(this::updateActivity, activityUpdateTicks);
 
-        LOGGER.info("Logging into discord bot successful. discord: " + this.jda.getSelfUser().getName());
+        SelfUser user = this.jda.getSelfUser();
+        LOGGER.info("Logging into discord bot successful. Discord Tag: " + user.getAsTag());
     }
 
     @PostDestroy

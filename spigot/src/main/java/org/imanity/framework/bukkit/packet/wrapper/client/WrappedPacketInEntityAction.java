@@ -67,11 +67,11 @@ public final class WrappedPacketInEntityAction extends WrappedPacket {
             }
         }
         //All the already existing values
-        for (PlayerAction val : PlayerAction.values()) {
-            CACHED_PLAYER_ACTION_NAMES.put(val.name(), val);
-        }
 
         ImmutableMap.Builder<String, PlayerAction> builder = ImmutableMap.builder();
+        for (PlayerAction val : PlayerAction.values()) {
+            builder.put(val.name(), val);
+        }
         builder.put("PRESS_SHIFT_KEY", PlayerAction.START_SNEAKING);
         builder.put("RELEASE_SHIFT_KEY", PlayerAction.STOP_SNEAKING);
         builder.put("RIDING_JUMP", PlayerAction.START_RIDING_JUMP);
