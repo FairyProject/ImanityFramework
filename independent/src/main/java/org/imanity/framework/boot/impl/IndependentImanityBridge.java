@@ -38,6 +38,7 @@ import java.net.URISyntaxException;
 import java.net.URL;
 import java.net.URLConnection;
 import java.util.*;
+import java.util.stream.Collectors;
 
 @RequiredArgsConstructor
 public class IndependentImanityBridge implements ImanityBridge {
@@ -140,6 +141,11 @@ public class IndependentImanityBridge implements ImanityBridge {
                 new Entry<>("bootable", this.bootable),
                 new Entry<>("independent", this.bootable.getBootableObject())
         );
+    }
+
+    @Override
+    public Set<ClassLoader> getClassLoaders() {
+        return Collections.singleton(this.bootable.getBootableClass().getClassLoader());
     }
 
     @Override

@@ -34,6 +34,7 @@ import java.io.File;
 import java.io.InputStream;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 public interface ImanityBridge {
 
@@ -50,6 +51,8 @@ public interface ImanityBridge {
     Map<String, Object> loadYaml(InputStream inputStream);
 
     List<Entry<String, Object>> getPluginInstances();
+
+    Set<ClassLoader> getClassLoaders();
 
     List<File> getPluginFiles();
 

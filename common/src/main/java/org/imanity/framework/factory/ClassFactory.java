@@ -24,6 +24,7 @@
 
 package org.imanity.framework.factory;
 
+import com.sun.org.apache.regexp.internal.RE;
 import lombok.experimental.UtilityClass;
 import org.imanity.framework.ImanityCommon;
 import org.imanity.framework.annotation.ClasspathScan;
@@ -31,6 +32,7 @@ import org.imanity.framework.plugin.component.Component;
 import org.imanity.framework.plugin.service.Service;
 import org.imanity.framework.util.entry.Entry;
 import org.reflections.Reflections;
+import org.reflections.scanners.FieldAnnotationsScanner;
 import org.reflections.scanners.SubTypesScanner;
 import org.reflections.scanners.TypeAnnotationsScanner;
 
@@ -44,14 +46,15 @@ public final class ClassFactory {
     private static final Map<Class<? extends Annotation>, Collection<Class<?>>> CLASSES = new ConcurrentHashMap<>(128);
 
     public static String[] CLASS_PATHS;
+    public static Reflections REFLECTIONS;
 
     public static void loadClasses() {
         ClassFactory.loadClassPath();
 
-        Reflections reflections = ClassFactory.createReflections();
+        REFLECTIONS = ClassFactory.createReflections();
 
-        ClassFactory.scan(Component.class, reflections);
-        ClassFactory.scan(Service.class, reflections);
+        ClassFactory.scan(Component.class);
+        ClassFactory.scan(Service.class);
     }
 
     private static void loadClassPath() {
@@ -62,12 +65,16 @@ public final class ClassFactory {
             Object instance = entry.getValue();
             Class<?> type = instance.getClass();
 
+            System.out.println("find plugin " + entry.getKey());
+
             ClasspathScan annotation = type.getAnnotation(ClasspathScan.class);
 
             if (annotation != null) {
                 classPaths.add(annotation.value());
             }
         }
+
+        System.out.println(classPaths);
 
         ClassFactory.CLASS_PATHS = classPaths.toArray(new String[0]);
     }
@@ -77,7 +84,7 @@ public final class ClassFactory {
     }
 
     public static void scan(Class<? extends Annotation> annotation) {
-        ClassFactory.scan(annotation, ClassFactory.createReflections());
+        ClassFactory.scan(annotation, REFLECTIONS);
     }
 
     private static void scan(Class<? extends Annotation> annotation, Reflections reflections) {
@@ -85,7 +92,7 @@ public final class ClassFactory {
     }
 
     private static Reflections createReflections() {
-        return new Reflections(ClassFactory.CLASS_PATHS, new TypeAnnotationsScanner(), new SubTypesScanner(false), ImanityCommon.class.getClassLoader());
+        return new Reflections(ClassFactory.CLASS_PATHS, new TypeAnnotationsScanner(), new SubTypesScanner(false), new FieldAnnotationsScanner(), ImanityCommon.BRIDGE.getClassLoaders());
     }
 
 }

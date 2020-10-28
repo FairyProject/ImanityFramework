@@ -126,6 +126,7 @@ public class ServiceHandler {
     public void registerAutowired(Object instance) {
         Collection<Field> fields = FieldFactory.getFields(Autowired.class, instance.getClass());
         for (Field field : fields) {
+
             if (Modifier.isStatic(field.getModifiers())) {
                 continue;
             }
@@ -135,6 +136,8 @@ public class ServiceHandler {
             if (service != null) {
                 AccessUtil.setAccessible(field);
                 field.set(instance, service);
+            } else {
+                throw new IllegalArgumentException("Couldn't find bean " + field.getType().getName() + " !");
             }
         }
     }

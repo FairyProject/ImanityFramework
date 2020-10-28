@@ -15,7 +15,7 @@ public class FieldFactory {
     private static final Map<Class<? extends Annotation>, AnnotatedFieldHolder> ANNOTATED_FIELDS = new HashMap<>();
 
     public static void loadFields() {
-        Reflections reflections = new Reflections(ClassFactory.CLASS_PATHS, new FieldAnnotationsScanner());
+        Reflections reflections = ClassFactory.REFLECTIONS;
 
         FieldFactory.scan(Autowired.class, reflections);
     }

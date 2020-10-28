@@ -28,7 +28,9 @@ import com.google.common.collect.ImmutableList;
 import org.apache.logging.log4j.Logger;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.imanity.framework.ImanityBridge;
+import org.imanity.framework.ImanityCommon;
 import org.imanity.framework.bukkit.Imanity;
+import org.imanity.framework.bukkit.plugin.ImanityPlugin;
 import org.imanity.framework.bukkit.util.SpigotUtil;
 import org.imanity.framework.bukkit.util.BukkitUtil;
 import org.imanity.framework.libraries.classloader.PluginClassLoader;
@@ -37,8 +39,10 @@ import org.imanity.framework.util.entry.EntryArrayList;
 
 import java.io.File;
 import java.io.InputStream;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 public class BukkitImanityBridge implements ImanityBridge {
@@ -84,6 +88,16 @@ public class BukkitImanityBridge implements ImanityBridge {
         return Imanity.PLUGINS.stream()
                 .map(plugin -> new Entry<>(plugin.getName(), (Object) plugin))
                 .collect(Collectors.toList());
+    }
+
+    @Override
+    public Set<ClassLoader> getClassLoaders() {
+        Set<ClassLoader> classLoaders = new HashSet<>();
+        classLoaders.add(ImanityCommon.class.getClassLoader());
+        for (ImanityPlugin plugin : Imanity.PLUGINS) {
+            classLoaders.add(plugin.getClass().getClassLoader());
+        }
+        return classLoaders;
     }
 
     @Override
