@@ -128,7 +128,7 @@ public class WrappedPacketInWindowClick extends WrappedPacket {
         WINDOW_CLICK_TYPE_CACHE = windowCacheBuilder.build();
 
         CLICK_MODE_PRIMITIVE = new FieldResolver(packetClass)
-            .resolve(int.class, 3)
+            .resolveSilent(int.class, 3)
             .exists();
     }
 

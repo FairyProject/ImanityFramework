@@ -105,7 +105,7 @@ public final class WrappedPacketOutPosition extends WrappedPacket implements Sen
         }
 
         hasTeleportId = new FieldResolver(packetClass)
-                .resolve(int.class, 0)
+                .resolveSilent(int.class, 0)
                 .exists();
     }
 

@@ -44,7 +44,7 @@ public final class WrappedPacketInKeepAlive extends WrappedPacket {
 
     public static void init() {
         integerPresent = new FieldResolver(PacketTypeClasses.Client.KEEP_ALIVE)
-            .resolve(int.class, 0)
+            .resolveSilent(int.class, 0)
             .exists();
     }
 

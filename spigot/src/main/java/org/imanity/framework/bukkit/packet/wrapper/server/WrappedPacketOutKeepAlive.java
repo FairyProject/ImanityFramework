@@ -56,7 +56,7 @@ public class WrappedPacketOutKeepAlive extends WrappedPacket implements Sendable
 
     public static void init() {
         packetClass = PacketTypeClasses.Server.KEEP_ALIVE;
-        integerMode = new FieldResolver(packetClass).resolve(int.class, 0).exists();
+        integerMode = new FieldResolver(packetClass).resolveSilent(int.class, 0).exists();
 
         if (integerMode) {
             try {

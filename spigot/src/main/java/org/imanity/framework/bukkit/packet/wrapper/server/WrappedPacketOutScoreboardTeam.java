@@ -52,13 +52,13 @@ public class WrappedPacketOutScoreboardTeam extends WrappedPacket implements Sen
         FieldResolver fieldResolver = new FieldResolver(PacketTypeClasses.Server.SCOREBOARD_TEAM);
 
         try {
-            HAS_TEAM_PUSH = fieldResolver.resolve(String.class, 5).exists();
+            HAS_TEAM_PUSH = fieldResolver.resolveSilent(String.class, 5).exists();
         } catch (IllegalArgumentException ex) {
             HAS_TEAM_PUSH = false;
         }
 
         try {
-            HAS_CHAT_FORMAT = fieldResolver.resolve(int.class, 2).exists();
+            HAS_CHAT_FORMAT = fieldResolver.resolveSilent(int.class, 2).exists();
         } catch (IllegalArgumentException ex) {
             HAS_CHAT_FORMAT = false;
         }

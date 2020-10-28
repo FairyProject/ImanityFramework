@@ -51,7 +51,7 @@ public final class WrappedPacketInCustomPayload extends WrappedPacket {
     public static void init() {
         packetClass = PacketTypeClasses.Client.CUSTOM_PAYLOAD;
         strPresentInIndex0 = new FieldResolver(packetClass)
-            .resolve(String.class, 0)
+            .resolveSilent(String.class, 0)
             .exists();
         try {
             nmsPacketDataSerializer = NMS_CLASS_RESOLVER.resolve("PacketDataSerializer");

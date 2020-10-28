@@ -110,6 +110,10 @@ public class FieldResolver extends MemberResolver<Field> {
 		}
 	}
 
+	public <T> FieldWrapper<T> resolveSilent(Class<T> type, int index) {
+		return new FieldWrapper<>(this.resolveSilent(new ResolverQuery(type, index)));
+	}
+
 	public <T> List<FieldWrapper<T>> resolveList(Class<T> type) {
 		List<FieldWrapper<T>> fieldList = new ArrayList<>();
 

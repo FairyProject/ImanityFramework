@@ -40,7 +40,7 @@ public final class WrappedPacketInAbilities extends WrappedPacket {
 
     static {
         MULTIPLE_ABILITIES = new FieldResolver(PacketTypeClasses.Client.ABILITIES)
-                .resolve(boolean.class, 1)
+                .resolveSilent(boolean.class, 1)
                 .get(null);
     }
 
