@@ -48,7 +48,7 @@ public final class ClassFactory {
     public static void loadClasses() {
         ClassFactory.loadClassPath();
 
-        Reflections reflections = new Reflections(ClassFactory.CLASS_PATHS, new TypeAnnotationsScanner(), new SubTypesScanner(false), ImanityCommon.class.getClassLoader());
+        Reflections reflections = ClassFactory.createReflections();
 
         ClassFactory.scan(Component.class, reflections);
         ClassFactory.scan(Service.class, reflections);
@@ -77,11 +77,15 @@ public final class ClassFactory {
     }
 
     public static void scan(Class<? extends Annotation> annotation) {
-        ClassFactory.scan(annotation, new Reflections(ClassFactory.CLASS_PATHS, new TypeAnnotationsScanner()));
+        ClassFactory.scan(annotation, ClassFactory.createReflections());
     }
 
     private static void scan(Class<? extends Annotation> annotation, Reflections reflections) {
         CLASSES.put(annotation, reflections.getTypesAnnotatedWith(annotation));
+    }
+
+    private static Reflections createReflections() {
+        return new Reflections(ClassFactory.CLASS_PATHS, new TypeAnnotationsScanner(), new SubTypesScanner(false), ImanityCommon.class.getClassLoader());
     }
 
 }
