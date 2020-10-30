@@ -208,24 +208,32 @@
             <version>1.0-SNAPSHOT</version>
             <scope>compile</scope>
         </dependency>
+
+        <!-- CAFFEINE -->
         <dependency>
             <groupId>com.github.ben-manes.caffeine</groupId>
             <artifactId>caffeine</artifactId>
             <version>2.8.5</version>
             <scope>provided</scope>
         </dependency>
+
+        <!-- ASM -->
         <dependency>
             <groupId>com.esotericsoftware</groupId>
             <artifactId>reflectasm</artifactId>
             <version>1.11.9</version>
             <scope>compile</scope>
         </dependency>
+
+        <!-- FastAsyncWorldEdit -->
         <dependency>
             <groupId>com.boydti</groupId>
             <artifactId>fawe-api</artifactId>
             <version>latest</version>
             <scope>provided</scope>
         </dependency>
+
+        <!-- WorldEdit -->
         <dependency>
             <groupId>com.sk89q.worldedit</groupId>
             <artifactId>worldedit-bukkit</artifactId>

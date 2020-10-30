@@ -103,6 +103,8 @@ public final class Imanity {
 
     public static boolean SHUTTING_DOWN = false;
 
+    public static boolean TESTING = false;
+
     public static void init(Plugin plugin) {
         Imanity.PLUGIN = plugin;
         Imanity.RANDOM = new FastRandom();

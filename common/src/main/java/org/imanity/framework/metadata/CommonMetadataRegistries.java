@@ -49,4 +49,8 @@ public final class CommonMetadataRegistries {
         return PLAYERS.get(uuid);
     }
 
+    public static void remove(UUID uuid) {
+        PLAYERS.remove(uuid);
+    }
+
 }

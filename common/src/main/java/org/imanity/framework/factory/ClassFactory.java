@@ -65,8 +65,6 @@ public final class ClassFactory {
             Object instance = entry.getValue();
             Class<?> type = instance.getClass();
 
-            System.out.println("find plugin " + entry.getKey());
-
             ClasspathScan annotation = type.getAnnotation(ClasspathScan.class);
 
             if (annotation != null) {

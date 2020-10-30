@@ -24,11 +24,24 @@
 
 package org.imanity.framework.bukkit.plugin;
 
+import org.bukkit.plugin.PluginDescriptionFile;
 import org.bukkit.plugin.java.JavaPlugin;
+import org.bukkit.plugin.java.JavaPluginLoader;
 import org.imanity.framework.bukkit.Imanity;
 import org.imanity.framework.bukkit.plugin.ImanityPlugin;
 
+import java.io.File;
+
 public final class ImanityStandalonePlugin extends JavaPlugin {
+
+    protected ImanityStandalonePlugin() {
+        super();
+    }
+
+    protected ImanityStandalonePlugin(JavaPluginLoader loader, PluginDescriptionFile description, File dataFolder, File file)
+    {
+        super(loader, description, dataFolder, file);
+    }
 
     @Override
     public void onEnable() {
