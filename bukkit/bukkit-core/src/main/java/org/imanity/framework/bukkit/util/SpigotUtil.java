@@ -35,7 +35,7 @@ public class SpigotUtil {
     public static void init() {
 
         try {
-            Class.forName("spg.lgdev.config.iSpigotConfig");
+            Class.forName("spg.lgdev.org.imanity.framework.config.iSpigotConfig");
             SPIGOT_TYPE = SpigotType.IMANITY;
             return;
         } catch (ClassNotFoundException e) {}

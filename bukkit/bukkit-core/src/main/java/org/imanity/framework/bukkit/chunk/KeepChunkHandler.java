@@ -32,7 +32,7 @@ import org.imanity.framework.annotation.PostInitialize;
 import org.imanity.framework.bukkit.Imanity;
 import org.imanity.framework.bukkit.listener.events.EventSubscription;
 import org.imanity.framework.bukkit.listener.events.Events;
-import org.imanity.framework.plugin.service.Service;
+import org.imanity.framework.Service;
 
 import java.util.HashSet;
 import java.util.Set;

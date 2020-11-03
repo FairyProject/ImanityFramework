@@ -33,7 +33,7 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerChatTabCompleteEvent;
 import org.imanity.framework.bukkit.events.player.PlayerPostJoinEvent;
 import org.imanity.framework.plugin.component.Component;
-import org.imanity.framework.plugin.service.Autowired;
+import org.imanity.framework.Autowired;
 
 import java.util.Collection;
 

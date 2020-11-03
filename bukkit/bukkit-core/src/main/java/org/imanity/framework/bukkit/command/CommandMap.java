@@ -39,7 +39,7 @@ import org.imanity.framework.command.CommandMeta;
 import org.imanity.framework.command.CommandService;
 import org.imanity.framework.command.CommandEvent;
 import org.imanity.framework.command.parameter.ParameterMeta;
-import org.imanity.framework.plugin.service.Autowired;
+import org.imanity.framework.Autowired;
 
 import java.util.*;
 

@@ -27,11 +27,10 @@ package org.imanity.framework.bukkit.impl;
 import org.bukkit.event.Listener;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.java.JavaPlugin;
+import org.imanity.framework.ComponentHolder;
 import org.imanity.framework.bukkit.Imanity;
 import org.imanity.framework.bukkit.listener.FilteredListener;
-import org.imanity.framework.bukkit.plugin.ImanityStandalonePlugin;
 import org.imanity.framework.bukkit.reflection.resolver.ConstructorResolver;
-import org.imanity.framework.plugin.component.ComponentHolder;
 
 public class ComponentHolderBukkitListener extends ComponentHolder {
 

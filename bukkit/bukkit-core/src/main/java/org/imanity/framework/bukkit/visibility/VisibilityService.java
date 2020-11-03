@@ -29,7 +29,7 @@ import org.imanity.framework.annotation.PreInitialize;
 import org.imanity.framework.bukkit.Imanity;
 import org.imanity.framework.plugin.component.ComponentHolder;
 import org.imanity.framework.plugin.component.ComponentRegistry;
-import org.imanity.framework.plugin.service.Service;
+import org.imanity.framework.Service;
 
 import java.util.LinkedList;
 import java.util.List;

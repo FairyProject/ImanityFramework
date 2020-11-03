@@ -44,8 +44,8 @@ import org.imanity.framework.bukkit.packet.wrapper.annotation.AutowiredWrappedPa
 import org.imanity.framework.bukkit.reflection.MinecraftReflection;
 import org.imanity.framework.bukkit.util.TaskUtil;
 import org.imanity.framework.factory.ClassFactory;
-import org.imanity.framework.plugin.service.Autowired;
-import org.imanity.framework.plugin.service.Service;
+import org.imanity.framework.Autowired;
+import org.imanity.framework.Service;
 import java.lang.reflect.Method;
 
 @Service(name = "packet")

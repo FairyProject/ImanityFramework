@@ -27,7 +27,7 @@ package org.imanity.framework.bukkit.nametag;
 import lombok.Getter;
 import org.bukkit.entity.Player;
 import org.imanity.framework.ImanityCommon;
-import org.imanity.framework.plugin.service.Autowired;
+import org.imanity.framework.Autowired;
 
 import java.beans.ConstructorProperties;
 

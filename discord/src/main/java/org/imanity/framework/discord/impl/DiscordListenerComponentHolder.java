@@ -25,9 +25,9 @@
 package org.imanity.framework.discord.impl;
 
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
+import org.imanity.framework.ComponentHolder;
 import org.imanity.framework.ImanityCommon;
 import org.imanity.framework.discord.DiscordService;
-import org.imanity.framework.plugin.component.ComponentHolder;
 
 public class DiscordListenerComponentHolder extends ComponentHolder {
     @Override

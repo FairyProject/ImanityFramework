@@ -25,12 +25,12 @@
 package org.imanity.framework.bukkit.timer;
 
 import org.bukkit.scheduler.BukkitTask;
-import org.imanity.framework.annotation.PostDestroy;
-import org.imanity.framework.annotation.PostInitialize;
+import org.imanity.framework.PostDestroy;
+import org.imanity.framework.PostInitialize;
+import org.imanity.framework.Service;
 import org.imanity.framework.bukkit.Imanity;
 import org.imanity.framework.bukkit.timer.event.TimerStartEvent;
 import org.imanity.framework.bukkit.util.TaskUtil;
-import org.imanity.framework.plugin.service.Service;
 
 import java.util.ArrayList;
 import java.util.Iterator;

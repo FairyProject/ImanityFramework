@@ -45,7 +45,7 @@ import org.imanity.framework.bukkit.reflection.MinecraftReflection;
 import org.imanity.framework.bukkit.reflection.resolver.FieldResolver;
 import org.imanity.framework.bukkit.reflection.resolver.minecraft.NMSClassResolver;
 import org.imanity.framework.bukkit.reflection.wrapper.FieldWrapper;
-import org.imanity.framework.plugin.service.Autowired;
+import org.imanity.framework.Autowired;
 
 import java.util.*;
 

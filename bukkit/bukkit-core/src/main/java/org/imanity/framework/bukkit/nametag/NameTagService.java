@@ -35,7 +35,7 @@ import org.imanity.framework.bukkit.Imanity;
 import org.imanity.framework.bukkit.metadata.Metadata;
 import org.imanity.framework.metadata.MetadataKey;
 import org.imanity.framework.bukkit.nametag.impl.DefaultNameTagAdapter;
-import org.imanity.framework.plugin.service.Service;
+import org.imanity.framework.Service;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.*;

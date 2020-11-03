@@ -44,7 +44,7 @@ import org.imanity.framework.bukkit.tablist.util.impl.v1_8.NMS1_8TabImpl;
 import org.imanity.framework.bukkit.tablist.util.impl.ProtocolLibTabImpl;
 import org.imanity.framework.bukkit.util.SpigotUtil;
 import org.imanity.framework.bukkit.reflection.MinecraftReflection;
-import org.imanity.framework.plugin.service.Autowired;
+import org.imanity.framework.Autowired;
 
 import java.util.concurrent.*;
 

@@ -28,17 +28,13 @@ import lombok.RequiredArgsConstructor;
 import org.apache.logging.log4j.Logger;
 import org.imanity.framework.ImanityBridge;
 import org.imanity.framework.boot.FrameworkBootable;
-import org.imanity.framework.libraries.classloader.PluginClassLoader;
-import org.imanity.framework.util.FileUtils;
+import org.imanity.framework.plugin.PluginClassLoader;
 import org.imanity.framework.util.entry.Entry;
-import org.yaml.snakeyaml.Yaml;
 
 import java.io.*;
-import java.net.URISyntaxException;
 import java.net.URL;
 import java.net.URLConnection;
 import java.util.*;
-import java.util.stream.Collectors;
 
 @RequiredArgsConstructor
 public class IndependentImanityBridge implements ImanityBridge {

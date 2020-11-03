@@ -25,16 +25,14 @@
 package org.imanity.framework.discord.listener;
 
 import net.dv8tion.jda.api.entities.Member;
-import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent;
 import net.dv8tion.jda.api.events.message.priv.PrivateMessageReceivedEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
+import org.imanity.framework.Component;
 import org.imanity.framework.command.CommandService;
 import org.imanity.framework.discord.DiscordService;
-import org.imanity.framework.discord.command.DiscordCommandEvent;
-import org.imanity.framework.plugin.component.Component;
-import org.imanity.framework.plugin.service.Autowired;
+import org.imanity.framework.Autowired;
 import org.jetbrains.annotations.NotNull;
 
 @Component

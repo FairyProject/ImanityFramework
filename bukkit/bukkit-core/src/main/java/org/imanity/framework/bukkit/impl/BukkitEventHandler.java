@@ -32,10 +32,6 @@ import org.imanity.framework.redis.server.ImanityServer;
 import org.imanity.framework.redis.server.enums.ServerState;
 
 public class BukkitEventHandler implements IEventHandler {
-    @Override
-    public void onServerStateChanged(ImanityServer server, ServerState oldState, ServerState newState) {
-        Imanity.callEvent(new NetworkStateChangedEvent(server, oldState, newState));
-    }
 
     @Override
     public void onPostServicesInitial() {

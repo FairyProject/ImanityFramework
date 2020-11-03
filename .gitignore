@@ -79,7 +79,7 @@ ehthumbs_vista.db
 # Dump file
 *.stackdump
 
-# Folder config file
+# Folder org.imanity.framework.config file
 [Dd]esktop.ini
 
 # Recycle Bin used on file shares
