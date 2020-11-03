@@ -1,4 +1,4 @@
-package org.imanity.framework.jongo.configuration;
+package org.imanity.framework;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
@@ -7,8 +7,8 @@ import java.lang.annotation.Target;
 
 @Target(ElementType.TYPE)
 @Retention(RetentionPolicy.RUNTIME)
-public @interface ProvideConfiguration {
+public @interface ServiceDependency {
 
-    Class<? extends AbstractMongoConfiguration> value();
+    String[] dependencies();
 
 }

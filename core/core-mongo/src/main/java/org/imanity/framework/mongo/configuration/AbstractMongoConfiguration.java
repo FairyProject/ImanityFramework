@@ -1,4 +1,4 @@
-package org.imanity.framework.jongo.configuration;
+package org.imanity.framework.mongo.configuration;
 
 import com.mongodb.MongoClientOptions;
 import com.mongodb.MongoCredential;

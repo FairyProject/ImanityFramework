@@ -1,24 +1,46 @@
 package org.imanity.framework;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.mongodb.client.model.Filters;
+import de.undercouch.bson4jackson.BsonFactory;
+import de.undercouch.bson4jackson.BsonParser;
 import lombok.Getter;
-import org.bson.types.ObjectId;
-import org.imanity.framework.jongo.Jongo;
-import org.imanity.framework.jongo.MongoCollection;
+import org.bson.BsonDocument;
+import org.bson.Document;
+import org.imanity.framework.mongo.MongoService;
+import org.mongojack.JacksonMongoCollection;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
-import static org.imanity.framework.jongo.Oid.withOid;
-
+@ServiceDependency(dependencies = { "mongo" })
 public abstract class MongoRepository<T, ID> implements Repository<T, ID> {
 
-    @Getter
-    protected MongoCollection collection;
+    private static final BsonFactory BSON_FACTORY;
 
-    @Override
-    public void init(RepositoryService repositoryService) {
-        this.collection = repositoryService.getMongoService().collection(this.name(), this.getClass());
+    @Autowired
+    private static MongoService MONGO_SERVICE;
+
+    static {
+        BSON_FACTORY = new BsonFactory();
+        BSON_FACTORY.enable(BsonParser.Feature.HONOR_DOCUMENT_LENGTH);
+    }
+
+    @Getter
+    protected JacksonMongoCollection<T> collection;
+    protected ObjectMapper objectMapper;
+
+    @PostInitialize
+    public void init() {
+        this.collection = MONGO_SERVICE.collection(this.name(), this.getClass(), this.type());
+
+        this.objectMapper = new ObjectMapper(BSON_FACTORY);
+        this.configureJacksonMapper(this.objectMapper);
+    }
+
+    public void configureJacksonMapper(ObjectMapper objectMapper) {
+
     }
 
     public abstract String name();
@@ -37,36 +59,38 @@ public abstract class MongoRepository<T, ID> implements Repository<T, ID> {
 
     @Override
     public Optional<T> findById(ID id) {
-        return Optional.ofNullable(this.collection.findOne(withOid(id.toString())).as(this.type()));
+        return Optional.ofNullable(this.collection.findOneById(id));
     }
 
     @Override
     public Optional<T> findByExample(T example) {
-        return Optional.ofNullable(this.collection.findOne(example).as(this.type()));
+        try {
+            return Optional.ofNullable(this.collection.findOne(this.toBson(example)));
+        } catch (Throwable throwable) {
+            throw new IllegalArgumentException(throwable);
+        }
     }
 
     @Override
     public <Q> Optional<T> findByQuery(String query, Q value) {
-        return Optional.ofNullable(this.collection.findOne("{" + query + ": #}", value).as(this.type()));
+        return Optional.ofNullable(this.collection.findOne(Filters.eq(query, value)));
     }
 
     @Override
     public boolean existsById(ID id) {
-        return this.collection.findOne(withOid(id.toString())).as(this.type()) != null;
+        return this.findById(id).isPresent();
     }
 
     @Override
     public Iterable<T> findAll() {
-        return this.collection.find().as(this.type());
+        return this.collection.find();
     }
 
     @Override
-    public Iterable<T> findAllById(Iterable<ID> ids) {
+    public Iterable<T> findAllById(List<ID> ids) {
         List<T> result = new ArrayList<>();
-        for (ID id : ids) {
-            for (T t : this.collection.find("{ _id: # }", new ObjectId(id.toString())).as(this.type())) {
-                result.add(t);
-            }
+        for (T t : this.collection.find(this.collection.createIdInQuery(ids))) {
+            result.add(t);
         }
 
         return result;
@@ -74,26 +98,36 @@ public abstract class MongoRepository<T, ID> implements Repository<T, ID> {
 
     @Override
     public long count() {
-        return this.collection.count();
+        return this.collection.countDocuments();
     }
 
     @Override
     public void deleteById(ID id) {
-        this.collection.remove(new ObjectId(id.toString()));
+        this.collection.removeById(id);
     }
 
     @Override
-    public void delete(T t) {
-        this.collection.remove(t);
+    public void delete(T example) {
+        this.collection.deleteMany(this.toBson(example));
     }
 
     @Override
     public void deleteAll(Iterable<? extends T> examples) {
-        examples.forEach(this.collection::remove);
+        examples.forEach(this::delete);
     }
 
     @Override
     public void deleteAll() {
-        this.collection.remove();
+        this.collection.deleteMany(new BsonDocument());
+    }
+
+    private Document toBson(Object example) {
+        try {
+            byte[] bytes = ImanityCommon.JACKSON_MAPPER.writer().writeValueAsBytes(example);
+
+            return BSON_FACTORY.createJsonParser(bytes).readValueAs(Document.class);
+        } catch (Exception ex) {
+            throw new RuntimeException(ex);
+        }
     }
 }

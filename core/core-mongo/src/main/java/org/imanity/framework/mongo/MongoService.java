@@ -1,11 +1,12 @@
-package org.imanity.framework;
+package org.imanity.framework.mongo;
 
 import com.mongodb.*;
 import com.mongodb.client.MongoDatabase;
-import org.imanity.framework.jongo.Jongo;
-import org.imanity.framework.jongo.MongoCollection;
-import org.imanity.framework.jongo.configuration.AbstractMongoConfiguration;
-import org.imanity.framework.jongo.configuration.ProvideConfiguration;
+import org.bson.UuidRepresentation;
+import org.imanity.framework.*;
+import org.imanity.framework.mongo.configuration.AbstractMongoConfiguration;
+import org.imanity.framework.mongo.configuration.ProvideConfiguration;
+import org.mongojack.JacksonMongoCollection;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -18,7 +19,8 @@ public class MongoService {
     private List<AbstractMongoConfiguration> configurations;
 
     private Class<?> defaultConfiguration;
-    private Map<Class<?>, Jongo> databases;
+    private Map<Class<?>, MongoDatabase> databases;
+    private List<MongoClient> clients;
 
     @PreInitialize
     public void preInit() {
@@ -42,6 +44,7 @@ public class MongoService {
     @PostInitialize
     public void init() {
         this.databases = new ConcurrentHashMap<>(this.configurations.size());
+        this.clients = new ArrayList<>(this.configurations.size());
 
         for (AbstractMongoConfiguration configuration : this.configurations) {
             if (this.defaultConfiguration == null) {
@@ -53,9 +56,8 @@ public class MongoService {
             MongoCredential credential = configuration.credential();
             MongoClient client = new MongoClient(address, credential, clientOptions);
 
-            DB database = client.getDB(configuration.database());
-
-            this.databases.put(configuration.getClass(), new Jongo(database));
+            this.databases.put(configuration.getClass(), client.getDatabase(configuration.database()));
+            this.clients.add(client);
         }
 
         this.configurations.clear();
@@ -64,15 +66,15 @@ public class MongoService {
 
     @PostDestroy
     public void stop() {
-        for (Jongo jongo : this.databases.values()) {
+        for (MongoClient client : this.clients) {
             try {
-                jongo.getDatabase().getMongoClient().close();
+                client.close();
             } catch (Throwable ignored) {
             }
         }
     }
 
-    public MongoCollection collection(String name, Class<?> use) {
+    public <T> JacksonMongoCollection<T> collection(String name, Class<?> use, Class<T> tClass) {
         Class<?> type;
         ProvideConfiguration configuration = use.getAnnotation(ProvideConfiguration.class);
         if (configuration != null) {
@@ -85,12 +87,14 @@ public class MongoService {
             }
         }
 
-        Jongo jongo = this.databases.getOrDefault(type, null);
-        if (jongo == null) {
+        MongoDatabase database = this.databases.getOrDefault(type, null);
+        if (database == null) {
             throw new IllegalArgumentException("The database hasn't registered");
         }
 
-        return jongo.getCollection(name);
+        return JacksonMongoCollection.builder()
+                .withObjectMapper(FrameworkMisc.JACKSON_MAPPER)
+                .build(database, name, tClass, UuidRepresentation.JAVA_LEGACY);
     }
 
 }

@@ -24,6 +24,7 @@
 
 package org.imanity.framework;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 import org.apache.logging.log4j.Logger;
@@ -35,8 +36,6 @@ import org.imanity.framework.events.IEventHandler;
 import org.imanity.framework.exception.OptionNotEnabledException;
 import org.imanity.framework.factory.ClassFactory;
 import org.imanity.framework.factory.FieldFactory;
-import org.imanity.framework.jongo.Mapper;
-import org.imanity.framework.jongo.serializer.jackson.JacksonMapper;
 import org.imanity.framework.libraries.Library;
 import org.imanity.framework.libraries.LibraryHandler;
 import org.imanity.framework.locale.Locale;
@@ -68,7 +67,7 @@ public final class ImanityCommon {
     public static ICommandExecutor COMMAND_EXECUTOR;
     public static IEventHandler EVENT_HANDLER;
     public static ITaskScheduler TASK_SCHEDULER;
-    public static Mapper MAPPER;
+    public static ObjectMapper JACKSON_MAPPER;
 
     @Autowired
     public static MySQL SQL;
@@ -189,7 +188,7 @@ public final class ImanityCommon {
         private IEventHandler eventHandler;
         private ITaskScheduler taskScheduler;
         private IPlayerBridge playerBridge;
-        private Mapper mapper;
+        private ObjectMapper mapper;
 
         public Builder bridge(ImanityBridge bridge) {
             this.bridge = bridge;
@@ -216,7 +215,7 @@ public final class ImanityCommon {
             return this;
         }
 
-        public Builder mapper(Mapper mapper) {
+        public Builder mapper(ObjectMapper mapper) {
             this.mapper = mapper;
             return this;
         }
@@ -241,10 +240,13 @@ public final class ImanityCommon {
                 PlayerData.PLAYER_BRIDGE = this.playerBridge;
             }
             if (this.mapper == null) {
-                ImanityCommon.MAPPER = JacksonMapper.Builder.jacksonMapper().build();
+                ImanityCommon.JACKSON_MAPPER = new ObjectMapper();
             } else {
-                ImanityCommon.MAPPER = this.mapper;
+                ImanityCommon.JACKSON_MAPPER = this.mapper;
             }
+
+            FrameworkMisc.JACKSON_MAPPER = ImanityCommon.JACKSON_MAPPER;
+
             ImanityCommon.init();
         }
 

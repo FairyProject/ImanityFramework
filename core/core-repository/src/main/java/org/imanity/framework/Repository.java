@@ -1,5 +1,6 @@
 package org.imanity.framework;
 
+import java.util.List;
 import java.util.Optional;
 
 public interface Repository<T, ID> {
@@ -10,7 +11,10 @@ public interface Repository<T, ID> {
 
     <S extends T> S save(S pojo);
 
-    <S extends T> Iterable<S> saveAll(Iterable<S> pojoIterable);
+    default <S extends T> Iterable<S> saveAll(Iterable<S> pojoIterable) {
+        pojoIterable.forEach(this::save);
+        return pojoIterable;
+    }
 
     Optional<T> findById(ID id);
 
@@ -22,7 +26,7 @@ public interface Repository<T, ID> {
 
     Iterable<T> findAll();
 
-    Iterable<T> findAllById(Iterable<ID> ids);
+    Iterable<T> findAllById(List<ID> ids);
 
     long count();
 

@@ -24,6 +24,7 @@
 
 package org.imanity.framework;
 
+import com.google.common.collect.Lists;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -48,7 +49,7 @@ public class ServiceData {
     private Object instance;
 
     private String name;
-    private String[] dependencies;
+    private List<String> dependencies;
 
     private Map<Class<? extends Annotation>, Collection<Method>> annotatedMethods;
 
@@ -60,13 +61,13 @@ public class ServiceData {
         this.type = type;
         this.instance = instance;
         this.name = name;
-        this.dependencies = dependencies;
+        this.dependencies = Lists.newArrayList(dependencies);
 
-        this.loadAnnotatedMethods();
+        this.loadAnnotations();
     }
 
     @SneakyThrows
-    public void loadAnnotatedMethods() {
+    public void loadAnnotations() {
         this.annotatedMethods = new HashMap<>();
 
         Class<?> type = this.type;
@@ -74,11 +75,16 @@ public class ServiceData {
             for (Method method : type.getDeclaredMethods()) {
                 this.loadMethod(method);
             }
+
+            ServiceDependency dependencyAnnotation = type.getAnnotation(ServiceDependency.class);
+            if (dependencyAnnotation != null) {
+                dependencies.addAll(Arrays.asList(dependencyAnnotation.dependencies()));
+            }
             type = type.getSuperclass();
         }
     }
 
-    public void loadMethod(Method method) throws ReflectiveOperationException {
+    public void loadMethod(Method method) {
         for (Class<? extends Annotation> annotation : ServiceData.ANNOTATIONS) {
             if (method.getAnnotation(annotation) != null) {
 
@@ -109,7 +115,7 @@ public class ServiceData {
     }
 
     public boolean hasDependencies() {
-        return this.dependencies.length > 0;
+        return this.dependencies.size() > 0;
     }
 
 }
