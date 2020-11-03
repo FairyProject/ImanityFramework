@@ -5,7 +5,7 @@ import java.util.Optional;
 
 public interface Repository<T, ID> {
 
-    void init(RepositoryService repositoryService);
+    void init();
 
     Class<T> type();
 

@@ -24,18 +24,15 @@
 
 package org.imanity.framework.bukkit.impl;
 
-import com.google.common.collect.ImmutableList;
 import org.apache.logging.log4j.Logger;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.imanity.framework.ImanityBridge;
 import org.imanity.framework.ImanityCommon;
 import org.imanity.framework.bukkit.Imanity;
 import org.imanity.framework.bukkit.plugin.ImanityPlugin;
-import org.imanity.framework.bukkit.util.SpigotUtil;
 import org.imanity.framework.bukkit.util.BukkitUtil;
-import org.imanity.framework.libraries.classloader.PluginClassLoader;
+import org.imanity.framework.plugin.PluginClassLoader;
 import org.imanity.framework.util.entry.Entry;
-import org.imanity.framework.util.entry.EntryArrayList;
 
 import java.io.File;
 import java.io.InputStream;

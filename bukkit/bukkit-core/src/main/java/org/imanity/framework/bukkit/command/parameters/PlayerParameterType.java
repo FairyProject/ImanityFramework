@@ -28,7 +28,7 @@ import org.apache.commons.lang.StringUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
-import org.imanity.framework.plugin.component.Component;
+import org.imanity.framework.Component;
 import org.imanity.framework.util.CC;
 
 import java.util.ArrayList;

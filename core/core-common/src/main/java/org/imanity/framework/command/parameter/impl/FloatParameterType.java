@@ -26,7 +26,7 @@ package org.imanity.framework.command.parameter.impl;
 
 import org.imanity.framework.command.CommandEvent;
 import org.imanity.framework.command.parameter.ParameterHolder;
-import org.imanity.framework.plugin.component.Component;
+import org.imanity.framework.Component;
 import org.imanity.framework.Autowired;
 
 @Component

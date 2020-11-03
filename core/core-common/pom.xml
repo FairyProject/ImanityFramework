@@ -75,6 +75,31 @@
                     </execution>
                 </executions>
             </plugin>
+            <!-- JCABI -->
+            <plugin>
+                <groupId>com.jcabi</groupId>
+                <artifactId>jcabi-maven-plugin</artifactId>
+                <version>0.14.1</version>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>ajc</goal>
+                        </goals>
+                    </execution>
+                </executions>
+                <dependencies>
+                    <dependency>
+                        <groupId>org.aspectj</groupId>
+                        <artifactId>aspectjtools</artifactId>
+                        <version>1.9.2</version>
+                    </dependency>
+                    <dependency>
+                        <groupId>org.aspectj</groupId>
+                        <artifactId>aspectjweaver</artifactId>
+                        <version>1.9.2</version>
+                    </dependency>
+                </dependencies>
+            </plugin>
         </plugins>
 
         <resources>
@@ -132,13 +157,6 @@
             <artifactId>mongo-java-driver</artifactId>
             <version>LATEST</version>
             <scope>provided</scope>
-        </dependency>
-        <!-- https://mvnrepository.com/artifact/com.fasterxml.jackson.core/jackson-databind -->
-        <dependency>
-            <groupId>com.fasterxml.jackson.core</groupId>
-            <artifactId>jackson-databind</artifactId>
-            <version>2.11.2</version>
-            <scope>compile</scope>
         </dependency>
         <!-- https://mvnrepository.com/artifact/org.apache.commons/commons-lang3 -->
         <dependency>
@@ -240,6 +258,13 @@
 
         <dependency>
             <groupId>org.imanity.framework</groupId>
+            <artifactId>core-repository</artifactId>
+            <version>${version}</version>
+            <scope>compile</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>org.imanity.framework</groupId>
             <artifactId>core-services</artifactId>
             <version>${version}</version>
             <scope>compile</scope>
@@ -250,6 +275,14 @@
             <artifactId>core-yaml</artifactId>
             <version>1.0-SNAPSHOT</version>
             <scope>compile</scope>
+        </dependency>
+
+        <!-- JCABI -->
+        <dependency>
+            <groupId>org.aspectj</groupId>
+            <artifactId>aspectjrt</artifactId>
+            <version>1.6.12</version>
+            <scope>runtime</scope>
         </dependency>
     </dependencies>
 

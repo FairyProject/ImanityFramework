@@ -27,8 +27,6 @@ package org.imanity.framework.bukkit.impl;
 import org.bukkit.entity.Player;
 import org.imanity.framework.bukkit.Imanity;
 import org.imanity.framework.player.IPlayerBridge;
-import org.imanity.framework.data.PlayerData;
-import org.imanity.framework.data.store.StoreDatabase;
 
 import java.util.Collection;
 import java.util.UUID;

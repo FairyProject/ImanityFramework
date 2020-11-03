@@ -4,6 +4,7 @@ import com.google.common.base.Preconditions;
 import org.bukkit.entity.Player;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
+import org.bukkit.plugin.Plugin;
 import org.imanity.framework.ImanityCommon;
 import org.imanity.framework.bukkit.listener.events.Events;
 import org.imanity.framework.bukkit.plugin.ImanityPlugin;
@@ -14,13 +15,13 @@ import java.util.function.Function;
 
 public class BukkitRepository<T> {
 
-    private ImanityPlugin plugin;
+    private Plugin plugin;
 
     private boolean async;
     private Function<Player, T> loadAction, findAction;
     private BiConsumer<Player, T> saveAction;
 
-    public BukkitRepository(ImanityPlugin plugin) {
+    public BukkitRepository(Plugin plugin) {
         this.plugin = plugin;
         this.async = ImanityCommon.CORE_CONFIG.ASYNCHRONOUS_DATA_STORING;
     }

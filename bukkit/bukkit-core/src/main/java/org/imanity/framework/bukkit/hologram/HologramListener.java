@@ -38,7 +38,7 @@ import org.imanity.framework.bukkit.metadata.Metadata;
 import org.imanity.framework.bukkit.player.movement.MovementListener;
 import org.imanity.framework.bukkit.util.SampleMetadata;
 import org.imanity.framework.bukkit.util.TaskUtil;
-import org.imanity.framework.plugin.component.Component;
+import org.imanity.framework.Component;
 
 import java.util.HashSet;
 import java.util.Set;

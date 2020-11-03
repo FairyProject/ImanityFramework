@@ -65,6 +65,8 @@ import org.imanity.framework.bukkit.util.*;
 import org.imanity.framework.bukkit.tablist.ImanityTabAdapter;
 import org.imanity.framework.bukkit.tablist.ImanityTabHandler;
 import org.imanity.framework.bukkit.visual.VisualBlockHandler;
+import org.imanity.framework.locale.LocaleRepository;
+import org.imanity.framework.locale.player.LocaleData;
 import org.imanity.framework.plugin.PluginClassLoader;
 import org.imanity.framework.task.chain.TaskChainFactory;
 import org.imanity.framework.util.FastRandom;
@@ -87,6 +89,9 @@ public final class Imanity {
 
     @Autowired
     public static KeepChunkHandler KEEP_CHUNK_HANDLER;
+
+    @Autowired
+    private static LocaleRepository LOCALE_REPOSITORY;
 
     public static Plugin PLUGIN;
 
@@ -127,6 +132,12 @@ public final class Imanity {
                 .eventHandler(new BukkitEventHandler())
                 .taskScheduler(new BukkitTaskScheduler())
         .init();
+
+        new BukkitRepository<LocaleData>(PLUGIN)
+                .async()
+                .load(player -> LOCALE_REPOSITORY.find(player.getUniqueId()))
+                .save((player, localeData) -> LOCALE_REPOSITORY.save(localeData))
+                .init();
     }
 
     public static VisualBlockHandler getVisualBlockHandler() {
@@ -210,7 +221,7 @@ public final class Imanity {
     }
 
     public static String translate(Player player, String key) {
-        return BukkitUtil.color(ImanityCommon.translate(player, key));
+        return BukkitUtil.color(ImanityCommon.translate(player.getUniqueId(), key));
     }
 
     public static Iterable<String> translateList(Player player, String key) {

@@ -27,8 +27,6 @@ package org.imanity.framework.locale;
 import lombok.Getter;
 import org.imanity.framework.ImanityCommon;
 import org.imanity.framework.Service;
-import org.imanity.framework.locale.player.LocaleData;
-import org.imanity.framework.data.PlayerDataBuilder;
 
 import java.io.File;
 import java.io.InputStream;
@@ -46,13 +44,6 @@ public class LocaleHandler {
     public void init() {
         this.locales = new HashMap<>();
         this.defaultLocale = this.getOrRegister(ImanityCommon.CORE_CONFIG.DEFAULT_LOCALE);
-
-        new PlayerDataBuilder()
-                .loadOnJoin(true)
-                .saveOnQuit(true)
-                .name("locale")
-                .playerDataClass(LocaleData.class)
-                .build();
     }
 
     public Locale getOrRegister(String name) {

@@ -30,7 +30,7 @@ import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerLoginEvent;
 import org.imanity.framework.bukkit.packet.PacketService;
-import org.imanity.framework.plugin.component.Component;
+import org.imanity.framework.Component;
 import org.imanity.framework.Autowired;
 
 @Component

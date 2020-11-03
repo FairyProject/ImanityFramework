@@ -56,7 +56,7 @@ import org.imanity.framework.bukkit.util.CoordXZ;
 import org.imanity.framework.bukkit.util.TaskUtil;
 import org.imanity.framework.bukkit.util.chunk.CachedChunk;
 import org.imanity.framework.bukkit.util.chunk.CraftCachedChunk;
-import org.imanity.framework.plugin.component.Component;
+import org.imanity.framework.Component;
 import org.imanity.framework.util.thread.ServerThreadLock;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;

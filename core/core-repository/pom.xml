@@ -23,28 +23,9 @@
                 <artifactId>maven-compiler-plugin</artifactId>
                 <version>3.7.0</version>
                 <configuration>
-                    <source>1.8</source>
-                    <target>1.8</target>
+                    <source>${java.version}</source>
+                    <target>${java.version}</target>
                 </configuration>
-                <executions>
-                    <execution>
-                        <id>default-compile</id>
-                        <configuration>
-                            <compilerArgument>-proc:none</compilerArgument>
-                            <includes>
-                                <include>org/imanity/framework/plugin/PluginProcessor.java</include>
-                                <!--include dependencies required for LogMeCustomAnnotationProcessor -->
-                            </includes>
-                        </configuration>
-                    </execution>
-                    <execution>
-                        <id>compile-project</id>
-                        <phase>compile</phase>
-                        <goals>
-                            <goal>compile</goal>
-                        </goals>
-                    </execution>
-                </executions>
             </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
@@ -96,7 +77,19 @@
     <dependencies>
         <dependency>
             <groupId>org.imanity.framework</groupId>
-            <artifactId>core-common</artifactId>
+            <artifactId>core-services</artifactId>
+            <version>${version}</version>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.imanity.framework</groupId>
+            <artifactId>core-mongo</artifactId>
+            <version>${version}</version>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.imanity.framework</groupId>
+            <artifactId>core-misc</artifactId>
             <version>${version}</version>
             <scope>provided</scope>
         </dependency>

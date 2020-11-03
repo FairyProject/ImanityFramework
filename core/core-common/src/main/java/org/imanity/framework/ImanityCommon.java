@@ -30,7 +30,6 @@ import lombok.NoArgsConstructor;
 import org.apache.logging.log4j.Logger;
 import org.imanity.framework.command.ICommandExecutor;
 import org.imanity.framework.config.CoreConfig;
-import org.imanity.framework.data.DataHandler;
 import org.imanity.framework.database.MySQL;
 import org.imanity.framework.events.IEventHandler;
 import org.imanity.framework.exception.OptionNotEnabledException;
@@ -40,15 +39,16 @@ import org.imanity.framework.libraries.Library;
 import org.imanity.framework.libraries.LibraryHandler;
 import org.imanity.framework.locale.Locale;
 import org.imanity.framework.locale.LocaleHandler;
+import org.imanity.framework.locale.LocaleRepository;
 import org.imanity.framework.locale.player.LocaleData;
 import org.imanity.framework.player.IPlayerBridge;
-import org.imanity.framework.data.PlayerData;
 import org.imanity.framework.redis.RedisService;
 import org.imanity.framework.redis.server.ServerHandler;
 import org.imanity.framework.redis.server.enums.ServerState;
 import org.imanity.framework.task.ITaskScheduler;
 import java.util.EnumSet;
 import java.util.Set;
+import java.util.UUID;
 
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public final class ImanityCommon {
@@ -62,6 +62,10 @@ public final class ImanityCommon {
 
     @Autowired
     public static LocaleHandler LOCALE_HANDLER;
+
+    @Autowired
+    public static LocaleRepository LOCALE_REPOSITORY;
+
     public static LibraryHandler LIBRARY_HANDLER;
 
     public static ICommandExecutor COMMAND_EXECUTOR;
@@ -154,15 +158,14 @@ public final class ImanityCommon {
             SERVER_HANDLER.changeServerState(ServerState.STOPPING);
         }
 
-        DataHandler.shutdown();
         ImanityCommon.SERVICE_HANDLER.stop();
     }
 
-    public static String translate(Object player, String key) {
+    public static String translate(UUID uuid, String key) {
         if (!ImanityCommon.CORE_CONFIG.USE_LOCALE) {
             throw new OptionNotEnabledException("use_locale", "org.imanity.framework.config.yml");
         }
-        LocaleData localeData = DataHandler.getPlayerData(player, LocaleData.class);
+        LocaleData localeData = LOCALE_REPOSITORY.find(uuid);
         Locale locale;
         if (localeData == null || localeData.getLocale() == null) {
             locale = ImanityCommon.LOCALE_HANDLER.getDefaultLocale();
@@ -235,9 +238,6 @@ public final class ImanityCommon {
             if (this.taskScheduler != null) {
                 ImanityCommon.TASK_SCHEDULER = this.taskScheduler;
                 FrameworkMisc.TASK_SCHEDULER = this.taskScheduler;
-            }
-            if (this.playerBridge != null) {
-                PlayerData.PLAYER_BRIDGE = this.playerBridge;
             }
             if (this.mapper == null) {
                 ImanityCommon.JACKSON_MAPPER = new ObjectMapper();

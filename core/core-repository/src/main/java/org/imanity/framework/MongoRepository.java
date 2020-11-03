@@ -123,7 +123,7 @@ public abstract class MongoRepository<T, ID> implements Repository<T, ID> {
 
     private Document toBson(Object example) {
         try {
-            byte[] bytes = ImanityCommon.JACKSON_MAPPER.writer().writeValueAsBytes(example);
+            byte[] bytes = FrameworkMisc.JACKSON_MAPPER.writer().writeValueAsBytes(example);
 
             return BSON_FACTORY.createJsonParser(bytes).readValueAs(Document.class);
         } catch (Exception ex) {

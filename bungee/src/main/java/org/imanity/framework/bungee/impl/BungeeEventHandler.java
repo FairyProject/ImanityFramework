@@ -30,10 +30,6 @@ import org.imanity.framework.redis.server.enums.ServerState;
 
 // TODO: event
 public class BungeeEventHandler implements IEventHandler {
-    @Override
-    public void onServerStateChanged(ImanityServer server, ServerState oldState, ServerState newState) {
-
-    }
 
     @Override
     public void onPostServicesInitial() {

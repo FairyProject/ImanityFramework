@@ -24,9 +24,6 @@
 
 package org.imanity.framework.player;
 
-import org.imanity.framework.data.PlayerData;
-import org.imanity.framework.data.store.StoreDatabase;
-
 import java.util.Collection;
 import java.util.UUID;
 

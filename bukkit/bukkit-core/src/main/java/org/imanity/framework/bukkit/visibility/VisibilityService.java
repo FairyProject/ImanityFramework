@@ -25,10 +25,10 @@
 package org.imanity.framework.bukkit.visibility;
 
 import org.bukkit.entity.Player;
-import org.imanity.framework.annotation.PreInitialize;
+import org.imanity.framework.PreInitialize;
 import org.imanity.framework.bukkit.Imanity;
-import org.imanity.framework.plugin.component.ComponentHolder;
-import org.imanity.framework.plugin.component.ComponentRegistry;
+import org.imanity.framework.ComponentHolder;
+import org.imanity.framework.ComponentRegistry;
 import org.imanity.framework.Service;
 
 import java.util.LinkedList;

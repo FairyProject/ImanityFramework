@@ -25,8 +25,8 @@
 package org.imanity.framework.database;
 
 import lombok.Getter;
-import org.imanity.framework.annotation.PostDestroy;
-import org.imanity.framework.annotation.PostInitialize;
+import org.imanity.framework.PostDestroy;
+import org.imanity.framework.PostInitialize;
 import org.imanity.framework.Service;
 import org.imanity.framework.util.builder.SQLHost;
 import org.imanity.framework.util.builder.hikari.HikariHandler;

@@ -39,7 +39,7 @@ import org.imanity.framework.bukkit.util.TaskUtil;
 import org.imanity.framework.command.CommandProvider;
 import org.imanity.framework.command.CommandService;
 import org.imanity.framework.command.CommandEvent;
-import org.imanity.framework.plugin.component.Component;
+import org.imanity.framework.Component;
 import org.imanity.framework.Autowired;
 import org.imanity.framework.util.AccessUtil;
 

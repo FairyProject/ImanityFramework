@@ -36,7 +36,7 @@ import org.bukkit.event.player.PlayerPickupItemEvent;
 import org.bukkit.inventory.ItemStack;
 import org.imanity.framework.ImanityCommon;
 import org.imanity.framework.bukkit.util.SampleMetadata;
-import org.imanity.framework.plugin.component.Component;
+import org.imanity.framework.Component;
 
 @Component
 public class ItemListener implements Listener {

@@ -30,7 +30,7 @@ import org.bukkit.ChatColor;
 import org.bukkit.World;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
-import org.imanity.framework.plugin.component.Component;
+import org.imanity.framework.Component;
 
 import java.util.ArrayList;
 import java.util.List;

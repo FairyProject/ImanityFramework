@@ -26,16 +26,12 @@ package org.imanity.framework.command;
 
 import com.google.common.collect.ImmutableSet;
 import lombok.Getter;
-import org.imanity.framework.annotation.PostInitialize;
-import org.imanity.framework.annotation.PreInitialize;
+import org.imanity.framework.*;
 import org.imanity.framework.command.annotation.Command;
 import org.imanity.framework.command.annotation.CommandHolder;
 import org.imanity.framework.command.annotation.Parameter;
 import org.imanity.framework.command.parameter.ParameterHolder;
 import org.imanity.framework.command.parameter.ParameterMeta;
-import org.imanity.framework.plugin.component.ComponentHolder;
-import org.imanity.framework.plugin.component.ComponentRegistry;
-import org.imanity.framework.Service;
 
 import java.lang.reflect.Method;
 import java.util.*;

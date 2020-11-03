@@ -33,7 +33,7 @@ import org.bukkit.event.world.WorldUnloadEvent;
 import org.imanity.framework.bukkit.Imanity;
 import org.imanity.framework.bukkit.metadata.Metadata;
 import org.imanity.framework.bukkit.util.SampleMetadata;
-import org.imanity.framework.plugin.component.Component;
+import org.imanity.framework.Component;
 
 import static org.imanity.framework.bukkit.Imanity.PLUGIN;
 

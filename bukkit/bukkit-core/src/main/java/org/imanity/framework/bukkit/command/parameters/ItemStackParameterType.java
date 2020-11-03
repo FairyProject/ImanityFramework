@@ -30,7 +30,7 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.imanity.framework.bukkit.command.util.ItemUtil;
-import org.imanity.framework.plugin.component.Component;
+import org.imanity.framework.Component;
 
 import java.util.List;
 import java.util.Set;

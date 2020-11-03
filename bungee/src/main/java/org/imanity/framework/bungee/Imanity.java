@@ -31,8 +31,8 @@ import org.apache.logging.log4j.Logger;
 import org.imanity.framework.ImanityCommon;
 import org.imanity.framework.bungee.impl.*;
 import org.imanity.framework.bungee.plugin.ImanityPlugin;
-import org.imanity.framework.libraries.classloader.PluginClassLoader;
-import org.imanity.framework.plugin.component.ComponentRegistry;
+import org.imanity.framework.ComponentRegistry;
+import org.imanity.framework.plugin.PluginClassLoader;
 import org.imanity.framework.task.chain.TaskChainFactory;
 
 import java.util.List;

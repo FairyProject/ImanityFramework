@@ -34,7 +34,7 @@ import org.imanity.framework.bukkit.events.player.EntityDamageByPlayerEvent;
 import org.imanity.framework.bukkit.events.player.PlayerDamageByEntityEvent;
 import org.imanity.framework.bukkit.events.player.PlayerDamageByPlayerEvent;
 import org.imanity.framework.bukkit.events.player.PlayerDamageEvent;
-import org.imanity.framework.plugin.component.Component;
+import org.imanity.framework.Component;
 
 @Component
 public class CallEventListener implements Listener {

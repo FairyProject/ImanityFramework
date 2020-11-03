@@ -24,12 +24,7 @@
 
 package org.imanity.framework.redis.subscription;
 
-import com.fasterxml.jackson.annotation.JsonAutoDetect;
-import com.fasterxml.jackson.annotation.PropertyAccessor;
-import com.google.gson.Gson;
-import com.google.gson.JsonObject;
 import lombok.Getter;
-import org.imanity.framework.data.mapping.DataElementMapper;
 import org.imanity.framework.redis.RedisService;
 import org.redisson.api.RTopic;
 
@@ -37,14 +32,6 @@ import java.util.function.Consumer;
 
 @Getter
 public class RedisPubSub<T> {
-    public static final DataElementMapper MAPPER;
-
-    static {
-
-        MAPPER = new DataElementMapper();
-        MAPPER.setVisibility(PropertyAccessor.FIELD, JsonAutoDetect.Visibility.ANY);
-
-    }
 
     private final String name;
     private final RTopic topic;

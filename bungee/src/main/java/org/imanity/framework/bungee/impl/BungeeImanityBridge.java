@@ -24,7 +24,6 @@
 
 package org.imanity.framework.bungee.impl;
 
-import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import lombok.SneakyThrows;
 import net.md_5.bungee.api.ProxyServer;
@@ -36,7 +35,7 @@ import org.imanity.framework.ImanityBridge;
 import org.imanity.framework.ImanityCommon;
 import org.imanity.framework.bungee.Imanity;
 import org.imanity.framework.bungee.plugin.ImanityPlugin;
-import org.imanity.framework.libraries.classloader.PluginClassLoader;
+import org.imanity.framework.plugin.PluginClassLoader;
 import org.imanity.framework.util.entry.Entry;
 
 import java.io.*;

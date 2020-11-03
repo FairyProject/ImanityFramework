@@ -29,7 +29,7 @@ import net.md_5.bungee.api.plugin.Plugin;
 import org.imanity.framework.bungee.Imanity;
 import org.imanity.framework.bungee.plugin.annotation.PluginProvider;
 import org.imanity.framework.bungee.util.PluginUtil;
-import org.imanity.framework.plugin.component.ComponentHolder;
+import org.imanity.framework.ComponentHolder;
 
 public class ComponentHolderBungeeListener extends ComponentHolder {
     @Override
