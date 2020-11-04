@@ -1,5 +1,7 @@
 package org.imanity.framework;
 
+import org.imanity.framework.cache.Unless;
+
 import java.lang.annotation.*;
 import java.util.concurrent.TimeUnit;
 
@@ -27,7 +29,7 @@ import java.util.concurrent.TimeUnit;
  * cache of the object.
  *
  * <p>Since 0.7.18 you can control when exactly flushing happens, with
- * {@link Cacheable.FlushBefore} and {@link Cacheable.FlushAfter} annotations
+ * {@link ClearBefore} and {@link ClearAfter} annotations
  * ({@link Cacheable.Flush} is deprecated), for example:
  *
  * <pre>public class Page {
@@ -77,52 +79,22 @@ public @interface Cacheable {
     boolean asyncUpdate() default false;
 
     /**
-     * Before-flushing trigger(s).
+     * Storing the key of the cacheable
      *
-     * <p>Before calling the method, call static method {@code flushBefore()}
-     * in this class and, according to its result, either flush or not.
-     * For example:
-     *
-     * <pre> class Foo {
-     *   &#64;Cacheable(before = Foo.class)
-     *   int read() {
-     *     // return some number
-     *   }
-     *   public static boolean flushBefore() {
-     *   // if TRUE is returned, flushing will happen before
-     *   // the call to #read()
-     *   }
-     * }</pre>
-     *
-     * @since 0.21
      */
-    Class<?>[] before() default { };
-
-    /**
-     * After-flushing trigger(s).
-     *
-     * <p>After calling the method, call static method {@code flushAfter()}
-     * in this class and, according to its result, either flush or not.
-     * For example:
-     *
-     * <pre> class Foo {
-     *   &#64;Cacheable(after = Foo.class)
-     *   int read() {
-     *     // return some number
-     *   }
-     *   public static boolean flushAfter() {
-     *   // if TRUE is returned, flushing will happen after
-     *   // the call to #read()
-     *   }
-     * }</pre>
-     *
-     * @since 0.21
-     */
-    Class<?>[] after() default { };
-
     String key() default "";
 
-    boolean ignoredNull() default false;
+    /**
+     * Ignore if the key has anything appears null
+     *
+     */
+    boolean ignoreKeyNull() default false;
+
+    /**
+     * Don't store if unless returns true
+     *
+     */
+    Class<? extends Unless>[] unless() default { };
 
     /**
      * Identifies a method that should flush all cached entities of
@@ -132,7 +104,7 @@ public @interface Cacheable {
     @Documented
     @Retention(RetentionPolicy.RUNTIME)
     @Target(ElementType.METHOD)
-    @interface FlushBefore {
+    @interface ClearBefore {
     }
 
     /**
@@ -143,7 +115,7 @@ public @interface Cacheable {
     @Documented
     @Retention(RetentionPolicy.RUNTIME)
     @Target(ElementType.METHOD)
-    @interface FlushAfter {
+    @interface ClearAfter {
     }
 
 }

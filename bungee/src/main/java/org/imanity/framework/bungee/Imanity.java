@@ -24,6 +24,7 @@
 
 package org.imanity.framework.bungee;
 
+import lombok.SneakyThrows;
 import net.md_5.bungee.api.ProxyServer;
 import net.md_5.bungee.api.plugin.Plugin;
 import org.apache.logging.log4j.LogManager;
@@ -75,6 +76,7 @@ public class Imanity {
         return Imanity.PLUGIN.getProxy();
     }
 
+    @SneakyThrows
     public static void shutdown() {
         SHUTTING_DOWN = true;
 

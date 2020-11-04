@@ -46,9 +46,9 @@ import org.imanity.framework.redis.RedisService;
 import org.imanity.framework.redis.server.ServerHandler;
 import org.imanity.framework.redis.server.enums.ServerState;
 import org.imanity.framework.task.ITaskScheduler;
-import java.util.EnumSet;
-import java.util.Set;
-import java.util.UUID;
+import org.imanity.framework.util.Terminable;
+
+import java.util.*;
 
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public final class ImanityCommon {
@@ -74,13 +74,12 @@ public final class ImanityCommon {
     public static ObjectMapper JACKSON_MAPPER;
 
     @Autowired
-    public static MySQL SQL;
-
-    @Autowired
     public static RedisService REDIS;
 
     @Autowired
     public static ServerHandler SERVER_HANDLER;
+
+    private static final List<Terminable> TERMINABLES = new ArrayList<>();
 
     private static boolean LIBRARIES_INITIALIZED, BRIDGE_INITIALIZED;
 
@@ -153,12 +152,19 @@ public final class ImanityCommon {
         SERVICE_HANDLER.registerAutowired(instance);
     }
 
-    public static void shutdown() {
+    public static void shutdown() throws Throwable {
         if (ImanityCommon.CORE_CONFIG.USE_REDIS) {
             SERVER_HANDLER.changeServerState(ServerState.STOPPING);
         }
 
+        synchronized (ImanityCommon.TERMINABLES) {
+            for (Terminable terminable : ImanityCommon.TERMINABLES) {
+                terminable.close();
+            }
+        }
+
         ImanityCommon.SERVICE_HANDLER.stop();
+        FrameworkMisc.close();
     }
 
     public static String translate(UUID uuid, String key) {
@@ -173,6 +179,12 @@ public final class ImanityCommon {
             locale = localeData.getLocale();
         }
         return locale.get(key);
+    }
+
+    public static void addTerminable(Terminable terminable) {
+        synchronized (ImanityCommon.TERMINABLES) {
+            ImanityCommon.TERMINABLES.add(terminable);
+        }
     }
 
     public static Builder builder() {

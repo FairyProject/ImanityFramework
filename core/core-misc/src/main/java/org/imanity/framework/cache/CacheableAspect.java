@@ -12,19 +12,19 @@ import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.annotation.Before;
 import org.aspectj.lang.reflect.MethodSignature;
 import org.imanity.framework.CacheEvict;
+import org.imanity.framework.CachePut;
 import org.imanity.framework.Cacheable;
+import org.imanity.framework.cache.impl.CacheKeyAbstract;
+import org.imanity.framework.cache.impl.CacheKeyMethod;
+import org.imanity.framework.cache.impl.CacheKeyString;
 import org.imanity.framework.util.AccessUtil;
 
 import javax.annotation.Nullable;
 import java.lang.ref.SoftReference;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
-import java.lang.reflect.Modifier;
-import java.util.Arrays;
 import java.util.Map;
-import java.util.Objects;
 import java.util.concurrent.*;
-import java.util.concurrent.atomic.AtomicInteger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -43,17 +43,16 @@ public class CacheableAspect {
     private transient final CacheManager defaultCacheManager;
     private transient final Map<Class<?>, CacheManager> cacheManagers;
 
-    // TODO: shut it down when closing
-    private transient final ScheduledExecutorService cleanerService;
-    private transient final ExecutorService updaterService;
+    public static ScheduledExecutorService CLEANER_SERVICE;
+    public static ExecutorService UPDATER_SERVICE;
 
     public CacheableAspect() {
-        this.cleanerService = Executors.newSingleThreadScheduledExecutor(new ThreadFactoryBuilder()
+        CLEANER_SERVICE = Executors.newSingleThreadScheduledExecutor(new ThreadFactoryBuilder()
                 .setNameFormat("cacheable-clean")
                 .setDaemon(true)
                 .build()
         );
-        this.updaterService = Executors.newSingleThreadExecutor(new ThreadFactoryBuilder()
+        UPDATER_SERVICE = Executors.newSingleThreadExecutor(new ThreadFactoryBuilder()
                 .setNameFormat("cacheable-update")
                 .setDaemon(true)
                 .build()
@@ -62,7 +61,7 @@ public class CacheableAspect {
         this.defaultCacheManager = new CacheManager(this);
         this.cacheManagers = new ConcurrentHashMap<>(0);
 
-        this.cleanerService.scheduleAtFixedRate(() -> {
+        this.CLEANER_SERVICE.scheduleAtFixedRate(() -> {
             this.defaultCacheManager.clean();
 
             for (CacheManager cacheManager : this.cacheManagers.values()) {
@@ -70,7 +69,7 @@ public class CacheableAspect {
             }
         }, 1L, 1L, TimeUnit.SECONDS);
 
-        this.updaterService.submit(() -> {
+        this.UPDATER_SERVICE.submit(() -> {
             while (true) {
                 try {
                     this.defaultCacheManager.update();
@@ -83,6 +82,7 @@ public class CacheableAspect {
                 }
             }
         });
+
     }
 
     // TODO: Performance check, is this key reader efficient?
@@ -153,7 +153,7 @@ public class CacheableAspect {
                 for (int i = 0; i < fieldIndex; i++) {
                     stringBuilder.append(fields[i]);
 
-                    if (i + 1 <= fieldIndex) {
+                    if (i + 1 < fieldIndex) {
                         stringBuilder.append(".");
                     }
                 }
@@ -171,7 +171,7 @@ public class CacheableAspect {
                 for (int i = 0; i < fieldIndex; i++) {
                     stringBuilder.append(fields[i]);
 
-                    if (i + 1 <= fieldIndex) {
+                    if (i + 1 < fieldIndex) {
                         stringBuilder.append(".");
                     }
                 }
@@ -192,7 +192,15 @@ public class CacheableAspect {
             this.cacheManagers.put(type, cacheManager);
         }
 
-        return cacheManager;
+        return cacheManager == null ? this.defaultCacheManager : cacheManager;
+    }
+
+    public CacheKeyAbstract toKey(JoinPoint point, String key) {
+        if (key != null && !key.isEmpty()) {
+            return new CacheKeyString(point, key);
+        }
+
+        return new CacheKeyMethod(point);
     }
 
     @Around("execution(* *(..)) && @annotation(org.imanity.framework.Cacheable)")
@@ -200,9 +208,19 @@ public class CacheableAspect {
         final Method method = ((MethodSignature) point.getSignature()).getMethod();
 
         final Cacheable annotation = method.getAnnotation(Cacheable.class);
-        final CacheableAspect.Key key = new CacheableAspect.Key(point, readAnnotationKey(point, annotation.key(), annotation.ignoredNull()));
+        CacheKeyAbstract key = this.toKey(point, readAnnotationKey(point, annotation.key(), annotation.ignoreKeyNull()));
 
-        return this.getCacheManager(method.getDeclaringClass()).cache(key, annotation, method, point).through();
+        return this.getCacheManager(method.getDeclaringClass()).cache(key, method, point, annotation.unless(), annotation.asyncUpdate(), false).through();
+    }
+
+    @Around("execution(* *(..)) && @annotation(org.imanity.framework.CachePut)")
+    public Object cachePut(ProceedingJoinPoint point) throws Throwable {
+        final Method method = ((MethodSignature) point.getSignature()).getMethod();
+
+        final CachePut annotation = method.getAnnotation(CachePut.class);
+        CacheKeyAbstract key = this.toKey(point, readAnnotationKey(point, annotation.value(), annotation.ignoreKeyNull()));
+
+        return this.getCacheManager(method.getDeclaringClass()).cache(key, method, point, annotation.unless(), annotation.asyncUpdate(), false).through();
     }
 
     @Before(
@@ -211,16 +229,18 @@ public class CacheableAspect {
     public void evict(JoinPoint point) {
         Method method = ((MethodSignature) point.getSignature()).getMethod();
         CacheEvict annotation = method.getAnnotation(CacheEvict.class);
-        String keyString = this.readAnnotationKey(point, annotation.value(), annotation.ignoredNull());
+        String keyString = this.readAnnotationKey(point, annotation.value(), annotation.ignoreKeyNull());
 
         this.getCacheManager(method.getDeclaringClass()).evict(point, keyString);
     }
+
+
 
     @Before
             (
                     // @checkstyle StringLiteralsConcatenation (3 lines)
                     "execution(* *(..))"
-                            + " && @annotation(org.imanity.framework.Cacheable.FlushBefore)"
+                            + " && @annotation(org.imanity.framework.Cacheable.ClearBefore)"
             )
     public void preFlush(final JoinPoint point) {
         this.flush(point, "before the call");
@@ -230,14 +250,16 @@ public class CacheableAspect {
             (
                     // @checkstyle StringLiteralsConcatenation (2 lines)
                     "execution(* *(..))"
-                            + " && @annotation(org.imanity.framework.Cacheable.FlushAfter)"
+                            + " && @annotation(org.imanity.framework.Cacheable.ClearAfter)"
             )
     public void postFlush(final JoinPoint point) {
         this.flush(point, "after the call");
     }
 
     private void flush(final JoinPoint point, final String when) {
-        this.getCacheManager(point.getThis().getClass()).flush(point);
+        Method method = ((MethodSignature) point.getSignature()).getMethod();
+
+        this.getCacheManager(method.getDeclaringClass()).flush(point);
     }
 
     protected boolean isCreateTunnel(final CacheableAspect.Tunnel tunnel) {
@@ -248,7 +270,7 @@ public class CacheableAspect {
     protected static final class Tunnel {
 
         private final transient ProceedingJoinPoint point;
-        private final transient CacheableAspect.Key key;
+        private final transient CacheKeyAbstract key;
         private final transient boolean async;
         private transient boolean executed;
         private transient long lifetime;
@@ -256,8 +278,7 @@ public class CacheableAspect {
 
         private transient SoftReference<Object> cached;
 
-        Tunnel(final ProceedingJoinPoint pnt,
-               final CacheableAspect.Key akey, final boolean asy) {
+        Tunnel(final ProceedingJoinPoint pnt, final CacheKeyAbstract akey, final boolean asy) {
             this.point = pnt;
             this.key = akey;
             this.async = asy;
@@ -279,9 +300,7 @@ public class CacheableAspect {
                 this.hasResult = result != null;
                 this.cached = new SoftReference<>(result);
 
-                final Method method = MethodSignature.class
-                        .cast(this.point.getSignature())
-                        .getMethod();
+                final Method method = ((MethodSignature) this.point.getSignature()).getMethod();
 
                 final Cacheable annotation = method.getAnnotation(Cacheable.class);
 
@@ -299,7 +318,11 @@ public class CacheableAspect {
                 this.executed = true;
             }
 
-            return this.key.through(this.cached.get());
+            return this.cached.get();
+        }
+
+        public boolean hasResult() {
+            return this.hasResult;
         }
 
         public boolean expired() {
@@ -317,70 +340,5 @@ public class CacheableAspect {
         SoftReference<Object> cached() {
             return this.cached;
         }
-    }
-
-    @ToString
-    protected static class Key {
-
-        private final transient long start;
-        private final transient AtomicInteger accessed;
-        private final transient Method method;
-        private final transient Object target;
-        private final transient Object[] arguments;
-
-        @Nullable
-        protected final transient String key;
-
-        Key(final JoinPoint point, String key) {
-            this.start = System.currentTimeMillis();
-            this.accessed = new AtomicInteger();
-            this.method = ((MethodSignature) point.getSignature()).getMethod();
-            this.target = CacheableAspect.Key.findTarget(point);
-            this.arguments = point.getArgs();
-            this.key = key;
-        }
-
-        @Override
-        public final int hashCode() {
-            return Objects.hash(this.method, this.key);
-        }
-
-        @Override
-        public final boolean equals(final Object obj) {
-            final boolean equals;
-            if (this == obj) {
-                equals = true;
-            } else if (obj instanceof CacheableAspect.Key) {
-                final CacheableAspect.Key key = CacheableAspect.Key.class.cast(obj);
-                equals = key.method.equals(this.method)
-                        && this.target.equals(key.target)
-                        && Arrays.deepEquals(key.arguments, this.arguments)
-                        && Objects.equals(key.key, this.key);
-            } else {
-                equals = false;
-            }
-            return equals;
-        }
-
-        public Object through(final Object result) {
-            return result;
-        }
-
-        public final boolean sameTarget(final JoinPoint point) {
-            return CacheableAspect.Key.findTarget(point).equals(this.target);
-        }
-
-        private static Object findTarget(final JoinPoint point) {
-            final Object tgt;
-            final Method method = MethodSignature.class
-                    .cast(point.getSignature()).getMethod();
-            if (Modifier.isStatic(method.getModifiers())) {
-                tgt = method.getDeclaringClass();
-            } else {
-                tgt = point.getTarget();
-            }
-            return tgt;
-        }
-
     }
 }

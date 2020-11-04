@@ -86,19 +86,19 @@
         <dependency>
             <groupId>org.imanity.framework</groupId>
             <artifactId>core-services</artifactId>
-            <version>${version}</version>
+            <version>${project.version}</version>
             <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>org.imanity.framework</groupId>
             <artifactId>core-yaml</artifactId>
-            <version>${version}</version>
+            <version>${project.version}</version>
             <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>org.imanity.framework</groupId>
             <artifactId>core-misc</artifactId>
-            <version>${version}</version>
+            <version>${project.version}</version>
             <scope>provided</scope>
         </dependency>
         <dependency>

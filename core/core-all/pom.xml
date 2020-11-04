@@ -15,7 +15,7 @@
         <dependency>
             <groupId>org.imanity.framework</groupId>
             <artifactId>core-common</artifactId>
-            <version>${version}</version>
+            <version>${project.version}</version>
             <scope>compile</scope>
         </dependency>
     </dependencies>

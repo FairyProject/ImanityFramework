@@ -28,6 +28,7 @@ import com.google.common.collect.ImmutableList;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 import lombok.NonNull;
+import lombok.SneakyThrows;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.bukkit.Sound;
@@ -344,6 +345,7 @@ public final class Imanity {
 
     }
 
+    @SneakyThrows
     public static void shutdown() {
         SHUTTING_DOWN = true;
 

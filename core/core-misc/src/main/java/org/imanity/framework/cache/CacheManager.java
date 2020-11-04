@@ -1,17 +1,20 @@
 package org.imanity.framework.cache;
 
+import lombok.SneakyThrows;
 import org.aspectj.lang.JoinPoint;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.imanity.framework.Cacheable;
+import org.imanity.framework.cache.impl.CacheKeyAbstract;
 
 import java.lang.reflect.Method;
-import java.util.Objects;
 import java.util.concurrent.*;
 
 public class CacheManager {
 
-    private transient final ConcurrentMap<CacheableAspect.Key, CacheableAspect.Tunnel> tunnels;
-    private transient final BlockingQueue<CacheableAspect.Key> updatekeys;
+    private static final ConcurrentMap<Class<?>, Unless> UNLESS_CACHE = new ConcurrentHashMap<>();
+
+    private transient final ConcurrentMap<CacheKeyAbstract, CacheableAspect.Tunnel> tunnels;
+    private transient final BlockingQueue<CacheKeyAbstract> updatekeys;
 
     private final CacheableAspect cacheableAspect;
 
@@ -24,7 +27,7 @@ public class CacheManager {
 
     public void clean() {
         synchronized (this.tunnels) {
-            for (final CacheableAspect.Key key : this.tunnels.keySet()) {
+            for (final CacheKeyAbstract key : this.tunnels.keySet()) {
                 if (this.tunnels.get(key).expired()
                         && !this.tunnels.get(key).asyncUpdate()) {
                     this.tunnels.remove(key);
@@ -34,7 +37,7 @@ public class CacheManager {
     }
 
     public void update() throws Throwable {
-        final CacheableAspect.Key key = this.updatekeys.take();
+        final CacheKeyAbstract key = this.updatekeys.take();
         final CacheableAspect.Tunnel tunnel = this.tunnels.get(key);
         if (tunnel != null && tunnel.expired()) {
             final CacheableAspect.Tunnel newTunnel = tunnel.copy();
@@ -43,45 +46,66 @@ public class CacheManager {
         }
     }
 
-    public CacheableAspect.Tunnel cache(CacheableAspect.Key key, Cacheable annotation, Method method, ProceedingJoinPoint point) throws Throwable {
+    public CacheableAspect.Tunnel cache(CacheKeyAbstract key,
+                                        Method method,
+                                        ProceedingJoinPoint point,
+                                        Class<? extends Unless>[] unlesses,
+                                        boolean asyncPut,
+                                        boolean forcePut) throws Throwable {
         synchronized (this.tunnels) {
 
-            for (final Class<?> before : annotation.before()) {
-                final boolean flag = (boolean) before.getMethod("flushBefore").invoke(method.getClass());
-                if (flag) {
-                    this.cacheableAspect.preFlush(point);
+            CacheableAspect.Tunnel tunnel;
+            if (forcePut) {
+                tunnel = null;
+            } else {
+                tunnel = this.tunnels.get(key);
+            }
+
+            boolean put = true;
+
+            if (forcePut || this.cacheableAspect.isCreateTunnel(tunnel)) {
+                tunnel = new CacheableAspect.Tunnel(
+                        point, key, asyncPut
+                );
+
+                if (!this.checkUnless(unlesses, tunnel)) {
+                    this.tunnels.put(key, tunnel);
+                } else {
+                    put = false;
                 }
             }
 
-            CacheableAspect.Tunnel tunnel = this.tunnels.get(key);
-            if (this.cacheableAspect.isCreateTunnel(tunnel)) {
-                tunnel = new CacheableAspect.Tunnel(
-                        point, key, annotation.asyncUpdate()
-                );
-                this.tunnels.put(key, tunnel);
-            }
-            if (tunnel.expired() && tunnel.asyncUpdate()) {
+            if (put && tunnel.expired() && tunnel.asyncUpdate()) {
                 this.updatekeys.offer(key);
-            }
-            for (final Class<?> after : annotation.after()) {
-                final boolean flag = (boolean) after.getMethod("flushAfter").invoke(method.getClass());
-                if (flag) {
-                    this.cacheableAspect.postFlush(point);
-                }
             }
 
             return tunnel;
         }
     }
 
+    @SneakyThrows
+    private boolean checkUnless(Class<? extends Unless>[] unlesses, CacheableAspect.Tunnel tunnel) {
+        for (Class<? extends Unless> unlessClass : unlesses) {
+            Unless unless;
+
+            if (UNLESS_CACHE.containsKey(unlessClass)) {
+                unless = UNLESS_CACHE.get(unlessClass);
+            } else {
+                unless = unlessClass.newInstance();
+            }
+
+            if (unless.unless(tunnel)) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
     public void evict(JoinPoint point, String keyString) {
         synchronized (this.tunnels) {
-            for (final CacheableAspect.Key key : this.tunnels.keySet()) {
-                if (!key.sameTarget(point)) {
-                    continue;
-                }
-
-                if (!Objects.equals(key.key, keyString)) {
+            for (final CacheKeyAbstract key : this.tunnels.keySet()) {
+                if (!key.equals(this.cacheableAspect.toKey(point, keyString))) {
                     continue;
                 }
                 this.tunnels.remove(key);
@@ -91,8 +115,8 @@ public class CacheManager {
 
     public void flush(JoinPoint point) {
         synchronized (this.tunnels) {
-            for (final CacheableAspect.Key key : this.tunnels.keySet()) {
-                if (!key.sameTarget(point)) {
+            for (final CacheKeyAbstract key : this.tunnels.keySet()) {
+                if (!key.sameTarget(point, null)) {
                     continue;
                 }
                 this.tunnels.remove(key);
