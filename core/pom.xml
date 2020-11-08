@@ -24,6 +24,7 @@
 
     <properties>
         <aspectj.version>1.8.7</aspectj.version>
+        <mongo-java-driver.version>3.12.7</mongo-java-driver.version>
     </properties>
 
     <distributionManagement>

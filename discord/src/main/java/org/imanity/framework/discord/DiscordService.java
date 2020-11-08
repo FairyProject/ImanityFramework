@@ -24,12 +24,23 @@
 
 package org.imanity.framework.discord;
 
+import com.fasterxml.jackson.core.JsonGenerator;
+import com.fasterxml.jackson.core.JsonParser;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.DeserializationContext;
+import com.fasterxml.jackson.databind.JsonDeserializer;
+import com.fasterxml.jackson.databind.JsonSerializer;
+import com.fasterxml.jackson.databind.SerializerProvider;
+import com.fasterxml.jackson.databind.deser.std.StdDeserializer;
+import com.fasterxml.jackson.databind.module.SimpleModule;
+import com.fasterxml.jackson.databind.ser.std.StdSerializer;
 import com.google.common.base.Preconditions;
 import lombok.Getter;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.JDABuilder;
 import net.dv8tion.jda.api.entities.*;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
+import net.dv8tion.jda.api.utils.data.DataObject;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.checkerframework.checker.nullness.qual.Nullable;
@@ -41,10 +52,14 @@ import org.imanity.framework.discord.activity.ActivityProvider;
 import org.imanity.framework.discord.command.DiscordCommandEvent;
 import org.imanity.framework.discord.impl.DiscordListenerComponentHolder;
 import org.imanity.framework.discord.provider.DiscordPresenceProvider;
+import org.imanity.framework.util.AccessUtil;
 
 import javax.security.auth.login.LoginException;
+import java.io.IOException;
+import java.lang.reflect.Constructor;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.TreeSet;
 
 @Service(name = "discord")
@@ -199,7 +214,7 @@ public class DiscordService {
             return;
         }
 
-        DiscordCommandEvent commandEvent = new DiscordCommandEvent(member, rawMessage.substring(1), channel);
+        DiscordCommandEvent commandEvent = new DiscordCommandEvent(member, rawMessage.substring(1), channel, message);
         commandService.evalCommand(commandEvent);
     }
 }

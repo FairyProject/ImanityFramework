@@ -123,6 +123,7 @@
     <properties>
         <java.version>1.8</java.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <mongo-java-driver.version>3.12.7</mongo-java-driver.version>
     </properties>
 
     <distributionManagement>
@@ -164,8 +165,8 @@
         </dependency>
         <dependency>
             <groupId>org.mongodb</groupId>
-            <artifactId>mongo-java-driver</artifactId>
-            <version>LATEST</version>
+            <artifactId>mongodb-driver-sync</artifactId>
+            <version>4.0.4</version>
             <scope>provided</scope>
         </dependency>
         <!-- https://mvnrepository.com/artifact/org.apache.commons/commons-lang3 -->

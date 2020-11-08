@@ -78,6 +78,7 @@
                     <deprecation>true</deprecation>
                     <verbose>true</verbose>
                     <Xlint>ignore</Xlint>
+                    <XnoInline>true</XnoInline>
                     <encoding>${project.build.sourceEncoding}</encoding>
                     <forceAjcCompile>true</forceAjcCompile>
                     <sources/><!-- this is important!-->
@@ -124,7 +125,7 @@
         <dependency>
             <groupId>org.mongodb</groupId>
             <artifactId>mongo-java-driver</artifactId>
-            <version>LATEST</version>
+            <version>3.12.7</version>
             <scope>provided</scope>
         </dependency>
         <dependency>

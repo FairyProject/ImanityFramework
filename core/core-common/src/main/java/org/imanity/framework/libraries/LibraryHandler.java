@@ -35,6 +35,7 @@ import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -43,7 +44,7 @@ public class LibraryHandler {
 
     private final Path libFolder;
 
-    private final EnumMap<Library, Path> loaded = new EnumMap<>(Library.class);
+    private final Map<Library, Path> loaded = new ConcurrentHashMap<>();
     private final Map<ImmutableSet<Library>, IsolatedClassLoader> loaders = new HashMap<>();
 
     private final ExecutorService EXECUTOR = Executors.newCachedThreadPool(new ThreadFactoryBuilder()
@@ -59,7 +60,11 @@ public class LibraryHandler {
         this.libFolder = file.toPath();
     }
 
-    public IsolatedClassLoader obtainClassLoaderWith(Set<Library> libraries) {
+    public IsolatedClassLoader obtainClassLoaderWith(Collection<Library> libraries) {
+        return this.obtainClassLoaderWith(libraries.toArray(new Library[0]));
+    }
+
+    public IsolatedClassLoader obtainClassLoaderWith(Library... libraries) {
         ImmutableSet<Library> set = ImmutableSet.copyOf(libraries);
 
         for (Library dependency : libraries) {
@@ -91,9 +96,13 @@ public class LibraryHandler {
         }
     }
 
-    public void downloadLibraries(Set<Library> libraries) {
+    public void downloadLibraries(Collection<Library> libraries) {
+        this.downloadLibraries(libraries.toArray(new Library[0]));
+    }
 
-        CountDownLatch latch = new CountDownLatch(libraries.size());
+    public void downloadLibraries(Library... libraries) {
+
+        CountDownLatch latch = new CountDownLatch(libraries.length);
 
         for (Library library : libraries) {
             EXECUTOR.execute(() -> {

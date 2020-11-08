@@ -210,7 +210,7 @@ public class CacheableAspect {
         final Cacheable annotation = method.getAnnotation(Cacheable.class);
         CacheKeyAbstract key = this.toKey(point, readAnnotationKey(point, annotation.key(), annotation.ignoreKeyNull()));
 
-        return this.getCacheManager(method.getDeclaringClass()).cache(key, method, point, annotation.unless(), annotation.asyncUpdate(), false).through();
+        return this.getCacheManager(method.getDeclaringClass()).cache(key, point, annotation.unless(), annotation.forever() ? -1 : annotation.lifetime(), annotation.unit(), annotation.asyncUpdate(), false).through();
     }
 
     @Around("execution(* *(..)) && @annotation(org.imanity.framework.CachePut)")
@@ -220,7 +220,7 @@ public class CacheableAspect {
         final CachePut annotation = method.getAnnotation(CachePut.class);
         CacheKeyAbstract key = this.toKey(point, readAnnotationKey(point, annotation.value(), annotation.ignoreKeyNull()));
 
-        return this.getCacheManager(method.getDeclaringClass()).cache(key, method, point, annotation.unless(), annotation.asyncUpdate(), false).through();
+        return this.getCacheManager(method.getDeclaringClass()).cache(key, point, annotation.unless(), annotation.forever() ? -1 : annotation.lifetime(), annotation.unit(), annotation.asyncUpdate(), false).through();
     }
 
     @Before(
@@ -233,8 +233,6 @@ public class CacheableAspect {
 
         this.getCacheManager(method.getDeclaringClass()).evict(point, keyString);
     }
-
-
 
     @Before
             (
@@ -269,24 +267,34 @@ public class CacheableAspect {
     @ToString
     protected static final class Tunnel {
 
-        private final transient ProceedingJoinPoint point;
-        private final transient CacheKeyAbstract key;
-        private final transient boolean async;
+        private final ProceedingJoinPoint point;
+        private final CacheKeyAbstract key;
+        private final boolean async;
+        private final long lifetime;
+        private final TimeUnit timeUnit;
+
         private transient boolean executed;
-        private transient long lifetime;
+        private transient long expiredTime;
         private transient boolean hasResult;
 
         private transient SoftReference<Object> cached;
 
-        Tunnel(final ProceedingJoinPoint pnt, final CacheKeyAbstract akey, final boolean asy) {
-            this.point = pnt;
-            this.key = akey;
-            this.async = asy;
+        Tunnel(final ProceedingJoinPoint point, final CacheKeyAbstract key, final boolean async, long lifetime, TimeUnit timeUnit) {
+            this.point = point;
+            this.key = key;
+            this.async = async;
+            this.lifetime = lifetime;
+            this.timeUnit = timeUnit;
+
+            if (this.lifetime != 0L) {
+                final long millis = timeUnit.toMillis(this.lifetime);
+                this.expiredTime = System.currentTimeMillis() + millis;
+            }
         }
 
         public Tunnel copy() {
             return new Tunnel(
-                    this.point, this.key, this.async
+                    this.point, this.key, this.async, this.lifetime, this.timeUnit
             );
         }
 
@@ -300,19 +308,15 @@ public class CacheableAspect {
                 this.hasResult = result != null;
                 this.cached = new SoftReference<>(result);
 
-                final Method method = ((MethodSignature) this.point.getSignature()).getMethod();
+                if (this.lifetime == -1) {
+                    this.expiredTime = Long.MAX_VALUE;
 
-                final Cacheable annotation = method.getAnnotation(Cacheable.class);
-
-                if (annotation.forever()) {
-                    this.lifetime = Long.MAX_VALUE;
-
-                } else if (annotation.lifetime() == 0) {
-                    this.lifetime = 0L;
+                } else if (this.lifetime == 0) {
+                    this.expiredTime = 0L;
 
                 } else {
-                    final long millis = annotation.unit().toMillis(annotation.lifetime());
-                    this.lifetime = start + millis;
+                    final long millis = this.timeUnit.toMillis(this.lifetime);
+                    this.expiredTime = start + millis;
 
                 }
                 this.executed = true;
@@ -326,7 +330,7 @@ public class CacheableAspect {
         }
 
         public boolean expired() {
-            final boolean expired = this.lifetime < System.currentTimeMillis();
+            final boolean expired = this.expiredTime < System.currentTimeMillis();
             final boolean collected = this.executed
                     && this.hasResult
                     && this.cached.get() == null;

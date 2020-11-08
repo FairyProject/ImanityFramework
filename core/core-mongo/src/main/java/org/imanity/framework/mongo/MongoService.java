@@ -1,6 +1,9 @@
 package org.imanity.framework.mongo;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.mongodb.*;
+import com.mongodb.client.MongoClient;
+import com.mongodb.client.MongoClients;
 import com.mongodb.client.MongoDatabase;
 import org.bson.UuidRepresentation;
 import org.imanity.framework.*;
@@ -9,6 +12,7 @@ import org.imanity.framework.mongo.configuration.ProvideConfiguration;
 import org.mongojack.JacksonMongoCollection;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -51,10 +55,8 @@ public class MongoService {
                 this.defaultConfiguration = configuration.getClass();
             }
 
-            ServerAddress address = configuration.serverAddress();
-            MongoClientOptions clientOptions = configuration.mongoClientOptions();
-            MongoCredential credential = configuration.credential();
-            MongoClient client = new MongoClient(address, credential, clientOptions);
+            MongoClientSettings clientSettings = configuration.mongoClientSettings();
+            MongoClient client = MongoClients.create(clientSettings);
 
             this.databases.put(configuration.getClass(), client.getDatabase(configuration.database()));
             this.clients.add(client);
@@ -75,6 +77,10 @@ public class MongoService {
     }
 
     public <T> JacksonMongoCollection<T> collection(String name, Class<?> use, Class<T> tClass) {
+        return this.collection(name, use, tClass, FrameworkMisc.JACKSON_MAPPER);
+    }
+
+    public <T> JacksonMongoCollection<T> collection(String name, Class<?> use, Class<T> tClass, ObjectMapper objectMapper) {
         Class<?> type;
         ProvideConfiguration configuration = use.getAnnotation(ProvideConfiguration.class);
         if (configuration != null) {
@@ -93,7 +99,7 @@ public class MongoService {
         }
 
         return JacksonMongoCollection.builder()
-                .withObjectMapper(FrameworkMisc.JACKSON_MAPPER)
+                .withObjectMapper(objectMapper)
                 .build(database, name, tClass, UuidRepresentation.JAVA_LEGACY);
     }
 

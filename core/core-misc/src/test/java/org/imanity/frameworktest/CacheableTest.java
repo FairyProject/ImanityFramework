@@ -3,6 +3,7 @@ package org.imanity.frameworktest;
 import org.hamcrest.CoreMatchers;
 import org.hamcrest.MatcherAssert;
 import org.imanity.framework.CacheEvict;
+import org.imanity.framework.CachePut;
 import org.imanity.framework.Cacheable;
 import org.imanity.framework.cache.EnableOwnCacheManager;
 import org.junit.Test;
@@ -147,6 +148,12 @@ public class CacheableTest {
         imanity.evict(id);
 
         MatcherAssert.assertThat(dummyObjectA, CoreMatchers.not(imanity.test(new ImanityDummy(id))));
+
+        id = 3;
+        long testPut = RANDOM.nextLong();
+
+        imanity.put(id, testPut);
+        MatcherAssert.assertThat(testPut, CoreMatchers.equalTo(testPut));
     }
 
     @Test(expected = IllegalArgumentException.class)
@@ -197,6 +204,11 @@ public class CacheableTest {
         @CacheEvict(value = "test-$(arg0)")
         public void evict(int id) {
 
+        }
+
+        @CachePut(value = "test-${arg0}")
+        public long put(int id, long value) {
+            return value;
         }
 
         @CacheEvict("test-$(arg0.xd)")

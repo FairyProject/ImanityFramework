@@ -54,6 +54,7 @@ public final class ClassFactory {
 
         ClassFactory.scan(Component.class);
         ClassFactory.scan(Service.class);
+
     }
 
     private static void loadClassPath() {

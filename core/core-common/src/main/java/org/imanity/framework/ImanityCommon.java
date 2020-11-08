@@ -24,17 +24,18 @@
 
 package org.imanity.framework;
 
+import com.fasterxml.jackson.annotation.JsonAutoDetect;
+import com.fasterxml.jackson.annotation.PropertyAccessor;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.common.collect.ImmutableSet;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 import org.apache.logging.log4j.Logger;
 import org.imanity.framework.command.ICommandExecutor;
 import org.imanity.framework.config.CoreConfig;
-import org.imanity.framework.database.MySQL;
 import org.imanity.framework.events.IEventHandler;
 import org.imanity.framework.exception.OptionNotEnabledException;
 import org.imanity.framework.factory.ClassFactory;
-import org.imanity.framework.factory.FieldFactory;
 import org.imanity.framework.libraries.Library;
 import org.imanity.framework.libraries.LibraryHandler;
 import org.imanity.framework.locale.Locale;
@@ -53,7 +54,7 @@ import java.util.*;
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public final class ImanityCommon {
 
-    private static final Set<Library> GLOBAL_LIBRARIES = EnumSet.of(Library.MONGO_DB, Library.HIKARI_CP, Library.YAML, Library.CAFFEINE);
+    private static final Set<Library> GLOBAL_LIBRARIES = ImmutableSet.of(Library.MONGO_DB_SYNC, Library.MONGO_DB_CORE, Library.BSON, Library.HIKARI_CP, Library.YAML, Library.CAFFEINE);
     public static final String METADATA_PREFIX = "Imanity_";
 
     public static ImanityBridge BRIDGE;
@@ -89,7 +90,6 @@ public final class ImanityCommon {
 
         ImanityCommon.loadLibraries();
         ClassFactory.loadClasses();
-        FieldFactory.loadFields();
 
         ImanityCommon.SERVICE_HANDLER = new ServiceHandler();
         ImanityCommon.SERVICE_HANDLER.registerServices();
@@ -113,26 +113,24 @@ public final class ImanityCommon {
             Class.forName("com.google.common.collect.ImmutableList");
         } catch (ClassNotFoundException ex) {
             // Below 1.8
-            EnumSet<Library> guava = EnumSet.of(Library.GUAVA);
-            ImanityCommon.LIBRARY_HANDLER.downloadLibraries(guava);
-            ImanityCommon.LIBRARY_HANDLER.obtainClassLoaderWith(guava);
+            ImanityCommon.LIBRARY_HANDLER.downloadLibraries(Library.GUAVA);
+            ImanityCommon.LIBRARY_HANDLER.obtainClassLoaderWith(Library.GUAVA);
         }
 
         try {
             Class.forName("it.unimi.dsi.fastutil.Arrays");
         } catch (ClassNotFoundException ex) {
-            EnumSet<Library> guava = EnumSet.of(Library.FAST_UTIL);
-            ImanityCommon.LIBRARY_HANDLER.downloadLibraries(guava);
-            ImanityCommon.LIBRARY_HANDLER.obtainClassLoaderWith(guava);
+            ImanityCommon.LIBRARY_HANDLER.downloadLibraries(Library.FAST_UTIL);
+            ImanityCommon.LIBRARY_HANDLER.obtainClassLoaderWith(Library.FAST_UTIL);
         }
 
-        EnumSet<Library> redisson;
+        Library redisson;
         try {
             Class.forName("io.netty.channel.Channel");
 
-            redisson = EnumSet.of(Library.REDISSON_RELOCATED);
+            redisson = Library.REDISSON_RELOCATED;
         } catch (ClassNotFoundException ex) {
-            redisson = EnumSet.of(Library.REDISSON);
+            redisson = Library.REDISSON;
         }
 
         ImanityCommon.LIBRARY_HANDLER.downloadLibraries(redisson);
@@ -253,6 +251,8 @@ public final class ImanityCommon {
             }
             if (this.mapper == null) {
                 ImanityCommon.JACKSON_MAPPER = new ObjectMapper();
+                ImanityCommon.JACKSON_MAPPER.setVisibility(PropertyAccessor.ALL, JsonAutoDetect.Visibility.NONE);
+                ImanityCommon.JACKSON_MAPPER.setVisibility(PropertyAccessor.FIELD, JsonAutoDetect.Visibility.ANY);
             } else {
                 ImanityCommon.JACKSON_MAPPER = this.mapper;
             }

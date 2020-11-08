@@ -32,13 +32,13 @@ import java.util.Arrays;
 import java.util.Base64;
 
 @Getter
-public enum Library {
+public class Library {
 
-    REDISSON(
+    public static Library REDISSON = new Library(
             "org.redisson",
             "redisson-all", // Include all
-            "3.13.3",
-            "Wx16na9jIrQP0ezbW0W8ATDP0fBlID8GXnosT4QGU4w="
+            "3.13.6",
+            null
     ),
 
     /**
@@ -47,7 +47,7 @@ public enum Library {
      * This is the netty relocated version of redisson
      *
      */
-    REDISSON_RELOCATED(
+    REDISSON_RELOCATED = new Library(
             "org.redisson",
             "redisson-relocated",
             "3.13.7-SNAPSHOT",
@@ -55,43 +55,55 @@ public enum Library {
             null
     ),
 
-    YAML(
+    YAML = new Library(
             "org.yaml",
             "snakeyaml",
             "1.20",
             "HOWEuJiOSesajRuXIHGgsg9eyONxV7xakRNP3ZDGEjw="
     ),
-    HIKARI_CP(
+    HIKARI_CP = new Library(
             "com.zaxxer",
             "HikariCP",
             "3.1.0",
             "TBo58lIW2Ukyh3VYKUwOliccAeRx+y9FxdDzsD8UUUw="
     ),
-    MONGO_DB(
+    MONGO_DB_SYNC = new Library(
             "org.mongodb",
-            "mongo-java-driver",
-            "3.12.2",
-            "eMxHcEtasb/ubFCv99kE5rVZMPGmBei674ZTdjYe58w="
+            "mongodb-driver-sync",
+            "4.0.4",
+            null
     ),
-    CAFFEINE(
+    MONGO_DB_CORE = new Library(
+            "org.mongodb",
+            "mongodb-driver-core",
+            "4.0.4",
+            null
+    ),
+    BSON = new Library(
+            "org.mongodb",
+            "bson",
+            "4.0.4",
+            null
+    ),
+    CAFFEINE = new Library(
             "com.github.ben-manes.caffeine",
             "caffeine",
             "2.8.4",
             "KV9YN5gQj6b507VJApJpPF5PkCon0DZqAi0T7Ln0lag="
     ),
-    GUAVA(
+    GUAVA = new Library(
             "com.google.guava",
             "guava",
             "29.0-jre",
             "SIXFTM1H57LSJTHQSY+RW1FY6AQGTA7NKCYL+WEW2IU="
     ),
-    REFLECTIVE_ASM(
+    REFLECTIVE_ASM = new Library(
             "com.esotericsoftware",
             "reflectasm",
             "1.11.9",
             null
     ),
-    FAST_UTIL(
+    FAST_UTIL = new Library(
             "it.unimi.dsi",
             "fastutil",
             "8.1.0",
@@ -100,15 +112,16 @@ public enum Library {
 
     private final String mavenRepoPath;
     private final String version;
+    private final String name;
     private final byte[] checksum;
 
     private static final String MAVEN_FORMAT = "%s/%s/%s/%s-%s.jar";
 
-    Library(String groupId, String artifactId, String version, String checksum) {
+    public Library(String groupId, String artifactId, String version, String checksum) {
         this(groupId, artifactId, version, version, checksum);
     }
 
-    Library(String groupId, String artifactId, String versionPackage, String version, String checksum) {
+    public Library(String groupId, String artifactId, String versionPackage, String version, String checksum) {
         this.mavenRepoPath = String.format(MAVEN_FORMAT,
                 groupId.replace(".", "/"),
                 artifactId,
@@ -116,16 +129,21 @@ public enum Library {
                 artifactId,
                 version
         );
+        this.name = artifactId;
         this.version = version;
-        if (checksum != null) {
+        if (checksum != null && !checksum.isEmpty()) {
             this.checksum = Base64.getDecoder().decode(checksum);
         } else {
             this.checksum = null;
         }
     }
 
+    public String name() {
+        return this.name;
+    }
+
     public String getFileName() {
-        return name().toLowerCase().replace('_', '-') + "-" + this.version;
+        return this.name.toLowerCase().replace('_', '-') + "-" + this.version;
     }
 
     public boolean checksumMatches(byte[] hash) {

@@ -2,11 +2,8 @@ package org.imanity.framework;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.mongodb.client.model.Filters;
-import de.undercouch.bson4jackson.BsonFactory;
-import de.undercouch.bson4jackson.BsonParser;
 import lombok.Getter;
 import org.bson.BsonDocument;
-import org.bson.Document;
 import org.imanity.framework.mongo.MongoService;
 import org.mongojack.JacksonMongoCollection;
 
@@ -17,15 +14,8 @@ import java.util.Optional;
 @ServiceDependency(dependencies = { "mongo" })
 public abstract class MongoRepository<T, ID> implements Repository<T, ID> {
 
-    private static final BsonFactory BSON_FACTORY;
-
     @Autowired
     private static MongoService MONGO_SERVICE;
-
-    static {
-        BSON_FACTORY = new BsonFactory();
-        BSON_FACTORY.enable(BsonParser.Feature.HONOR_DOCUMENT_LENGTH);
-    }
 
     @Getter
     protected JacksonMongoCollection<T> collection;
@@ -33,13 +23,16 @@ public abstract class MongoRepository<T, ID> implements Repository<T, ID> {
 
     @PostInitialize
     public void init() {
-        this.collection = MONGO_SERVICE.collection(this.name(), this.getClass(), this.type());
+        this.collection = MONGO_SERVICE.collection(this.name(), this.getClass(), this.type(), this.objectMapper());
 
-        this.objectMapper = new ObjectMapper(BSON_FACTORY);
-        this.configureJacksonMapper(this.objectMapper);
+        this.postInit();
     }
 
-    public void configureJacksonMapper(ObjectMapper objectMapper) {
+    public ObjectMapper objectMapper() {
+        return FrameworkMisc.JACKSON_MAPPER;
+    }
+
+    public void postInit() {
 
     }
 
@@ -60,15 +53,6 @@ public abstract class MongoRepository<T, ID> implements Repository<T, ID> {
     @Override
     public Optional<T> findById(ID id) {
         return Optional.ofNullable(this.collection.findOneById(id));
-    }
-
-    @Override
-    public Optional<T> findByExample(T example) {
-        try {
-            return Optional.ofNullable(this.collection.findOne(this.toBson(example)));
-        } catch (Throwable throwable) {
-            throw new IllegalArgumentException(throwable);
-        }
     }
 
     @Override
@@ -107,13 +91,8 @@ public abstract class MongoRepository<T, ID> implements Repository<T, ID> {
     }
 
     @Override
-    public void delete(T example) {
-        this.collection.deleteMany(this.toBson(example));
-    }
-
-    @Override
-    public void deleteAll(Iterable<? extends T> examples) {
-        examples.forEach(this::delete);
+    public <Q> void deleteByQuery(String query, Q value) {
+        this.collection.deleteMany(Filters.eq(query, value));
     }
 
     @Override
@@ -121,13 +100,8 @@ public abstract class MongoRepository<T, ID> implements Repository<T, ID> {
         this.collection.deleteMany(new BsonDocument());
     }
 
-    private Document toBson(Object example) {
-        try {
-            byte[] bytes = FrameworkMisc.JACKSON_MAPPER.writer().writeValueAsBytes(example);
-
-            return BSON_FACTORY.createJsonParser(bytes).readValueAs(Document.class);
-        } catch (Exception ex) {
-            throw new RuntimeException(ex);
-        }
+    public String queryId() {
+        return "_id";
     }
+
 }

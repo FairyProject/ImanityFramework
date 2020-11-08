@@ -26,6 +26,7 @@ The framework to let you build plugin/backend/discord-bot easily with clean spot
 * [packetevents](https://github.com/retrooper/packetevents) - Revised to fit the library needs
 * [ProtocolLib](https://github.com/dmulloy2/ProtocolLib) - Revised to fit the library needs
 * [helper](https://github.com/lucko/helper) - Revised to fit the library needs
+* [jsoncat](https://github.com/Snailclimb/jsoncat) - Revised to fit the library needs
 
 ## Example Plugins:
 - [DeathSwap](https://github.com/LeeGodSRC/deathswap) (outdated)

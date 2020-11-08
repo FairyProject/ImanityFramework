@@ -25,7 +25,6 @@
 package org.imanity.framework.boot;
 
 import com.google.common.base.Preconditions;
-import com.google.common.collect.Sets;
 import joptsimple.OptionException;
 import joptsimple.OptionParser;
 import joptsimple.OptionSet;
@@ -99,7 +98,7 @@ public final class FrameworkBootable {
 
     public FrameworkBootable(Class<?> bootableClass) {
         this.bootableClass = bootableClass;
-        this.errorHandlers = Sets.newConcurrentHashSet();
+        this.errorHandlers = new HashSet<>();
 
         this.configurations = new HashMap<>();
         this.optionHandlers = new ArrayList<>();
@@ -147,6 +146,7 @@ public final class FrameworkBootable {
 
             this.pluginClassLoader = new PluginClassLoader(ClassLoader.getSystemClassLoader());
             ImanityCommon.BRIDGE = new IndependentImanityBridge(this);
+            FrameworkMisc.BRIDGE = ImanityCommon.BRIDGE;
             ImanityCommon.loadLibraries(); // Pre load libraries since we need it
 
             this.yaml = new Yaml();

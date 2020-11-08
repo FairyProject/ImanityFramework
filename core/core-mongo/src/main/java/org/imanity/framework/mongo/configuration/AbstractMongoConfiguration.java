@@ -1,24 +1,20 @@
 package org.imanity.framework.mongo.configuration;
 
-import com.mongodb.MongoClientOptions;
-import com.mongodb.MongoCredential;
-import com.mongodb.ServerAddress;
+import com.mongodb.ConnectionString;
+import com.mongodb.MongoClientSettings;
+import org.bson.UuidRepresentation;
 
 public abstract class AbstractMongoConfiguration {
 
     public abstract String database();
 
-    public abstract ServerAddress serverAddress();
-
-    public abstract MongoCredential credential();
-
-    public MongoClientOptions mongoClientOptions() {
-        MongoClientOptions.Builder builder = MongoClientOptions.builder();
-        this.setupClientOptions(builder);
+    public MongoClientSettings mongoClientSettings() {
+        MongoClientSettings.Builder builder = MongoClientSettings.builder().uuidRepresentation(UuidRepresentation.JAVA_LEGACY);
+        this.setupClientSettings(builder);
         return builder.build();
     }
 
-    protected void setupClientOptions(MongoClientOptions.Builder builder) {
+    protected void setupClientSettings(MongoClientSettings.Builder builder) {
 
     }
 

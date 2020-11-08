@@ -32,7 +32,7 @@ import org.apache.commons.lang3.reflect.ConstructorUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.imanity.framework.factory.ClassFactory;
-import org.imanity.framework.factory.FieldFactory;
+import org.imanity.framework.factory.WiredFieldFactory;
 import org.imanity.framework.util.AccessUtil;
 import org.imanity.framework.util.entry.Entry;
 
@@ -98,10 +98,12 @@ public class ServiceHandler {
     }
 
     private void initialAutowired() {
+        WiredFieldFactory.loadFields();
+
         this.getServiceInstances().forEach(this::registerAutowired);
 
         try {
-            Collection<Field> fields = FieldFactory.getStaticFields(Autowired.class);
+            Collection<Field> fields = WiredFieldFactory.getStaticFields(Autowired.class);
             for (Field field : fields) {
                 if (!Modifier.isStatic(field.getModifiers())) {
                     continue;
@@ -119,7 +121,7 @@ public class ServiceHandler {
 
     @SneakyThrows
     public void registerAutowired(Object instance) {
-        Collection<Field> fields = FieldFactory.getFields(Autowired.class, instance.getClass());
+        Collection<Field> fields = WiredFieldFactory.getFields(Autowired.class, instance.getClass());
         for (Field field : fields) {
 
             if (Modifier.isStatic(field.getModifiers())) {

@@ -37,15 +37,17 @@ import javax.annotation.Nullable;
 import java.io.File;
 import java.util.concurrent.CompletableFuture;
 
+@Getter
 public class DiscordCommandEvent extends CommandEvent {
 
-    @Getter
     private final MessageChannel channel;
+    private final Message message;
 
-    public DiscordCommandEvent(Member user, String command, MessageChannel channel) {
+    public DiscordCommandEvent(Member user, String command, MessageChannel channel, Message message) {
         super(user, command);
 
         this.channel = channel;
+        this.message = message;
     }
 
     @Override

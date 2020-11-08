@@ -47,9 +47,10 @@ public class CacheManager {
     }
 
     public CacheableAspect.Tunnel cache(CacheKeyAbstract key,
-                                        Method method,
                                         ProceedingJoinPoint point,
                                         Class<? extends Unless>[] unlesses,
+                                        long lifetime,
+                                        TimeUnit timeUnit,
                                         boolean asyncPut,
                                         boolean forcePut) throws Throwable {
         synchronized (this.tunnels) {
@@ -65,7 +66,7 @@ public class CacheManager {
 
             if (forcePut || this.cacheableAspect.isCreateTunnel(tunnel)) {
                 tunnel = new CacheableAspect.Tunnel(
-                        point, key, asyncPut
+                        point, key, asyncPut, lifetime, timeUnit
                 );
 
                 if (!this.checkUnless(unlesses, tunnel)) {

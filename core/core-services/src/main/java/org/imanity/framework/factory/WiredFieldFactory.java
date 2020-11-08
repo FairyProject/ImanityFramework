@@ -9,14 +9,14 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 import java.util.*;
 
-public class FieldFactory {
+public class WiredFieldFactory {
 
     private static final Map<Class<? extends Annotation>, AnnotatedFieldHolder> ANNOTATED_FIELDS = new HashMap<>();
 
     public static void loadFields() {
         Reflections reflections = ClassFactory.REFLECTIONS;
 
-        FieldFactory.scan(Autowired.class, reflections);
+        WiredFieldFactory.scan(Autowired.class, reflections);
     }
 
     public static Collection<Field> getStaticFields(Class<? extends Annotation> annotation) {

@@ -18,8 +18,6 @@ public interface Repository<T, ID> {
 
     Optional<T> findById(ID id);
 
-    Optional<T> findByExample(T example);
-
     <Q> Optional<T> findByQuery(String query, Q value);
 
     boolean existsById(ID id);
@@ -32,9 +30,7 @@ public interface Repository<T, ID> {
 
     void deleteById(ID id);
 
-    void delete(T t);
-
-    void deleteAll(Iterable<? extends T> examples);
+    <Q> void deleteByQuery(String query, Q value);
 
     void deleteAll();
 }
