@@ -35,15 +35,6 @@
                         <configuration>
                             <minimizeJar>false</minimizeJar>
                             <createDependencyReducedPom>false</createDependencyReducedPom>
-                            <filters>
-                                <filter>
-                                    <artifact>*:*</artifact>
-                                    <excludes>
-                                        <exclude>com/mongodb/**</exclude>
-                                        <exclude>org/bson/**</exclude>
-                                    </excludes>
-                                </filter>
-                            </filters>
                         </configuration>
                     </execution>
                 </executions>
