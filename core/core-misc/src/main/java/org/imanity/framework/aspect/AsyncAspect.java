@@ -36,7 +36,7 @@ public final class AsyncAspect {
             );
         }
 
-        final Future<?> future = this.EXECUTOR.submit(() -> {
+        final Future<?> future = EXECUTOR.submit(() -> {
                     Object returned1 = null;
                     try {
                         final Object result1 = point.proceed();

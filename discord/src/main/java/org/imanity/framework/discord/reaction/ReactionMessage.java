@@ -5,15 +5,15 @@ import net.dv8tion.jda.api.entities.*;
 import net.dv8tion.jda.api.events.message.react.MessageReactionAddEvent;
 import net.dv8tion.jda.api.requests.RestAction;
 import org.apache.logging.log4j.util.TriConsumer;
+import org.imanity.framework.Async;
 import org.imanity.framework.ImanityCommon;
-import org.imanity.framework.discord.DiscordService;
 import org.imanity.framework.discord.message.CachedMessage;
 import org.imanity.framework.util.entry.Entry;
 import org.imanity.framework.util.entry.EntryArrayList;
 import org.jetbrains.annotations.Nullable;
 import org.mongojack.Id;
 
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 
@@ -23,9 +23,10 @@ public class ReactionMessage {
 
     @Id
     private final CachedMessage message;
+    private boolean enabled;
 
     private ReactionConsumer notRegisteredConsumer;
-    private Map<String, ReactionConsumer> reactionConsumers = new HashMap<>();
+    private Map<String, ReactionConsumer> reactionConsumers = new LinkedHashMap<>();
 
     @Nullable
     public ReactionConsumer find(String emojiId) {
@@ -34,6 +35,7 @@ public class ReactionMessage {
 
     public CompletableFuture<Void> delete(boolean removeFromDiscord) {
         ImanityCommon.getService(ReactionService.class).delete(message.getMessageId());
+        this.enabled = false;
 
         if (removeFromDiscord) {
             return this.message.delete();
@@ -54,11 +56,17 @@ public class ReactionMessage {
             throw new IllegalArgumentException("Couldn't find the discord message!");
         }
 
-        rest.queue(message -> {
-                    for (ReactionConsumer consumer : this.reactionConsumers.values()) {
-                        message.addReaction(consumer.getEmojiId()).queue();
-                    }
-                });
+        rest.queue(this::addEmojis);
+    }
+
+    @Async
+    private void addEmojis(Message message) {
+        for (ReactionConsumer consumer : this.reactionConsumers.values()) {
+            if (!this.enabled) {
+                break;
+            }
+            message.addReaction(consumer.getEmojiId()).complete();
+        }
     }
 
     public TextChannel getChannel() {
@@ -112,6 +120,7 @@ public class ReactionMessage {
             }
 
             ReactionService.INSTANCE.send(message);
+            message.enabled = true;
             return message;
         }
 

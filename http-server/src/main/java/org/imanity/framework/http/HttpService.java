@@ -40,6 +40,10 @@ public class HttpService {
     private FrameworkBootable bootable;
     private Thread thread;
 
+    private Channel channel;
+    private EventLoopGroup bossGroup;
+    private EventLoopGroup workerGroup;
+
     @PreInitialize
     public void preInit() {
         try {
@@ -61,8 +65,8 @@ public class HttpService {
     @PostInitialize
     public void init() {
         this.thread = new Thread(() -> {
-            EventLoopGroup bossGroup = new NioEventLoopGroup(1);
-            EventLoopGroup workerGroup = new NioEventLoopGroup();
+            this.bossGroup = new NioEventLoopGroup(1);
+            this.workerGroup = new NioEventLoopGroup();
 
             try {
                 ServerBootstrap b = new ServerBootstrap();
@@ -83,15 +87,10 @@ public class HttpService {
                         });
                 int port = this.bootable.getInteger("http.port", DEFAULT_PORT);
 
-                Channel ch = b.bind(port).sync().channel();
+                this.channel = b.bind(port).sync().channel();
                 LOGGER.info("Start HTTP server with port {}", port);
-                ch.closeFuture().sync();
             } catch (InterruptedException e) {
-                LOGGER.error("Something wrong while handling http server", e);
-            } finally {
-                LOGGER.error("shutdown bossGroup and workerGroup");
-                bossGroup.shutdownGracefully();
-                workerGroup.shutdownGracefully();
+                e.printStackTrace();
             }
         });
 
@@ -104,7 +103,14 @@ public class HttpService {
     @PreDestroy
     @SneakyThrows
     public void destroy() {
+        LOGGER.error("shutdown bossGroup and workerGroup");
+        this.bossGroup.shutdownGracefully();
+        this.workerGroup.shutdownGracefully();
+
+        this.channel.closeFuture().sync();
+
         this.thread.join();
+        this.thread.interrupt();
     }
 
 }

@@ -132,7 +132,7 @@ public class CommandService {
             throw new IllegalArgumentException("Couldn't find the parameter type " + type.getSimpleName() + ".");
         }
 
-        return holder;
+        return holder.transform(event, parameter);
     }
 
     public List<String> tabCompleteParameters(Object user, String[] parameters, String parameter, Class<?> transformTo, String[] tabCompleteFlags) {

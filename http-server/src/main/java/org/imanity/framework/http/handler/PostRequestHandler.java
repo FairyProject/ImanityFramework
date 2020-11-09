@@ -7,6 +7,7 @@ import io.netty.handler.codec.http.HttpMethod;
 import org.apache.commons.io.Charsets;
 import org.apache.commons.lang3.CharEncoding;
 import org.imanity.framework.http.entity.MethodDetail;
+import org.imanity.framework.http.exception.BadRequestException;
 import org.imanity.framework.http.factory.FullHttpResponseFactory;
 import org.imanity.framework.http.factory.ParameterResolverFactory;
 import org.imanity.framework.http.factory.RouteMethodMapper;
@@ -51,7 +52,7 @@ public class PostRequestHandler implements RequestHandler {
             }
 
         } else {
-            throw new IllegalArgumentException("only receive application/json type data");
+            throw new BadRequestException("only receive application/json type data");
         }
         return FullHttpResponseFactory.getSuccessResponse(targetMethod, targetMethodParams, methodDetail.getInstance());
     }

@@ -50,20 +50,24 @@ public class ServiceData {
 
     private String name;
     private List<String> dependencies;
+    private boolean callAnnotations;
 
     private Map<Class<? extends Annotation>, Collection<Method>> annotatedMethods;
 
     public ServiceData(Object instance, Service service) {
-        this(instance.getClass(), instance, service.name(), service.dependencies());
+        this(instance.getClass(), instance, service.name(), service.dependencies(), true);
     }
 
-    public ServiceData(Class<?> type, Object instance, String name, String[] dependencies) {
+    public ServiceData(Class<?> type, Object instance, String name, String[] dependencies, boolean callAnnotations) {
         this.type = type;
         this.instance = instance;
         this.name = name;
         this.dependencies = Lists.newArrayList(dependencies);
+        this.callAnnotations = callAnnotations;
 
-        this.loadAnnotations();
+        if (callAnnotations) {
+            this.loadAnnotations();
+        }
     }
 
     @SneakyThrows
@@ -107,6 +111,10 @@ public class ServiceData {
     }
 
     public void call(Class<? extends Annotation> annotation) throws InvocationTargetException, IllegalAccessException {
+        if (!this.callAnnotations) {
+            return;
+        }
+
         if (this.annotatedMethods.containsKey(annotation)) {
             for (Method method : this.annotatedMethods.get(annotation)) {
                 method.invoke(instance);

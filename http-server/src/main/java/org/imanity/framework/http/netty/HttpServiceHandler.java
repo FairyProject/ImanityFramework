@@ -10,6 +10,7 @@ import io.netty.handler.codec.http.HttpUtil;
 import io.netty.util.AsciiString;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.imanity.framework.http.exception.BadRequestException;
 import org.imanity.framework.http.factory.FullHttpResponseFactory;
 import org.imanity.framework.http.factory.RequestHandlerFactory;
 import org.imanity.framework.http.handler.RequestHandler;
@@ -33,6 +34,11 @@ public class HttpServiceHandler extends SimpleChannelInboundHandler<FullHttpRequ
         FullHttpResponse fullHttpResponse;
         try {
             fullHttpResponse = requestHandler.handle(fullHttpRequest);
+        } catch (BadRequestException e) {
+
+            String requestPath = URLUtil.getRequestPath(fullHttpRequest.uri());
+            fullHttpResponse = FullHttpResponseFactory.getErrorResponse(requestPath, e.toString(), HttpResponseStatus.BAD_REQUEST);
+
         } catch (Throwable e) {
             LOGGER.error("Caught an unexpected error.", e);
             String requestPath = URLUtil.getRequestPath(fullHttpRequest.uri());

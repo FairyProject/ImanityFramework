@@ -25,22 +25,18 @@ public class EmoteUtil {
 
     public static String getNumberEmoteId(int number) {
         switch (number) {
-            case 0: return "U+0030";
-            case 1: return "U+0031";
-            case 2: return "U+0032";
-            case 3: return "U+0033";
-            case 4: return "U+0034";
-            case 5: return "U+0035";
-            case 6: return "U+0036";
-            case 7: return "U+0037";
-            case 8: return "U+0038";
-            case 9: return "U+0039";
+            case 0: return "0️⃣";
+            case 1: return "1️⃣";
+            case 2: return "2️⃣";
+            case 3: return "3️⃣";
+            case 4: return "4️⃣";
+            case 5: return "5️⃣";
+            case 6: return "6️⃣";
+            case 7: return "7️⃣";
+            case 8: return "8️⃣";
+            case 9: return "9️⃣";
             default: throw new IllegalArgumentException("getNumberEmote() cannot be applied to numbers smaller than 0 or more than 10!");
         }
-    }
-
-    public static Emote getNumberEmoteEntity(int number) {
-        return DiscordService.INSTANCE.getJda().getEmoteById(EmoteUtil.getNumberEmoteId(number));
     }
 
 }

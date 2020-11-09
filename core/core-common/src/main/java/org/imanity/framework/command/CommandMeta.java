@@ -30,7 +30,9 @@ import org.imanity.framework.command.parameter.ParameterMeta;
 
 import java.lang.reflect.Method;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @RequiredArgsConstructor
 @Getter
@@ -94,7 +96,7 @@ public class CommandMeta {
             }
             Object result = CommandService.INSTANCE.transformParameter(event, passedParameter, parameter.getParameterClass());
             if (result == null) {
-                event.sendInternalError("Couldn't find the parameters type!");
+                event.sendUsage(this.getUsage());
                 return;
             }
             transformedParameters.add(result);

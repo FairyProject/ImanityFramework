@@ -36,6 +36,7 @@ import org.imanity.framework.discord.annotations.OnlyPrivate;
 import javax.annotation.Nullable;
 import java.io.File;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.TimeUnit;
 
 @Getter
 public class DiscordCommandEvent extends CommandEvent {
@@ -78,6 +79,18 @@ public class DiscordCommandEvent extends CommandEvent {
 
     public CompletableFuture<Message> reply(Message message) {
         return this.channel.sendMessage(message).submit();
+    }
+
+    public CompletableFuture<Void> replyTemporary(MessageEmbed embed) {
+        return this.reply(embed).thenAccept(message -> message.delete().queueAfter(5L, TimeUnit.SECONDS));
+    }
+
+    public CompletableFuture<Void> replyTemporary(String msg) {
+        return this.reply(msg).thenAccept(message -> message.delete().queueAfter(5L, TimeUnit.SECONDS));
+    }
+
+    public CompletableFuture<Void> replyTemporary(Message msg) {
+        return this.reply(msg).thenAccept(message -> message.delete().queueAfter(5L, TimeUnit.SECONDS));
     }
 
     public CompletableFuture<Message> reply(File file, AttachmentOption... options) {

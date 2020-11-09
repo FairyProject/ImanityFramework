@@ -29,8 +29,6 @@ public class ReactionListener extends ListenerAdapter {
         String emojiId = event.getReactionEmote().isEmoji() ? event.getReactionEmote().getEmoji() : null;
         ReactionMessage reactionMessage = this.reactionService.findMessage(id);
 
-        System.out.println(emojiId + " " + (reactionMessage != null));
-
         if (reactionMessage == null) {
             return;
         }

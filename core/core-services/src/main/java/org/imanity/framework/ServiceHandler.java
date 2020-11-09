@@ -92,7 +92,7 @@ public class ServiceHandler {
         }
 
         for (Entry<String, Object> entry : FrameworkMisc.BRIDGE.getPluginInstances()) {
-            this.registerService(entry.getValue(), entry.getKey(), new String[0]);
+            this.registerService(entry.getValue(), entry.getKey(), new String[0], false);
         }
 
     }
@@ -217,8 +217,8 @@ public class ServiceHandler {
         }
     }
 
-    public void registerService(Object serviceInstance, String name, String[] dependencies) {
-        this.services.put(serviceInstance.getClass(), new ServiceData(serviceInstance.getClass(), serviceInstance, name, dependencies));
+    public void registerService(Object serviceInstance, String name, String[] dependencies, boolean callAnnotations) {
+        this.services.put(serviceInstance.getClass(), new ServiceData(serviceInstance.getClass(), serviceInstance, name, dependencies, callAnnotations));
     }
 
 }

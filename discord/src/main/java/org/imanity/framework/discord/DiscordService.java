@@ -24,26 +24,21 @@
 
 package org.imanity.framework.discord;
 
-import com.fasterxml.jackson.core.JsonGenerator;
-import com.fasterxml.jackson.core.JsonParser;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.DeserializationContext;
-import com.fasterxml.jackson.databind.JsonDeserializer;
-import com.fasterxml.jackson.databind.JsonSerializer;
-import com.fasterxml.jackson.databind.SerializerProvider;
-import com.fasterxml.jackson.databind.deser.std.StdDeserializer;
-import com.fasterxml.jackson.databind.module.SimpleModule;
-import com.fasterxml.jackson.databind.ser.std.StdSerializer;
 import com.google.common.base.Preconditions;
+import com.google.common.collect.ImmutableList;
 import lombok.Getter;
+import lombok.Setter;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.JDABuilder;
 import net.dv8tion.jda.api.entities.*;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
-import net.dv8tion.jda.api.utils.data.DataObject;
+import net.dv8tion.jda.api.requests.GatewayIntent;
+import net.dv8tion.jda.api.utils.ChunkingFilter;
+import net.dv8tion.jda.api.utils.MemberCachePolicy;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.checkerframework.checker.nullness.qual.Nullable;
+import org.imanity.framework.discord.provider.DiscordBotProvider;
+import org.jetbrains.annotations.Nullable;
 import org.imanity.framework.*;
 import org.imanity.framework.boot.FrameworkBootable;
 import org.imanity.framework.command.CommandProvider;
@@ -52,15 +47,11 @@ import org.imanity.framework.discord.activity.ActivityProvider;
 import org.imanity.framework.discord.command.DiscordCommandEvent;
 import org.imanity.framework.discord.impl.DiscordListenerComponentHolder;
 import org.imanity.framework.discord.provider.DiscordPresenceProvider;
-import org.imanity.framework.util.AccessUtil;
 
 import javax.security.auth.login.LoginException;
-import java.io.IOException;
-import java.lang.reflect.Constructor;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.TreeSet;
+import java.util.*;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 @Service(name = "discord")
 @Getter
@@ -83,6 +74,7 @@ public class DiscordService {
 
     private TreeSet<ActivityProvider> activityProviders;
     private List<ListenerAdapter> listenerAdapters;
+    private List<DiscordBotProvider> botProviders;
 
     private DiscordPresenceProvider presenceProvider;
 
@@ -95,9 +87,24 @@ public class DiscordService {
         INSTANCE = this;
 
         this.listenerAdapters = new ArrayList<>();
+        this.botProviders = new ArrayList<>();
         this.activityProviders = new TreeSet<>((o1, o2) -> Integer.compare(o2.getPriority(), o1.getPriority()));
 
         ComponentRegistry.registerComponentHolder(new DiscordListenerComponentHolder());
+        ComponentRegistry.registerComponentHolder(new ComponentHolder() {
+            @Override
+            public Class<?>[] type() {
+                return new Class[] { DiscordBotProvider.class };
+            }
+
+            @Override
+            public Object newInstance(Class<?> type) {
+                DiscordBotProvider provider = (DiscordBotProvider) super.newInstance(type);
+
+                botProviders.add(provider);
+                return provider;
+            }
+        });
     }
 
     @PostInitialize
@@ -117,6 +124,17 @@ public class DiscordService {
             } else {
                 builder = JDABuilder.createDefault(token);
             }
+
+            builder
+                    .setMemberCachePolicy(MemberCachePolicy.ALL)
+                    .setChunkingFilter(ChunkingFilter.ALL)
+                    .enableIntents(EnumSet.allOf(GatewayIntent.class));
+
+            for (DiscordBotProvider botProvider : this.botProviders) {
+                botProvider.setupBot(builder);
+            }
+            this.botProviders.clear();
+            this.botProviders = null;
 
             for (ListenerAdapter adapter : this.listenerAdapters) {
                 builder.addEventListeners(adapter);
