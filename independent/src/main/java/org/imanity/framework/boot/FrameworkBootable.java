@@ -358,7 +358,6 @@ public final class FrameworkBootable {
 
         synchronized (this.shutdownLock) {
             if (this.closed) {
-                LOGGER.warn("It's already closed by trying to shutdown()");
                 return;
             }
 

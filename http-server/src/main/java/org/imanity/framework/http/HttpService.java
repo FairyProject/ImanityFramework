@@ -171,7 +171,7 @@ public class HttpService {
     @PreDestroy
     @SneakyThrows
     public void destroy() {
-        LOGGER.error("shutdown bossGroup and workerGroup");
+        LOGGER.info("shutdown bossGroup and workerGroup");
         this.bossGroup.shutdownGracefully();
         this.workerGroup.shutdownGracefully();
 
