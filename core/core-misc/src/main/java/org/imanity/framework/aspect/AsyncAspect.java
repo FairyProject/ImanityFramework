@@ -23,8 +23,7 @@ public final class AsyncAspect {
 
     @Around("execution(@org.imanity.framework.Async * * (..))")
     public Object wrap(final ProceedingJoinPoint point) {
-        final Class<?> returned = MethodSignature.class
-                .cast(point.getSignature()).getMethod().getReturnType();
+        final Class<?> returned = ((MethodSignature) point.getSignature()).getMethod().getReturnType();
 
         if (!Future.class.isAssignableFrom(returned) && !returned.equals(Void.TYPE)) {
             throw new IllegalStateException(

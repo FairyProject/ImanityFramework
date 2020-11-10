@@ -351,7 +351,20 @@ public final class FrameworkBootable {
         return this.status == ProgramStatus.CLOSED;
     }
 
+    private final Object shutdownLock = new Object();
+    private boolean closed;
+
     public void shutdown() {
+
+        synchronized (this.shutdownLock) {
+            if (this.closed) {
+                LOGGER.warn("It's already closed by trying to shutdown()");
+                return;
+            }
+
+            closed = true;
+        }
+
         if (this.status == ProgramStatus.SHUTTING_DOWN || this.status == ProgramStatus.CLOSED) {
             return;
         }

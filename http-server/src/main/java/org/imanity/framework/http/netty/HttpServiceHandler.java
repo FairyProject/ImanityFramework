@@ -30,25 +30,31 @@ public class HttpServiceHandler extends SimpleChannelInboundHandler<FullHttpRequ
         if (uri.equals(FAVICON_ICO)) {
             return;
         }
-        RequestHandler requestHandler = RequestHandlerFactory.get(fullHttpRequest.method());
+
         FullHttpResponse fullHttpResponse;
-        try {
-            fullHttpResponse = requestHandler.handle(fullHttpRequest);
-        } catch (BadRequestException e) {
-
+        RequestHandler requestHandler = RequestHandlerFactory.get(fullHttpRequest.method());
+        if (requestHandler == null) {
             String requestPath = URLUtil.getRequestPath(fullHttpRequest.uri());
-            fullHttpResponse = FullHttpResponseFactory.getErrorResponse(requestPath, e.toString(), HttpResponseStatus.BAD_REQUEST);
+            fullHttpResponse = FullHttpResponseFactory.getErrorResponse(requestPath, "Unexpected request method: " + fullHttpRequest.method(), HttpResponseStatus.METHOD_NOT_ALLOWED);
+        } else {
+            try {
+                fullHttpResponse = requestHandler.handle(fullHttpRequest);
+            } catch (BadRequestException e) {
 
-        } catch (Throwable e) {
-            LOGGER.error("Caught an unexpected error.", e);
-            String requestPath = URLUtil.getRequestPath(fullHttpRequest.uri());
-            fullHttpResponse = FullHttpResponseFactory.getErrorResponse(requestPath, e.toString(), HttpResponseStatus.INTERNAL_SERVER_ERROR);
+                LOGGER.warn("Bad Request: " + e.getLocalizedMessage());
+                String requestPath = URLUtil.getRequestPath(fullHttpRequest.uri());
+                fullHttpResponse = FullHttpResponseFactory.getErrorResponse(requestPath, e.toString(), HttpResponseStatus.BAD_REQUEST);
+
+            } catch (Throwable e) {
+                LOGGER.error("Caught an unexpected error.", e);
+                String requestPath = URLUtil.getRequestPath(fullHttpRequest.uri());
+                fullHttpResponse = FullHttpResponseFactory.getErrorResponse(requestPath, e.toString(), HttpResponseStatus.INTERNAL_SERVER_ERROR);
+            }
         }
 
         if (fullHttpResponse == null) {
             String requestPath = URLUtil.getRequestPath(fullHttpRequest.uri());
-            ctx.write(FullHttpResponseFactory.getErrorResponse(requestPath, "Nothing here", HttpResponseStatus.NO_CONTENT));
-            return;
+            fullHttpResponse = FullHttpResponseFactory.getErrorResponse(requestPath, "Nothing here", HttpResponseStatus.NO_CONTENT);
         }
 
         boolean keepAlive = HttpUtil.isKeepAlive(fullHttpRequest);

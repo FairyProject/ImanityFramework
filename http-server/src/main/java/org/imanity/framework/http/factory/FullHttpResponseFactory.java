@@ -5,10 +5,11 @@ import io.netty.buffer.Unpooled;
 import io.netty.handler.codec.http.DefaultFullHttpResponse;
 import io.netty.handler.codec.http.FullHttpResponse;
 import io.netty.handler.codec.http.HttpResponseStatus;
-import io.netty.util.AsciiString;
 import org.imanity.framework.Autowired;
 import org.imanity.framework.FrameworkMisc;
 import org.imanity.framework.boot.FrameworkBootable;
+import org.imanity.framework.http.entity.HttpHeaders;
+import org.imanity.framework.http.entity.ResponseEntity;
 import org.imanity.framework.http.exception.ErrorResponse;
 
 import java.lang.reflect.InvocationTargetException;
@@ -19,9 +20,6 @@ import static io.netty.handler.codec.http.HttpResponseStatus.OK;
 import static io.netty.handler.codec.http.HttpVersion.HTTP_1_1;
 
 public class FullHttpResponseFactory {
-
-    private static final AsciiString CONTENT_TYPE = AsciiString.cached("Content-Type");
-    private static final AsciiString CONTENT_LENGTH = AsciiString.cached("Content-Length");
 
     @Autowired
     private static FrameworkBootable BOOTABLE;
@@ -49,36 +47,52 @@ public class FullHttpResponseFactory {
 
     public static FullHttpResponse getErrorResponse(String url, String message, HttpResponseStatus httpResponseStatus) {
         ErrorResponse errorResponse = new ErrorResponse(httpResponseStatus.code(), httpResponseStatus.reasonPhrase(), message, url);
-        byte[] content;
-        try {
-            content = FrameworkMisc.JACKSON_MAPPER.writeValueAsBytes(errorResponse);
-        } catch (JsonProcessingException ex) {
-            throw new RuntimeException(ex);
-        }
+        byte[] content = toContentBytes(errorResponse);
         FullHttpResponse response = new DefaultFullHttpResponse(HTTP_1_1, httpResponseStatus, Unpooled.wrappedBuffer(content));
-        response.headers().set(CONTENT_TYPE, "application/json");
-        response.headers().setInt(CONTENT_LENGTH, response.content().readableBytes());
+        response.headers().set(HttpHeaders.CONTENT_TYPE, "application/json");
+        response.headers().setInt(HttpHeaders.CONTENT_LENGTH, response.content().readableBytes());
         return response;
     }
 
 
     private static FullHttpResponse buildSuccessResponse(Object o) {
-        byte[] content;
+        if (o instanceof ResponseEntity<?>) {
+            ResponseEntity<?> responseEntity = (ResponseEntity<?>) o;
+            Object contentObject = responseEntity.getBody();
+
+            byte[] content = toContentBytes(contentObject);
+            FullHttpResponse response = new DefaultFullHttpResponse(HTTP_1_1, responseEntity.getStatusCode(), Unpooled.wrappedBuffer(content));
+            responseEntity.getHeaders().writeToNative(response.headers());
+
+            if (!response.headers().contains(HttpHeaders.CONTENT_TYPE)) {
+                response.headers().set(HttpHeaders.CONTENT_TYPE, "application/json");
+            }
+
+            if (!response.headers().contains(HttpHeaders.CONTENT_LENGTH)) {
+                response.headers().set(HttpHeaders.CONTENT_LENGTH, response.content().readableBytes());
+            }
+            return response;
+        }
+
+        byte[] content = toContentBytes(o);
+        FullHttpResponse response = new DefaultFullHttpResponse(HTTP_1_1, OK, Unpooled.wrappedBuffer(content));
+        response.headers().set(HttpHeaders.CONTENT_TYPE, "application/json");
+        response.headers().setInt(HttpHeaders.CONTENT_LENGTH, response.content().readableBytes());
+        return response;
+    }
+
+    private static byte[] toContentBytes(Object contentObject) {
         try {
-            content = FrameworkMisc.JACKSON_MAPPER.writeValueAsBytes(o);
+            return FrameworkMisc.JACKSON_MAPPER.writeValueAsBytes(contentObject);
         } catch (JsonProcessingException ex) {
             throw new RuntimeException(ex);
         }
-        FullHttpResponse response = new DefaultFullHttpResponse(HTTP_1_1, OK, Unpooled.wrappedBuffer(content));
-        response.headers().set(CONTENT_TYPE, "application/json");
-        response.headers().setInt(CONTENT_LENGTH, response.content().readableBytes());
-        return response;
     }
 
     private static FullHttpResponse buildSuccessResponse() {
         FullHttpResponse response = new DefaultFullHttpResponse(HTTP_1_1, OK);
-        response.headers().set(CONTENT_TYPE, "application/json");
-        response.headers().setInt(CONTENT_LENGTH, response.content().readableBytes());
+        response.headers().set(HttpHeaders.CONTENT_TYPE, "application/json");
+        response.headers().setInt(HttpHeaders.CONTENT_LENGTH, response.content().readableBytes());
         return response;
     }
 

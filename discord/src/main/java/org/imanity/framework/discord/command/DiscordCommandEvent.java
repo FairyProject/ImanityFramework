@@ -30,6 +30,7 @@ import net.dv8tion.jda.api.utils.AttachmentOption;
 import org.imanity.framework.command.CommandEvent;
 import org.imanity.framework.command.CommandMeta;
 import org.imanity.framework.discord.DiscordService;
+import org.imanity.framework.discord.annotations.OnlyChannel;
 import org.imanity.framework.discord.annotations.OnlyGuild;
 import org.imanity.framework.discord.annotations.OnlyPrivate;
 
@@ -133,6 +134,11 @@ public class DiscordCommandEvent extends CommandEvent {
         }
 
         if (meta.getMethod().getAnnotation(OnlyGuild.class) != null && !this.isGuild()) {
+            return false;
+        }
+
+        OnlyChannel onlyChannel = meta.getMethod().getAnnotation(OnlyChannel.class);
+        if (onlyChannel != null && this.channel.getIdLong() != onlyChannel.value()) {
             return false;
         }
 

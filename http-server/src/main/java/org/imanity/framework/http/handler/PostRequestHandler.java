@@ -39,7 +39,7 @@ public class PostRequestHandler implements RequestHandler {
         String contentType = this.getContentType(fullHttpRequest.headers());
 
         List<Object> targetMethodParams = new ArrayList<>();
-        if (contentType.equals("application/json")) {
+        if (contentType != null && contentType.equals("application/json")) {
             String json = fullHttpRequest.content().toString(Charsets.toCharset(CharEncoding.UTF_8));
             methodDetail.setJson(json);
             Parameter[] targetMethodParameters = targetMethod.getParameters();
@@ -58,8 +58,11 @@ public class PostRequestHandler implements RequestHandler {
     }
 
     private String getContentType(HttpHeaders headers) {
-        String typeStr = headers.get("Content-Type");
-        String[] list = typeStr.split(";");
+        String contentType = headers.get("Content-Type");
+        if (contentType == null) {
+            return null;
+        }
+        String[] list = contentType.split(";");
         return list[0];
     }
 }
