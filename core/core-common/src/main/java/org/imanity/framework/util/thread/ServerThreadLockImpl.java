@@ -37,7 +37,7 @@ public class ServerThreadLockImpl implements ServerThreadLock {
 
     ServerThreadLockImpl() {
         // already sync - just countdown on obtained & return
-        if (ImanityCommon.BRIDGE.isServerThread()) {
+        if (ImanityCommon.PLATFORM.isServerThread()) {
             this.obtainedSignal.countDown();
             return;
         }

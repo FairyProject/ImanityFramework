@@ -61,7 +61,7 @@ public final class ClassFactory {
         List<String> classPaths = new ArrayList<>();
         classPaths.add("org.imanity.framework");
 
-        for (Entry<String, Object> entry : FrameworkMisc.BRIDGE.getPluginInstances()) {
+        for (Entry<String, Object> entry : FrameworkMisc.PLATFORM.getPluginInstances()) {
             Object instance = entry.getValue();
             Class<?> type = instance.getClass();
 
@@ -90,7 +90,7 @@ public final class ClassFactory {
     }
 
     private static Reflections createReflections() {
-        return new Reflections(ClassFactory.CLASS_PATHS, new TypeAnnotationsScanner(), new SubTypesScanner(false), new FieldAnnotationsScanner(), FrameworkMisc.BRIDGE.getClassLoaders());
+        return new Reflections(ClassFactory.CLASS_PATHS, new TypeAnnotationsScanner(), new SubTypesScanner(false), new FieldAnnotationsScanner(), FrameworkMisc.PLATFORM.getClassLoaders());
     }
 
 }

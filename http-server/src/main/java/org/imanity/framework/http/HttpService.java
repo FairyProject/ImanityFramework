@@ -49,6 +49,8 @@ public class HttpService {
     private EventLoopGroup bossGroup;
     private EventLoopGroup workerGroup;
 
+    private boolean running;
+
     private List<AbstractCorsConfiguration> corsConfigurations;
 
     @PreInitialize
@@ -156,6 +158,7 @@ public class HttpService {
                 int port = this.bootable.getInteger("http.port", DEFAULT_PORT);
 
                 this.channel = b.bind(port).sync().channel();
+                this.running = true;
                 LOGGER.info("Start HTTP server with port {}", port);
             } catch (InterruptedException e) {
                 e.printStackTrace();
@@ -171,6 +174,9 @@ public class HttpService {
     @PreDestroy
     @SneakyThrows
     public void destroy() {
+        if (!this.running) {
+            return;
+        }
         LOGGER.info("shutdown bossGroup and workerGroup");
         this.bossGroup.shutdownGracefully();
         this.workerGroup.shutdownGracefully();

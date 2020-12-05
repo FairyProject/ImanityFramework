@@ -127,7 +127,7 @@ public final class Imanity {
         ComponentRegistry.registerComponentHolder(new ComponentHolderBukkitListener());
 
         ImanityCommon.builder()
-                .bridge(new BukkitImanityBridge())
+                .platform(new BukkitImanityPlatform())
                 .playerBridge(new BukkitPlayerBridge())
                 .commandExecutor(new BukkitCommandExecutor())
                 .eventHandler(new BukkitEventHandler())

@@ -34,11 +34,11 @@ import java.io.File;
 
 public final class ImanityStandalonePlugin extends JavaPlugin {
 
-    protected ImanityStandalonePlugin() {
+    public ImanityStandalonePlugin() {
         super();
     }
 
-    protected ImanityStandalonePlugin(JavaPluginLoader loader, PluginDescriptionFile description, File dataFolder, File file)
+    public ImanityStandalonePlugin(JavaPluginLoader loader, PluginDescriptionFile description, File dataFolder, File file)
     {
         super(loader, description, dataFolder, file);
     }

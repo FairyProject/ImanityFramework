@@ -8,11 +8,10 @@ import com.mongodb.client.MongoDatabase;
 import org.bson.UuidRepresentation;
 import org.imanity.framework.*;
 import org.imanity.framework.mongo.configuration.AbstractMongoConfiguration;
-import org.imanity.framework.mongo.configuration.ProvideConfiguration;
+import org.imanity.framework.ProvideConfiguration;
 import org.mongojack.JacksonMongoCollection;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -67,7 +66,15 @@ public class MongoService {
     }
 
     @PostDestroy
-    public void stop() {
+    public void stop(ServiceData serviceData) {
+        if (!serviceData.isStage(ServiceData.ActivationStage.POST_INIT_CALLED)) {
+            return;
+        }
+
+        if (this.clients == null) {
+            return;
+        }
+
         for (MongoClient client : this.clients) {
             try {
                 client.close();
@@ -91,6 +98,10 @@ public class MongoService {
             if (type == null) {
                 throw new IllegalArgumentException("There is no mongo configuration registered!");
             }
+        }
+
+        if (!AbstractMongoConfiguration.class.isAssignableFrom(type)) {
+            throw new IllegalArgumentException("The type " + type.getSimpleName() + " wasn't implemented on AbstractMongoConfiguration!");
         }
 
         MongoDatabase database = this.databases.getOrDefault(type, null);

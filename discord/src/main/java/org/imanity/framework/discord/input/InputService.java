@@ -1,6 +1,7 @@
 package org.imanity.framework.discord.input;
 
 import lombok.AllArgsConstructor;
+import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.TextChannel;
 import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
@@ -16,7 +17,7 @@ import java.util.function.BiFunction;
 @Service(name = "input")
 public class InputService {
 
-    private Map<Key, BiFunction<User, String, Boolean>> listeningConsumers;
+    private Map<Key, BiFunction<User, Message, Boolean>> listeningConsumers;
 
     @PostInitialize
     public void init() {
@@ -32,9 +33,9 @@ public class InputService {
 
         Key key = new Key(event.getChannel().getIdLong(), user.getIdLong());
         synchronized (this.listeningConsumers) {
-            BiFunction<User, String, Boolean> consumer = this.listeningConsumers.getOrDefault(key, null);
+            BiFunction<User, Message, Boolean> consumer = this.listeningConsumers.getOrDefault(key, null);
             if (consumer != null) {
-                boolean delete = consumer.apply(user, event.getMessage().getContentRaw());
+                boolean delete = consumer.apply(user, event.getMessage());
                 if (delete) {
                     this.listeningConsumers.remove(key);
                 }
@@ -42,19 +43,19 @@ public class InputService {
         }
     }
 
-    public void listen(long channel, User user, BiFunction<User, String, Boolean> consumer) {
+    public void listen(long channel, User user, BiFunction<User, Message, Boolean> consumer) {
         this.listen(channel, user.getIdLong(), consumer);
     }
 
-    public void listen(TextChannel channel, long user, BiFunction<User, String, Boolean> consumer) {
+    public void listen(TextChannel channel, long user, BiFunction<User, Message, Boolean> consumer) {
         this.listen(channel.getIdLong(), user, consumer);
     }
 
-    public void listen(TextChannel channel, User user, BiFunction<User, String, Boolean> consumer) {
+    public void listen(TextChannel channel, User user, BiFunction<User, Message, Boolean> consumer) {
         this.listen(channel.getIdLong(), user.getIdLong(), consumer);
     }
 
-    public void listen(long channelId, long userId, BiFunction<User, String, Boolean> consumer) {
+    public void listen(long channelId, long userId, BiFunction<User, Message, Boolean> consumer) {
         synchronized (this.listeningConsumers) {
             this.listeningConsumers.put(new Key(channelId, userId), consumer);
         }

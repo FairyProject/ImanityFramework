@@ -22,19 +22,12 @@
  * SOFTWARE.
  */
 
-package org.imanity.framework.bungee.impl;
+package org.imanity.framework.boot.impl;
 
-import com.google.common.collect.ImmutableMap;
-import lombok.SneakyThrows;
-import net.md_5.bungee.api.ProxyServer;
-import net.md_5.bungee.api.plugin.Plugin;
-import net.md_5.bungee.config.Configuration;
-import net.md_5.bungee.config.ConfigurationProvider;
-import net.md_5.bungee.config.YamlConfiguration;
-import org.imanity.framework.ImanityBridge;
-import org.imanity.framework.ImanityCommon;
-import org.imanity.framework.bungee.Imanity;
-import org.imanity.framework.bungee.plugin.ImanityPlugin;
+import lombok.RequiredArgsConstructor;
+import org.apache.logging.log4j.Logger;
+import org.imanity.framework.ImanityPlatform;
+import org.imanity.framework.boot.FrameworkBootable;
 import org.imanity.framework.plugin.PluginClassLoader;
 import org.imanity.framework.util.entry.Entry;
 
@@ -42,13 +35,15 @@ import java.io.*;
 import java.net.URL;
 import java.net.URLConnection;
 import java.util.*;
-import java.util.logging.Level;
-import java.util.stream.Collectors;
 
-public class BungeeImanityBridge implements ImanityBridge {
+@RequiredArgsConstructor
+public class IndependentImanityPlatform implements ImanityPlatform {
+
+    private final FrameworkBootable bootable;
+
     @Override
     public void saveResources(String resourcePath, boolean replace) {
-        File dataFolder = Imanity.PLUGIN.getDataFolder();
+        File dataFolder = this.getDataFolder();
         if (resourcePath != null && !resourcePath.equals("")) {
             resourcePath = resourcePath.replace('\\', '/');
             InputStream in = getResource(resourcePath);
@@ -64,7 +59,7 @@ public class BungeeImanityBridge implements ImanityBridge {
 
                 try {
                     if (outFile.exists() && !replace) {
-                        ProxyServer.getInstance().getLogger().log(Level.WARNING, "Could not save " + outFile.getName() + " to " + outFile + " because " + outFile.getName() + " already exists.");
+                        FrameworkBootable.LOGGER.warn("Could not save " + outFile.getName() + " to " + outFile + " because " + outFile.getName() + " already exists.");
                     } else {
                         OutputStream out = new FileOutputStream(outFile);
                         byte[] buf = new byte[1024];
@@ -78,7 +73,7 @@ public class BungeeImanityBridge implements ImanityBridge {
                         in.close();
                     }
                 } catch (IOException var10) {
-                    ProxyServer.getInstance().getLogger().log(Level.SEVERE, "Could not save " + outFile.getName() + " to " + outFile, var10);
+                    FrameworkBootable.LOGGER.info("Could not save " + outFile.getName() + " to " + outFile, var10);
                 }
 
             }
@@ -92,7 +87,7 @@ public class BungeeImanityBridge implements ImanityBridge {
             throw new IllegalArgumentException("Filename cannot be null");
         } else {
             try {
-                URL url = Imanity.PLUGIN.getClass().getClassLoader().getResource(filename);
+                URL url = FrameworkBootable.class.getClassLoader().getResource(filename);
                 if (url == null) {
                     return null;
                 } else {
@@ -108,75 +103,59 @@ public class BungeeImanityBridge implements ImanityBridge {
 
     @Override
     public PluginClassLoader getClassLoader() {
-        return Imanity.CLASS_LOADER;
+        return this.bootable.getPluginClassLoader();
     }
 
     @Override
     public File getDataFolder() {
-        return Imanity.PLUGIN.getDataFolder();
+        return new File(".");
     }
 
     @Override
-    public org.apache.logging.log4j.Logger getLogger() {
-        return Imanity.LOGGER;
+    public Logger getLogger() {
+        return FrameworkBootable.LOGGER;
     }
 
     @Override
-    @SneakyThrows
     public Map<String, Object> loadYaml(File file) {
-        Configuration configuration = ConfigurationProvider.getProvider(YamlConfiguration.class).load(file);
-        ImmutableMap.Builder<String, Object> builder = ImmutableMap.builder();
-
-        for (String key : configuration.getKeys()) {
-            builder.put(key, configuration.get(key));
+        try {
+            return this.bootable.getYaml().load(new FileInputStream(file));
+        } catch (FileNotFoundException e) {
+            this.bootable.handleError(e);
+            return null;
         }
-
-        return builder.build();
     }
 
     @Override
     public Map<String, Object> loadYaml(InputStream inputStream) {
-        Configuration configuration = ConfigurationProvider.getProvider(YamlConfiguration.class).load(inputStream);
-        ImmutableMap.Builder<String, Object> builder = ImmutableMap.builder();
-
-        for (String key : configuration.getKeys()) {
-            builder.put(key, configuration.get(key));
-        }
-
-        return builder.build();
+        return this.bootable.getYaml().load(inputStream);
     }
 
     @Override
     public List<Entry<String, Object>> getPluginInstances() {
-        return Imanity.PLUGINS.stream()
-                .map(plugin -> new Entry<>(plugin.getDescription().getName(), (Object) plugin))
-                .collect(Collectors.toList());
+        return Arrays.asList(
+                new Entry<>("bootable", this.bootable),
+                new Entry<>("independent", this.bootable.getBootableObject())
+        );
     }
 
     @Override
     public Set<ClassLoader> getClassLoaders() {
-        Set<ClassLoader> classLoaders = new HashSet<>();
-        classLoaders.add(ImanityCommon.class.getClassLoader());
-        for (ImanityPlugin plugin : Imanity.PLUGINS) {
-            classLoaders.add(plugin.getClass().getClassLoader());
-        }
-        return classLoaders;
+        return Collections.singleton(this.bootable.getBootableClass().getClassLoader());
     }
 
     @Override
     public List<File> getPluginFiles() {
-        return Imanity.PLUGINS.stream()
-                .map(Plugin::getFile)
-                .collect(Collectors.toList());
+        return new ArrayList<>();
     }
 
     @Override
     public boolean isShuttingDown() {
-        return Imanity.SHUTTING_DOWN;
+        return this.bootable.isShuttingDown();
     }
 
     @Override
-    public boolean isServerThread() {
-        return true; // BungeeCord is async
+    public boolean isServerThread() { // ASYNC?
+        return true;
     }
 }

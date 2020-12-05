@@ -28,13 +28,14 @@ import org.apache.logging.log4j.Logger;
 import org.imanity.framework.plugin.PluginClassLoader;
 import org.imanity.framework.util.entry.Entry;
 
+import javax.annotation.Nullable;
 import java.io.File;
 import java.io.InputStream;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-public interface ImanityBridge {
+public interface ImanityPlatform {
 
     void saveResources(String name, boolean replace);
 
@@ -51,6 +52,10 @@ public interface ImanityBridge {
     List<Entry<String, Object>> getPluginInstances();
 
     Set<ClassLoader> getClassLoaders();
+
+    default @Nullable String identifyClassLoader(ClassLoader classLoader) throws Exception {
+        return null;
+    }
 
     List<File> getPluginFiles();
 

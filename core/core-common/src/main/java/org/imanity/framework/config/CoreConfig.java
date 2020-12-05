@@ -46,7 +46,7 @@ public class CoreConfig extends YamlConfiguration {
     public String DEFAULT_LOCALE = "en_us";
 
     public CoreConfig() {
-        super(new File(ImanityCommon.BRIDGE.getDataFolder(), "core.yml").toPath(), YamlProperties
+        super(new File(ImanityCommon.PLATFORM.getDataFolder(), "core.yml").toPath(), YamlProperties
             .builder()
                 .setFormatter(FieldNameFormatters.LOWER_CASE)
             .setPrependedComments(Arrays.asList(

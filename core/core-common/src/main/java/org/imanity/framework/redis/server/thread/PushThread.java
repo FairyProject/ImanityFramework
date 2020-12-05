@@ -43,7 +43,7 @@ public class PushThread extends Thread {
     @Override
     public void run() {
 
-        while (!ImanityCommon.BRIDGE.isShuttingDown()) {
+        while (!ImanityCommon.PLATFORM.isShuttingDown()) {
 
             try {
                 this.push();

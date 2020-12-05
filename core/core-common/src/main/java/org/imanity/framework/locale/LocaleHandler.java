@@ -61,7 +61,7 @@ public class LocaleHandler {
 
     public Locale registerFromYml(File file) {
 
-        Map<String, Object> map = ImanityCommon.BRIDGE.loadYaml(file);
+        Map<String, Object> map = ImanityCommon.PLATFORM.loadYaml(file);
         String name = map.get("locale").toString();
 
         Locale locale = this.getOrRegister(name);
@@ -78,7 +78,7 @@ public class LocaleHandler {
     }
 
     public Locale registerFromYml(InputStream inputStream) {
-        Map<String, Object> map = ImanityCommon.BRIDGE.loadYaml(inputStream);
+        Map<String, Object> map = ImanityCommon.PLATFORM.loadYaml(inputStream);
         String name = map.get("locale").toString();
 
         Locale locale = this.getOrRegister(name);

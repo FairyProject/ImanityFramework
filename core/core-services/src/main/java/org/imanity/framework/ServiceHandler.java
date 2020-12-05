@@ -31,6 +31,7 @@ import lombok.SneakyThrows;
 import org.apache.commons.lang3.reflect.ConstructorUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.imanity.framework.exception.ServiceAlreadyExistsException;
 import org.imanity.framework.factory.ClassFactory;
 import org.imanity.framework.factory.WiredFieldFactory;
 import org.imanity.framework.util.AccessUtil;
@@ -71,8 +72,9 @@ public class ServiceHandler {
 
         try {
 
-            List<ServiceData> services = new ArrayList<>();
+            Map<String, ServiceData> services = new HashMap<>();
             for (Class<?> type : ClassFactory.getClasses(Service.class)) {
+
                 Service service = type.getAnnotation(Service.class);
                 Preconditions.checkNotNull(service, "The type " + type.getName() + " doesn't have @Service annotation!");
 
@@ -83,7 +85,13 @@ public class ServiceHandler {
                     throw new IllegalArgumentException("Something wrong while creating instance of " + type.getSimpleName() + " (no args constructor not exists?!)", e);
                 }
 
-                services.add(new ServiceData(instance, service));
+                String name = service.name();
+
+                if (!services.containsKey(name)) {
+                    services.put(name, new ServiceData(instance.getClass(), instance, name, service.dependencies(), true));
+                } else {
+                    new ServiceAlreadyExistsException(name).printStackTrace();
+                }
             }
 
             this.sort(services);
@@ -91,7 +99,7 @@ public class ServiceHandler {
             throw new RuntimeException("Something wrong will detecting @Service annotation", throwable);
         }
 
-        for (Entry<String, Object> entry : FrameworkMisc.BRIDGE.getPluginInstances()) {
+        for (Entry<String, Object> entry : FrameworkMisc.PLATFORM.getPluginInstances()) {
             this.registerService(entry.getValue(), entry.getKey(), new String[0], false);
         }
 
@@ -166,18 +174,22 @@ public class ServiceHandler {
         }
     }
 
-    private void sort(Collection<ServiceData> services) {
+    private void sort(Map<String, ServiceData> services) {
 
-        List<ServiceData> unloaded = new ArrayList<>(services);
-        Set<String> existing = services.stream()
+        List<ServiceData> unloaded = new ArrayList<>(services.values());
+        Set<String> existing = unloaded.stream()
                 .map(ServiceData::getName)
                 .collect(Collectors.toSet());
 
-        for (ServiceData data : services) {
+        // Remove Services without valid dependency
+        Iterator<ServiceData> removeIterator = unloaded.iterator();
+        while (removeIterator.hasNext()) {
+            ServiceData data = removeIterator.next();
+
             for (String dependency : data.getDependencies()) {
                 if (!existing.contains(dependency)) {
                     LOGGER.error("Couldn't find the dependency " + dependency + " for " + data.getName() + "!");
-                    unloaded.remove(data);
+                    removeIterator.remove();
                     break;
                 }
             }
@@ -185,6 +197,7 @@ public class ServiceHandler {
 
         existing.clear();
 
+        // Continually loop until all dependency found and loaded
         Map<String, ServiceData> sorted = new LinkedHashMap<>();
 
         while (!unloaded.isEmpty()) {

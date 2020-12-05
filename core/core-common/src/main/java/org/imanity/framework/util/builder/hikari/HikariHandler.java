@@ -46,9 +46,9 @@ public class HikariHandler {
 
     public static void init() {
         File file;
-        file = new File(ImanityCommon.BRIDGE.getDataFolder(), "HikariSettings.json");
+        file = new File(ImanityCommon.PLATFORM.getDataFolder(), "HikariSettings.json");
         if (!file.exists()) {
-            ImanityCommon.BRIDGE.saveResources("HikariSettings.json", true);
+            ImanityCommon.PLATFORM.saveResources("HikariSettings.json", true);
         }
         try {
             JsonElement parse = new JsonParser().parse(new FileReader(file));

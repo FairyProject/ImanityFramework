@@ -61,12 +61,6 @@ public class Library {
             "1.20",
             "HOWEuJiOSesajRuXIHGgsg9eyONxV7xakRNP3ZDGEjw="
     ),
-    HIKARI_CP = new Library(
-            "com.zaxxer",
-            "HikariCP",
-            "3.1.0",
-            "TBo58lIW2Ukyh3VYKUwOliccAeRx+y9FxdDzsD8UUUw="
-    ),
     MONGO_DB_SYNC = new Library(
             "org.mongodb",
             "mongodb-driver-sync",

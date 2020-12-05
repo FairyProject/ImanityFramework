@@ -45,7 +45,7 @@ public class FetchThread extends Thread {
 
     @Override
     public void run() {
-        while (!ImanityCommon.BRIDGE.isShuttingDown()) {
+        while (!ImanityCommon.PLATFORM.isShuttingDown()) {
             try {
                 this.fetch();
             } catch (Throwable throwable) {

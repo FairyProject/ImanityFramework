@@ -26,7 +26,7 @@ package org.imanity.framework.libraries;
 
 import com.google.common.collect.ImmutableSet;
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
-import org.imanity.framework.ImanityCommon;
+import org.imanity.framework.FrameworkMisc;
 import org.imanity.framework.libraries.classloader.IsolatedClassLoader;
 
 import java.io.File;
@@ -53,7 +53,7 @@ public class LibraryHandler {
         .build());
 
     public LibraryHandler() {
-        File file = new File(ImanityCommon.BRIDGE.getDataFolder(), "libs");
+        File file = new File(FrameworkMisc.PLATFORM.getDataFolder(), "libs");
         if (!file.exists()) {
             file.mkdirs();
         }
@@ -108,9 +108,9 @@ public class LibraryHandler {
             EXECUTOR.execute(() -> {
                 try {
                     loadLibrary(library);
-                    ImanityCommon.getLogger().info("Loaded Library " + library.name() + " v" + library.getVersion());
+                    FrameworkMisc.PLATFORM.getLogger().info("Loaded Library " + library.name() + " v" + library.getVersion());
                 } catch (Throwable throwable) {
-                    ImanityCommon.getLogger().warn("Unable to load library " + library.getFileName() + ".", throwable);
+                    FrameworkMisc.PLATFORM.getLogger().warn("Unable to load library " + library.getFileName() + ".", throwable);
                 } finally {
                     latch.countDown();
                 }
@@ -135,7 +135,7 @@ public class LibraryHandler {
 
         this.loaded.put(library, file);
 
-        ImanityCommon.BRIDGE.getClassLoader().addJarToClasspath(file);
+        FrameworkMisc.PLATFORM.getClassLoader().addJarToClasspath(file);
     }
 
     protected Path downloadLibrary(Library library) throws LibraryDownloadException {

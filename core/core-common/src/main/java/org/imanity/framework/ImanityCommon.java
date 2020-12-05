@@ -54,10 +54,10 @@ import java.util.*;
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public final class ImanityCommon {
 
-    private static final Set<Library> GLOBAL_LIBRARIES = ImmutableSet.of(Library.MONGO_DB_SYNC, Library.MONGO_DB_CORE, Library.BSON, Library.HIKARI_CP, Library.YAML, Library.CAFFEINE);
+    private static final Set<Library> GLOBAL_LIBRARIES = ImmutableSet.of(Library.MONGO_DB_SYNC, Library.MONGO_DB_CORE, Library.BSON, Library.YAML, Library.CAFFEINE);
     public static final String METADATA_PREFIX = "Imanity_";
 
-    public static ImanityBridge BRIDGE;
+    public static ImanityPlatform PLATFORM;
     public static CoreConfig CORE_CONFIG;
     public static ServiceHandler SERVICE_HANDLER;
 
@@ -136,10 +136,11 @@ public final class ImanityCommon {
         ImanityCommon.LIBRARY_HANDLER.downloadLibraries(redisson);
         ImanityCommon.LIBRARY_HANDLER.obtainClassLoaderWith(redisson);
 
+        FrameworkMisc.LIBRARY_HANDLER = ImanityCommon.LIBRARY_HANDLER;
     }
 
     public static Logger getLogger() {
-        return ImanityCommon.BRIDGE.getLogger();
+        return ImanityCommon.PLATFORM.getLogger();
     }
 
     public static <T> T getService(Class<T> type) {
@@ -196,15 +197,15 @@ public final class ImanityCommon {
 
     public static class Builder {
 
-        private ImanityBridge bridge;
+        private ImanityPlatform platform;
         private ICommandExecutor commandExecutor;
         private IEventHandler eventHandler;
         private ITaskScheduler taskScheduler;
         private IPlayerBridge playerBridge;
         private ObjectMapper mapper;
 
-        public Builder bridge(ImanityBridge bridge) {
-            this.bridge = bridge;
+        public Builder platform(ImanityPlatform bridge) {
+            this.platform = bridge;
             return this;
         }
 
@@ -234,9 +235,9 @@ public final class ImanityCommon {
         }
 
         public void init() {
-            if (this.bridge != null) {
-                ImanityCommon.BRIDGE = this.bridge;
-                FrameworkMisc.BRIDGE = this.bridge;
+            if (this.platform != null) {
+                ImanityCommon.PLATFORM = this.platform;
+                FrameworkMisc.PLATFORM = this.platform;
             }
             if (this.commandExecutor != null) {
                 ImanityCommon.COMMAND_EXECUTOR = this.commandExecutor;

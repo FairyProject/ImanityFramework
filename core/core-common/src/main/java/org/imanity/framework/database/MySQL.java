@@ -87,7 +87,7 @@ public class MySQL {
         public String TABLE_PREFIX = "imanity-";
 
         public SQLConfig() {
-            super(new File(ImanityCommon.BRIDGE.getDataFolder(), "mysql.yml").toPath(), YamlProperties.builder()
+            super(new File(ImanityCommon.PLATFORM.getDataFolder(), "mysql.yml").toPath(), YamlProperties.builder()
                     .setFormatter(FieldNameFormatters.LOWER_CASE)
                 .setPrependedComments(Arrays.asList(
                         "================================",

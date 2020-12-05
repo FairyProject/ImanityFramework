@@ -64,7 +64,7 @@ public class Imanity {
         ComponentRegistry.registerComponentHolder(new ComponentHolderBungeeListener());
 
         ImanityCommon.builder()
-                .bridge(new BungeeImanityBridge())
+                .platform(new BungeeImanityPlatform())
                 .commandExecutor(new BungeeCommandExecutor())
                 .eventHandler(new BungeeEventHandler())
                 .playerBridge(new BungeePlayerBridge())

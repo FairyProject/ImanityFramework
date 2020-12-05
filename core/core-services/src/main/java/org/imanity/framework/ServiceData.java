@@ -52,6 +52,8 @@ public class ServiceData {
     private List<String> dependencies;
     private boolean callAnnotations;
 
+    private ActivationStage stage;
+
     private Map<Class<? extends Annotation>, Collection<Method>> annotatedMethods;
 
     public ServiceData(Object instance, Service service) {
@@ -64,6 +66,7 @@ public class ServiceData {
         this.name = name;
         this.dependencies = Lists.newArrayList(dependencies);
         this.callAnnotations = callAnnotations;
+        this.stage = ActivationStage.NOT_LOADED;
 
         if (callAnnotations) {
             this.loadAnnotations();
@@ -92,8 +95,11 @@ public class ServiceData {
         for (Class<? extends Annotation> annotation : ServiceData.ANNOTATIONS) {
             if (method.getAnnotation(annotation) != null) {
 
-                if (method.getParameterCount() != 0) {
-                    throw new IllegalArgumentException("The method " + method.toString() + " used annotation " + annotation.getSimpleName() + " but having parameters! parameters are not allowed when using " + annotation.getSimpleName() + "!");
+                int parameterCount = method.getParameterCount();
+                if (parameterCount > 0) {
+                    if (parameterCount != 1 && method.getParameterTypes()[0] != ServiceData.class) {
+                        throw new IllegalArgumentException("The method " + method.toString() + " used annotation " + annotation.getSimpleName() + " but doesn't have matches parameters! you can only use either no parameter or one parameter with ServerData type on annotated " + annotation.getSimpleName() + "!");
+                    }
                 }
                 method.setAccessible(true);
 
@@ -110,6 +116,30 @@ public class ServiceData {
         }
     }
 
+    private void changeStage(Class<? extends Annotation> annotation) {
+        if (annotation == PreInitialize.class) {
+            this.stage = ActivationStage.PRE_INIT_CALLED;
+        } else if (annotation == PostInitialize.class) {
+            this.stage = ActivationStage.POST_INIT_CALLED;
+        } else if (annotation == PreDestroy.class) {
+            this.stage = ActivationStage.PRE_DESTROY_CALLED;
+        } else if (annotation == PostDestroy.class) {
+            this.stage = ActivationStage.POST_DESTROY_CALLED;
+        }
+    }
+
+    public boolean isStage(ActivationStage stage) {
+        return this.stage == stage;
+    }
+
+    public boolean isActivated() {
+        return this.stage == ActivationStage.PRE_INIT_CALLED || this.stage == ActivationStage.POST_INIT_CALLED;
+    }
+
+    public boolean isDestroyed() {
+        return this.stage == ActivationStage.PRE_DESTROY_CALLED || this.stage == ActivationStage.POST_DESTROY_CALLED;
+    }
+
     public void call(Class<? extends Annotation> annotation) throws InvocationTargetException, IllegalAccessException {
         if (!this.callAnnotations) {
             return;
@@ -117,13 +147,30 @@ public class ServiceData {
 
         if (this.annotatedMethods.containsKey(annotation)) {
             for (Method method : this.annotatedMethods.get(annotation)) {
-                method.invoke(instance);
+                if (method.getParameterCount() == 1) {
+                    method.invoke(instance, this);
+                } else {
+                    method.invoke(instance);
+                }
             }
         }
+
+        this.changeStage(annotation);
     }
 
     public boolean hasDependencies() {
         return this.dependencies.size() > 0;
+    }
+
+    public static enum ActivationStage {
+
+        NOT_LOADED,
+        PRE_INIT_CALLED,
+        POST_INIT_CALLED,
+
+        PRE_DESTROY_CALLED,
+        POST_DESTROY_CALLED
+
     }
 
 }

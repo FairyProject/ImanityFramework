@@ -42,7 +42,7 @@ import org.imanity.framework.boot.enums.ProgramStatus;
 import org.imanity.framework.boot.error.ErrorHandler;
 import org.imanity.framework.boot.impl.IndependentCommandExecutor;
 import org.imanity.framework.boot.impl.IndependentEventHandler;
-import org.imanity.framework.boot.impl.IndependentImanityBridge;
+import org.imanity.framework.boot.impl.IndependentImanityPlatform;
 import org.imanity.framework.boot.impl.IndependentPlayerBridge;
 import org.imanity.framework.boot.task.AsyncTaskScheduler;
 import org.imanity.framework.boot.user.UserInterface;
@@ -145,8 +145,8 @@ public final class FrameworkBootable {
             this.initFiles();
 
             this.pluginClassLoader = new PluginClassLoader(ClassLoader.getSystemClassLoader());
-            ImanityCommon.BRIDGE = new IndependentImanityBridge(this);
-            FrameworkMisc.BRIDGE = ImanityCommon.BRIDGE;
+            ImanityCommon.PLATFORM = new IndependentImanityPlatform(this);
+            FrameworkMisc.PLATFORM = ImanityCommon.PLATFORM;
             ImanityCommon.loadLibraries(); // Pre load libraries since we need it
 
             this.yaml = new Yaml();

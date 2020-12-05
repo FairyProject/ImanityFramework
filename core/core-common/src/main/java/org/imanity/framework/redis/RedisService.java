@@ -45,9 +45,9 @@ public class RedisService {
     @SneakyThrows
     @PreInitialize
     public void preInit() {
-        File configFile = new File(ImanityCommon.BRIDGE.getDataFolder(), "redisson.yml");
+        File configFile = new File(ImanityCommon.PLATFORM.getDataFolder(), "redisson.yml");
         if (!configFile.exists()) {
-            ImanityCommon.BRIDGE.saveResources("redisson.yml", false);
+            ImanityCommon.PLATFORM.saveResources("redisson.yml", false);
         }
 
         if (!ImanityCommon.CORE_CONFIG.USE_REDIS) {
