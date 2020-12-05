@@ -27,12 +27,10 @@ package org.imanity.framework.bukkit.packet.wrapper.server.playerinfo;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
-import net.minecraft.server.v1_8_R3.PacketPlayOutPlayerInfo;
 import org.bukkit.GameMode;
 import org.bukkit.entity.Player;
 import org.imanity.framework.bukkit.reflection.MinecraftReflection;
 import org.imanity.framework.bukkit.reflection.resolver.ConstructorResolver;
-import org.imanity.framework.bukkit.reflection.resolver.FieldResolver;
 import org.imanity.framework.bukkit.reflection.resolver.minecraft.NMSClassResolver;
 import org.imanity.framework.bukkit.reflection.wrapper.*;
 import org.imanity.framework.util.EquivalentConverter;
@@ -125,7 +123,7 @@ public class WrappedPlayerInfoData {
 
                 try {
 
-                    return CONSTRUCTOR.resolveBunch(
+                    return CONSTRUCTOR.resolve(
                             new Object[] {
                                     null,
                                     specific.gameProfile.getHandle(),

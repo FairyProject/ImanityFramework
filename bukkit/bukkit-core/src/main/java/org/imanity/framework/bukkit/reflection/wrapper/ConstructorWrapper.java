@@ -24,6 +24,8 @@
 
 package org.imanity.framework.bukkit.reflection.wrapper;
 
+import org.jetbrains.annotations.Nullable;
+
 import java.lang.reflect.Constructor;
 
 public class ConstructorWrapper<R> extends WrapperAbstract {
@@ -55,7 +57,20 @@ public class ConstructorWrapper<R> extends WrapperAbstract {
 		return null;
 	}
 
-	public R resolveBunch(Object[]... args) {
+	public R resolve(Object[]... args) {
+
+		R r = this.resolveSilent(args);
+
+		if (r == null) {
+			throw new IllegalStateException("No Args Constructor found!");
+		}
+
+		return r;
+
+	}
+
+	@Nullable
+	public R resolveSilent(Object[]... args) {
 
 		for (Object[] objects : args) {
 			R r = this.newInstanceSilent(objects);
@@ -64,7 +79,7 @@ public class ConstructorWrapper<R> extends WrapperAbstract {
 			}
 		}
 
-		throw new IllegalStateException("No Args Constructor found!");
+		return null;
 
 	}
 

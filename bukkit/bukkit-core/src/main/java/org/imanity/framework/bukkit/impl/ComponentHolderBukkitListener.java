@@ -49,10 +49,15 @@ public class ComponentHolderBukkitListener extends ComponentHolder {
                 new Class[] {plugin.getClass()},
                 new Class[] {JavaPlugin.class}
         )
-                .resolveBunch(
+                .resolveSilent(
                         new Object[0],
                         new Object[] { plugin }
                 );
+
+        if (object == null) {
+            Imanity.LOGGER.error("The Listener " + type.getName() + " Doesn't have matches arguments! (It would either be no args or 1 arg with plugin it self)");
+            return null;
+        }
 
         if (Listener.class.isAssignableFrom(type)) {
 

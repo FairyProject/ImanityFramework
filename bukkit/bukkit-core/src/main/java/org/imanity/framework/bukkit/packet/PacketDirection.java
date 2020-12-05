@@ -106,7 +106,7 @@ public enum PacketDirection {
                 .resolveMatches(
                         new Class[] { Player.class },
                         new Class[0])
-                .resolveBunch(
+                .resolve(
                         new Object[] { player },
                         new Object[0]
                 );

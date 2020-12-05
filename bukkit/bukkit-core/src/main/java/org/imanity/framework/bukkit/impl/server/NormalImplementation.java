@@ -276,7 +276,7 @@ public class NormalImplementation implements ServerImplementation {
                     short s = (short) ((b.getX() & 15) << 12 | (b.getZ() & 15) << 8 | b.getY());
                     Object blockNMS = this.toBlockNMS(materialData);
 
-                    Array.set(info, i, BLOCK_INFO_CONSTRUCTOR.resolveBunch(
+                    Array.set(info, i, BLOCK_INFO_CONSTRUCTOR.resolve(
                             new Object[] {s, blockNMS},
                             new Object[] {packet.getPacket(), s, blockNMS}
                     ));
