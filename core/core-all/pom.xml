@@ -37,10 +37,6 @@
                             <createDependencyReducedPom>false</createDependencyReducedPom>
                             <relocations>
                                 <relocation>
-                                    <pattern>org.hibernate</pattern>
-                                    <shadedPattern>org.imanity.framework.libs.hibernate</shadedPattern>
-                                </relocation>
-                                <relocation>
                                     <pattern>org.yaml</pattern>
                                     <shadedPattern>org.imanity.framework.libs.yaml</shadedPattern>
                                 </relocation>
@@ -61,8 +57,20 @@
                                     <shadedPattern>org.imanity.framework.libs.guava</shadedPattern>
                                 </relocation>
                                 <relocation>
-                                    <pattern>com.google.guava</pattern>
-                                    <shadedPattern>org.imanity.framework.libs.guava</shadedPattern>
+                                    <pattern>org.mariadb.jdbc</pattern>
+                                    <shadedPattern>org.imanity.framework.libs.mariadb</shadedPattern>
+                                </relocation>
+                                <relocation>
+                                    <pattern>com.mysql</pattern>
+                                    <shadedPattern>org.imanity.framework.libs.mysql</shadedPattern>
+                                </relocation>
+                                <relocation>
+                                    <pattern>org.postgresql</pattern>
+                                    <shadedPattern>org.imanity.framework.libs.postgresql</shadedPattern>
+                                </relocation>
+                                <relocation>
+                                    <pattern>com.zaxxer.hikari</pattern>
+                                    <shadedPattern>org.imanity.framework.libs.hikari</shadedPattern>
                                 </relocation>
                             </relocations>
                         </configuration>
