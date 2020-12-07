@@ -68,7 +68,6 @@ public final class ImanityCommon {
 
 
             Library.BSON,
-            Library.YAML,
             Library.CAFFEINE
     );
     public static final String METADATA_PREFIX = "Imanity_";
@@ -138,6 +137,13 @@ public final class ImanityCommon {
         } catch (ClassNotFoundException ex) {
             ImanityCommon.LIBRARY_HANDLER.downloadLibraries(Library.FAST_UTIL);
             ImanityCommon.LIBRARY_HANDLER.obtainClassLoaderWith(Library.FAST_UTIL);
+        }
+
+        try {
+            Class.forName("org.yaml");
+        } catch (ClassNotFoundException ex) {
+            ImanityCommon.LIBRARY_HANDLER.downloadLibraries(Library.YAML);
+            ImanityCommon.LIBRARY_HANDLER.obtainClassLoaderWith(Library.YAML);
         }
 
         Library redisson;

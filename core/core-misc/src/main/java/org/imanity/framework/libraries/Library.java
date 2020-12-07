@@ -62,8 +62,7 @@ public class Library {
             "org{}yaml",
             "snakeyaml",
             "1.20",
-            "HOWEuJiOSesajRuXIHGgsg9eyONxV7xakRNP3ZDGEjw=",
-            new Relocate("org{}yaml", IMANITY_LIB_PACKAGE + "yaml")
+            "HOWEuJiOSesajRuXIHGgsg9eyONxV7xakRNP3ZDGEjw="
     ),
     MONGO_DB_SYNC = new Library(
             "org{}mongodb",
