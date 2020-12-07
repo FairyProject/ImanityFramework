@@ -28,7 +28,6 @@ import org.bukkit.plugin.PluginDescriptionFile;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.plugin.java.JavaPluginLoader;
 import org.imanity.framework.bukkit.Imanity;
-import org.imanity.framework.bukkit.plugin.ImanityPlugin;
 
 import java.io.File;
 
@@ -46,11 +45,15 @@ public final class ImanityStandalonePlugin extends JavaPlugin {
     @Override
     public void onEnable() {
 
+        ClassLoader originalContextClassLoader = Thread.currentThread().getContextClassLoader();
+        Thread.currentThread().setContextClassLoader(getClassLoader());
+
         for (ImanityPlugin plugin : Imanity.PLUGINS) {
             plugin.preEnable();
         }
 
         Imanity.init(this);
+        Thread.currentThread().setContextClassLoader(originalContextClassLoader);
 
     }
 

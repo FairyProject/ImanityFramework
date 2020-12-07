@@ -1,6 +1,8 @@
 package org.imanity.framework.mysql.connection.hikari;
 
-import java.util.function.Function;
+import org.imanity.framework.RepositoryType;
+import org.imanity.framework.mysql.pojo.statement.PostgresStatementBuilder;
+import org.imanity.framework.mysql.pojo.statement.SqlStatementBuilder;
 
 public class PostgreConnectionFactory extends HikariConnectionFactory {
     @Override
@@ -19,12 +21,13 @@ public class PostgreConnectionFactory extends HikariConnectionFactory {
     }
 
     @Override
-    public String name() {
-        return "PostgreSQL";
+    public RepositoryType type() {
+        return RepositoryType.POSTGRE;
     }
 
     @Override
-    public Function<String, String> getStatementProcessor() {
-        return s -> s.replace("'", "\"");
+    public SqlStatementBuilder builder() {
+        return new PostgresStatementBuilder();
     }
+
 }

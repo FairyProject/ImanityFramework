@@ -6,15 +6,16 @@ import com.zaxxer.hikari.HikariDataSource;
 import lombok.Getter;
 import org.apache.logging.log4j.Logger;
 import org.imanity.framework.FrameworkMisc;
-import org.imanity.framework.libraries.Library;
-import org.imanity.framework.mysql.connection.ConnectionFactory;
+import org.imanity.framework.mysql.connection.AbstractConnectionFactory;
+import org.imanity.framework.mysql.pojo.statement.SqlStatementBuilder;
+import org.imanity.framework.mysql.pojo.statement.StandardSqlStatementBuilder;
 
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
-public abstract class HikariConnectionFactory implements ConnectionFactory {
+public abstract class HikariConnectionFactory extends AbstractConnectionFactory {
 
     @Getter
     protected HikariConfig config;
@@ -31,20 +32,6 @@ public abstract class HikariConnectionFactory implements ConnectionFactory {
     @Override
     public void init() {
         try {
-            Class.forName("com.zaxxer.hikari.HikariConfig");
-        } catch (ClassNotFoundException ex) {
-            Library library = new Library(
-                    "com.zaxxer",
-                    "HikariCP",
-                    "3.1.0",
-                    "TBo58lIW2Ukyh3VYKUwOliccAeRx+y9FxdDzsD8UUUw="
-            );
-
-            FrameworkMisc.LIBRARY_HANDLER.downloadLibraries(library);
-            FrameworkMisc.LIBRARY_HANDLER.obtainClassLoaderWith(library);
-        }
-
-        try {
             this.config = new HikariConfig();
         } catch (LinkageError ex) {
             handleLinkageError(ex);
@@ -54,6 +41,11 @@ public abstract class HikariConnectionFactory implements ConnectionFactory {
         this.config.setPoolName("imanity-hikari");
         this.config.setInitializationFailTimeout(-1);
         this.config.addDataSourceProperty("socketTimeout", String.valueOf(TimeUnit.SECONDS.toMillis(30)));
+    }
+
+    @Override
+    public SqlStatementBuilder builder() {
+        return new StandardSqlStatementBuilder();
     }
 
     @Override

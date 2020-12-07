@@ -1,8 +1,8 @@
 package org.imanity.framework.mysql.connection.hikari;
 
-import com.zaxxer.hikari.HikariConfig;
-
-import java.util.function.Function;
+import org.imanity.framework.RepositoryType;
+import org.imanity.framework.mysql.pojo.statement.MySqlStatementBuilder;
+import org.imanity.framework.mysql.pojo.statement.SqlStatementBuilder;
 
 public class MariaConnectionFactory extends HikariConnectionFactory {
     @Override
@@ -11,8 +11,8 @@ public class MariaConnectionFactory extends HikariConnectionFactory {
     }
 
     @Override
-    public String name() {
-        return "MariaDB";
+    public RepositoryType type() {
+        return RepositoryType.MARIADB;
     }
 
     @Override
@@ -26,7 +26,8 @@ public class MariaConnectionFactory extends HikariConnectionFactory {
     }
 
     @Override
-    public Function<String, String> getStatementProcessor() {
-        return s -> s.replace("'", "`"); // use backticks for quotes
+    public SqlStatementBuilder builder() {
+        return new MySqlStatementBuilder();
     }
+
 }

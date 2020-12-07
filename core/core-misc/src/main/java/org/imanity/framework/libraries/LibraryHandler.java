@@ -26,6 +26,8 @@ package org.imanity.framework.libraries;
 
 import com.google.common.collect.ImmutableSet;
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
+import me.lucko.jarrelocator.JarRelocator;
+import me.lucko.jarrelocator.Relocation;
 import org.imanity.framework.FrameworkMisc;
 import org.imanity.framework.libraries.classloader.IsolatedClassLoader;
 
@@ -131,11 +133,33 @@ public class LibraryHandler {
             return;
         }
 
-        Path file = this.downloadLibrary(library);
-
+        Path file = this.remapLibrary(library, this.downloadLibrary(library));
         this.loaded.put(library, file);
-
         FrameworkMisc.PLATFORM.getClassLoader().addJarToClasspath(file);
+    }
+
+    private Path remapLibrary(Library library, Path normalFile) {
+        List<Relocation> relocations = new ArrayList<>(Arrays.asList(library.getRelocations()));
+
+        if (relocations.isEmpty()) {
+            return normalFile;
+        }
+
+        Path remappedFile = this.libFolder.resolve(library.getFileName() + "-remapped.jar");
+        if (Files.exists(remappedFile)) {
+            return remappedFile;
+        }
+
+        JarRelocator relocator = new JarRelocator(normalFile.toFile(), remappedFile.toFile(), relocations);
+        try {
+            System.out.println("Remapping library " + library.getName() + "...");
+
+            relocator.run();
+        } catch (Throwable throwable) {
+            throw new RuntimeException("Something wrong while relocating library...", throwable);
+        }
+
+        return remappedFile;
     }
 
     protected Path downloadLibrary(Library library) throws LibraryDownloadException {

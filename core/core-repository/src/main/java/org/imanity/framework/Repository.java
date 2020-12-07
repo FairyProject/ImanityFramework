@@ -1,9 +1,12 @@
 package org.imanity.framework;
 
+import java.io.Serializable;
 import java.util.List;
 import java.util.Optional;
 
-public interface Repository<T, ID> {
+@DisallowAnnotation(value = PreInitialize.class)
+@ServiceDependency(dependencies = {"mongo", "sql"})
+public interface Repository<T, ID extends Serializable> {
 
     void init();
 

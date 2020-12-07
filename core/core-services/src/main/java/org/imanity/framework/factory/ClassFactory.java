@@ -85,11 +85,11 @@ public final class ClassFactory {
         ClassFactory.scan(annotation, REFLECTIONS);
     }
 
-    private static void scan(Class<? extends Annotation> annotation, Reflections reflections) {
+    public static void scan(Class<? extends Annotation> annotation, Reflections reflections) {
         CLASSES.put(annotation, reflections.getTypesAnnotatedWith(annotation));
     }
 
-    private static Reflections createReflections() {
+    public static Reflections createReflections() {
         return new Reflections(ClassFactory.CLASS_PATHS, new TypeAnnotationsScanner(), new SubTypesScanner(false), new FieldAnnotationsScanner(), FrameworkMisc.PLATFORM.getClassLoaders());
     }
 

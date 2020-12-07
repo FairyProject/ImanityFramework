@@ -1,0 +1,27 @@
+package org.imanity.framework.mysql.pojo.statement;
+
+import org.imanity.framework.mysql.pojo.info.PojoInfo;
+import org.imanity.framework.mysql.pojo.Query;
+
+public interface SqlStatementBuilder {
+	
+	public String getInsertSql(Query query, Object row);
+	public Object[] getInsertArgs(Query query, Object row);
+
+	public String getUpdateSql(Query query, Object row);
+	public Object[] getUpdateArgs(Query query, Object row);
+	
+	public String getDeleteSql(Query query, Object row);
+	public Object[] getDeleteArgs(Query query, Object row);
+
+	public String getUpsertSql(Query query, Object row);
+	public Object[] getUpsertArgs(Query query, Object row);
+	
+	public String getSelectSql(Query query, Class<?> rowClass);
+	public String getCreateTableSql(Class<?> clazz);
+	
+	public PojoInfo getPojoInfo(Class<?> rowClass);
+
+	public Object convertValue(Object value, String columnTypeName);
+
+}

@@ -262,6 +262,13 @@
 
         <dependency>
             <groupId>org.imanity.framework</groupId>
+            <artifactId>core-mysql</artifactId>
+            <version>${version}</version>
+            <scope>compile</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>org.imanity.framework</groupId>
             <artifactId>core-misc</artifactId>
             <version>${version}</version>
             <scope>compile</scope>

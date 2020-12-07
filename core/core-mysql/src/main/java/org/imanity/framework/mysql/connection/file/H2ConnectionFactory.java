@@ -1,6 +1,7 @@
 package org.imanity.framework.mysql.connection.file;
 
 import org.imanity.framework.FrameworkMisc;
+import org.imanity.framework.RepositoryType;
 import org.imanity.framework.libraries.Library;
 import org.imanity.framework.libraries.classloader.IsolatedClassLoader;
 
@@ -11,7 +12,6 @@ import java.sql.Connection;
 import java.sql.Driver;
 import java.sql.SQLException;
 import java.util.Properties;
-import java.util.function.Function;
 
 public class H2ConnectionFactory extends FileConnectionFactory {
 
@@ -22,33 +22,22 @@ public class H2ConnectionFactory extends FileConnectionFactory {
     private NonClosableConnection connection;
 
     public H2ConnectionFactory(Path path) {
+        this(path, false);
+    }
+
+    public H2ConnectionFactory(Path path, boolean test) {
         super(path);
 
-        if (!LIBRARY_LOADED) {
-            LIBRARY_LOADED = true;
-
-            Library library = new Library(
-                    "com.h2database",
-                    "h2",
-                    // seems to be a compat bug in 1.4.200 with older dbs
-                    // see: https://github.com/h2database/h2database/issues/2078
-                    "1.4.199",
-                    "MSWhZ0O8a0z7thq7p4MgPx+2gjCqD9yXiY95b5ml1C4="
-            );
-
-            Library byteBuddy = new Library(
-                    "net.bytebuddy",
-                    "byte-buddy",
-                    "1.10.9",
-                    "B7nKbi+XDLA/SyVlHfHy/OJx1JG0TgQJgniHeG9pLU0="
-            );
-
-            FrameworkMisc.LIBRARY_HANDLER.downloadLibraries(library, byteBuddy);
-            CLASS_LOADER = FrameworkMisc.LIBRARY_HANDLER.obtainClassLoaderWith(library, byteBuddy);
-        }
-
         try {
-            Class<?> driverClass = CLASS_LOADER.loadClass("org.h2.Driver");
+            if (test) {
+                Class<?> driverClass = Class.forName("org.h2.Driver");
+                Method loadMethod = driverClass.getMethod("load");
+                this.driver = (Driver) loadMethod.invoke(null);
+                return;
+            }
+            Class<?> driverClass = FrameworkMisc.LIBRARY_HANDLER
+                    .obtainClassLoaderWith(Library.H2_DRIVER)
+                    .loadClass("org.h2.Driver");
             Method loadMethod = driverClass.getMethod("load");
             this.driver = (Driver) loadMethod.invoke(null);
         } catch (InvocationTargetException | NoSuchMethodException | IllegalAccessException | ClassNotFoundException ex) {
@@ -57,8 +46,8 @@ public class H2ConnectionFactory extends FileConnectionFactory {
     }
 
     @Override
-    public String name() {
-        return "H2";
+    public RepositoryType type() {
+        return RepositoryType.H2;
     }
 
     @Override
@@ -67,7 +56,7 @@ public class H2ConnectionFactory extends FileConnectionFactory {
             return;
         }
 
-        Connection connection = this.driver.connect("jdbc:h2:" + this.path.toString(), new Properties());
+        Connection connection = this.driver.connect(this.url(), new Properties());
         if (connection != null) {
             this.connection = NonClosableConnection.wrap(connection);
         } else {
@@ -75,16 +64,15 @@ public class H2ConnectionFactory extends FileConnectionFactory {
         }
     }
 
+    public String url() {
+        return "jdbc:h2:" + this.path.toString() + ";mode=MySQL";
+    }
+
     @Override
     public void shutdown() throws Exception {
         if (this.connection != null) {
             this.connection.shutdown();
         }
-    }
-
-    @Override
-    public Function<String, String> getStatementProcessor() {
-        return s -> s.replace("'", "`");
     }
 
     @Override

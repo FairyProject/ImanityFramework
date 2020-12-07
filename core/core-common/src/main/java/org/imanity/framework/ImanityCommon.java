@@ -54,7 +54,23 @@ import java.util.*;
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public final class ImanityCommon {
 
-    private static final Set<Library> GLOBAL_LIBRARIES = ImmutableSet.of(Library.MONGO_DB_SYNC, Library.MONGO_DB_CORE, Library.BSON, Library.YAML, Library.CAFFEINE);
+    private static final Set<Library> GLOBAL_LIBRARIES = ImmutableSet.of(
+            // SQL
+            Library.MARIADB_DRIVER,
+            Library.HIKARI,
+            Library.H2_DRIVER,
+            Library.MYSQL_DRIVER,
+            Library.POSTGRESQL_DRIVER,
+
+            // MONGO
+            Library.MONGO_DB_SYNC,
+            Library.MONGO_DB_CORE,
+
+
+            Library.BSON,
+            Library.YAML,
+            Library.CAFFEINE
+    );
     public static final String METADATA_PREFIX = "Imanity_";
 
     public static ImanityPlatform PLATFORM;
@@ -75,9 +91,6 @@ public final class ImanityCommon {
     public static ObjectMapper JACKSON_MAPPER;
 
     @Autowired
-    public static RedisService REDIS;
-
-    @Autowired
     public static ServerHandler SERVER_HANDLER;
 
     private static final List<Terminable> TERMINABLES = new ArrayList<>();
@@ -85,11 +98,14 @@ public final class ImanityCommon {
     private static boolean LIBRARIES_INITIALIZED, BRIDGE_INITIALIZED;
 
     public static void init() {
+        ImanityCommon.loadLibraries();
+
         ImanityCommon.CORE_CONFIG = new CoreConfig();
         ImanityCommon.CORE_CONFIG.loadAndSave();
 
-        ImanityCommon.loadLibraries();
         ClassFactory.loadClasses();
+
+        ImanityCommon.PLATFORM.preServiceLoaded();
 
         ImanityCommon.SERVICE_HANDLER = new ServiceHandler();
         ImanityCommon.SERVICE_HANDLER.registerServices();

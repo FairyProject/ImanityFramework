@@ -30,6 +30,7 @@ import org.bukkit.plugin.java.JavaPlugin;
 import org.imanity.framework.ImanityPlatform;
 import org.imanity.framework.ImanityCommon;
 import org.imanity.framework.bukkit.Imanity;
+import org.imanity.framework.bukkit.impl.server.ServerImplementation;
 import org.imanity.framework.bukkit.plugin.ImanityPlugin;
 import org.imanity.framework.bukkit.util.BukkitUtil;
 import org.imanity.framework.plugin.PluginClassLoader;
@@ -124,5 +125,10 @@ public class BukkitImanityPlatform implements ImanityPlatform {
     @Override
     public boolean isServerThread() {
         return Imanity.IMPLEMENTATION.isServerThread();
+    }
+
+    @Override
+    public void preServiceLoaded() {
+        Imanity.IMPLEMENTATION = ServerImplementation.load();
     }
 }

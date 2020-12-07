@@ -117,7 +117,6 @@ public final class Imanity {
         SpigotUtil.init();
         Imanity.initCommon();
 
-        Imanity.IMPLEMENTATION = ServerImplementation.load();
         Imanity.TASK_CHAIN_FACTORY = BukkitTaskChainFactory.create(plugin);
 
         MenuUpdateTask.init();

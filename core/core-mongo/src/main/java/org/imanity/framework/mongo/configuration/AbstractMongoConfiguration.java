@@ -8,6 +8,10 @@ public abstract class AbstractMongoConfiguration {
 
     public abstract String database();
 
+    public boolean shouldActivate() {
+        return true;
+    }
+
     public MongoClientSettings mongoClientSettings() {
         MongoClientSettings.Builder builder = MongoClientSettings.builder().uuidRepresentation(UuidRepresentation.JAVA_LEGACY);
         this.setupClientSettings(builder);

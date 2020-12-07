@@ -25,6 +25,7 @@
 package org.imanity.framework;
 
 import com.google.common.collect.Lists;
+import com.google.common.collect.Sets;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -41,7 +42,8 @@ public class ServiceData {
 
     private static final Class<? extends Annotation>[] ANNOTATIONS = new Class[] {
             PreInitialize.class, PostInitialize.class,
-            PreDestroy.class, PostDestroy.class
+            PreDestroy.class, PostDestroy.class,
+            ShouldInitialize.class
     };
 
     private Class<?> type;
@@ -49,12 +51,17 @@ public class ServiceData {
     private Object instance;
 
     private String name;
-    private List<String> dependencies;
+    private Set<String> dependencies;
     private boolean callAnnotations;
 
     private ActivationStage stage;
 
+    private Map<Class<? extends Annotation>, String> disallowAnnotations;
     private Map<Class<? extends Annotation>, Collection<Method>> annotatedMethods;
+
+    public ServiceData(Object instance) {
+        this(instance.getClass(), instance, "dummy", new String[0], true);
+    }
 
     public ServiceData(Object instance, Service service) {
         this(instance.getClass(), instance, service.name(), service.dependencies(), true);
@@ -64,7 +71,7 @@ public class ServiceData {
         this.type = type;
         this.instance = instance;
         this.name = name;
-        this.dependencies = Lists.newArrayList(dependencies);
+        this.dependencies = Sets.newHashSet(dependencies);
         this.callAnnotations = callAnnotations;
         this.stage = ActivationStage.NOT_LOADED;
 
@@ -76,8 +83,21 @@ public class ServiceData {
     @SneakyThrows
     public void loadAnnotations() {
         this.annotatedMethods = new HashMap<>();
+        this.disallowAnnotations = new HashMap<>();
 
         Class<?> type = this.type;
+        while (type != null && type != Object.class) {
+            DisallowAnnotation disallowAnnotation = type.getAnnotation(DisallowAnnotation.class);
+            if (disallowAnnotation != null) {
+                for (Class<? extends Annotation> annotation : disallowAnnotation.value()) {
+                    this.disallowAnnotations.put(annotation, type.getName());
+                }
+            }
+
+            type = type.getSuperclass();
+        }
+
+        type = this.type;
         while (type != null && type != Object.class) {
             for (Method method : type.getDeclaredMethods()) {
                 this.loadMethod(method);
@@ -87,6 +107,7 @@ public class ServiceData {
             if (dependencyAnnotation != null) {
                 dependencies.addAll(Arrays.asList(dependencyAnnotation.dependencies()));
             }
+
             type = type.getSuperclass();
         }
     }
@@ -94,12 +115,20 @@ public class ServiceData {
     public void loadMethod(Method method) {
         for (Class<? extends Annotation> annotation : ServiceData.ANNOTATIONS) {
             if (method.getAnnotation(annotation) != null) {
+                if (this.disallowAnnotations.containsKey(annotation)) {
+                    String className = this.disallowAnnotations.get(annotation);
+                    throw new IllegalArgumentException("The annotation " + annotation.getSimpleName() + " is disallowed by class " + className + ", But it used in method " + method.toString());
+                }
 
                 int parameterCount = method.getParameterCount();
                 if (parameterCount > 0) {
                     if (parameterCount != 1 && method.getParameterTypes()[0] != ServiceData.class) {
                         throw new IllegalArgumentException("The method " + method.toString() + " used annotation " + annotation.getSimpleName() + " but doesn't have matches parameters! you can only use either no parameter or one parameter with ServerData type on annotated " + annotation.getSimpleName() + "!");
                     }
+                }
+
+                if (annotation == ShouldInitialize.class && method.getReturnType() != boolean.class) {
+                    throw new IllegalArgumentException("The method " + method.toString() + " used annotation " + annotation.getSimpleName() + " but doesn't have matches return type! you can only use boolean as return type on annotated " + annotation.getSimpleName() + "!");
                 }
                 method.setAccessible(true);
 
@@ -138,6 +167,26 @@ public class ServiceData {
 
     public boolean isDestroyed() {
         return this.stage == ActivationStage.PRE_DESTROY_CALLED || this.stage == ActivationStage.POST_DESTROY_CALLED;
+    }
+
+    public boolean shouldInitialize() throws InvocationTargetException, IllegalAccessException  {
+        if (this.annotatedMethods.containsKey(ShouldInitialize.class)) {
+            for (Method method : this.annotatedMethods.get(ShouldInitialize.class)) {
+                boolean result;
+
+                if (method.getParameterCount() == 1) {
+                    result = (boolean) method.invoke(instance, this);
+                } else {
+                    result = (boolean) method.invoke(instance);
+                }
+
+                if (!result) {
+                    return false;
+                }
+            }
+        }
+
+        return true;
     }
 
     public void call(Class<? extends Annotation> annotation) throws InvocationTargetException, IllegalAccessException {

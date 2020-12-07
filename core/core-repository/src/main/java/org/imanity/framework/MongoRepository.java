@@ -7,12 +7,12 @@ import org.bson.BsonDocument;
 import org.imanity.framework.mongo.MongoService;
 import org.mongojack.JacksonMongoCollection;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
-@ServiceDependency(dependencies = { "mongo" })
-public abstract class MongoRepository<T, ID> implements Repository<T, ID> {
+public abstract class MongoRepository<T, ID extends Serializable> implements Repository<T, ID> {
 
     @Autowired
     private static MongoService MONGO_SERVICE;
@@ -32,11 +32,11 @@ public abstract class MongoRepository<T, ID> implements Repository<T, ID> {
         return FrameworkMisc.JACKSON_MAPPER;
     }
 
+    public abstract String name();
+
     public void postInit() {
 
     }
-
-    public abstract String name();
 
     @Override
     public <S extends T> S save(S pojo) {

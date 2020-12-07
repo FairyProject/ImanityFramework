@@ -1,69 +1,127 @@
 package org.imanity.framework;
 
+import lombok.Getter;
+import lombok.Setter;
+
+import java.io.Serializable;
+import java.lang.reflect.InvocationTargetException;
 import java.util.List;
 import java.util.Optional;
 
-public class ConfigurableRepository<T, ID> implements Repository<T, ID> {
+@Getter
+public abstract class ConfigurableRepository<T, ID extends Serializable> implements Repository<T, ID> {
 
+    private Repository<T, ID> repository;
+    private ServiceData serviceData;
+    private boolean initialized;
 
-
-    @Override
+    @PostInitialize
     public void init() {
+        RepositoryType type = this.repositoryType();
+        switch (type) {
+            case MONGO:
+                this.repository = new MongoRepository<T, ID>() {
+                    @Override
+                    public String name() {
+                        return ConfigurableRepository.this.name();
+                    }
 
+                    @Override
+                    public Class<T> type() {
+                        return ConfigurableRepository.this.type();
+                    }
+                };
+                break;
+            default:
+                this.repository = new SQLRepository<T, ID>(type) {
+
+                    @Override
+                    public Class<T> type() {
+                        return ConfigurableRepository.this.type();
+                    }
+                };
+                break;
+        }
+
+        this.serviceData = new ServiceData(this.repository);
+
+        try {
+            this.serviceData.call(PostInitialize.class);
+        } catch (InvocationTargetException | IllegalAccessException e) {
+            throw new RuntimeException("Something wrong while calling PostInitialize for ConfigurableRepository", e);
+        }
+        this.initialized = true;
     }
 
-    @Override
-    public Class<T> type() {
-        return null;
+    @PreDestroy
+    public void preClose() {
+        try {
+            this.serviceData.call(PreDestroy.class);
+        } catch (InvocationTargetException | IllegalAccessException e) {
+            throw new RuntimeException("Something wrong while calling PreDestroy for ConfigurableRepository", e);
+        }
     }
+
+    @PostDestroy
+    public void postClose() {
+        try {
+            this.serviceData.call(PostDestroy.class);
+        } catch (InvocationTargetException | IllegalAccessException e) {
+            throw new RuntimeException("Something wrong while calling PostDestroy for ConfigurableRepository", e);
+        }
+    }
+
+    public abstract RepositoryType repositoryType();
+
+    public abstract String name();
 
     @Override
     public <S extends T> S save(S pojo) {
-        return null;
+        return this.repository.save(pojo);
     }
 
     @Override
     public Optional<T> findById(ID id) {
-        return Optional.empty();
+        return this.repository.findById(id);
     }
 
     @Override
     public <Q> Optional<T> findByQuery(String query, Q value) {
-        return Optional.empty();
+        return this.repository.findByQuery(query, value);
     }
 
     @Override
     public boolean existsById(ID id) {
-        return false;
+        return this.repository.existsById(id);
     }
 
     @Override
     public Iterable<T> findAll() {
-        return null;
+        return this.repository.findAll();
     }
 
     @Override
     public Iterable<T> findAllById(List<ID> ids) {
-        return null;
+        return this.repository.findAllById(ids);
     }
 
     @Override
     public long count() {
-        return 0;
+        return this.repository.count();
     }
 
     @Override
     public void deleteById(ID id) {
-
+        this.repository.deleteById(id);
     }
 
     @Override
     public <Q> void deleteByQuery(String query, Q value) {
-
+        this.repository.deleteByQuery(query, value);
     }
 
     @Override
     public void deleteAll() {
-
+        this.repository.deleteAll();
     }
 }

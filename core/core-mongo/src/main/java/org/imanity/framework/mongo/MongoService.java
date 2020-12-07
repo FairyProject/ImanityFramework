@@ -16,7 +16,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-@Service(name = "mongo")
+@Service(name = "mongo", dependencies = "serializer")
 public class MongoService {
 
     private List<AbstractMongoConfiguration> configurations;
@@ -38,6 +38,9 @@ public class MongoService {
             @Override
             public Object newInstance(Class<?> type) {
                 AbstractMongoConfiguration instance = (AbstractMongoConfiguration) super.newInstance(type);
+                if (!instance.shouldActivate()) {
+                    return null;
+                }
                 configurations.add(instance);
                 return instance;
             }

@@ -25,6 +25,8 @@
 package org.imanity.framework.config;
 
 import org.imanity.framework.ImanityCommon;
+import org.imanity.framework.RepositoryType;
+import org.imanity.framework.config.annotation.ConfigurationElement;
 import org.imanity.framework.config.format.FieldNameFormatters;
 import org.imanity.framework.config.yaml.YamlConfiguration;
 
@@ -45,6 +47,8 @@ public class CoreConfig extends YamlConfiguration {
 
     public String DEFAULT_LOCALE = "en_us";
 
+    public Storage STORAGE = new Storage();
+
     public CoreConfig() {
         super(new File(ImanityCommon.PLATFORM.getDataFolder(), "core.yml").toPath(), YamlProperties
             .builder()
@@ -55,5 +59,35 @@ public class CoreConfig extends YamlConfiguration {
                     "==============================",
                     " "
             )).build());
+    }
+
+    @ConfigurationElement
+    public static class Storage {
+
+        public RepositoryType DEFAULT_TYPE = RepositoryType.H2;
+        public MySql MYSQL = new MySql();
+        public Mongo MONGO = new Mongo();
+
+    }
+
+    @ConfigurationElement
+    public static class MySql {
+
+        public boolean ENABLED = false;
+        public String HOST = "localhost";
+        public String PORT = "3306";
+        public String USER = "admin";
+        public String PASSWORD = "password";
+        public String DATABASE = "database";
+
+    }
+
+    @ConfigurationElement
+    public static class Mongo {
+
+        public boolean ENABLED = false;
+        public String CONNECTION_STRING = "mongodb://localhost:27017";
+        public String DATABASE = "database";
+
     }
 }

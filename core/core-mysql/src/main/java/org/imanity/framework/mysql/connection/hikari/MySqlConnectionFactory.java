@@ -1,10 +1,13 @@
 package org.imanity.framework.mysql.connection.hikari;
 
+import org.imanity.framework.RepositoryType;
+import org.imanity.framework.mysql.pojo.statement.MySqlStatementBuilder;
+import org.imanity.framework.mysql.pojo.statement.SqlStatementBuilder;
+
 import java.sql.Driver;
 import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.util.Enumeration;
-import java.util.function.Function;
 
 public class MySqlConnectionFactory extends HikariConnectionFactory {
     @Override
@@ -21,8 +24,13 @@ public class MySqlConnectionFactory extends HikariConnectionFactory {
     }
 
     @Override
-    public String name() {
-        return "MySQL";
+    public RepositoryType type() {
+        return RepositoryType.MYSQL;
+    }
+
+    @Override
+    public SqlStatementBuilder builder() {
+        return new MySqlStatementBuilder();
     }
 
     @Override
@@ -42,8 +50,4 @@ public class MySqlConnectionFactory extends HikariConnectionFactory {
         }
     }
 
-    @Override
-    public Function<String, String> getStatementProcessor() {
-        return s -> s.replace("'", "`"); // use backticks for quotes
-    }
 }

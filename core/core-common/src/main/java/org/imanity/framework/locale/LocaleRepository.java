@@ -5,11 +5,19 @@ import org.imanity.framework.cache.EnableOwnCacheManager;
 import org.imanity.framework.cache.Unless;
 import org.imanity.framework.locale.player.LocaleData;
 
+import java.io.File;
+import java.nio.file.Path;
 import java.util.UUID;
 
 @EnableOwnCacheManager
 @Service(name = "locale-repository")
-public class LocaleRepository extends MongoRepository<LocaleData, UUID> {
+public class LocaleRepository extends ConfigurableRepository<LocaleData, UUID> {
+
+    @Override
+    public RepositoryType repositoryType() {
+        return ImanityCommon.CORE_CONFIG.STORAGE.DEFAULT_TYPE;
+    }
+
     @Override
     public String name() {
         return "locale";
@@ -20,7 +28,7 @@ public class LocaleRepository extends MongoRepository<LocaleData, UUID> {
         return LocaleData.class;
     }
 
-    @Cacheable(key = "locale-$(arg0)", unless = { Unless.ResultIsNull.class })
+    @Cacheable(forever = true, key = "locale-$(arg0)")
     public LocaleData find(UUID uuid) {
         return super.findById(uuid).orElse(new LocaleData(uuid));
     }
@@ -30,9 +38,10 @@ public class LocaleRepository extends MongoRepository<LocaleData, UUID> {
         return super.save(localeData);
     }
 
-    @PostInitialize
+    @PostDestroy
     @Cacheable.ClearAfter
     public void stop() {
 
     }
+
 }

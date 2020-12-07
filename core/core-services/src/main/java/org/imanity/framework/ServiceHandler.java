@@ -46,6 +46,7 @@ import java.util.stream.Collectors;
 
 public class ServiceHandler {
 
+    public static ServiceHandler INSTANCE;
     private static final Logger LOGGER = LogManager.getLogger(ServiceHandler.class);
 
     private final Map<Class<?>, ServiceData> services = new LinkedHashMap<>();
@@ -149,6 +150,16 @@ public class ServiceHandler {
 
     @SneakyThrows
     public void init() {
+        INSTANCE = this;
+
+        Iterator<Map.Entry<Class<?>, ServiceData>> iterator = this.services.entrySet().iterator();
+        while (iterator.hasNext()) {
+            Map.Entry<Class<?>, ServiceData> entry = iterator.next();
+            if (!entry.getValue().shouldInitialize()) {
+                iterator.remove();
+            }
+        }
+
         this.call(PreInitialize.class);
 
         this.initialAutowired();

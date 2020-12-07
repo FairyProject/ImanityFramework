@@ -29,6 +29,7 @@ import org.imanity.framework.util.AccessUtil;
 import org.imanity.framework.util.Utility;
 
 import java.lang.reflect.Constructor;
+import java.util.Arrays;
 
 /**
  * Resolver for constructors
@@ -88,7 +89,10 @@ public class ConstructorResolver extends MemberResolver<Constructor> {
 	public ConstructorWrapper resolveMatches(Class<?>[]... types) {
 		for (Class<?>[] parameters : types) {
 			for (Constructor constructor : this.clazz.getDeclaredConstructors()) {
-				if (isParametersEquals(constructor.getParameterTypes(), parameters)) {
+
+				Class<?>[] parametersTypes = constructor.getParameterTypes();
+
+				if (isParametersEquals(parametersTypes, parameters)) {
 					try {
 						return new ConstructorWrapper<>(AccessUtil.setAccessible(constructor));
 					} catch (ReflectiveOperationException e) {
@@ -97,6 +101,7 @@ public class ConstructorResolver extends MemberResolver<Constructor> {
 				}
 			}
 		}
+
 		return null;
 	}
 

@@ -26,6 +26,7 @@ package org.imanity.framework.locale;
 
 import lombok.Getter;
 import org.imanity.framework.ImanityCommon;
+import org.imanity.framework.PostInitialize;
 import org.imanity.framework.Service;
 
 import java.io.File;
@@ -41,9 +42,11 @@ public class LocaleHandler {
     @Getter
     private Locale defaultLocale;
 
+    @PostInitialize
     public void init() {
         this.locales = new HashMap<>();
         this.defaultLocale = this.getOrRegister(ImanityCommon.CORE_CONFIG.DEFAULT_LOCALE);
+        this.getOrRegister("zh_tw"); // test
     }
 
     public Locale getOrRegister(String name) {

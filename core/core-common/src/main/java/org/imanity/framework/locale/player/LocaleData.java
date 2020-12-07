@@ -26,24 +26,34 @@ package org.imanity.framework.locale.player;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Getter;
-import lombok.RequiredArgsConstructor;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.imanity.framework.ImanityCommon;
 import org.imanity.framework.locale.Locale;
-import org.mongojack.Id;
+
+import javax.persistence.Entity;
+import javax.persistence.Id;
+import javax.persistence.Table;
 
 import java.util.UUID;
 
 @Getter
 @Setter
-@RequiredArgsConstructor
+@Entity
+@NoArgsConstructor
+@Table(name = "locale")
 public class LocaleData {
 
     @Id
     @JsonProperty
-    private final UUID uuid;
+    private UUID uuid;
 
     @JsonProperty
-    private Locale locale = ImanityCommon.LOCALE_HANDLER.getDefaultLocale();
+    private Locale locale;
+
+    public LocaleData(UUID uuid) {
+        this.uuid = uuid;
+        this.locale = ImanityCommon.LOCALE_HANDLER.getDefaultLocale();
+    }
 
 }

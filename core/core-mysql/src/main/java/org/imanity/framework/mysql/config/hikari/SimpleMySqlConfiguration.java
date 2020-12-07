@@ -1,11 +1,8 @@
 package org.imanity.framework.mysql.config.hikari;
 
 import com.zaxxer.hikari.HikariConfig;
-import org.imanity.framework.mysql.config.AbstractSqlConfiguration;
-import org.imanity.framework.mysql.connection.hikari.MariaConnectionFactory;
+import org.imanity.framework.RepositoryType;
 import org.imanity.framework.mysql.connection.hikari.MySqlConnectionFactory;
-
-import java.util.concurrent.TimeUnit;
 
 public abstract class SimpleMySqlConfiguration extends SimpleHikariConfiguration<MySqlConnectionFactory> {
 
@@ -32,13 +29,8 @@ public abstract class SimpleMySqlConfiguration extends SimpleHikariConfiguration
         config.addDataSourceProperty("maintainTimeStats", "false");
     }
 
-    public abstract String address();
-
-    public abstract String port();
-
-    public abstract String databaseName();
-
-    public abstract String username();
-
-    public abstract String password();
+    @Override
+    public RepositoryType type() {
+        return RepositoryType.MYSQL;
+    }
 }

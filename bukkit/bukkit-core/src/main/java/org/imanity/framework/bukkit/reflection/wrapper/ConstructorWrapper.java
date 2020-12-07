@@ -59,13 +59,14 @@ public class ConstructorWrapper<R> extends WrapperAbstract {
 
 	public R resolve(Object[]... args) {
 
-		R r = this.resolveSilent(args);
-
-		if (r == null) {
-			throw new IllegalStateException("No Args Constructor found!");
+		for (Object[] objects : args) {
+			R r = this.newInstance(objects);
+			if (r != null) {
+				return r;
+			}
 		}
 
-		return r;
+		return null;
 
 	}
 

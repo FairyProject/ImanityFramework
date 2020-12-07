@@ -1,12 +1,15 @@
 package org.imanity.framework.mysql.connection.file;
 
 import lombok.Getter;
-import org.imanity.framework.mysql.connection.ConnectionFactory;
+import org.imanity.framework.mysql.connection.AbstractConnectionFactory;
+import org.imanity.framework.mysql.pojo.statement.MySqlStatementBuilder;
+import org.imanity.framework.mysql.pojo.statement.SqlStatementBuilder;
+import org.imanity.framework.mysql.pojo.statement.StandardSqlStatementBuilder;
 
 import java.nio.file.Path;
 import java.text.DecimalFormat;
 
-abstract class FileConnectionFactory implements ConnectionFactory {
+abstract class FileConnectionFactory extends AbstractConnectionFactory {
 
     protected static final DecimalFormat DF = new DecimalFormat("#.##");
 
@@ -15,6 +18,11 @@ abstract class FileConnectionFactory implements ConnectionFactory {
 
     FileConnectionFactory(Path path) {
         this.path = path;
+    }
+
+    @Override
+    public SqlStatementBuilder builder() {
+        return new MySqlStatementBuilder();
     }
 
     @Override

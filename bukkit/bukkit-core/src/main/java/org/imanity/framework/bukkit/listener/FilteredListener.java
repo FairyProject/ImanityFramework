@@ -94,7 +94,7 @@ public class FilteredListener<T extends Plugin> implements Listener {
             }
             final Class<? extends Event> eventClass = checkClass.asSubclass(Event.class);
             method.setAccessible(true);
-            Set<RegisteredListener> eventSet = ret.computeIfAbsent(eventClass, k -> new HashSet<RegisteredListener>());
+            Set<RegisteredListener> eventSet = ret.computeIfAbsent(eventClass, k -> new HashSet<>());
 
             boolean ignoredFilters = method.getAnnotation(IgnoredFilters.class) != null;
 

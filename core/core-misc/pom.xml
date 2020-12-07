@@ -147,6 +147,13 @@
             <scope>provided</scope>
         </dependency>
 
+        <dependency>
+            <groupId>me.lucko</groupId>
+            <artifactId>jar-relocator</artifactId>
+            <version>1.4</version>
+            <scope>compile</scope>
+        </dependency>
+
         <!-- JACKSON -->
         <dependency>
             <groupId>com.fasterxml.jackson.core</groupId>
