@@ -170,6 +170,10 @@ public class ServiceData {
     }
 
     public boolean shouldInitialize() throws InvocationTargetException, IllegalAccessException  {
+        if (this.annotatedMethods == null) {
+            return true;
+        }
+
         if (this.annotatedMethods.containsKey(ShouldInitialize.class)) {
             for (Method method : this.annotatedMethods.get(ShouldInitialize.class)) {
                 boolean result;
