@@ -51,12 +51,6 @@ public class CacheBlockSetListener implements Listener {
     }
 
     @EventHandler
-    public void onWorldLoad(WorldInitEvent event) {
-        CacheBlockSetHandler blockSetHandler = new CacheBlockSetHandler(event.getWorld());
-        Metadata.provideForWorld(event.getWorld()).put(CacheBlockSetHandler.METADATA, blockSetHandler);
-    }
-
-    @EventHandler
     public void onWorldUnload(WorldUnloadEvent event) {
         Metadata.provideForWorld(event.getWorld()).remove(CacheBlockSetHandler.METADATA);
     }

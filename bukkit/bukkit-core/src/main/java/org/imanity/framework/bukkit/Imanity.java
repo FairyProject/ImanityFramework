@@ -149,7 +149,7 @@ public final class Imanity {
     }
 
     public static CacheBlockSetHandler getBlockSetHandler(World world) {
-        return Metadata.provideForWorld(world).getOrNull(CacheBlockSetHandler.METADATA);
+        return Metadata.provideForWorld(world).getOrPut(CacheBlockSetHandler.METADATA, () -> new CacheBlockSetHandler(world));
     }
 
     public static HologramHandler getHologramHandler(World world) {
