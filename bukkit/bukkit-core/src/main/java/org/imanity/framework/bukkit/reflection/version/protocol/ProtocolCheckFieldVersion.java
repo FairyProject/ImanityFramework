@@ -25,11 +25,19 @@
 package org.imanity.framework.bukkit.reflection.version.protocol;
 
 import org.bukkit.entity.Player;
+import org.imanity.framework.bukkit.impl.annotation.ProviderTestImpl;
+import org.imanity.framework.bukkit.impl.test.ImplementationTest;
 import org.imanity.framework.bukkit.reflection.MinecraftReflection;
+import org.imanity.framework.bukkit.reflection.annotation.ProtocolImpl;
 import org.imanity.framework.bukkit.reflection.resolver.FieldResolver;
+import org.imanity.framework.bukkit.reflection.resolver.ResolverQuery;
 import org.imanity.framework.bukkit.reflection.resolver.minecraft.NMSClassResolver;
 import org.imanity.framework.bukkit.reflection.wrapper.FieldWrapper;
 
+import java.lang.reflect.Field;
+
+@ProtocolImpl
+@ProviderTestImpl(ProtocolCheckFieldVersion.TestImpl.class)
 public class ProtocolCheckFieldVersion implements ProtocolCheck {
 
     private final FieldWrapper PLAYER_CONNECTION_FIELD;
@@ -65,5 +73,31 @@ public class ProtocolCheckFieldVersion implements ProtocolCheck {
         Object networkManager = NETWORK_MANAGER_FIELD.get(playerConnection);
 
         return (int) VERSION_FIELD.get(networkManager);
+    }
+
+    public static class TestImpl implements ImplementationTest {
+
+        @Override
+        public boolean test() {
+            Class<?> networkManager;
+
+
+            try {
+                NMSClassResolver classResolver = new NMSClassResolver();
+                networkManager = classResolver.resolve("NetworkManager");
+            } catch (Throwable throwable) {
+                throw new IllegalArgumentException(throwable);
+            }
+
+            try {
+                FieldResolver resolver = new FieldResolver(networkManager);
+                Field field = resolver.resolve(new ResolverQuery("version", Integer.class, int.class));
+
+                return field != null;
+            } catch (Throwable throwable) {
+            }
+
+            return false;
+        }
     }
 }

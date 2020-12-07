@@ -64,7 +64,8 @@ public class ProtocolCheckMethodVersion implements ProtocolCheck {
             NETWORK_MANAGER_FIELD = fieldResolver.resolveByFirstTypeWrapper(networkManager);
 
             MethodResolver resolver = new MethodResolver(networkManager);
-            GET_VERSION_METHOD = resolver.resolveWrapper(new ResolverQuery("getVersion", new Class[0]));
+            GET_VERSION_METHOD = resolver.resolveWrapper(new ResolverQuery(int.class, "getVersion")
+                    .withModifierOptions(ResolverQuery.ModifierOptions.builder().onlyDynamic(true).build()));
         } catch (ReflectiveOperationException e) {
             throw new RuntimeException(e);
         }
@@ -97,17 +98,10 @@ public class ProtocolCheckMethodVersion implements ProtocolCheck {
 
                 MethodResolver resolver = new MethodResolver(networkManager);
 
-                Method method = resolver.resolve(new ResolverQuery("getVersion", new Class[0]));
+                Method method = resolver.resolve(new ResolverQuery(int.class, "getVersion")
+                        .withModifierOptions(ResolverQuery.ModifierOptions.builder().onlyDynamic(true).build()));
 
                 return method != null && (method.getReturnType() == int.class || method.getReturnType() == Integer.class);
-            } catch (Throwable throwable) {
-            }
-
-            try {
-                FieldResolver resolver = new FieldResolver(networkManager);
-                Field field = resolver.resolve(new ResolverQuery("version", Integer.class, int.class));
-
-                return field != null;
             } catch (Throwable throwable) {
             }
 

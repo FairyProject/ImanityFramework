@@ -100,11 +100,6 @@ public class HologramListener implements Listener {
     }
 
     @EventHandler
-    public void onWorldLoad(WorldLoadEvent event) {
-        Metadata.provideForWorld(event.getWorld()).put(HologramHandler.WORLD_METADATA, new HologramHandler());
-    }
-
-    @EventHandler
     public void onWorldUnload(WorldUnloadEvent event) {
         Metadata.provideForWorld(event.getWorld()).remove(HologramHandler.WORLD_METADATA);
     }

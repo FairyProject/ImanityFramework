@@ -153,9 +153,7 @@ public final class Imanity {
     }
 
     public static HologramHandler getHologramHandler(World world) {
-        return Metadata.provideForWorld(world)
-                .get(HologramHandler.WORLD_METADATA)
-                .orElseThrow(() -> new RuntimeException("Something wrong while getting world hologram handler"));
+        return Metadata.provideForWorld(world).getOrPut(HologramHandler.WORLD_METADATA, HologramHandler::new);
     }
 
     public static AbstractMovementImplementation registerMovementListener(MovementListener movementListener) {
