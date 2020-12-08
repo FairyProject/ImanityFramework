@@ -63,7 +63,6 @@ public class SqlService {
             }
 
             AbstractConnectionFactory factory = configuration.factory();
-            factory.init();
 
             factory.connect();
             this.connectionFactories.put(configuration.getClass(), factory);

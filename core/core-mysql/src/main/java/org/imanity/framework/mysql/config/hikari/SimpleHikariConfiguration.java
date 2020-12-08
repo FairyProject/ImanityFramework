@@ -11,6 +11,7 @@ public abstract class SimpleHikariConfiguration<T extends HikariConnectionFactor
     @SneakyThrows
     public T factory() {
         T factory = this.factoryClass().newInstance();
+        factory.init();
         this.setupFactory(factory);
         return factory;
     }
