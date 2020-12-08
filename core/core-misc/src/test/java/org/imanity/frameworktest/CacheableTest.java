@@ -75,7 +75,6 @@ public class CacheableTest {
 
         MatcherAssert.assertThat(dummyObjectA, CoreMatchers.equalTo(dummyObjectB));
 
-        System.out.println("evict");
         imanity.evict(id);
 
         MatcherAssert.assertThat(dummyObjectA, CoreMatchers.not(imanity.test(new ImanityDummy(id))));
@@ -104,7 +103,6 @@ public class CacheableTest {
 
         @Cacheable(key = "'test-' + args[0].getId()")
         public long test(ImanityDummy dummy) {
-            System.out.println("dummy: " + dummy.id);
             return RANDOM.nextLong();
         }
 
@@ -191,7 +189,6 @@ public class CacheableTest {
 
         @Cacheable(lifetime = 1, unit = TimeUnit.SECONDS)
         public CacheableTest.Foo get() {
-            System.out.println(" ");
             return new CacheableTest.Foo(CacheableTest.RANDOM.nextLong());
         }
 

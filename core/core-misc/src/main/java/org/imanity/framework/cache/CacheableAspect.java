@@ -95,9 +95,7 @@ public class CacheableAspect {
         }
 
         try {
-            String key = this.scriptParser.getDefinedCacheKey(value, point.getTarget(), point.getArgs(), null, false);
-            System.out.println(key);
-            return key;
+            return this.scriptParser.getDefinedCacheKey(value, point.getTarget(), point.getArgs(), null, false);
         } catch (Exception ex) {
             LOGGER.error(ex.getMessage(), ex);
         }
