@@ -140,8 +140,8 @@ public class WrappedPacketOutLogin extends WrappedPacket implements SendableWrap
     public Object asNMSPacket() {
         return PACKET_CONSTRUCTOR.newInstance(
                 this.playerId,
-                this.hardcore,
                 MinecraftReflection.getGameModeConverter().getGeneric(this.gameMode),
+                this.hardcore,
                 this.dimension,
                 Enum.valueOf(ENUM_DIFFICULTY_CLASS, this.difficulty.name()),
                 this.maxPlayers,
