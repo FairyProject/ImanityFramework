@@ -1,6 +1,7 @@
 package org.imanity.framework.cache;
 
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
+import lombok.SneakyThrows;
 import lombok.ToString;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -17,6 +18,8 @@ import org.imanity.framework.Cacheable;
 import org.imanity.framework.cache.impl.CacheKeyAbstract;
 import org.imanity.framework.cache.impl.CacheKeyMethod;
 import org.imanity.framework.cache.impl.CacheKeyString;
+import org.imanity.framework.cache.script.AbstractScriptParser;
+import org.imanity.framework.cache.script.JavaScriptParser;
 import org.imanity.framework.util.AccessUtil;
 
 import javax.annotation.Nullable;
@@ -46,6 +49,8 @@ public class CacheableAspect {
     public static ScheduledExecutorService CLEANER_SERVICE;
     public static ExecutorService UPDATER_SERVICE;
 
+    private final AbstractScriptParser scriptParser;
+
     public CacheableAspect() {
         CLEANER_SERVICE = Executors.newSingleThreadScheduledExecutor(new ThreadFactoryBuilder()
                 .setNameFormat("cacheable-clean")
@@ -60,8 +65,9 @@ public class CacheableAspect {
 
         this.defaultCacheManager = new CacheManager(this);
         this.cacheManagers = new ConcurrentHashMap<>(0);
+        this.scriptParser = new JavaScriptParser();
 
-        this.CLEANER_SERVICE.scheduleAtFixedRate(() -> {
+        CLEANER_SERVICE.scheduleAtFixedRate(() -> {
             this.defaultCacheManager.clean();
 
             for (CacheManager cacheManager : this.cacheManagers.values()) {
@@ -69,119 +75,34 @@ public class CacheableAspect {
             }
         }, 1L, 1L, TimeUnit.SECONDS);
 
-        this.UPDATER_SERVICE.submit(() -> {
-            while (true) {
-                try {
-                    this.defaultCacheManager.update();
-
-                    for (CacheManager cacheManager : this.cacheManagers.values()) {
-                        cacheManager.update();
-                    }
-                } catch (final Throwable ex) {
-                    LOGGER.error(ex);
-                }
-            }
-        });
-
     }
 
     // TODO: Performance check, is this key reader efficient?
 
-    private static final Pattern KEY_REGEX = Pattern.compile("\\$\\((?<a>[\\w.-]*)\\)");
-    private static final Pattern ARGUMENT_REGEX = Pattern.compile("arg(?<arg>[0-9])");
-
-    private String readAnnotationKey(JoinPoint point, String value, boolean ignoreNull) {
+    private String readAnnotationKey(JoinPoint point, String value, boolean preventNull) {
         if (value == null || value.isEmpty()) {
             return "";
         }
 
-        Matcher matcher = KEY_REGEX.matcher(value);
-        Method method = ((MethodSignature) point.getSignature()).getMethod();
-        String result = value;
+        Object[] args = point.getArgs();
 
-        while (matcher.find()) {
-            String group = matcher.group("a");
-            String resultField = this.scanArgumentPattern(point, method, group);
-
-            if (resultField != null) {
-                result = result.replace("$(" + group + ")", resultField);
-            } else if (ignoreNull) {
-                result = result.replace("$(" + group + ")", "null");
-            } else {
-                throw new NullPointerException("The field/parameter " + group + " results null.");
+        if (preventNull) {
+            for (int i = 0; i < args.length; i++) {
+                if (args[i] == null) {
+                    throw new IllegalArgumentException("The argument with index " + i + " in method " + point.getSignature().getName() + " is null!");
+                }
             }
         }
 
-        return result;
-    }
-
-    @Nullable
-    private String scanArgumentPattern(JoinPoint point, Method method, String fieldString) {
-        String[] fields = fieldString.split("\\.");
-        Object[] arguments = point.getArgs();
-
-        Object fieldObject = null;
-        for (int fieldIndex = 0; fieldIndex < fields.length; fieldIndex++) {
-            String fieldName = fields[fieldIndex];
-
-            if (fieldIndex == 0) {
-                Matcher argMatcher = ARGUMENT_REGEX.matcher(fieldName);
-                if (argMatcher.find()) {
-
-                    int argumentId = Integer.parseInt(argMatcher.group("arg"));
-                    if (arguments.length <= argumentId) {
-
-                        throw new IllegalArgumentException("The argument with id " + argumentId +
-                                " does not exists in method " + point.getSignature().getName() +
-                                " (max argument is " + (arguments.length - 1) + ")");
-                    }
-
-                    fieldObject = arguments[argumentId];
-                } else {
-                    for (int i = 0; i < method.getParameterCount(); i++) {
-                        if (method.getParameters()[i].getName().equals(fieldName)) {
-                            fieldObject = arguments[i];
-                            break;
-                        }
-                    }
-                }
-                continue;
-            }
-
-            if (fieldObject == null) {
-                StringBuilder stringBuilder = new StringBuilder();
-                for (int i = 0; i < fieldIndex; i++) {
-                    stringBuilder.append(fields[i]);
-
-                    if (i + 1 < fieldIndex) {
-                        stringBuilder.append(".");
-                    }
-                }
-
-                throw new NullPointerException("The field " + stringBuilder.toString() + " is null! cannot go through " + stringBuilder.toString() + "." + fields[fieldIndex]);
-            }
-
-            try {
-                Field field = fieldObject.getClass().getDeclaredField(fieldName);
-
-                AccessUtil.setAccessible(field);
-                fieldObject = field.get(fieldObject);
-            } catch (ReflectiveOperationException ex) {
-                StringBuilder stringBuilder = new StringBuilder();
-                for (int i = 0; i < fieldIndex; i++) {
-                    stringBuilder.append(fields[i]);
-
-                    if (i + 1 < fieldIndex) {
-                        stringBuilder.append(".");
-                    }
-                }
-
-                throw new IllegalArgumentException("The field " + stringBuilder.toString() + "." + fields[fieldIndex] + " doesn't not exists!");
-            }
-
+        try {
+            String key = this.scriptParser.getDefinedCacheKey(value, point.getTarget(), point.getArgs(), null, false);
+            System.out.println(key);
+            return key;
+        } catch (Exception ex) {
+            LOGGER.error(ex.getMessage(), ex);
         }
 
-        return fieldObject != null ? fieldObject.toString() : null;
+        return "";
     }
 
     public CacheManager getCacheManager(Class<?> type) {
@@ -203,14 +124,39 @@ public class CacheableAspect {
         return new CacheKeyMethod(point);
     }
 
+    @SneakyThrows
+    public boolean checkCondition(String condition, Object target, Object[] arguments, Object retVal, boolean hasRetVal) {
+        boolean result = true;
+        if (arguments != null && arguments.length > 0 && condition != null && condition.length() > 0) {
+            result = this.scriptParser.getElValue(condition, target, arguments, retVal, true, Boolean.class);
+        }
+        return result;
+    }
+
     @Around("execution(* *(..)) && @annotation(org.imanity.framework.Cacheable)")
     public Object cache(final ProceedingJoinPoint point) throws Throwable {
         final Method method = ((MethodSignature) point.getSignature()).getMethod();
 
         final Cacheable annotation = method.getAnnotation(Cacheable.class);
-        CacheKeyAbstract key = this.toKey(point, readAnnotationKey(point, annotation.key(), annotation.ignoreKeyNull()));
+        CacheKeyAbstract key = this.toKey(point, readAnnotationKey(point, annotation.key(), annotation.preventArgumentNull()));
+        String condition = annotation.condition();
 
-        return this.getCacheManager(method.getDeclaringClass()).cache(key, point, annotation.unless(), annotation.forever() ? -1 : annotation.lifetime(), annotation.unit(), annotation.asyncUpdate(), false).through();
+        CacheManager manager = this.getCacheManager(method.getDeclaringClass());
+        CacheWrapper<?> wrapper = manager.find(key);
+
+        if (wrapper != null) {
+            return wrapper.get();
+        }
+
+        Object result = point.proceed();
+
+        if (condition.length() != 0 && !this.checkCondition(condition, point.getTarget(), point.getArgs(), result, true)) {
+            return result;
+        }
+
+        wrapper = new CacheWrapper<>(result, annotation.forever() ? 0L : annotation.unit().toMillis(annotation.lifetime()));
+        manager.cache(key, wrapper);
+        return result;
     }
 
     @Around("execution(* *(..)) && @annotation(org.imanity.framework.CachePut)")
@@ -218,9 +164,20 @@ public class CacheableAspect {
         final Method method = ((MethodSignature) point.getSignature()).getMethod();
 
         final CachePut annotation = method.getAnnotation(CachePut.class);
-        CacheKeyAbstract key = this.toKey(point, readAnnotationKey(point, annotation.value(), annotation.ignoreKeyNull()));
+        CacheKeyAbstract key = this.toKey(point, readAnnotationKey(point, annotation.value(), annotation.preventArgumentNull()));
+        String condition = annotation.condition();
 
-        return this.getCacheManager(method.getDeclaringClass()).cache(key, point, annotation.unless(), annotation.forever() ? -1 : annotation.lifetime(), annotation.unit(), annotation.asyncUpdate(), false).through();
+        CacheManager manager = this.getCacheManager(method.getDeclaringClass());
+
+        Object result = point.proceed();
+
+        if (condition.length() != 0 && !this.checkCondition(condition, point.getTarget(), point.getArgs(), result, true)) {
+            return result;
+        }
+
+        CacheWrapper<?> wrapper = new CacheWrapper<>(result, annotation.forever() ? 0L : annotation.unit().toMillis(annotation.lifetime()));
+        manager.cache(key, wrapper);
+        return result;
     }
 
     @Before(
@@ -229,8 +186,16 @@ public class CacheableAspect {
     public void evict(JoinPoint point) {
         Method method = ((MethodSignature) point.getSignature()).getMethod();
         CacheEvict annotation = method.getAnnotation(CacheEvict.class);
-        String keyString = this.readAnnotationKey(point, annotation.value(), annotation.ignoreKeyNull());
+        String keyString = this.readAnnotationKey(point, annotation.value(), annotation.preventArgumentNull());
+        String condition = annotation.condition();
 
+        if (condition.length() > 0) {
+            boolean conditionResult = this.checkCondition(condition, point.getTarget(), point.getArgs(), null, false);
+
+            if (!conditionResult) {
+                return;
+            }
+        }
         this.getCacheManager(method.getDeclaringClass()).evict(point, keyString);
     }
 
@@ -260,89 +225,4 @@ public class CacheableAspect {
         this.getCacheManager(method.getDeclaringClass()).flush(point);
     }
 
-    protected boolean isCreateTunnel(final CacheableAspect.Tunnel tunnel) {
-        return tunnel == null || (tunnel.expired() && !tunnel.asyncUpdate());
-    }
-
-    @ToString
-    protected static final class Tunnel {
-
-        private final ProceedingJoinPoint point;
-        private final CacheKeyAbstract key;
-        private final boolean async;
-        private final long lifetime;
-        private final TimeUnit timeUnit;
-
-        private transient boolean executed;
-        private transient long expiredTime;
-        private transient boolean hasResult;
-
-        private transient SoftReference<Object> cached;
-
-        Tunnel(final ProceedingJoinPoint point, final CacheKeyAbstract key, final boolean async, long lifetime, TimeUnit timeUnit) {
-            this.point = point;
-            this.key = key;
-            this.async = async;
-            this.lifetime = lifetime;
-            this.timeUnit = timeUnit;
-
-            if (this.lifetime != 0L) {
-                final long millis = timeUnit.toMillis(this.lifetime);
-                this.expiredTime = System.currentTimeMillis() + millis;
-            }
-        }
-
-        public Tunnel copy() {
-            return new Tunnel(
-                    this.point, this.key, this.async, this.lifetime, this.timeUnit
-            );
-        }
-
-        public synchronized Object through() throws Throwable {
-            if (!this.executed) {
-
-                final long start = System.currentTimeMillis();
-
-                final Object result = this.point.proceed();
-
-                this.hasResult = result != null;
-                this.cached = new SoftReference<>(result);
-
-                if (this.lifetime == -1) {
-                    this.expiredTime = Long.MAX_VALUE;
-
-                } else if (this.lifetime == 0) {
-                    this.expiredTime = 0L;
-
-                } else {
-                    final long millis = this.timeUnit.toMillis(this.lifetime);
-                    this.expiredTime = start + millis;
-
-                }
-                this.executed = true;
-            }
-
-            return this.cached.get();
-        }
-
-        public boolean hasResult() {
-            return this.hasResult;
-        }
-
-        public boolean expired() {
-            final boolean expired = this.expiredTime < System.currentTimeMillis();
-            final boolean collected = this.executed
-                    && this.hasResult
-                    && this.cached.get() == null;
-            return this.executed && (expired || collected);
-        }
-
-        public boolean asyncUpdate() {
-            return this.async;
-        }
-
-        SoftReference<Object> cached() {
-            return this.cached;
-        }
-    }
 }

@@ -11,6 +11,12 @@ public @interface CacheEvict {
 
     String value();
 
-    boolean ignoreKeyNull() default false;
+    String condition() default "";
+
+    /**
+     * Prevent to store value if one of argument were null
+     *
+     */
+    boolean preventArgumentNull() default true;
 
 }

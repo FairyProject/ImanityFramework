@@ -31,26 +31,6 @@ public class CacheableTest {
     }
 
     @Test
-    public void asyncUpdateCacheSimpleCall() throws Exception {
-        final CacheableTest.Foo foo = new CacheableTest.Foo(1L);
-        final String first = foo.asyncGet().toString();
-        MatcherAssert.assertThat(
-                first,
-                CoreMatchers.equalTo(foo.asyncGet().toString())
-        );
-        TimeUnit.SECONDS.sleep(2);
-        MatcherAssert.assertThat(
-                first,
-                CoreMatchers.equalTo(foo.asyncGet().toString())
-        );
-        TimeUnit.SECONDS.sleep(2);
-        MatcherAssert.assertThat(
-                first,
-                CoreMatchers.not(CoreMatchers.equalTo(foo.asyncGet().toString()))
-        );
-    }
-
-    @Test
     public void cachesSimpleStaticCall() throws Exception {
         final String first = CacheableTest.Foo.staticGet();
         MatcherAssert.assertThat(
@@ -62,56 +42,6 @@ public class CacheableTest {
                 CacheableTest.Foo.staticGet(),
                 CoreMatchers.not(CoreMatchers.equalTo(first))
         );
-    }
-
-    @Test
-    public void cleansCacheWhenExpired() throws Exception {
-        final CacheableTest.Foo foo = new CacheableTest.Foo(1L);
-        final String first = foo.get().toString();
-        TimeUnit.SECONDS.sleep(5);
-        MatcherAssert.assertThat(
-                foo.get().toString(),
-                CoreMatchers.not(CoreMatchers.equalTo(first))
-        );
-    }
-
-    @Test
-    public void cachesJustOnceInParallelThreads() throws Exception {
-        final CacheableTest.Foo foo = new CacheableTest.Foo(1L);
-        final Thread never = new Thread(
-                new Runnable() {
-                    @Override
-                    public void run() {
-                        foo.never();
-                    }
-                }
-        );
-        never.start();
-        final Set<String> values = new ConcurrentSkipListSet<String>();
-        final int threads = Runtime.getRuntime().availableProcessors() << 1;
-        final CountDownLatch start = new CountDownLatch(1);
-        final CountDownLatch done = new CountDownLatch(threads);
-        final Callable<Boolean> task = new Callable<Boolean>() {
-            @Override
-            public Boolean call() throws Exception {
-                start.await(1L, TimeUnit.SECONDS);
-                values.add(foo.get().toString());
-                done.countDown();
-                return true;
-            }
-        };
-        final ExecutorService executor = Executors.newFixedThreadPool(threads);
-        try {
-            for (int pos = 0; pos < threads; ++pos) {
-                executor.submit(task);
-            }
-            start.countDown();
-            done.await(30, TimeUnit.SECONDS);
-            MatcherAssert.assertThat(values.size(), CoreMatchers.equalTo(1));
-            never.interrupt();
-        } finally {
-            executor.shutdown();
-        }
     }
 
     @Test
@@ -145,6 +75,7 @@ public class CacheableTest {
 
         MatcherAssert.assertThat(dummyObjectA, CoreMatchers.equalTo(dummyObjectB));
 
+        System.out.println("evict");
         imanity.evict(id);
 
         MatcherAssert.assertThat(dummyObjectA, CoreMatchers.not(imanity.test(new ImanityDummy(id))));
@@ -157,68 +88,53 @@ public class CacheableTest {
     }
 
     @Test(expected = IllegalArgumentException.class)
-    public void testInvalidKey() throws Exception {
-        Imanity imanity = new Imanity();
-
-        imanity.test();
-    }
-
-    @Test(expected = NullPointerException.class)
     public void testNullParameter() throws Exception {
         Imanity imanity = new Imanity();
 
         imanity.test((String) null);
     }
 
-    @Test(expected = IllegalArgumentException.class)
-    public void testNotExistsField() throws Exception {
-        Imanity imanity = new Imanity();
-
-        imanity.xd(new ImanityDummy(2));
-    }
-
     @EnableOwnCacheManager
     private static final class Imanity {
 
-        @Cacheable(key = "test-$(arg0)")
+        @Cacheable(key = "'test-' + args[0]")
         public long test(int id) {
             return RANDOM.nextLong();
         }
 
-        @Cacheable(key = "test-$(arg0.id)")
+        @Cacheable(key = "'test-' + args[0].getId()")
         public long test(ImanityDummy dummy) {
             System.out.println("dummy: " + dummy.id);
             return RANDOM.nextLong();
         }
 
-        @Cacheable(key = "test-$(arg0)")
+        @Cacheable(key = "'test-' + args[0]")
         public String test() {
             return "hi";
         }
 
-        @Cacheable(key = "test-$(arg0)")
+        @Cacheable(key = "'test-' + args[0]")
         public String test(String text) {
             return "lol";
         }
 
-        @CacheEvict(value = "test-$(arg0)")
+        @CacheEvict(value = "'test-' + args[0]")
         public void evict(int id) {
 
         }
 
-        @CachePut(value = "test-${arg0}")
+        @CachePut(value = "'test-' + args[0]")
         public long put(int id, long value) {
             return value;
         }
 
-        @CacheEvict("test-$(arg0.xd)")
-        public void xd(ImanityDummy dummy) {
-
-        }
-
     }
 
-    private static final class ImanityDummy {
+    public static final class ImanityDummy {
+
+        public int getId() {
+            return id;
+        }
 
         private int id;
 
@@ -275,11 +191,7 @@ public class CacheableTest {
 
         @Cacheable(lifetime = 1, unit = TimeUnit.SECONDS)
         public CacheableTest.Foo get() {
-            return new CacheableTest.Foo(CacheableTest.RANDOM.nextLong());
-        }
-
-        @Cacheable(lifetime = 1, unit = TimeUnit.SECONDS, asyncUpdate = true)
-        public CacheableTest.Foo asyncGet() {
+            System.out.println(" ");
             return new CacheableTest.Foo(CacheableTest.RANDOM.nextLong());
         }
 
