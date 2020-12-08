@@ -117,7 +117,7 @@ public class WrappedPacketOutLogin extends WrappedPacket implements SendableWrap
 
         this.hardcore = readBoolean(0);
 
-        Enum gameModeEnum = MinecraftReflection.getGameModeConverter().getSpecific(readObject(0, ENUM_GAMEMODE_CLASS));
+        this.gameMode = MinecraftReflection.getGameModeConverter().getSpecific(readObject(0, ENUM_GAMEMODE_CLASS));
 
         this.dimension = readInt(1);
 
