@@ -33,4 +33,6 @@ The framework to let you build plugin/backend/discord-bot or even HTTP server ea
 - [DeathSwap](https://github.com/LeeGodSRC/deathswap) (outdated)
 
 ## License
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+
 The Imanity Framework is under MIT License
