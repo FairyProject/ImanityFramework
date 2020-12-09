@@ -24,14 +24,9 @@
 
 package org.imanity.framework.bungee.impl;
 
-import com.google.common.collect.ImmutableMap;
-import lombok.SneakyThrows;
 import net.md_5.bungee.api.ProxyServer;
 import net.md_5.bungee.api.plugin.Plugin;
 import net.md_5.bungee.api.plugin.PluginDescription;
-import net.md_5.bungee.config.Configuration;
-import net.md_5.bungee.config.ConfigurationProvider;
-import net.md_5.bungee.config.YamlConfiguration;
 import org.imanity.framework.ImanityPlatform;
 import org.imanity.framework.ImanityCommon;
 import org.imanity.framework.bungee.Imanity;
@@ -121,31 +116,6 @@ public class BungeeImanityPlatform implements ImanityPlatform {
     @Override
     public org.apache.logging.log4j.Logger getLogger() {
         return Imanity.LOGGER;
-    }
-
-    @Override
-    @SneakyThrows
-    public Map<String, Object> loadYaml(File file) {
-        Configuration configuration = ConfigurationProvider.getProvider(YamlConfiguration.class).load(file);
-        ImmutableMap.Builder<String, Object> builder = ImmutableMap.builder();
-
-        for (String key : configuration.getKeys()) {
-            builder.put(key, configuration.get(key));
-        }
-
-        return builder.build();
-    }
-
-    @Override
-    public Map<String, Object> loadYaml(InputStream inputStream) {
-        Configuration configuration = ConfigurationProvider.getProvider(YamlConfiguration.class).load(inputStream);
-        ImmutableMap.Builder<String, Object> builder = ImmutableMap.builder();
-
-        for (String key : configuration.getKeys()) {
-            builder.put(key, configuration.get(key));
-        }
-
-        return builder.build();
     }
 
     @Override

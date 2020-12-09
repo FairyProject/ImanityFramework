@@ -6,6 +6,7 @@ import org.imanity.framework.mysql.connection.AbstractConnectionFactory;
 import org.imanity.framework.mysql.pojo.info.PojoInfo;
 import org.imanity.framework.mysql.pojo.statement.SqlStatementBuilder;
 import org.imanity.framework.mysql.util.SQLUtil;
+import org.intellij.lang.annotations.Language;
 
 import java.lang.reflect.InvocationTargetException;
 import java.sql.*;
@@ -102,7 +103,7 @@ public class Query {
 	 * @param sql  The SQL string to use, may include ? parameters.
 	 * @param args The parameter values to use in the query.
 	 */
-	public Query sql(String sql, Object... args) {
+	public Query sql(@Language("SQL") String sql, Object... args) {
 		this.sql = sql;
 		this.args = args;
 		return this;
@@ -115,7 +116,7 @@ public class Query {
 	 * @param sql  The SQL string to use, may include ? parameters.
 	 * @param args The parameter values to use in the query.
 	 */
-	public Query sql(String sql, List<?> args) {
+	public Query sql(@Language("SQL") String sql, List<?> args) {
 		this.sql = sql;
 		this.args = args.toArray();
 		return this;

@@ -30,9 +30,7 @@ import org.imanity.framework.util.entry.Entry;
 
 import javax.annotation.Nullable;
 import java.io.File;
-import java.io.InputStream;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 
 public interface ImanityPlatform {
@@ -44,10 +42,6 @@ public interface ImanityPlatform {
     File getDataFolder();
 
     Logger getLogger();
-
-    Map<String, Object> loadYaml(File file);
-
-    Map<String, Object> loadYaml(InputStream inputStream);
 
     List<Entry<String, Object>> getPluginInstances();
 

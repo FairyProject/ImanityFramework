@@ -33,8 +33,11 @@ import java.lang.annotation.Annotation;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 
 import lombok.SneakyThrows;
+
+import javax.annotation.Nullable;
 
 @Getter
 @Setter
@@ -56,6 +59,7 @@ public class ServiceData {
 
     private ActivationStage stage;
 
+    private Map<String, String> tags;
     private Map<Class<? extends Annotation>, String> disallowAnnotations;
     private Map<Class<? extends Annotation>, Collection<Method>> annotatedMethods;
 
@@ -74,6 +78,7 @@ public class ServiceData {
         this.dependencies = Sets.newHashSet(dependencies);
         this.callAnnotations = callAnnotations;
         this.stage = ActivationStage.NOT_LOADED;
+        this.tags = new ConcurrentHashMap<>(0);
 
         if (callAnnotations) {
             this.loadAnnotations();
@@ -167,6 +172,19 @@ public class ServiceData {
 
     public boolean isDestroyed() {
         return this.stage == ActivationStage.PRE_DESTROY_CALLED || this.stage == ActivationStage.POST_DESTROY_CALLED;
+    }
+
+    @Nullable
+    public String getTag(String key) {
+        return this.tags.getOrDefault(key, null);
+    }
+
+    public boolean hasTag(String key) {
+        return this.tags.containsKey(key);
+    }
+
+    public void addTag(String key, String value) {
+        this.tags.put(key, value);
     }
 
     public boolean shouldInitialize() throws InvocationTargetException, IllegalAccessException  {

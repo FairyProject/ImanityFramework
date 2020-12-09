@@ -24,8 +24,6 @@
 
 package org.imanity.framework.util;
 
-import lombok.RequiredArgsConstructor;
-
 import java.util.concurrent.atomic.AtomicInteger;
 
 public class CountdownCallback {

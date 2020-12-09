@@ -2,7 +2,6 @@ package org.imanity.framework.cache;
 
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import lombok.SneakyThrows;
-import lombok.ToString;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.aspectj.lang.JoinPoint;
@@ -20,16 +19,11 @@ import org.imanity.framework.cache.impl.CacheKeyMethod;
 import org.imanity.framework.cache.impl.CacheKeyString;
 import org.imanity.framework.cache.script.AbstractScriptParser;
 import org.imanity.framework.cache.script.JavaScriptParser;
-import org.imanity.framework.util.AccessUtil;
+import org.intellij.lang.annotations.Language;
 
-import javax.annotation.Nullable;
-import java.lang.ref.SoftReference;
-import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.Map;
 import java.util.concurrent.*;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 /**
  *
@@ -123,10 +117,10 @@ public class CacheableAspect {
     }
 
     @SneakyThrows
-    public boolean checkCondition(String condition, Object target, Object[] arguments, Object retVal, boolean hasRetVal) {
+    public boolean checkCondition(@Language("JavaScript") String condition, Object target, Object[] arguments, Object retVal, boolean hasRetVal) {
         boolean result = true;
         if (arguments != null && arguments.length > 0 && condition != null && condition.length() > 0) {
-            result = this.scriptParser.getElValue(condition, target, arguments, retVal, true, Boolean.class);
+            result = this.scriptParser.getElValue(condition, target, arguments, retVal, hasRetVal, Boolean.class);
         }
         return result;
     }
@@ -137,7 +131,7 @@ public class CacheableAspect {
 
         final Cacheable annotation = method.getAnnotation(Cacheable.class);
         CacheKeyAbstract key = this.toKey(point, readAnnotationKey(point, annotation.key(), annotation.preventArgumentNull()));
-        String condition = annotation.condition();
+        @Language("JavaScript") String condition = annotation.condition();
 
         CacheManager manager = this.getCacheManager(method.getDeclaringClass());
         CacheWrapper<?> wrapper = manager.find(key);
@@ -163,7 +157,7 @@ public class CacheableAspect {
 
         final CachePut annotation = method.getAnnotation(CachePut.class);
         CacheKeyAbstract key = this.toKey(point, readAnnotationKey(point, annotation.value(), annotation.preventArgumentNull()));
-        String condition = annotation.condition();
+        @Language("JavaScript") String condition = annotation.condition();
 
         CacheManager manager = this.getCacheManager(method.getDeclaringClass());
 
@@ -185,7 +179,7 @@ public class CacheableAspect {
         Method method = ((MethodSignature) point.getSignature()).getMethod();
         CacheEvict annotation = method.getAnnotation(CacheEvict.class);
         String keyString = this.readAnnotationKey(point, annotation.value(), annotation.preventArgumentNull());
-        String condition = annotation.condition();
+        @Language("JavaScript") String condition = annotation.condition();
 
         if (condition.length() > 0) {
             boolean conditionResult = this.checkCondition(condition, point.getTarget(), point.getArgs(), null, false);

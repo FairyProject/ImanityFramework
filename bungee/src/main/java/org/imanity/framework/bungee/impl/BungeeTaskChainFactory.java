@@ -25,10 +25,10 @@
 package org.imanity.framework.bungee.impl;
 
 import org.imanity.framework.bungee.Imanity;
-import org.imanity.framework.task.chain.AsyncQueue;
-import org.imanity.framework.task.chain.GameInterface;
-import org.imanity.framework.task.chain.TaskChainAsyncQueue;
-import org.imanity.framework.task.chain.TaskChainFactory;
+import org.imanity.framework.task.AsyncQueue;
+import org.imanity.framework.task.GameInterface;
+import org.imanity.framework.task.TaskChainAsyncQueue;
+import org.imanity.framework.task.TaskChainFactory;
 
 import java.util.concurrent.TimeUnit;
 

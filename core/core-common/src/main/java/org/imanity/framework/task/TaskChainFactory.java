@@ -22,7 +22,7 @@
  * SOFTWARE.
  */
 
-package org.imanity.framework.task.chain;
+package org.imanity.framework.task;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -35,7 +35,7 @@ public class TaskChainFactory {
     private final GameInterface impl;
     private final AsyncQueue asyncQueue;
     private final Map<String, Queue<SharedTaskChain>> sharedChains = new HashMap<>();
-    volatile private BiConsumer<Exception, org.imanity.framework.task.chain.TaskChainTasks.Task<?, ?>> defaultErrorHandler;
+    volatile private BiConsumer<Exception, TaskChainTasks.Task<?, ?>> defaultErrorHandler;
     volatile boolean shutdown = false;
 
     @SuppressWarnings("WeakerAccess")
@@ -56,8 +56,8 @@ public class TaskChainFactory {
     /**
      * Creates a new chain.
      */
-    public <T> org.imanity.framework.task.chain.TaskChain<T> newChain() {
-        return new org.imanity.framework.task.chain.TaskChain<>(this);
+    public <T> TaskChain<T> newChain() {
+        return new TaskChain<>(this);
     }
 
     /**
@@ -73,7 +73,7 @@ public class TaskChainFactory {
      *
      * @param name Name of the shared chain. Case sensitive
      */
-    public synchronized <T> org.imanity.framework.task.chain.TaskChain<T> newSharedChain(String name) {
+    public synchronized <T> TaskChain<T> newSharedChain(String name) {
         //noinspection unchecked
         return new SharedTaskChain<>(name, this);
     }
@@ -83,7 +83,7 @@ public class TaskChainFactory {
      * if they do not suspply their own error handler.
      * @return The current default error handler
      */
-    public BiConsumer<Exception, org.imanity.framework.task.chain.TaskChainTasks.Task<?, ?>> getDefaultErrorHandler() {
+    public BiConsumer<Exception, TaskChainTasks.Task<?, ?>> getDefaultErrorHandler() {
         return defaultErrorHandler;
     }
 
@@ -92,7 +92,7 @@ public class TaskChainFactory {
      * if they do not supply their own error handler.
      * @param errorHandler The error handler
      */
-    public void setDefaultErrorHandler(BiConsumer<Exception, org.imanity.framework.task.chain.TaskChainTasks.Task<?, ?>> errorHandler) {
+    public void setDefaultErrorHandler(BiConsumer<Exception, TaskChainTasks.Task<?, ?>> errorHandler) {
         this.defaultErrorHandler = errorHandler;
     }
 

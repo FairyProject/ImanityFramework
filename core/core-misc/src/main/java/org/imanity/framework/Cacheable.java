@@ -1,5 +1,7 @@
 package org.imanity.framework;
 
+import org.intellij.lang.annotations.Language;
+
 import java.lang.annotation.*;
 import java.util.concurrent.TimeUnit;
 
@@ -36,7 +38,7 @@ public @interface Cacheable {
      * Don't store if condition is false
      *
      */
-    String condition() default "";
+    @Language("JavaScript") String condition() default "";
 
     /**
      * Prevent to store value if one of argument were null

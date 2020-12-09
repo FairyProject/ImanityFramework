@@ -117,21 +117,6 @@ public class IndependentImanityPlatform implements ImanityPlatform {
     }
 
     @Override
-    public Map<String, Object> loadYaml(File file) {
-        try {
-            return this.bootable.getYaml().load(new FileInputStream(file));
-        } catch (FileNotFoundException e) {
-            this.bootable.handleError(e);
-            return null;
-        }
-    }
-
-    @Override
-    public Map<String, Object> loadYaml(InputStream inputStream) {
-        return this.bootable.getYaml().load(inputStream);
-    }
-
-    @Override
     public List<Entry<String, Object>> getPluginInstances() {
         return Arrays.asList(
                 new Entry<>("bootable", this.bootable),

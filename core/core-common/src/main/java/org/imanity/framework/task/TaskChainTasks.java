@@ -22,7 +22,7 @@
  * SOFTWARE.
  */
 
-package org.imanity.framework.task.chain;
+package org.imanity.framework.task;
 
 import java.util.concurrent.CompletableFuture;
 import java.util.function.Consumer;
@@ -37,10 +37,10 @@ public class TaskChainTasks {
      */
     public interface Task<R, A> {
         /**
-         * @see org.imanity.framework.task.chain.TaskChain#getCurrentChain()
+         * @see TaskChain#getCurrentChain()
          */
-        default org.imanity.framework.task.chain.TaskChain<?> getCurrentChain() {
-            return org.imanity.framework.task.chain.TaskChain.getCurrentChain();
+        default TaskChain<?> getCurrentChain() {
+            return TaskChain.getCurrentChain();
         }
 
         R run(A input);

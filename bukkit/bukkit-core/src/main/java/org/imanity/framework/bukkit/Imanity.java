@@ -69,7 +69,7 @@ import org.imanity.framework.bukkit.visual.VisualBlockHandler;
 import org.imanity.framework.locale.LocaleRepository;
 import org.imanity.framework.locale.player.LocaleData;
 import org.imanity.framework.plugin.PluginClassLoader;
-import org.imanity.framework.task.chain.TaskChainFactory;
+import org.imanity.framework.task.TaskChainFactory;
 import org.imanity.framework.util.FastRandom;
 
 import javax.annotation.Nullable;

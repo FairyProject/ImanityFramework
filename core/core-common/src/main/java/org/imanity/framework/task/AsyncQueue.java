@@ -22,36 +22,22 @@
  * SOFTWARE.
  */
 
-package org.imanity.framework.util.builder;
+package org.imanity.framework.task;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
+import java.util.concurrent.TimeUnit;
 
+@SuppressWarnings("WeakerAccess")
+public interface AsyncQueue {
+    /**
+     * Task to post async of main thread
+     * @param runnable
+     */
+    void postAsync(Runnable runnable);
 
-public class SQLExecutor {
-
-    public static void freeConnection(Connection connection) {
-        try {
-            if (connection != null) {
-                connection.close();
-            }
-        } catch (Exception ignored) {
-        }
-    }
-
-    public static void freeStatement(PreparedStatement preparedStatement, ResultSet resultSet) {
-        try {
-            if (preparedStatement != null) {
-                preparedStatement.close();
-            }
-        } catch (Exception ignored) {
-        }
-        try {
-            if (resultSet != null) {
-                resultSet.close();
-            }
-        } catch (Exception ignored) {
-        }
-    }
+    /**
+     * Call during game shutdown state
+     * @param timeout
+     * @param unit
+     */
+    void shutdown(int timeout, TimeUnit unit);
 }

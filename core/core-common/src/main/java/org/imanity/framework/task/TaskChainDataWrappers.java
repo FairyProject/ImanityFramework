@@ -22,7 +22,7 @@
  * SOFTWARE.
  */
 
-package org.imanity.framework.task.chain;
+package org.imanity.framework.task;
 
 @SuppressWarnings("WeakerAccess")
 public final class TaskChainDataWrappers {

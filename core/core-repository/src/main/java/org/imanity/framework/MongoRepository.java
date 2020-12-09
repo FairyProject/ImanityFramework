@@ -19,7 +19,6 @@ public abstract class MongoRepository<T, ID extends Serializable> implements Rep
 
     @Getter
     protected JacksonMongoCollection<T> collection;
-    protected ObjectMapper objectMapper;
 
     @PostInitialize
     public void init() {

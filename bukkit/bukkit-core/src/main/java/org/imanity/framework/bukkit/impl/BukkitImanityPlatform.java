@@ -25,7 +25,6 @@
 package org.imanity.framework.bukkit.impl;
 
 import org.apache.logging.log4j.Logger;
-import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.imanity.framework.ImanityPlatform;
 import org.imanity.framework.ImanityCommon;
@@ -38,11 +37,9 @@ import org.imanity.framework.util.entry.Entry;
 
 import javax.annotation.Nullable;
 import java.io.File;
-import java.io.InputStream;
 import java.lang.reflect.Method;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -60,18 +57,6 @@ public class BukkitImanityPlatform implements ImanityPlatform {
     @Override
     public PluginClassLoader getClassLoader() {
         return Imanity.CLASS_LOADER;
-    }
-
-    @Override
-    public Map<String, Object> loadYaml(File file) {
-        YamlConfiguration configuration = YamlConfiguration.loadConfiguration(file);
-        return configuration.getValues(true);
-    }
-
-    @Override
-    public Map<String, Object> loadYaml(InputStream inputStream) {
-        YamlConfiguration configuration = YamlConfiguration.loadConfiguration(inputStream);
-        return configuration.getValues(true);
     }
 
     @Override

@@ -33,9 +33,7 @@ import java.net.URL;
 import java.net.URLConnection;
 import java.nio.charset.Charset;
 
-
 public class FileUtils {
-
 
 	public static File getSelfJar() throws URISyntaxException {
 		return new File(FileUtils.class.getProtectionDomain().getCodeSource().getLocation()
@@ -69,7 +67,6 @@ public class FileUtils {
 		}
 	}
 
-	
 	public static File createNewFile(File file) {
 		if (file != null && !file.exists()) {
 			try {
@@ -80,7 +77,6 @@ public class FileUtils {
 		return file;
 	}
 
-	
 	public static void createNewFileAndPath(File file) {
 		if (!file.exists()) {
 			final String filePath = file.getPath();

@@ -34,7 +34,7 @@ import org.imanity.framework.bungee.impl.*;
 import org.imanity.framework.bungee.plugin.ImanityPlugin;
 import org.imanity.framework.ComponentRegistry;
 import org.imanity.framework.plugin.PluginClassLoader;
-import org.imanity.framework.task.chain.TaskChainFactory;
+import org.imanity.framework.task.TaskChainFactory;
 
 import java.util.List;
 import java.util.concurrent.TimeUnit;

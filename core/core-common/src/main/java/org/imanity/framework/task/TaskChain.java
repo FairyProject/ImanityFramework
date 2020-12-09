@@ -32,9 +32,9 @@
  * @license MIT
  */
 
-package org.imanity.framework.task.chain;
+package org.imanity.framework.task;
 
-import org.imanity.framework.task.chain.TaskChainTasks.*;
+import org.imanity.framework.task.TaskChainTasks.*;
 
 import java.util.*;
 import java.util.concurrent.CompletableFuture;

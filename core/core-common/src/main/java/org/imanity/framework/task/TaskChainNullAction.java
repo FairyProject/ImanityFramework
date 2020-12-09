@@ -22,14 +22,40 @@
  * SOFTWARE.
  */
 
-package org.imanity.framework.util.builder.query;
+package org.imanity.framework.task;
 
-import java.sql.ResultSet;
-import java.sql.SQLException;
+/**
+ * Defines actions to perform when a chain is used with .abortIfNull
+ * Override desired arguments needed to provide actions
+ *
+ * @deprecated Use {@link TaskChainAbortAction} instead
+ * @param <A1>
+ * @param <A2>
+ * @param <A3>
+ */
+@SuppressWarnings("WeakerAccess")
+@Deprecated
+public interface TaskChainNullAction <A1, A2, A3> extends TaskChainAbortAction<A1, A2, A3> {
+    default void onNull(TaskChain<?> chain, A1 arg1) {}
+    default void onNull(TaskChain<?> chain, A1 arg1, A2 arg2) {
+        onNull(chain, arg1);
+    }
+    default void onNull(TaskChain<?> chain, A1 arg1, A2 arg2, A3 arg3) {
+        onNull(chain, arg1, arg2);
+    }
 
+    @Override
+    default void onAbort(TaskChain<?> chain, A1 arg1) {
+        onNull(chain, arg1);
+    }
 
-public interface TaskResult {
+    @Override
+    default void onAbort(TaskChain<?> chain, A1 arg1, A2 arg2) {
+        onNull(chain, arg1, arg2);
+    }
 
-    Object execute(ResultSet resultSet) throws SQLException;
-
+    @Override
+    default void onAbort(TaskChain<?> chain, A1 arg1, A2 arg2, A3 arg3) {
+        onNull(chain, arg1, arg2, arg3);
+    }
 }

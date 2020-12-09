@@ -22,7 +22,7 @@
  * SOFTWARE.
  */
 
-package org.imanity.framework.task.chain;
+package org.imanity.framework.task;
 
 import java.util.concurrent.TimeUnit;
 
@@ -68,10 +68,10 @@ public interface GameInterface {
      * Every factory created needs to register a way to automatically shut itself down (On Disable)
      *
      * If its impossible to provide automatic shutdown registry, you should leave this method blank
-     * and manually call {@link org.imanity.framework.task.chain.TaskChainFactory#shutdown(int, TimeUnit)}
+     * and manually call {@link TaskChainFactory#shutdown(int, TimeUnit)}
      * @param factory Factory to shutdown
      */
-    void registerShutdownHandler(org.imanity.framework.task.chain.TaskChainFactory factory);
+    void registerShutdownHandler(TaskChainFactory factory);
 
     /**
      * Check if this interface has Main thread
@@ -86,7 +86,7 @@ public interface GameInterface {
      * Adds a delay to the chain execution based on real time
      *
      * Method will be ran async from main thread.
-     * Chain must {@link org.imanity.framework.task.chain.TaskChain#abort()} if the delay is interrupted.
+     * Chain must {@link TaskChain#abort()} if the delay is interrupted.
      *
      * @param duration Duration to delay
      * @param units Units to delay in
@@ -98,7 +98,7 @@ public interface GameInterface {
                 Thread.sleep(units.toMillis(duration));
                 run.run();
             } catch (InterruptedException e) {
-                org.imanity.framework.task.chain.TaskChain.abort();
+                TaskChain.abort();
             }
         });
     }

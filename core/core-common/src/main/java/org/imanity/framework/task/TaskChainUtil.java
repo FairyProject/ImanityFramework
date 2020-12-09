@@ -22,71 +22,47 @@
  * SOFTWARE.
  */
 
-package org.imanity.framework.util.builder;
+package org.imanity.framework.task;
 
+import java.util.logging.Logger;
 
-public enum SQLColumnType {
+final class TaskChainUtil {
+    private TaskChainUtil() {
+    }
 
-    
-    TINYINT,
+    /**
+     * Util method for example logging
+     * @param log
+     */
+    static void log(String log) {
+        for (String s : log.split("\n")) {
+            Logger.getGlobal().info(s);
+        }
+    }
 
-    
-    SMALLINT,
+    public static void logError(String log) {
+        for (String s : log.split("\n")) {
+            Logger.getGlobal().severe(s);
+        }
+    }
 
-    
-    MEDIUMINT,
+    /**
+     * Throws an exception without it needing to be in the method signature
+     * @param t
+     */
+    static void sneakyThrows(Throwable t) {
+        //noinspection RedundantTypeArguments
+        throw TaskChainUtil.<RuntimeException>superSneaky( t );
+    }
 
-    
-    INT,
-
-    
-    BIGINT,
-
-    
-    FLOAT,
-
-    
-    DOUBLE,
-
-    
-    DECIMAL,
-
-    
-    CHAR,
-
-    
-    VARCHAR,
-
-    
-    TINYTEXT,
-
-    
-    TEXT,
-
-    
-    MEDIUMTEXT,
-
-    
-    LONGTEXT,
-
-    
-    BINARY,
-
-    
-    VARBINARY,
-
-    
-    BIT,
-
-    
-    TINYBLOB,
-
-    
-    BLOB,
-
-    
-    MEDIUMBLOB,
-
-    
-    LONGBLOB
+    /**
+     * Magical method needed to trick Java
+     * @param t
+     * @param <T>
+     * @return
+     * @throws T
+     */
+    private static <T extends Throwable> T superSneaky(Throwable t) throws T {
+        throw (T) t;
+    }
 }

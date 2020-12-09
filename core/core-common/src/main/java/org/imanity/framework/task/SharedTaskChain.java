@@ -22,10 +22,10 @@
  * SOFTWARE.
  */
 
-package org.imanity.framework.task.chain;
+package org.imanity.framework.task;
 
 
-import org.imanity.framework.task.chain.TaskChainTasks.Task;
+import org.imanity.framework.task.TaskChainTasks.Task;
 
 import java.util.Map;
 import java.util.Queue;
@@ -33,14 +33,14 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 
-class SharedTaskChain<R> extends org.imanity.framework.task.chain.TaskChain<R> {
+class SharedTaskChain<R> extends TaskChain<R> {
     private final String name;
     private final Map<String, Queue<SharedTaskChain>> sharedChains;
     private Queue<SharedTaskChain> queue;
     private volatile boolean isPending;
     private volatile boolean canExecute = true;
 
-    SharedTaskChain(String name, org.imanity.framework.task.chain.TaskChainFactory factory) {
+    SharedTaskChain(String name, TaskChainFactory factory) {
         super(factory);
         this.sharedChains = factory.getSharedChains();
         this.name = name;

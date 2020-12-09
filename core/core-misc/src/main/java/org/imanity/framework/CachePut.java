@@ -1,5 +1,7 @@
 package org.imanity.framework;
 
+import org.intellij.lang.annotations.Language;
+
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -12,7 +14,7 @@ public @interface CachePut {
 
     String value();
 
-    String condition() default "";
+    @Language("JavaScript") String condition() default "";
 
     boolean asyncUpdate() default false;
 

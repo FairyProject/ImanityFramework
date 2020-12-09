@@ -22,22 +22,50 @@
  * SOFTWARE.
  */
 
-package org.imanity.framework.task.chain;
+package org.imanity.framework.task;
 
+import java.util.concurrent.Executors;
+import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicInteger;
 
 @SuppressWarnings("WeakerAccess")
-public interface AsyncQueue {
-    /**
-     * Task to post async of main thread
-     * @param runnable
-     */
-    void postAsync(Runnable runnable);
+public class TaskChainAsyncQueue implements AsyncQueue {
+    private static final AtomicInteger threadId = new AtomicInteger();
+    private final ThreadPoolExecutor executor;
+
+    public TaskChainAsyncQueue() {
+        this.executor = createCachedThreadPool();
+    }
+
+    public TaskChainAsyncQueue(ThreadPoolExecutor executor) {
+        this.executor = executor;
+    }
+
+    public static ThreadPoolExecutor createCachedThreadPool() {
+        return (ThreadPoolExecutor) Executors.newCachedThreadPool(r -> {
+            final Thread thread = new Thread(r);
+            thread.setName("TaskChainAsyncQueue Thread " + threadId.getAndIncrement());
+            return thread;
+        });
+    }
+
+    public void postAsync(Runnable runnable) {
+        executor.submit(runnable);
+    }
 
     /**
      * Call during game shutdown state
      * @param timeout
      * @param unit
      */
-    void shutdown(int timeout, TimeUnit unit);
+    public void shutdown(int timeout, TimeUnit unit) {
+        try {
+            executor.setRejectedExecutionHandler((r, executor1) -> r.run());
+            executor.shutdown();
+            executor.awaitTermination(timeout, unit);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+    }
 }

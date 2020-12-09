@@ -31,7 +31,7 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.server.PluginDisableEvent;
 import org.bukkit.plugin.Plugin;
-import org.imanity.framework.task.chain.*;
+import org.imanity.framework.task.*;
 
 import java.util.concurrent.TimeUnit;
 

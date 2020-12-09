@@ -4,6 +4,7 @@ import lombok.Getter;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.imanity.framework.cache.CacheUtil;
+import org.intellij.lang.annotations.Language;
 
 import javax.script.*;
 import java.lang.reflect.Method;
@@ -50,7 +51,7 @@ public class JavaScriptParser extends AbstractScriptParser {
     }
 
     @Override
-    public <T> T getElValue(String exp, Object target, Object[] arguments, Object retVal, boolean hasRetVal, Class<T> valueType) throws Exception {
+    public <T> T getElValue(@Language("JavaScript") String exp, Object target, Object[] arguments, Object retVal, boolean hasRetVal, Class<T> valueType) throws Exception {
         Bindings bindings = new SimpleBindings();
         bindings.put(TARGET, target);
         bindings.put(ARGS, arguments);
