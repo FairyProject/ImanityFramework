@@ -43,15 +43,12 @@ import org.imanity.framework.boot.error.ErrorHandler;
 import org.imanity.framework.boot.impl.IndependentCommandExecutor;
 import org.imanity.framework.boot.impl.IndependentEventHandler;
 import org.imanity.framework.boot.impl.IndependentImanityPlatform;
-import org.imanity.framework.boot.impl.IndependentPlayerBridge;
 import org.imanity.framework.boot.task.AsyncTaskScheduler;
-import org.imanity.framework.boot.user.UserInterface;
 import org.imanity.framework.command.CommandService;
 import org.imanity.framework.plugin.PluginClassLoader;
 import org.imanity.framework.util.AccessUtil;
 import org.imanity.framework.util.CC;
 import org.imanity.framework.util.Utility;
-import org.jetbrains.annotations.Nullable;
 import org.yaml.snakeyaml.Yaml;
 
 import java.io.File;
@@ -83,9 +80,6 @@ public final class FrameworkBootable {
     private OptionSet options;
     private final List<OptionHandler> optionHandlers;
 
-    @Nullable
-    private UserInterface<?> userInterface;
-
     private Object bootableObject;
     private PluginClassLoader pluginClassLoader;
     private AsyncTaskScheduler taskScheduler;
@@ -106,11 +100,6 @@ public final class FrameworkBootable {
         this.status = ProgramStatus.BOOTING;
 
         LOGGER = LogManager.getLogger(this.bootableClass);
-    }
-
-    public FrameworkBootable withUserInterface(UserInterface<?> userInterface) {
-        this.userInterface = userInterface;
-        return this;
     }
 
     public FrameworkBootable withOptionHandler(OptionHandler optionHandler) {
@@ -156,10 +145,6 @@ public final class FrameworkBootable {
                     .taskScheduler(this.taskScheduler)
                     .eventHandler(new IndependentEventHandler())
                     .commandExecutor(new IndependentCommandExecutor());
-
-            if (this.userInterface != null) {
-                builder.playerBridge(new IndependentPlayerBridge(this.userInterface));
-            }
 
             builder.init();
 

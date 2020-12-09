@@ -26,18 +26,20 @@ package org.imanity.framework.player;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
-import org.mongojack.Id;
 
+import javax.persistence.Id;
 import java.util.Objects;
 import java.util.UUID;
 
 @Getter
+@NoArgsConstructor
 public class PlayerInfo {
 
 	@Id
 	@JsonProperty
-	private final UUID uuid;
+	private UUID uuid;
 
 	@Setter
 	@JsonProperty

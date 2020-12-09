@@ -20,6 +20,8 @@
                     <source>1.8</source>
                     <target>1.8</target>
                     <useIncrementalCompilation>false</useIncrementalCompilation>
+                    <compilerArgument>-parameters</compilerArgument>
+                    <testCompilerArgument>-parameters</testCompilerArgument>
                 </configuration>
                 <executions>
                     <execution>

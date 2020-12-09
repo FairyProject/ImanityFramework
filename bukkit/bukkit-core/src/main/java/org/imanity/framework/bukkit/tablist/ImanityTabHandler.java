@@ -34,7 +34,6 @@ import org.imanity.framework.bukkit.packet.PacketDto;
 import org.imanity.framework.bukkit.packet.PacketListener;
 import org.imanity.framework.bukkit.packet.PacketService;
 import org.imanity.framework.bukkit.packet.type.PacketTypeClasses;
-import org.imanity.framework.bukkit.packet.wrapper.WrappedPacket;
 import org.imanity.framework.bukkit.packet.wrapper.server.WrappedPacketOutLogin;
 import org.imanity.framework.metadata.MetadataKey;
 import org.imanity.framework.bukkit.tablist.util.IImanityTabImpl;
@@ -42,7 +41,6 @@ import lombok.Getter;
 import lombok.Setter;
 import org.imanity.framework.bukkit.tablist.util.impl.v1_8.NMS1_8TabImpl;
 import org.imanity.framework.bukkit.tablist.util.impl.ProtocolLibTabImpl;
-import org.imanity.framework.bukkit.util.SpigotUtil;
 import org.imanity.framework.bukkit.reflection.MinecraftReflection;
 import org.imanity.framework.Autowired;
 
@@ -52,11 +50,12 @@ import java.util.concurrent.*;
 public class ImanityTabHandler {
 
     //Instance
-    @Getter private static ImanityTabHandler instance;
+    @Getter
+    private static ImanityTabHandler instance;
 
     private static final MetadataKey<ImanityTablist> TABLIST_KEY = MetadataKey.create(ImanityCommon.METADATA_PREFIX + "TabList", ImanityTablist.class);
 
-    private ImanityTabAdapter adapter;
+    private final ImanityTabAdapter adapter;
     private ScheduledExecutorService thread;
     private IImanityTabImpl implementation;
 

@@ -79,7 +79,7 @@ import java.util.List;
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public final class Imanity {
 
-    public static final Logger LOGGER = LogManager.getLogger("Imanity");
+    public static final Logger LOGGER = LogManager.getLogger(Imanity.class);
     public static FastRandom RANDOM;
     public static ImanityBoardHandler BOARD_HANDLER;
     public static ImanityTabHandler TAB_HANDLER;
@@ -127,7 +127,6 @@ public final class Imanity {
 
         ImanityCommon.builder()
                 .platform(new BukkitImanityPlatform())
-                .playerBridge(new BukkitPlayerBridge())
                 .commandExecutor(new BukkitCommandExecutor())
                 .eventHandler(new BukkitEventHandler())
                 .taskScheduler(new BukkitTaskScheduler())

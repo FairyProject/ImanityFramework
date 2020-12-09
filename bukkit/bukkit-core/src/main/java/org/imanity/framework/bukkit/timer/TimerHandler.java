@@ -62,16 +62,22 @@ public class TimerHandler implements Runnable {
             return;
         }
 
-        this.timers.add(timer);
+        synchronized (this) {
+            this.timers.add(timer);
+        }
         timer.start();
     }
 
     public synchronized void clear(Timer timer) {
-        this.timers.remove(timer);
+        synchronized (this) {
+            this.timers.remove(timer);
+        }
     }
 
-    public synchronized void clear(Class<? extends Timer> timerClass) {
-        this.timers.removeIf(timerClass::isInstance);
+    public void clear(Class<? extends Timer> timerClass) {
+        synchronized (this) {
+            this.timers.removeIf(timerClass::isInstance);
+        }
     }
 
     public boolean isTimerRunning(Class<? extends Timer> timerClass) {
@@ -79,17 +85,19 @@ public class TimerHandler implements Runnable {
     }
 
     public synchronized <T extends Timer> T getTimer(Class<T> timerClass) {
-        return (T) this.timers
-                .stream()
-                .filter(timerClass::isInstance)
-                .findFirst()
-                .orElse(null);
+        synchronized (this) {
+            return (T) this.timers
+                    .stream()
+                    .filter(timerClass::isInstance)
+                    .findFirst()
+                    .orElse(null);
+        }
     }
 
     @Override
     public void run() {
 
-        synchronized (this.timers) {
+        synchronized (this) {
             Iterator<Timer> iterator = this.timers.iterator();
 
             while (iterator.hasNext()) {

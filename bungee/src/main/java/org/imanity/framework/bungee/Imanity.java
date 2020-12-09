@@ -67,7 +67,6 @@ public class Imanity {
                 .platform(new BungeeImanityPlatform())
                 .commandExecutor(new BungeeCommandExecutor())
                 .eventHandler(new BungeeEventHandler())
-                .playerBridge(new BungeePlayerBridge())
                 .taskScheduler(new BungeeTaskScheduler())
         .init();
     }

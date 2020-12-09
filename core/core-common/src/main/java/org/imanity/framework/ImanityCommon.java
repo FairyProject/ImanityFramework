@@ -42,8 +42,6 @@ import org.imanity.framework.locale.Locale;
 import org.imanity.framework.locale.LocaleHandler;
 import org.imanity.framework.locale.LocaleRepository;
 import org.imanity.framework.locale.player.LocaleData;
-import org.imanity.framework.player.IPlayerBridge;
-import org.imanity.framework.redis.RedisService;
 import org.imanity.framework.redis.server.ServerHandler;
 import org.imanity.framework.redis.server.enums.ServerState;
 import org.imanity.framework.task.ITaskScheduler;
@@ -223,7 +221,6 @@ public final class ImanityCommon {
         private ICommandExecutor commandExecutor;
         private IEventHandler eventHandler;
         private ITaskScheduler taskScheduler;
-        private IPlayerBridge playerBridge;
         private ObjectMapper mapper;
 
         public Builder platform(ImanityPlatform bridge) {
@@ -243,11 +240,6 @@ public final class ImanityCommon {
 
         public Builder taskScheduler(ITaskScheduler taskScheduler) {
             this.taskScheduler = taskScheduler;
-            return this;
-        }
-
-        public Builder playerBridge(IPlayerBridge playerBridge) {
-            this.playerBridge = playerBridge;
             return this;
         }
 

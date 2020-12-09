@@ -41,4 +41,9 @@ public class LocaleRepository extends ConfigurableRepository<LocaleData, UUID> {
 
     }
 
+    @ShouldInitialize
+    public boolean configure() {
+        return ImanityCommon.CORE_CONFIG.USE_LOCALE;
+    }
+
 }
