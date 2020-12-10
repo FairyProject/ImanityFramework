@@ -12,7 +12,7 @@ import java.util.concurrent.TimeUnit;
 @Target(ElementType.METHOD)
 public @interface CachePut {
 
-    String value();
+    @Language("JavaScript") String value();
 
     @Language("JavaScript") String condition() default "";
 
