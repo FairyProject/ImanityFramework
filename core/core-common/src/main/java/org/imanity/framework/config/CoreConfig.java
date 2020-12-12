@@ -39,7 +39,7 @@ public class CoreConfig extends YamlConfiguration {
 
     public boolean USE_REDIS_DISTRIBUTED_LOCK = false;
 
-    public boolean USE_LOCALE = false;
+    public boolean USE_LOCALE = false; // TODO: make a better way to decide enable or disable locale
 
     public boolean ASYNCHRONOUS_DATA_STORING = true;
 

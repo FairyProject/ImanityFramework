@@ -132,11 +132,13 @@ public final class Imanity {
                 .taskScheduler(new BukkitTaskScheduler())
         .init();
 
-        new BukkitRepository<LocaleData>(PLUGIN)
-                .async()
-                .load(player -> LOCALE_REPOSITORY.find(player.getUniqueId()))
-                .save((player, localeData) -> LOCALE_REPOSITORY.save(localeData))
-                .init();
+        if (ImanityCommon.CORE_CONFIG.USE_LOCALE) {
+            new BukkitRepository<LocaleData>(PLUGIN)
+                    .async()
+                    .load(player -> LOCALE_REPOSITORY.find(player.getUniqueId()))
+                    .save((player, localeData) -> LOCALE_REPOSITORY.save(localeData))
+                    .init();
+        }
     }
 
     public static VisualBlockHandler getVisualBlockHandler() {
