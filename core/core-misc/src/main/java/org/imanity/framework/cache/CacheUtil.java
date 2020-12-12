@@ -35,6 +35,9 @@ public class CacheUtil {
             Map tempMap = (Map) obj;
             return tempMap.isEmpty();
         }
+        if (obj instanceof Optional) {
+            return !((Optional) obj).isPresent();
+        }
         return false;
     }
 

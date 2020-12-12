@@ -90,7 +90,7 @@ public final class ImanityCommon {
     @Autowired
     public static ServerHandler SERVER_HANDLER;
 
-    private static final List<Terminable> TERMINABLES = new ArrayList<>();
+    private static final List<Terminable> TERMINATES = new ArrayList<>();
 
     private static boolean LIBRARIES_INITIALIZED, BRIDGE_INITIALIZED;
 
@@ -176,8 +176,8 @@ public final class ImanityCommon {
             SERVER_HANDLER.changeServerState(ServerState.STOPPING);
         }
 
-        synchronized (ImanityCommon.TERMINABLES) {
-            for (Terminable terminable : ImanityCommon.TERMINABLES) {
+        synchronized (ImanityCommon.TERMINATES) {
+            for (Terminable terminable : ImanityCommon.TERMINATES) {
                 terminable.close();
             }
         }
@@ -201,8 +201,8 @@ public final class ImanityCommon {
     }
 
     public static void addTerminable(Terminable terminable) {
-        synchronized (ImanityCommon.TERMINABLES) {
-            ImanityCommon.TERMINABLES.add(terminable);
+        synchronized (ImanityCommon.TERMINATES) {
+            ImanityCommon.TERMINATES.add(terminable);
         }
     }
 
