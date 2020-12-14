@@ -41,23 +41,14 @@ public class Library {
             "org{}redisson",
             "redisson-all", // Include all
             "3.13.6",
-            null
+            (String) "3YN36wajaTShvnJVRh7Q/SyH7HhsZhAIjqxm1vvqQYM=",
+            new Relocate("io{}netty", IMANITY_LIB_PACKAGE + "redisson.netty"),
+            new Relocate("org{}jboss{}marshalling", IMANITY_LIB_PACKAGE + "redisson.marshalling"),
+            new Relocate("org{}xerial{}snappy", IMANITY_LIB_PACKAGE + "redisson.snappy"),
+            new Relocate("org{}yaml", IMANITY_LIB_PACKAGE + "redisson.yaml"),
+            new Relocate("net{}bytebuddy", IMANITY_LIB_PACKAGE + "redisson.bytebuddy"),
+            new Relocate("com{}fasterxml{}jackson", IMANITY_LIB_PACKAGE + "redisson.jackson")
     ),
-
-    /**
-     *
-     * Only in Imanity-Libraries repository
-     * This is the netty relocated version of redisson
-     *
-     */
-    REDISSON_RELOCATED = new Library(
-            "org{}redisson",
-            "redisson-relocated",
-            "3.13.7-SNAPSHOT",
-            "3.13.7-20201024.150336-1",
-            (String) null
-    ),
-
     YAML = new Library(
             "org{}yaml",
             "snakeyaml",
@@ -68,21 +59,21 @@ public class Library {
             "org{}mongodb",
             "mongodb-driver-sync",
             "4.0.4",
-            null,
+            "yNfnRhpg02+ZUTkc+DBOmAhjCzt2pGJDHbOrOg0H7dE=",
             new Relocate("org{}mongodb", IMANITY_LIB_PACKAGE + "mongodb")
     ),
     MONGO_DB_CORE = new Library(
             "org{}mongodb",
             "mongodb-driver-core",
             "4.0.4",
-            null,
+            "O3919jFpB9moeW7FqPuSou2XroNq4MxnVVGmD0qD6m8=",
             new Relocate("org{}mongodb", IMANITY_LIB_PACKAGE + "mongodb")
     ),
     BSON = new Library(
             "org{}mongodb",
             "bson",
             "4.0.4",
-            null,
+            "e93W+2Fbbw7S/c+wnBUFtO9fPtOZ5gBitZ1Jbkp9scI=",
             new Relocate("org{}bson", IMANITY_LIB_PACKAGE + "bson")
     ),
     CAFFEINE = new Library(

@@ -309,6 +309,5 @@ public class StandardPojoInfo implements PojoInfo {
 
 	public void setPrimaryKeyName(String name) {
 		this.primaryKeyName = name;
-		System.out.println("primary key name " + name);
 	}
 }

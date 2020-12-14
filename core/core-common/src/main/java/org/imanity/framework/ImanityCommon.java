@@ -144,14 +144,7 @@ public final class ImanityCommon {
             ImanityCommon.LIBRARY_HANDLER.obtainClassLoaderWith(Library.YAML);
         }
 
-        Library redisson;
-        try {
-            Class.forName("io.netty.channel.Channel");
-
-            redisson = Library.REDISSON_RELOCATED;
-        } catch (ClassNotFoundException ex) {
-            redisson = Library.REDISSON;
-        }
+        Library redisson = Library.REDISSON;
 
         ImanityCommon.LIBRARY_HANDLER.downloadLibraries(redisson);
         ImanityCommon.LIBRARY_HANDLER.obtainClassLoaderWith(redisson);

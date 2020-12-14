@@ -2,6 +2,7 @@ package org.imanity.framework.mysql;
 
 import lombok.SneakyThrows;
 import org.imanity.framework.*;
+import org.imanity.framework.libraries.Library;
 import org.imanity.framework.mysql.config.AbstractSqlConfiguration;
 import org.imanity.framework.mysql.connection.AbstractConnectionFactory;
 import org.jetbrains.annotations.Nullable;
@@ -33,6 +34,8 @@ public class SqlService {
         INSTANCE = this;
 
         this.preConfigurations = new ArrayList<>();
+        FrameworkMisc.LIBRARY_HANDLER.downloadLibraries(Library.BYTE_BUDDY);
+        FrameworkMisc.LIBRARY_HANDLER.obtainClassLoaderWith(Library.BYTE_BUDDY);
 
         ComponentRegistry.registerComponentHolder(new ComponentHolder() {
             @Override
