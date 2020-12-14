@@ -99,13 +99,12 @@ public class ItemBuilder implements Listener, Cloneable {
 	}
 
 	public ItemBuilder durability(final int durability) {
-		itemStack.setDurability((short) durability);
+		itemStack.setDurability((short) - (durability - itemStack.getType().getMaxDurability()));
 		return this;
 	}
 
-	@SuppressWarnings("deprecation")
 	public ItemBuilder data(final int data) {
-		itemStack.setData(new MaterialData(itemStack.getType(), (byte) data));
+		itemStack.setDurability((short) data);
 		return this;
 	}
 
