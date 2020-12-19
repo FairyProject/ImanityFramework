@@ -38,25 +38,25 @@ public class SpigotUtil {
             Class.forName("spg.lgdev.config.iSpigotConfig");
             SPIGOT_TYPE = SpigotType.IMANITY;
             return;
-        } catch (ClassNotFoundException e) {}
+        } catch (ClassNotFoundException ignored) {}
 
         try {
             Class.forName("org.github.paperspigot.PaperSpigotConfig");
             SPIGOT_TYPE = SpigotType.PAPER;
             return;
-        } catch (ClassNotFoundException e) {}
+        } catch (ClassNotFoundException ignored) {}
 
         try {
             Class.forName("com.destroystokyo.paper.PaperConfig");
             SPIGOT_TYPE = SpigotType.PAPER;
             return;
-        } catch (ClassNotFoundException e) {}
+        } catch (ClassNotFoundException ignored) {}
 
         try {
             Class.forName("org.spigotmc.SpigotConfig");
             SPIGOT_TYPE = SpigotType.SPIGOT;
             return;
-        } catch (ClassNotFoundException e) {}
+        } catch (ClassNotFoundException ignored) {}
 
         SPIGOT_TYPE = SpigotType.CRAFTBUKKIT;
 

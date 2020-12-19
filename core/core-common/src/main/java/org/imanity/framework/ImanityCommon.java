@@ -26,6 +26,7 @@ package org.imanity.framework;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.PropertyAccessor;
+import com.fasterxml.jackson.databind.MapperFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.ImmutableSet;
 import lombok.AccessLevel;
@@ -261,6 +262,7 @@ public final class ImanityCommon {
                 ImanityCommon.JACKSON_MAPPER = new ObjectMapper();
                 ImanityCommon.JACKSON_MAPPER.setVisibility(PropertyAccessor.ALL, JsonAutoDetect.Visibility.NONE);
                 ImanityCommon.JACKSON_MAPPER.setVisibility(PropertyAccessor.FIELD, JsonAutoDetect.Visibility.ANY);
+                ImanityCommon.JACKSON_MAPPER.configure(MapperFeature.PROPAGATE_TRANSIENT_MARKER, true);
             } else {
                 ImanityCommon.JACKSON_MAPPER = this.mapper;
             }

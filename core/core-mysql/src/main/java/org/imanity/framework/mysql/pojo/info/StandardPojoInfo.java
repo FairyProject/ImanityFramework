@@ -99,7 +99,7 @@ public class StandardPojoInfo implements PojoInfo {
 		for (Field field : clazz.getDeclaredFields()) {
 			int modifiers = field.getModifiers();
 
-			if (Modifier.isStatic(modifiers) || Modifier.isFinal(modifiers)) {
+			if (Modifier.isStatic(modifiers) || Modifier.isFinal(modifiers) || Modifier.isTransient(modifiers)) {
 				continue;
 			}
 
