@@ -73,7 +73,7 @@ public final class ImanityCommon {
 
     public static ImanityPlatform PLATFORM;
     public static CoreConfig CORE_CONFIG;
-    public static ServiceHandler SERVICE_HANDLER;
+    public static BeanContext SERVICE_HANDLER;
 
     @Autowired
     public static LocaleHandler LOCALE_HANDLER;
@@ -105,7 +105,7 @@ public final class ImanityCommon {
 
         ImanityCommon.PLATFORM.preServiceLoaded();
 
-        ImanityCommon.SERVICE_HANDLER = new ServiceHandler();
+        ImanityCommon.SERVICE_HANDLER = new BeanContext();
         ImanityCommon.SERVICE_HANDLER.registerServices();
         ImanityCommon.SERVICE_HANDLER.init();
     }
@@ -157,12 +157,12 @@ public final class ImanityCommon {
         return ImanityCommon.PLATFORM.getLogger();
     }
 
-    public static <T> T getService(Class<T> type) {
-        return (T) SERVICE_HANDLER.getServiceInstance(type);
+    public static <T> T getBean(Class<T> type) {
+        return (T) SERVICE_HANDLER.getBean(type);
     }
 
     public static void registerAutowired(Object instance) {
-        SERVICE_HANDLER.registerAutowired(instance);
+        SERVICE_HANDLER.injectBeans(instance);
     }
 
     public static void shutdown() throws Throwable {

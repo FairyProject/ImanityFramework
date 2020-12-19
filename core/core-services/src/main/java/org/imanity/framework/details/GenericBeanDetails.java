@@ -22,10 +22,8 @@
  * SOFTWARE.
  */
 
-package org.imanity.framework;
+package org.imanity.framework.details;
 
-import com.google.common.collect.Lists;
-import com.google.common.collect.Sets;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -36,12 +34,12 @@ import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
 import lombok.SneakyThrows;
-
-import javax.annotation.Nullable;
+import org.imanity.framework.*;
+import org.jetbrains.annotations.Nullable;
 
 @Getter
 @Setter
-public class ServiceData {
+public class GenericBeanDetails implements BeanDetails {
 
     private static final Class<? extends Annotation>[] ANNOTATIONS = new Class[] {
             PreInitialize.class, PostInitialize.class,
@@ -49,40 +47,38 @@ public class ServiceData {
             ShouldInitialize.class
     };
 
-    private Class<?> type;
-
-    private Object instance;
-
     private String name;
-    private Set<String> dependencies;
-    private boolean callAnnotations;
 
     private ActivationStage stage;
-
-    private Map<String, String> tags;
     private Map<Class<? extends Annotation>, String> disallowAnnotations;
     private Map<Class<? extends Annotation>, Collection<Method>> annotatedMethods;
 
-    public ServiceData(Object instance) {
-        this(instance.getClass(), instance, "dummy", new String[0], true);
+    @Nullable
+    private Object instance;
+    private Class<?> type;
+
+    private Map<String, String> tags;
+
+    public GenericBeanDetails(Object instance) {
+        this(instance.getClass(), instance, "dummy");
     }
 
-    public ServiceData(Object instance, Service service) {
-        this(instance.getClass(), instance, service.name(), service.dependencies(), true);
+    public GenericBeanDetails(Object instance, Service service) {
+        this(instance.getClass(), instance, service.name());
     }
 
-    public ServiceData(Class<?> type, Object instance, String name, String[] dependencies, boolean callAnnotations) {
+    public GenericBeanDetails(Class<?> type, String name) {
+        this(type, null, name);
+    }
+
+    public GenericBeanDetails(Class<?> type, @Nullable Object instance, String name) {
         this.type = type;
         this.instance = instance;
         this.name = name;
-        this.dependencies = Sets.newHashSet(dependencies);
-        this.callAnnotations = callAnnotations;
         this.stage = ActivationStage.NOT_LOADED;
         this.tags = new ConcurrentHashMap<>(0);
 
-        if (callAnnotations) {
-            this.loadAnnotations();
-        }
+        this.loadAnnotations();
     }
 
     @SneakyThrows
@@ -107,18 +103,12 @@ public class ServiceData {
             for (Method method : type.getDeclaredMethods()) {
                 this.loadMethod(method);
             }
-
-            ServiceDependency dependencyAnnotation = type.getAnnotation(ServiceDependency.class);
-            if (dependencyAnnotation != null) {
-                dependencies.addAll(Arrays.asList(dependencyAnnotation.dependencies()));
-            }
-
             type = type.getSuperclass();
         }
     }
 
     public void loadMethod(Method method) {
-        for (Class<? extends Annotation> annotation : ServiceData.ANNOTATIONS) {
+        for (Class<? extends Annotation> annotation : ANNOTATIONS) {
             if (method.getAnnotation(annotation) != null) {
                 if (this.disallowAnnotations.containsKey(annotation)) {
                     String className = this.disallowAnnotations.get(annotation);
@@ -127,7 +117,7 @@ public class ServiceData {
 
                 int parameterCount = method.getParameterCount();
                 if (parameterCount > 0) {
-                    if (parameterCount != 1 && method.getParameterTypes()[0] != ServiceData.class) {
+                    if (parameterCount != 1 && method.getParameterTypes()[0] != GenericBeanDetails.class) {
                         throw new IllegalArgumentException("The method " + method.toString() + " used annotation " + annotation.getSimpleName() + " but doesn't have matches parameters! you can only use either no parameter or one parameter with ServerData type on annotated " + annotation.getSimpleName() + "!");
                     }
                 }
@@ -150,46 +140,14 @@ public class ServiceData {
         }
     }
 
-    private void changeStage(Class<? extends Annotation> annotation) {
-        if (annotation == PreInitialize.class) {
-            this.stage = ActivationStage.PRE_INIT_CALLED;
-        } else if (annotation == PostInitialize.class) {
-            this.stage = ActivationStage.POST_INIT_CALLED;
-        } else if (annotation == PreDestroy.class) {
-            this.stage = ActivationStage.PRE_DESTROY_CALLED;
-        } else if (annotation == PostDestroy.class) {
-            this.stage = ActivationStage.POST_DESTROY_CALLED;
-        }
-    }
-
-    public boolean isStage(ActivationStage stage) {
-        return this.stage == stage;
-    }
-
-    public boolean isActivated() {
-        return this.stage == ActivationStage.PRE_INIT_CALLED || this.stage == ActivationStage.POST_INIT_CALLED;
-    }
-
-    public boolean isDestroyed() {
-        return this.stage == ActivationStage.PRE_DESTROY_CALLED || this.stage == ActivationStage.POST_DESTROY_CALLED;
-    }
-
-    @Nullable
-    public String getTag(String key) {
-        return this.tags.getOrDefault(key, null);
-    }
-
-    public boolean hasTag(String key) {
-        return this.tags.containsKey(key);
-    }
-
-    public void addTag(String key, String value) {
-        this.tags.put(key, value);
-    }
-
+    @Override
     public boolean shouldInitialize() throws InvocationTargetException, IllegalAccessException  {
         if (this.annotatedMethods == null) {
             return true;
+        }
+
+        if (instance == null) {
+            throw new NullPointerException("The Instance of bean details for " + this.type.getName() + " is null.");
         }
 
         if (this.annotatedMethods.containsKey(ShouldInitialize.class)) {
@@ -211,9 +169,10 @@ public class ServiceData {
         return true;
     }
 
+    @Override
     public void call(Class<? extends Annotation> annotation) throws InvocationTargetException, IllegalAccessException {
-        if (!this.callAnnotations) {
-            return;
+        if (instance == null) {
+            throw new NullPointerException("The Instance of bean details for " + this.type.getName() + " is null.");
         }
 
         if (this.annotatedMethods.containsKey(annotation)) {
@@ -229,8 +188,47 @@ public class ServiceData {
         this.changeStage(annotation);
     }
 
-    public boolean hasDependencies() {
-        return this.dependencies.size() > 0;
+    private void changeStage(Class<? extends Annotation> annotation) {
+        if (annotation == PreInitialize.class) {
+            this.stage = ActivationStage.PRE_INIT_CALLED;
+        } else if (annotation == PostInitialize.class) {
+            this.stage = ActivationStage.POST_INIT_CALLED;
+        } else if (annotation == PreDestroy.class) {
+            this.stage = ActivationStage.PRE_DESTROY_CALLED;
+        } else if (annotation == PostDestroy.class) {
+            this.stage = ActivationStage.POST_DESTROY_CALLED;
+        }
+    }
+
+    @Override
+    public boolean isStage(ActivationStage stage) {
+        return this.stage == stage;
+    }
+
+    @Override
+    public boolean isActivated() {
+        return this.stage == ActivationStage.PRE_INIT_CALLED || this.stage == ActivationStage.POST_INIT_CALLED;
+    }
+
+    @Override
+    public boolean isDestroyed() {
+        return this.stage == ActivationStage.PRE_DESTROY_CALLED || this.stage == ActivationStage.POST_DESTROY_CALLED;
+    }
+
+    @Override
+    @Nullable
+    public String getTag(String key) {
+        return this.tags.getOrDefault(key, null);
+    }
+
+    @Override
+    public boolean hasTag(String key) {
+        return this.tags.containsKey(key);
+    }
+
+    @Override
+    public void addTag(String key, String value) {
+        this.tags.put(key, value);
     }
 
     public static enum ActivationStage {

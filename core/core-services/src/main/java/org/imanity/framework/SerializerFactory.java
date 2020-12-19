@@ -22,8 +22,6 @@ public class SerializerFactory {
 
     private Map<Class<?>, ObjectSerializer> serializers;
 
-    private Map<Class<?>, AttributeConverter> hibernateSerializers;
-
     @PreInitialize
     public void preInit() {
         this.serializers = new ConcurrentHashMap<>();

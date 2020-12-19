@@ -38,7 +38,7 @@ public class DiscordListenerComponentHolder extends ComponentHolder {
     @Override
     public Object newInstance(Class<?> type) {
         Object object = super.newInstance(type);
-        DiscordService discordService = ImanityCommon.getService(DiscordService.class);
+        DiscordService discordService = ImanityCommon.getBean(DiscordService.class);
 
         discordService.registerListener((ListenerAdapter) object);
 

@@ -125,7 +125,7 @@ public class WrappedPacketOutCustomPayload extends WrappedPacket implements Send
                 this.tag = this.readString(0);
                 Object byteBuf = this.readObject(0, packetDataSerializerClass);
 
-                this.data = ImanityCommon.getService(PacketService.class).getNettyInjection().readBytes(byteBuf);
+                this.data = ImanityCommon.getBean(PacketService.class).getNettyInjection().readBytes(byteBuf);
                 break;
         }
 
