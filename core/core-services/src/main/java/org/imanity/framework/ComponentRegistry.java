@@ -24,6 +24,9 @@
 
 package org.imanity.framework;
 
+import org.imanity.framework.details.BeanDetails;
+import org.imanity.framework.details.constructor.BeanConstructorDetails;
+import org.imanity.framework.details.constructor.GenericBeanConstructorDetails;
 import org.imanity.framework.factory.ClassFactory;
 import org.imanity.framework.util.entry.Entry;
 import org.imanity.framework.util.entry.EntryArrayList;
@@ -69,7 +72,7 @@ public class ComponentRegistry {
         });
     }
 
-    public static void loadComponents(ServiceHandler serviceHandler) {
+    public static void loadComponents(BeanContext beanContext) {
         try {
             ComponentRegistry.registerComponentHolders();
 
@@ -78,7 +81,7 @@ public class ComponentRegistry {
                 Object instance = componentHolder.newInstance(type);
 
                 if (instance != null) {
-                    serviceHandler.registerAutowired(instance);
+                    beanContext.registerComponent(instance, type);
                 }
             }
         } catch (Throwable throwable) {

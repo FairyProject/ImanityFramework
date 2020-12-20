@@ -25,12 +25,12 @@ public class LocaleRepository extends ConfigurableRepository<LocaleData, UUID> {
         return LocaleData.class;
     }
 
-    @Cacheable(forever = true, key = "'locale-' + args[0]")
+    @Cacheable(forever = true, key = "'locale-' + #args[0]")
     public LocaleData find(UUID uuid) {
         return super.findById(uuid).orElse(new LocaleData(uuid));
     }
 
-    @CacheEvict("'locale-' + args[0].getUuid()")
+    @CacheEvict("'locale-' + #args[0].getUuid()")
     public <S extends LocaleData> S save(S localeData) {
         return super.save(localeData);
     }

@@ -7,6 +7,7 @@ import com.mongodb.client.MongoClients;
 import com.mongodb.client.MongoDatabase;
 import org.bson.UuidRepresentation;
 import org.imanity.framework.*;
+import org.imanity.framework.details.BeanDetails;
 import org.imanity.framework.mongo.configuration.AbstractMongoConfiguration;
 import org.imanity.framework.ProvideConfiguration;
 import org.mongojack.JacksonMongoCollection;
@@ -69,8 +70,8 @@ public class MongoService {
     }
 
     @PostDestroy
-    public void stop(ServiceData serviceData) {
-        if (!serviceData.isStage(ServiceData.ActivationStage.POST_INIT_CALLED)) {
+    public void stop(BeanDetails beanDetails) {
+        if (!beanDetails.isStage(BeanDetails.ActivationStage.POST_INIT_CALLED)) {
             return;
         }
 

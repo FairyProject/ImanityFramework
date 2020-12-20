@@ -91,7 +91,6 @@ public class FilteredEventList {
                             player = methodWrapper.invoke(event);
                         }
                     } catch (Exception ex) {
-                        return true;
                     }
                 }
 

@@ -144,7 +144,9 @@ public abstract class AbstractTimer implements Timer {
         if (removeFromHandler) {
             Imanity.TIMER_HANDLER.clear(this);
         }
-        this.timerList.remove(this);
+        if (this.timerList != null) {
+            this.timerList.remove(this);
+        }
     }
 
     @Override

@@ -24,6 +24,7 @@
 
 package org.imanity.framework.bukkit.timer;
 
+import com.google.common.collect.Sets;
 import org.bukkit.scheduler.BukkitTask;
 import org.imanity.framework.PostDestroy;
 import org.imanity.framework.PostInitialize;
@@ -35,17 +36,18 @@ import org.imanity.framework.bukkit.util.TaskUtil;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Set;
 
 @Service(name = "timer")
 public class TimerHandler implements Runnable {
 
-    private List<Timer> timers;
+    private Set<Timer> timers;
 
     private BukkitTask task;
 
     @PostInitialize
     public void init() {
-        this.timers = new ArrayList<>();
+        this.timers = Sets.newConcurrentHashSet();
         this.task = TaskUtil.runRepeated(this, 5L);
     }
 
@@ -68,7 +70,7 @@ public class TimerHandler implements Runnable {
         timer.start();
     }
 
-    public synchronized void clear(Timer timer) {
+    public void clear(Timer timer) {
         synchronized (this) {
             this.timers.remove(timer);
         }
@@ -84,7 +86,7 @@ public class TimerHandler implements Runnable {
         return this.getTimer(timerClass) != null;
     }
 
-    public synchronized <T extends Timer> T getTimer(Class<T> timerClass) {
+    public <T extends Timer> T getTimer(Class<T> timerClass) {
         synchronized (this) {
             return (T) this.timers
                     .stream()
@@ -101,7 +103,9 @@ public class TimerHandler implements Runnable {
             Iterator<Timer> iterator = this.timers.iterator();
 
             while (iterator.hasNext()) {
+
                 Timer timer = iterator.next();
+
                 if (!timer.isPaused()) {
 
                     timer.tick();
@@ -109,6 +113,7 @@ public class TimerHandler implements Runnable {
                         timer.clear(false);
                         iterator.remove();
                     }
+
                 }
             }
         }

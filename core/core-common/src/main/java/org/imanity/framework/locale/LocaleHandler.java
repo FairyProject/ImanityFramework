@@ -25,6 +25,7 @@
 package org.imanity.framework.locale;
 
 import lombok.Getter;
+import org.apache.commons.io.IOUtils;
 import org.imanity.framework.ImanityCommon;
 import org.imanity.framework.PostInitialize;
 import org.imanity.framework.Service;
@@ -32,7 +33,9 @@ import org.yaml.snakeyaml.Yaml;
 
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.IOException;
 import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -79,7 +82,12 @@ public class LocaleHandler {
         String name = map.get("locale").toString();
 
         Locale locale = this.getOrRegister(name);
+        this.registerByMap(locale, "", map);
 
+        return locale;
+    }
+
+    public void registerByMap(Locale locale, String path, Map<String, Object> map) {
         for (Map.Entry<String, Object> entry : map.entrySet()) {
             if (entry.getKey().equals("locale")) {
                 continue;
@@ -87,13 +95,13 @@ public class LocaleHandler {
 
             if (entry.getValue() instanceof List) {
                 List list = (List) entry.getValue();
-                locale.registerEntry(entry.getKey(), (String[]) list.stream().map(Object::toString).toArray(String[]::new));
-            } else if (entry.getValue() instanceof String) {
-                locale.registerEntry(entry.getKey(), entry.getValue().toString());
+                locale.registerEntry(path + entry.getKey(), (String[]) list.stream().map(Object::toString).toArray(String[]::new));
+            } else if (entry.getValue() instanceof Map) {
+                this.registerByMap(locale, path + entry.getKey() + ".", (Map<String, Object>) entry.getValue());
+            } else {
+                locale.registerEntry(path + entry.getKey(), entry.getValue().toString());
             }
         }
-
-        return locale;
     }
 
     public void unregisterLocale(String name) {

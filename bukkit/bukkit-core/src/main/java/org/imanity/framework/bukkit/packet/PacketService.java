@@ -95,7 +95,7 @@ public class PacketService {
             }, 0L);
         }
 
-        ImanityCommon.SERVICE_HANDLER.registerAutowired(nettyInjection);
+        ImanityCommon.BEAN_CONTEXT.injectBeans(nettyInjection);
         Imanity.getPlayers().forEach(this::inject);
 
         try {

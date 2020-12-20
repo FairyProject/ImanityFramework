@@ -33,6 +33,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.bukkit.Sound;
 import org.bukkit.World;
+import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Event;
 import org.bukkit.event.Listener;
@@ -45,6 +46,7 @@ import org.imanity.framework.bukkit.bossbar.BossBarAdapter;
 import org.imanity.framework.bukkit.bossbar.BossBarHandler;
 import org.imanity.framework.bukkit.chunk.KeepChunkHandler;
 import org.imanity.framework.bukkit.chunk.block.CacheBlockSetHandler;
+import org.imanity.framework.bukkit.events.player.PlayerLocaleLoadedEvent;
 import org.imanity.framework.bukkit.hologram.HologramHandler;
 import org.imanity.framework.bukkit.impl.*;
 import org.imanity.framework.bukkit.impl.server.ServerImplementation;
@@ -115,6 +117,7 @@ public final class Imanity {
         Imanity.CLASS_LOADER = new PluginClassLoader(plugin.getClass().getClassLoader());
 
         SpigotUtil.init();
+
         Imanity.initCommon();
 
         Imanity.TASK_CHAIN_FACTORY = BukkitTaskChainFactory.create(plugin);
@@ -137,6 +140,7 @@ public final class Imanity {
                     .async()
                     .load(player -> LOCALE_REPOSITORY.find(player.getUniqueId()))
                     .save((player, localeData) -> LOCALE_REPOSITORY.save(localeData))
+                    .onLoaded((player, localeData) -> Imanity.callEvent(new PlayerLocaleLoadedEvent(player, localeData)))
                     .init();
         }
     }

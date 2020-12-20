@@ -32,13 +32,13 @@ public @interface Cacheable {
      * Storing the key of the cacheable
      *
      */
-    @Language("JavaScript") String key() default "";
+    @Language("SpEL") String key() default "";
 
     /**
      * Don't store if condition is false
      *
      */
-    @Language("JavaScript") String condition() default "";
+    @Language("SpEL") String condition() default "";
 
     /**
      * Prevent to store value if one of argument were null

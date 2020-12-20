@@ -24,16 +24,23 @@
 
 package org.imanity.framework;
 
+import org.imanity.framework.details.constructor.BeanConstructorDetails;
+import org.imanity.framework.details.constructor.GenericBeanConstructorDetails;
+
 public abstract class ComponentHolder {
 
     public Object newInstance(Class<?> type) {
-        try {
-            return type.newInstance();
-        } catch (IllegalAccessException | InstantiationException e) {
-            throw new RuntimeException(e);
-        }
+        return this.newInstance(this.constructorDetails(type));
+    }
+
+    public Object newInstance(BeanConstructorDetails constructorDetails) {
+        return constructorDetails.newInstance(BeanContext.INSTANCE);
     }
 
     public abstract Class<?>[] type();
+
+    public BeanConstructorDetails constructorDetails(Class<?> type) {
+        return new GenericBeanConstructorDetails(type, BeanContext.INSTANCE);
+    }
 
 }

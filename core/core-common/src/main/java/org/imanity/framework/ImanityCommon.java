@@ -31,6 +31,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.ImmutableSet;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
+import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.imanity.framework.command.ICommandExecutor;
 import org.imanity.framework.config.CoreConfig;
@@ -53,6 +54,8 @@ import java.util.*;
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public final class ImanityCommon {
 
+    private static final Logger LOGGER = LogManager.getLogger(ImanityCommon.class);
+
     private static final Set<Library> GLOBAL_LIBRARIES = ImmutableSet.of(
             // SQL
             Library.MARIADB_DRIVER,
@@ -67,13 +70,14 @@ public final class ImanityCommon {
 
 
             Library.BSON,
-            Library.CAFFEINE
+            Library.CAFFEINE,
+            Library.SPRING_EL
     );
     public static final String METADATA_PREFIX = "Imanity_";
 
     public static ImanityPlatform PLATFORM;
     public static CoreConfig CORE_CONFIG;
-    public static ServiceHandler SERVICE_HANDLER;
+    public static BeanContext BEAN_CONTEXT;
 
     @Autowired
     public static LocaleHandler LOCALE_HANDLER;
@@ -105,9 +109,9 @@ public final class ImanityCommon {
 
         ImanityCommon.PLATFORM.preServiceLoaded();
 
-        ImanityCommon.SERVICE_HANDLER = new ServiceHandler();
-        ImanityCommon.SERVICE_HANDLER.registerServices();
-        ImanityCommon.SERVICE_HANDLER.init();
+        ImanityCommon.BEAN_CONTEXT = new BeanContext();
+        ImanityCommon.BEAN_CONTEXT.registerServices();
+        ImanityCommon.BEAN_CONTEXT.init();
     }
 
     public static void loadLibraries() {
@@ -157,12 +161,12 @@ public final class ImanityCommon {
         return ImanityCommon.PLATFORM.getLogger();
     }
 
-    public static <T> T getService(Class<T> type) {
-        return (T) SERVICE_HANDLER.getServiceInstance(type);
+    public static <T> T getBean(Class<T> type) {
+        return (T) BEAN_CONTEXT.getBean(type);
     }
 
     public static void registerAutowired(Object instance) {
-        SERVICE_HANDLER.registerAutowired(instance);
+        BEAN_CONTEXT.injectBeans(instance);
     }
 
     public static void shutdown() throws Throwable {
@@ -176,7 +180,7 @@ public final class ImanityCommon {
             }
         }
 
-        ImanityCommon.SERVICE_HANDLER.stop();
+        ImanityCommon.BEAN_CONTEXT.stop();
         FrameworkMisc.close();
     }
 

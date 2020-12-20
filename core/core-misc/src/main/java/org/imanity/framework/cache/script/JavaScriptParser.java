@@ -1,5 +1,7 @@
 package org.imanity.framework.cache.script;
 
+import jdk.nashorn.api.scripting.NashornScriptEngine;
+import jdk.nashorn.internal.runtime.Context;
 import lombok.Getter;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -23,6 +25,8 @@ public class JavaScriptParser extends AbstractScriptParser {
     private final ScriptEngine engine;
 
     public JavaScriptParser() {
+        Context.getGlobal();
+
         this.engine = this.engineManager.getEngineByName("javascript");
 
         try {

@@ -34,7 +34,7 @@ public class ReactionMessage {
     }
 
     public CompletableFuture<Void> delete(boolean removeFromDiscord) {
-        ImanityCommon.getService(ReactionService.class).delete(message.getMessageId());
+        ImanityCommon.getBean(ReactionService.class).delete(message.getMessageId());
         this.enabled = false;
 
         if (removeFromDiscord) {

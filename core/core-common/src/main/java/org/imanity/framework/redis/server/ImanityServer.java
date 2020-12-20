@@ -124,7 +124,7 @@ public class ImanityServer {
         @Override
         public ImanityServer deserialize(JsonParser jsonParser, DeserializationContext deserializationContext) throws IOException, JsonProcessingException {
             if (serverHandler == null) {
-                serverHandler = ImanityCommon.getService(ServerHandler.class);
+                serverHandler = ImanityCommon.getBean(ServerHandler.class);
             }
             return serverHandler.getServer(jsonParser.getValueAsString());
         }

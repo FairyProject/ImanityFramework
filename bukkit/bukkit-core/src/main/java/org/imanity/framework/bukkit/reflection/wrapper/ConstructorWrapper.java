@@ -59,13 +59,20 @@ public class ConstructorWrapper<R> extends WrapperAbstract {
 
 	public R resolve(Object[]... args) {
 
+		Throwable lastException = null;
+
+
 		for (Object[] objects : args) {
-			R r = this.newInstance(objects);
-			if (r != null) {
-				return r;
+			try {
+				return this.constructor.newInstance(objects);
+			} catch (Throwable throwable) {
+				lastException = throwable;
 			}
 		}
 
+		if (lastException != null) {
+			throw new RuntimeException(lastException);
+		}
 		return null;
 
 	}

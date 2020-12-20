@@ -11,9 +11,9 @@ import java.lang.annotation.Target;
 @Target(ElementType.METHOD)
 public @interface CacheEvict {
 
-    @Language("JavaScript") String value();
+    @Language("SpEL") String value();
 
-    @Language("JavaScript") String condition() default "";
+    @Language("SpEL") String condition() default "";
 
     /**
      * Prevent to store value if one of argument were null
