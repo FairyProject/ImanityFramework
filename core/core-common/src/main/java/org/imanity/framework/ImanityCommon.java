@@ -70,7 +70,8 @@ public final class ImanityCommon {
 
 
             Library.BSON,
-            Library.CAFFEINE
+            Library.CAFFEINE,
+            Library.SPRING_EL
     );
     public static final String METADATA_PREFIX = "Imanity_";
 
