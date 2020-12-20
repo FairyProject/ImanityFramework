@@ -25,6 +25,7 @@ The framework to let you build plugin/backend/discord-bot or even HTTP server ea
 * [SpringBoot](https://spring.io) - Inspired on code structures design
 * [packetevents](https://github.com/retrooper/packetevents) - Revised to fit the library needs
 * [ProtocolLib](https://github.com/dmulloy2/ProtocolLib) - Revised to fit the library needs
+* [configlib](https://github.com/Exlll/ConfigLib) - Revised to fit the library needs
 * [helper](https://github.com/lucko/helper) - Revised to fit the library needs
 * [jsoncat](https://github.com/Snailclimb/jsoncat) - Revised to fit the library needs
 * [norm](https://github.com/dieselpoint/norm) - Revised to fit the library needs
