@@ -36,43 +36,14 @@ public class ComponentHolderBukkitListener extends ComponentHolder {
 
     @Override
     public Object newInstance(Class<?> type) {
-        Plugin plugin;
-        if (Imanity.TESTING) {
-            plugin = Imanity.PLUGIN;
-        } else {
-            plugin = JavaPlugin.getProvidingPlugin(type);
-        }
+        Object object = super.newInstance(type);
 
-        Object object;
-
-        try {
-            ConstructorResolver resolver = new ConstructorResolver(type);
-            object = resolver.resolveMatches(
-                    new Class[0],
-                    new Class[] {plugin.getClass()},
-                    new Class[] {JavaPlugin.class}
-            )
-                    .resolve(
-                            new Object[0],
-                            new Object[] { plugin }
-                    );
-        } catch (Throwable throwable) {
-            Imanity.LOGGER.error("Something wrong while new instance of listener " + type.getName() + "!", throwable);
-            return null;
-        }
-
-        if (object == null) {
-            Imanity.LOGGER.error("The Listener " + type.getName() + " Doesn't have matches arguments! (It would either be no args or 1 arg with plugin it self)");
-            return null;
-        }
-
-        if (Listener.class.isAssignableFrom(type)) {
-
+        if (FilteredListener.class.isAssignableFrom(type)) {
+            return object;
+        } else if (Listener.class.isAssignableFrom(type)) {
             Imanity.registerEvents((Listener) object);
-
-        } else if (!FilteredListener.class.isAssignableFrom(type)) {
+        } else {
             Imanity.LOGGER.error("The Class " + type.getSimpleName() + " wasn't implement Listener or FunctionListener!");
-
             return null;
         }
 

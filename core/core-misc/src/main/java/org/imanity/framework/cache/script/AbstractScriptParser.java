@@ -25,7 +25,7 @@ public abstract class AbstractScriptParser {
         return this.getElValue(keyEL, target, arguments, null, false, valueType);
     }
 
-    public abstract <T> T getElValue(@Language("JavaScript") String exp, Object target, Object[] arguments, Object retVal, boolean hasRetVal,
+    public abstract <T> T getElValue(String exp, Object target, Object[] arguments, Object retVal, boolean hasRetVal,
                                      Class<T> valueType) throws Exception;
 
     public abstract void addFunction(String name, Method method);

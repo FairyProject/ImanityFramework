@@ -21,14 +21,6 @@ public class SimpleBeanDetails implements BeanDetails {
     private Class<?> type;
 
     @Override
-    public void loadAnnotations() {
-    }
-
-    @Override
-    public void loadMethod(Method method) {
-    }
-
-    @Override
     public boolean shouldInitialize() throws InvocationTargetException, IllegalAccessException {
         return true;
     }
@@ -68,11 +60,6 @@ public class SimpleBeanDetails implements BeanDetails {
     }
 
     @Override
-    public void setCallAnnotations(boolean callAnnotations) {
-
-    }
-
-    @Override
     public void setStage(GenericBeanDetails.ActivationStage stage) {
 
     }
@@ -90,11 +77,6 @@ public class SimpleBeanDetails implements BeanDetails {
     @Override
     public void setTags(Map<String, String> tags) {
 
-    }
-
-    @Override
-    public boolean isCallAnnotations() {
-        return false;
     }
 
     @Override

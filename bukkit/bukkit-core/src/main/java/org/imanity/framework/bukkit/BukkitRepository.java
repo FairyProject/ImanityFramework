@@ -7,7 +7,6 @@ import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.plugin.Plugin;
 import org.imanity.framework.ImanityCommon;
 import org.imanity.framework.bukkit.listener.events.Events;
-import org.imanity.framework.bukkit.plugin.ImanityPlugin;
 import org.imanity.framework.bukkit.util.TaskUtil;
 
 import java.util.function.BiConsumer;
@@ -15,11 +14,11 @@ import java.util.function.Function;
 
 public class BukkitRepository<T> {
 
-    private Plugin plugin;
+    private final Plugin plugin;
 
     private boolean async;
     private Function<Player, T> loadAction, findAction;
-    private BiConsumer<Player, T> saveAction;
+    private BiConsumer<Player, T> saveAction, onLoaded, onSaved;
 
     public BukkitRepository(Plugin plugin) {
         this.plugin = plugin;
@@ -46,15 +45,29 @@ public class BukkitRepository<T> {
         return this;
     }
 
+    public BukkitRepository<T> onLoaded(BiConsumer<Player, T> consumer) {
+        this.onLoaded = consumer;
+        return this;
+    }
+
+    public BukkitRepository<T> onSaved(BiConsumer<Player, T> consumer) {
+        this.onSaved = consumer;
+        return this;
+    }
+
     public void init() {
         Preconditions.checkNotNull(this.loadAction, "The loadAction is not being set!");
-        Preconditions.checkNotNull(this.saveAction, "The saveAction is not being set!");
 
         Events.subscribe(PlayerJoinEvent.class)
                 .listen((subscription, event) -> {
                     Player player = event.getPlayer();
 
-                    Runnable runnable = () -> this.loadAction.apply(player);
+                    Runnable runnable = () -> {
+                        T t = this.loadAction.apply(player);
+                        if (this.onLoaded != null) {
+                            this.onLoaded.accept(player, t);
+                        }
+                    };
 
                     if (this.async) {
                         TaskUtil.runAsync(runnable);
@@ -64,20 +77,27 @@ public class BukkitRepository<T> {
                 })
         .build(plugin);
 
-        Events.subscribe(PlayerQuitEvent.class)
-                .listen((subscription, event) -> {
-                    Player player = event.getPlayer();
+        if (this.saveAction != null) {
+            Events.subscribe(PlayerQuitEvent.class)
+                    .listen((subscription, event) -> {
+                        Player player = event.getPlayer();
 
-                    T t = findAction != null ? findAction.apply(player) : loadAction.apply(player);
-                    Runnable runnable = () -> this.saveAction.accept(player, t);
+                        Runnable runnable = () -> {
+                            T t = findAction != null ? findAction.apply(player) : loadAction.apply(player);
+                            this.saveAction.accept(player, t);
+                            if (this.onSaved != null) {
+                                this.onSaved.accept(player, t);
+                            }
+                        };
 
-                    if (this.async) {
-                        TaskUtil.runAsync(runnable);
-                    } else {
-                        runnable.run();
-                    }
-                })
-        .build(plugin);
+                        if (this.async) {
+                            TaskUtil.runAsync(runnable);
+                        } else {
+                            runnable.run();
+                        }
+                    })
+                    .build(plugin);
+        }
     }
 
 }

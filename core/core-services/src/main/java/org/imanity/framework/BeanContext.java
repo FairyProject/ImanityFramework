@@ -273,10 +273,11 @@ public class BeanContext {
         Map<String, ServiceBeanDetails> sorted = new LinkedHashMap<>();
 
         while (!unloaded.isEmpty()) {
-            Iterator<ServiceBeanDetails> iterator = unloaded.values().iterator();
+            Iterator<Map.Entry<String, ServiceBeanDetails>> iterator = unloaded.entrySet().iterator();
 
             while (iterator.hasNext()) {
-                ServiceBeanDetails beanDetails = iterator.next();
+                Map.Entry<String, ServiceBeanDetails> entry = iterator.next();
+                ServiceBeanDetails beanDetails = entry.getValue();
                 boolean missingDependencies = true;
 
                 if (!beanDetails.hasDependencies()) {
@@ -294,6 +295,7 @@ public class BeanContext {
                     beanDetails.build(this);
 
                     sorted.put(beanDetails.getName(), beanDetails);
+                    iterator.remove();
                 }
             }
         }

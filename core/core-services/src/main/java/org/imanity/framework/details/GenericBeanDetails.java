@@ -117,7 +117,7 @@ public class GenericBeanDetails implements BeanDetails {
 
                 int parameterCount = method.getParameterCount();
                 if (parameterCount > 0) {
-                    if (parameterCount != 1 && method.getParameterTypes()[0] != GenericBeanDetails.class) {
+                    if (parameterCount != 1 && BeanDetails.class.isAssignableFrom(method.getParameterTypes()[0])) {
                         throw new IllegalArgumentException("The method " + method.toString() + " used annotation " + annotation.getSimpleName() + " but doesn't have matches parameters! you can only use either no parameter or one parameter with ServerData type on annotated " + annotation.getSimpleName() + "!");
                     }
                 }
@@ -229,17 +229,6 @@ public class GenericBeanDetails implements BeanDetails {
     @Override
     public void addTag(String key, String value) {
         this.tags.put(key, value);
-    }
-
-    public static enum ActivationStage {
-
-        NOT_LOADED,
-        PRE_INIT_CALLED,
-        POST_INIT_CALLED,
-
-        PRE_DESTROY_CALLED,
-        POST_DESTROY_CALLED
-
     }
 
 }

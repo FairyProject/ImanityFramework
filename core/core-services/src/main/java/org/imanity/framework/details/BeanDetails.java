@@ -13,7 +13,7 @@ public interface BeanDetails {
 
     void call(Class<? extends Annotation> annotation) throws InvocationTargetException, IllegalAccessException;
 
-    boolean isStage(GenericBeanDetails.ActivationStage stage);
+    boolean isStage(ActivationStage stage);
 
     boolean isActivated();
 
@@ -28,7 +28,7 @@ public interface BeanDetails {
 
     void setName(String name);
 
-    void setStage(GenericBeanDetails.ActivationStage stage);
+    void setStage(ActivationStage stage);
 
     void setDisallowAnnotations(java.util.Map<Class<? extends Annotation>, String> disallowAnnotations);
 
@@ -42,7 +42,7 @@ public interface BeanDetails {
 
     String getName();
 
-    GenericBeanDetails.ActivationStage getStage();
+    ActivationStage getStage();
 
     java.util.Map<Class<? extends Annotation>, String> getDisallowAnnotations();
 
@@ -54,5 +54,16 @@ public interface BeanDetails {
     Class<?> getType();
 
     java.util.Map<String, String> getTags();
+
+    public static enum ActivationStage {
+
+        NOT_LOADED,
+        PRE_INIT_CALLED,
+        POST_INIT_CALLED,
+
+        PRE_DESTROY_CALLED,
+        POST_DESTROY_CALLED
+
+    }
 
 }

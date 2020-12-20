@@ -65,7 +65,7 @@ public class GenericBeanConstructorDetails implements BeanConstructorDetails {
         try {
             return this.constructor.newInstance(parameters);
         } catch (IllegalAccessException | InstantiationException | InvocationTargetException e) {
-            throw new RuntimeException("Something wrong while constructing " + this.type.getName() + "!");
+            throw new RuntimeException("Something wrong while constructing " + this.type.getName() + "!", e);
         }
     }
 

@@ -50,7 +50,7 @@ public abstract class NameTagAdapter {
     public NameTagAdapter(final String name, final int weight) {
         this.name = name;
         this.weight = weight;
-        ImanityCommon.SERVICE_HANDLER.injectBeans(this);
+        ImanityCommon.BEAN_CONTEXT.injectBeans(this);
     }
 
 }

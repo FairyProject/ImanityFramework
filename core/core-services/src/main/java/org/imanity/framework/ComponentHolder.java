@@ -34,13 +34,13 @@ public abstract class ComponentHolder {
     }
 
     public Object newInstance(BeanConstructorDetails constructorDetails) {
-        return constructorDetails.newInstance();
+        return constructorDetails.newInstance(BeanContext.INSTANCE);
     }
 
     public abstract Class<?>[] type();
 
     public BeanConstructorDetails constructorDetails(Class<?> type) {
-        return new GenericBeanConstructorDetails(type);
+        return new GenericBeanConstructorDetails(type, BeanContext.INSTANCE);
     }
 
 }

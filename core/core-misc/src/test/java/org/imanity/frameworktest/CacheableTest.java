@@ -96,32 +96,32 @@ public class CacheableTest {
     @EnableOwnCacheManager
     private static final class Imanity {
 
-        @Cacheable(key = "'test-' + args[0]")
+        @Cacheable(key = "'test-' + #args[0]")
         public long test(int id) {
             return RANDOM.nextLong();
         }
 
-        @Cacheable(key = "'test-' + args[0].getId()")
+        @Cacheable(key = "'test-' + #args[0].getId()")
         public long test(ImanityDummy dummy) {
             return RANDOM.nextLong();
         }
 
-        @Cacheable(key = "'test-' + args[0]")
+        @Cacheable(key = "'test-' + #args[0]")
         public String test() {
             return "hi";
         }
 
-        @Cacheable(key = "'test-' + args[0]")
+        @Cacheable(key = "'test-' + #args[0]")
         public String test(String text) {
             return "lol";
         }
 
-        @CacheEvict(value = "'test-' + args[0]")
+        @CacheEvict(value = "'test-' + #args[0]")
         public void evict(int id) {
 
         }
 
-        @CachePut(value = "'test-' + args[0]")
+        @CachePut(value = "'test-' + #args[0]")
         public long put(int id, long value) {
             return value;
         }

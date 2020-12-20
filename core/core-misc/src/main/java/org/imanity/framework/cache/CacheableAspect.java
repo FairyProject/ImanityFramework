@@ -19,6 +19,7 @@ import org.imanity.framework.cache.impl.CacheKeyMethod;
 import org.imanity.framework.cache.impl.CacheKeyString;
 import org.imanity.framework.cache.script.AbstractScriptParser;
 import org.imanity.framework.cache.script.JavaScriptParser;
+import org.imanity.framework.cache.script.SpringELParser;
 import org.intellij.lang.annotations.Language;
 
 import java.lang.reflect.Method;
@@ -59,7 +60,7 @@ public class CacheableAspect {
 
         this.defaultCacheManager = new CacheManager(this);
         this.cacheManagers = new ConcurrentHashMap<>(0);
-        this.scriptParser = new JavaScriptParser();
+        this.scriptParser = new SpringELParser();
 
         CLEANER_SERVICE.scheduleAtFixedRate(() -> {
             this.defaultCacheManager.clean();
@@ -117,7 +118,7 @@ public class CacheableAspect {
     }
 
     @SneakyThrows
-    public boolean checkCondition(@Language("JavaScript") String condition, Object target, Object[] arguments, Object retVal, boolean hasRetVal) {
+    public boolean checkCondition(@Language("SpEL") String condition, Object target, Object[] arguments, Object retVal, boolean hasRetVal) {
         boolean result = true;
         if (arguments != null && arguments.length > 0 && condition != null && condition.length() > 0) {
             result = this.scriptParser.getElValue(condition, target, arguments, retVal, hasRetVal, Boolean.class);
@@ -131,7 +132,7 @@ public class CacheableAspect {
 
         final Cacheable annotation = method.getAnnotation(Cacheable.class);
         CacheKeyAbstract key = this.toKey(point, readAnnotationKey(point, annotation.key(), annotation.preventArgumentNull()));
-        @Language("JavaScript") String condition = annotation.condition();
+        @Language("SpEL") String condition = annotation.condition();
 
         CacheManager manager = this.getCacheManager(method.getDeclaringClass());
         CacheWrapper<?> wrapper = manager.find(key);
