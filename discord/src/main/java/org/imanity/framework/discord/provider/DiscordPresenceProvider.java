@@ -25,11 +25,17 @@
 package org.imanity.framework.discord.provider;
 
 import net.dv8tion.jda.api.entities.Member;
+import org.imanity.framework.command.PresenceProvider;
 import org.imanity.framework.discord.command.DiscordCommandEvent;
 
 import javax.annotation.Nullable;
 
-public class DiscordPresenceProvider {
+public class DiscordPresenceProvider extends PresenceProvider<DiscordCommandEvent> {
+
+    @Override
+    public Class<DiscordCommandEvent> type() {
+        return DiscordCommandEvent.class;
+    }
 
     @Nullable
     public String prefix(Member member) {

@@ -33,7 +33,6 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.bukkit.Sound;
 import org.bukkit.World;
-import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Event;
 import org.bukkit.event.Listener;
@@ -46,6 +45,7 @@ import org.imanity.framework.bukkit.bossbar.BossBarAdapter;
 import org.imanity.framework.bukkit.bossbar.BossBarHandler;
 import org.imanity.framework.bukkit.chunk.KeepChunkHandler;
 import org.imanity.framework.bukkit.chunk.block.CacheBlockSetHandler;
+import org.imanity.framework.bukkit.command.presence.DefaultPresenceProvider;
 import org.imanity.framework.bukkit.events.player.PlayerLocaleLoadedEvent;
 import org.imanity.framework.bukkit.hologram.HologramHandler;
 import org.imanity.framework.bukkit.impl.*;
@@ -68,6 +68,7 @@ import org.imanity.framework.bukkit.util.*;
 import org.imanity.framework.bukkit.tablist.ImanityTabAdapter;
 import org.imanity.framework.bukkit.tablist.ImanityTabHandler;
 import org.imanity.framework.bukkit.visual.VisualBlockHandler;
+import org.imanity.framework.command.CommandService;
 import org.imanity.framework.locale.LocaleRepository;
 import org.imanity.framework.locale.player.LocaleData;
 import org.imanity.framework.plugin.PluginClassLoader;
@@ -134,6 +135,8 @@ public final class Imanity {
                 .eventHandler(new BukkitEventHandler())
                 .taskScheduler(new BukkitTaskScheduler())
         .init();
+
+        ImanityCommon.getBean(CommandService.class).registerDefaultPresenceProvider(new DefaultPresenceProvider());
 
         if (ImanityCommon.CORE_CONFIG.USE_LOCALE) {
             new BukkitRepository<LocaleData>(PLUGIN)

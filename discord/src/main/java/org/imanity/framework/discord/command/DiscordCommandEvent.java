@@ -107,26 +107,6 @@ public class DiscordCommandEvent extends CommandEvent {
     }
 
     @Override
-    public void sendUsage(String usage) {
-        DiscordService.INSTANCE.getPresenceProvider().sendUsage(this, usage);
-    }
-
-    @Override
-    public void sendError(Throwable exception) {
-        DiscordService.INSTANCE.getPresenceProvider().sendError(this, exception);
-    }
-
-    @Override
-    public void sendNoPermission() {
-        DiscordService.INSTANCE.getPresenceProvider().sendNoPermission(this);
-    }
-
-    @Override
-    public void sendInternalError(String message) {
-        DiscordService.INSTANCE.getPresenceProvider().sendInternalError(this, message);
-    }
-
-    @Override
     public boolean shouldExecute(CommandMeta meta, String[] arguments) {
 
         if (meta.getMethod().getAnnotation(OnlyPrivate.class) != null && !this.isPrivate()) {

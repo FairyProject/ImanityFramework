@@ -38,6 +38,7 @@ import org.imanity.framework.boot.console.ForwardLogHandler;
 import org.imanity.framework.boot.console.ImanityConsole;
 import org.imanity.framework.boot.console.OptionHandler;
 import org.imanity.framework.boot.console.command.ConsoleCommandEvent;
+import org.imanity.framework.boot.console.command.ConsolePresenceProvider;
 import org.imanity.framework.boot.enums.ProgramStatus;
 import org.imanity.framework.boot.error.ErrorHandler;
 import org.imanity.framework.boot.impl.IndependentCommandExecutor;
@@ -145,8 +146,9 @@ public final class FrameworkBootable {
                     .taskScheduler(this.taskScheduler)
                     .eventHandler(new IndependentEventHandler())
                     .commandExecutor(new IndependentCommandExecutor());
-
             builder.init();
+
+            ImanityCommon.getBean(CommandService.class).registerDefaultPresenceProvider(new ConsolePresenceProvider());
 
             Runtime.getRuntime().addShutdownHook(new Thread(this::shutdown, "Shutdown Thread"));
 

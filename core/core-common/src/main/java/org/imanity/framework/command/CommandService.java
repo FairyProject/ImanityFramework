@@ -26,15 +26,19 @@ package org.imanity.framework.command;
 
 import com.google.common.collect.ImmutableSet;
 import lombok.Getter;
+import lombok.SneakyThrows;
 import org.imanity.framework.*;
 import org.imanity.framework.command.annotation.Command;
 import org.imanity.framework.command.annotation.CommandHolder;
+import org.imanity.framework.command.annotation.CommandPresence;
 import org.imanity.framework.command.annotation.Parameter;
 import org.imanity.framework.command.parameter.ParameterHolder;
 import org.imanity.framework.command.parameter.ParameterMeta;
 
+import javax.annotation.Nullable;
 import java.lang.reflect.Method;
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 
 @Service(name = "command")
 @Getter
@@ -44,11 +48,16 @@ public class CommandService {
 
     private CommandProvider provider;
     private Map<Class<?>, ParameterHolder> parameters;
+    private Map<Class<?>, PresenceProvider> presenceProvidersByHolder;
     private List<CommandMeta> commands;
+
+    private Map<Class<?>, PresenceProvider> defaultPresenceProviders;
 
     @PreInitialize
     public void preInit() {
         this.parameters = new HashMap<>();
+        this.presenceProvidersByHolder = new ConcurrentHashMap<>();
+        this.defaultPresenceProviders = new ConcurrentHashMap<>();
 
         this.commands = new ArrayList<>();
 
@@ -61,7 +70,7 @@ public class CommandService {
             @Override
             public Object newInstance(Class<?> type) {
                 Object object = super.newInstance(type);
-                registerCommandHolder(object);
+                registerCommandHolder(object, type);
                 return object;
             }
         });
@@ -87,21 +96,49 @@ public class CommandService {
         INSTANCE = this;
     }
 
+    public void registerDefaultPresenceProvider(PresenceProvider presenceProvider) {
+        this.defaultPresenceProviders.put(presenceProvider.type(), presenceProvider);
+    }
+
     public void registerParameterHolder(ParameterHolder parameterHolder) {
         for (Class type : parameterHolder.type()) {
             this.parameters.put(type, parameterHolder);
         }
     }
 
-    public void registerCommandHolder(Object holder) {
+    @SneakyThrows
+    public PresenceProvider getPresenceProviderByAnnotation(CommandPresence annotation) {
+        Class<? extends PresenceProvider> type = annotation.value();
+        if (this.presenceProvidersByHolder.containsKey(type)) {
+            return this.presenceProvidersByHolder.get(type);
+        }
+
+        PresenceProvider presenceProvider = type.newInstance();
+        this.presenceProvidersByHolder.put(type, presenceProvider);
+        return presenceProvider;
+    }
+
+    @Nullable
+    public PresenceProvider getPresenceProviderByType(Class<?> type) {
+        return this.defaultPresenceProviders.getOrDefault(type, null);
+    }
+
+    public void registerCommandHolder(Object holder, Class<?> type) {
+        PresenceProvider<?> presenceProvider = null;
+        CommandPresence annotation = type.getAnnotation(CommandPresence.class);
+        if (annotation != null) {
+            presenceProvider = this.getPresenceProviderByAnnotation(annotation);
+        }
+
         for (Method method : holder.getClass().getDeclaredMethods()) {
-            if (method.getAnnotation(Command.class) != null) {
-                Command command = method.getAnnotation(Command.class);
+            Command command = method.getAnnotation(Command.class);
+            if (command != null) {
 
                 final List<ParameterMeta> parameterData = new ArrayList<>();
+                Class<?>[] parameters = method.getParameterTypes();
 
                 // Offset of 1 here for the sender parameter.
-                for (int parameterIndex = 1; parameterIndex < method.getParameterTypes().length; parameterIndex++) {
+                for (int parameterIndex = 1; parameterIndex < parameters.length; parameterIndex++) {
                     java.lang.reflect.Parameter parameter = method.getParameters()[parameterIndex];
                     Parameter parameterAnnotation = parameter.getAnnotation(Parameter.class);
 
@@ -111,8 +148,24 @@ public class CommandService {
                         parameterData.add(new ParameterMeta(parameter.getName(), false, "", new String[] {""}, parameter.getType()));
                     }
                 }
+                PresenceProvider<?> presenceProviderMethod = presenceProvider;
+                CommandPresence annotationMethod = method.getAnnotation(CommandPresence.class);
+                if (annotationMethod != null) {
+                    presenceProviderMethod = this.getPresenceProviderByAnnotation(annotationMethod);
+                }
+                if (presenceProviderMethod == null) {
+                    presenceProviderMethod = this.getPresenceProviderByType(parameters[0]);
+                }
 
-                CommandMeta meta = new CommandMeta(command.names(), command.permissionNode(), parameterData, holder, method);
+                if (presenceProviderMethod == null) {
+                    throw new IllegalArgumentException("The method " + method + " with first parameters " + parameters[0].getSimpleName() + " doesn't have match presence provider!");
+                }
+
+                if (!parameters[0].isAssignableFrom(presenceProviderMethod.type())) {
+                    throw new IllegalArgumentException("The method " + method + " with first parameters " + parameters[0].getSimpleName() + " doesn't match to " + presenceProviderMethod.getClass().getSimpleName() + " (requires type: " + presenceProviderMethod.type().getSimpleName() + ")");
+                }
+
+                CommandMeta meta = new CommandMeta(command.names(), command.permissionNode(), parameterData, holder, method, presenceProviderMethod);
                 this.commands.add(meta);
             }
         }
@@ -182,6 +235,8 @@ public class CommandService {
         if (commandMeta == null) {
             return false;
         }
+
+        commandEvent.setPresenceProvider(commandMeta.getPresenceProvider());
 
         if (!commandMeta.canAccess(user)) {
             commandEvent.sendNoPermission();

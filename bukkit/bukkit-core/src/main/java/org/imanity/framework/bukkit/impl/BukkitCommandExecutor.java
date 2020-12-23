@@ -30,6 +30,7 @@ import org.imanity.framework.command.ICommandExecutor;
 import org.imanity.framework.redis.server.ImanityServer;
 
 public class BukkitCommandExecutor implements ICommandExecutor {
+
     @Override
     public void execute(String command, String context, String executor, ImanityServer server) {
         NetworkCommandExecuteEvent event = new NetworkCommandExecuteEvent(server, command, context, executor);

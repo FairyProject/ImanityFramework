@@ -31,9 +31,9 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.ImmutableSet;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
-import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.imanity.framework.command.ICommandExecutor;
+import org.imanity.framework.command.PresenceProvider;
 import org.imanity.framework.config.CoreConfig;
 import org.imanity.framework.events.IEventHandler;
 import org.imanity.framework.exception.OptionNotEnabledException;
@@ -54,8 +54,6 @@ import java.util.*;
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public final class ImanityCommon {
 
-    private static final Logger LOGGER = LogManager.getLogger(ImanityCommon.class);
-
     private static final Set<Library> GLOBAL_LIBRARIES = ImmutableSet.of(
             // SQL
             Library.MARIADB_DRIVER,
@@ -68,9 +66,11 @@ public final class ImanityCommon {
             Library.MONGO_DB_SYNC,
             Library.MONGO_DB_CORE,
 
-
             Library.BSON,
             Library.CAFFEINE,
+
+            // Spring
+            Library.SPRING_CORE,
             Library.SPRING_EL
     );
     public static final String METADATA_PREFIX = "Imanity_";
@@ -215,6 +215,7 @@ public final class ImanityCommon {
 
     public static class Builder {
 
+        private PresenceProvider<?> presenceProvider;
         private ImanityPlatform platform;
         private ICommandExecutor commandExecutor;
         private IEventHandler eventHandler;

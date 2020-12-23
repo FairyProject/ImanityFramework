@@ -25,9 +25,7 @@
 package org.imanity.framework.discord;
 
 import com.google.common.base.Preconditions;
-import com.google.common.collect.ImmutableList;
 import lombok.Getter;
-import lombok.Setter;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.JDABuilder;
 import net.dv8tion.jda.api.entities.*;
@@ -50,8 +48,6 @@ import org.imanity.framework.discord.provider.DiscordPresenceProvider;
 
 import javax.security.auth.login.LoginException;
 import java.util.*;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 @Service(name = "discord")
 @Getter
@@ -105,6 +101,7 @@ public class DiscordService {
                 return provider;
             }
         });
+
     }
 
     @PostInitialize
@@ -191,6 +188,7 @@ public class DiscordService {
 
     public void withPresenceProvider(DiscordPresenceProvider presenceProvider) {
         this.presenceProvider = presenceProvider;
+        this.commandService.registerDefaultPresenceProvider(presenceProvider);
     }
 
     public void registerListener(ListenerAdapter listener) {
@@ -225,7 +223,6 @@ public class DiscordService {
         if (prefix == null || prefix.length() == 0) {
             return;
         }
-
 
         // Doesn't match to prefix
         if (!rawMessage.startsWith(prefix)) {

@@ -25,6 +25,7 @@
 package org.imanity.framework.command;
 
 import lombok.Getter;
+import lombok.Setter;
 
 import javax.annotation.Nullable;
 
@@ -35,6 +36,8 @@ public class CommandEvent {
     private final Object user;
 
     private final String command;
+    @Setter
+    private PresenceProvider<?> presenceProvider;
 
     public CommandEvent(@Nullable Object user, String command) {
         this.user = user;
@@ -52,20 +55,20 @@ public class CommandEvent {
         return (T) this;
     }
 
-    public void sendUsage(String usage) {
-
+    public final void sendUsage(String usage) {
+        this.presenceProvider.sendUsage0(this, usage);
     }
 
-    public void sendError(Throwable throwable) {
-
+    public final void sendError(Throwable throwable) {
+        this.presenceProvider.sendError0(this, throwable);
     }
 
-    public void sendNoPermission() {
-
+    public final void sendNoPermission() {
+        this.presenceProvider.sendNoPermission0(this);
     }
 
-    public void sendInternalError(String message) {
-
+    public final void sendInternalError(String message) {
+        this.presenceProvider.sendInternalError0(this, message);
     }
 
     public boolean shouldExecute(CommandMeta meta, String[] arguments) {

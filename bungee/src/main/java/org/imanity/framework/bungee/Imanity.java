@@ -33,6 +33,7 @@ import org.imanity.framework.ImanityCommon;
 import org.imanity.framework.bungee.impl.*;
 import org.imanity.framework.bungee.plugin.ImanityPlugin;
 import org.imanity.framework.ComponentRegistry;
+import org.imanity.framework.command.CommandService;
 import org.imanity.framework.plugin.PluginClassLoader;
 import org.imanity.framework.task.TaskChainFactory;
 
@@ -69,6 +70,8 @@ public class Imanity {
                 .eventHandler(new BungeeEventHandler())
                 .taskScheduler(new BungeeTaskScheduler())
         .init();
+
+        ImanityCommon.getBean(CommandService.class).registerDefaultPresenceProvider(new DefaultPresenceBuilder());
     }
 
     public static ProxyServer getProxy() {

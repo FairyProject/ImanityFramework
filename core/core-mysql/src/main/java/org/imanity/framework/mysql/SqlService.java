@@ -113,9 +113,13 @@ public class SqlService {
             throw new IllegalArgumentException("The type " + type.getSimpleName() + " wasn't implemented on AbstractMongoConfiguration!");
         }
 
-        AbstractConnectionFactory factory = this.connectionFactories.get(type);
+        if (this.connectionFactories == null) {
+            throw new IllegalArgumentException("SQLService haven't been loaded!");
+        }
+
+        AbstractConnectionFactory factory = this.connectionFactories.getOrDefault(type, null);
         if (factory == null) {
-            throw new IllegalArgumentException("The database hasn't registered");
+            throw new IllegalArgumentException("The database hasn't registered!");
         }
 
         return factory;

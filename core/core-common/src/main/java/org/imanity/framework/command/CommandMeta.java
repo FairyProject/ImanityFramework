@@ -43,6 +43,7 @@ public class CommandMeta {
     private final List<ParameterMeta> parameters;
     private final Object instance;
     private final Method method;
+    private final PresenceProvider presenceProvider;
 
     public String getName() {
         return names[0];

@@ -140,6 +140,12 @@ public class Library {
                     "i3MvlHBXDUqEHcHvbIJrWGl4sluoMHEv8fpZ3idd+mE=",
             new Relocate("com{}zaxxer{}hikari", IMANITY_LIB_PACKAGE + "hikari")
     ),
+    SPRING_CORE = new Library(
+            "org.springframework",
+            "spring-core",
+            "5.3.2",
+            null
+    ),
     SPRING_EL = new Library(
             "org.springframework",
             "spring-expression",

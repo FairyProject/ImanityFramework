@@ -39,23 +39,4 @@ public class ConsoleCommandEvent extends CommandEvent {
         return "console";
     }
 
-    @Override
-    public void sendError(Throwable throwable) {
-        FrameworkBootable.LOGGER.error(CC.RED + "Some error occurs while executing your command", throwable);
-    }
-
-    @Override
-    public void sendInternalError(String message) {
-        FrameworkBootable.LOGGER.error(CC.RED + "Some error occurs while executing your command: " + message);
-    }
-
-    @Override
-    public void sendNoPermission() {
-        FrameworkBootable.LOGGER.error(CC.RED + "You have no permission.");
-    }
-
-    @Override
-    public void sendUsage(String usage) {
-        FrameworkBootable.LOGGER.error(CC.RED + "Wrong Usage: " + usage);
-    }
 }
