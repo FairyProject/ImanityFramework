@@ -9,6 +9,7 @@ import org.imanity.framework.details.constructor.BeanConstructorDetails;
 import org.imanity.framework.details.constructor.GenericBeanConstructorDetails;
 
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Set;
 
 @Getter
@@ -22,6 +23,7 @@ public class ServiceBeanDetails extends GenericBeanDetails {
         super(type, name);
 
         this.dependencies = Sets.newHashSet(dependencies);
+        this.loadAnnotations();
     }
 
     public void setupConstruction(BeanContext beanContext) {
@@ -46,17 +48,14 @@ public class ServiceBeanDetails extends GenericBeanDetails {
     }
 
     @Override
-    public void loadAnnotations() {
-        super.loadAnnotations();
+    public void loadAnnotations(Collection<Class<?>> superClasses) {
+        super.loadAnnotations(superClasses);
 
-        Class<?> type = this.getType();
-        while (type != null && type != Object.class) {
+        for (Class<?> type : superClasses) {
             ServiceDependency dependencyAnnotation = type.getAnnotation(ServiceDependency.class);
             if (dependencyAnnotation != null) {
                 dependencies.addAll(Arrays.asList(dependencyAnnotation.dependencies()));
             }
-
-            type = type.getSuperclass();
         }
     }
 }

@@ -35,6 +35,7 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import lombok.SneakyThrows;
 import org.imanity.framework.*;
+import org.imanity.framework.util.Utility;
 import org.jetbrains.annotations.Nullable;
 
 @Getter
@@ -68,7 +69,10 @@ public class GenericBeanDetails implements BeanDetails {
     }
 
     public GenericBeanDetails(Class<?> type, String name) {
-        this(type, null, name);
+        this.type = type;
+        this.name = name;
+        this.stage = ActivationStage.NOT_LOADED;
+        this.tags = new ConcurrentHashMap<>(0);
     }
 
     public GenericBeanDetails(Class<?> type, @Nullable Object instance, String name) {
@@ -86,24 +90,27 @@ public class GenericBeanDetails implements BeanDetails {
         this.annotatedMethods = new HashMap<>();
         this.disallowAnnotations = new HashMap<>();
 
-        Class<?> type = this.type;
-        while (type != null && type != Object.class) {
+        this.loadAnnotations(Utility.getSuperAndInterfaces(this.type));
+    }
+
+    public void loadAnnotations(Collection<Class<?>> superClasses) {
+        for (Class<?> type : superClasses) {
             DisallowAnnotation disallowAnnotation = type.getAnnotation(DisallowAnnotation.class);
             if (disallowAnnotation != null) {
                 for (Class<? extends Annotation> annotation : disallowAnnotation.value()) {
                     this.disallowAnnotations.put(annotation, type.getName());
                 }
             }
-
-            type = type.getSuperclass();
         }
 
-        type = this.type;
-        while (type != null && type != Object.class) {
+        for (Class<?> type : superClasses) {
+            if (type.isInterface()) {
+                continue;
+            }
+
             for (Method method : type.getDeclaredMethods()) {
                 this.loadMethod(method);
             }
-            type = type.getSuperclass();
         }
     }
 
@@ -117,7 +124,7 @@ public class GenericBeanDetails implements BeanDetails {
 
                 int parameterCount = method.getParameterCount();
                 if (parameterCount > 0) {
-                    if (parameterCount != 1 && BeanDetails.class.isAssignableFrom(method.getParameterTypes()[0])) {
+                    if (parameterCount != 1 || !BeanDetails.class.isAssignableFrom(method.getParameterTypes()[0])) {
                         throw new IllegalArgumentException("The method " + method.toString() + " used annotation " + annotation.getSimpleName() + " but doesn't have matches parameters! you can only use either no parameter or one parameter with ServerData type on annotated " + annotation.getSimpleName() + "!");
                     }
                 }

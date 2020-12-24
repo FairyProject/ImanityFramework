@@ -3,6 +3,7 @@ package org.imanity.framework.locale;
 import org.imanity.framework.*;
 import org.imanity.framework.cache.EnableOwnCacheManager;
 import org.imanity.framework.locale.player.LocaleData;
+import org.imanity.framework.util.Utility;
 
 import java.util.UUID;
 
