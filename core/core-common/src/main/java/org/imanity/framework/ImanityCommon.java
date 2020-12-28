@@ -32,6 +32,8 @@ import com.google.common.collect.ImmutableSet;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 import org.apache.logging.log4j.Logger;
+import org.imanity.framework.cache.CacheableAspect;
+import org.imanity.framework.cache.manager.CacheManager;
 import org.imanity.framework.command.ICommandExecutor;
 import org.imanity.framework.command.PresenceProvider;
 import org.imanity.framework.config.CoreConfig;
@@ -161,11 +163,15 @@ public final class ImanityCommon {
         return ImanityCommon.PLATFORM.getLogger();
     }
 
+    public static CacheManager getCacheManagerFor(Class<?> bean) {
+        return CacheableAspect.INSTANCE.getCacheManager(bean);
+    }
+
     public static <T> T getBean(Class<T> type) {
         return (T) BEAN_CONTEXT.getBean(type);
     }
 
-    public static void registerAutowired(Object instance) {
+    public static void injectBean(Object instance) {
         BEAN_CONTEXT.injectBeans(instance);
     }
 

@@ -53,7 +53,7 @@ final class CommandMap extends SimpleCommandMap {
 	public CommandMap(Server server) {
 		super(server);
 
-		ImanityCommon.registerAutowired(this);
+		ImanityCommon.injectBean(this);
 	}
 
 	@Override

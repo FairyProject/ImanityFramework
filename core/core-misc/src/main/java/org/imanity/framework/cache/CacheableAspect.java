@@ -17,8 +17,9 @@ import org.imanity.framework.Cacheable;
 import org.imanity.framework.cache.impl.CacheKeyAbstract;
 import org.imanity.framework.cache.impl.CacheKeyMethod;
 import org.imanity.framework.cache.impl.CacheKeyString;
+import org.imanity.framework.cache.manager.CacheManager;
+import org.imanity.framework.cache.manager.CacheManagerConcurrentMap;
 import org.imanity.framework.cache.script.AbstractScriptParser;
-import org.imanity.framework.cache.script.JavaScriptParser;
 import org.imanity.framework.cache.script.SpringELParser;
 import org.intellij.lang.annotations.Language;
 
@@ -37,6 +38,7 @@ import java.util.concurrent.*;
 public class CacheableAspect {
 
     public static final Logger LOGGER = LogManager.getLogger(CacheableAspect.class);
+    public static CacheableAspect INSTANCE;
 
     private transient final CacheManager defaultCacheManager;
     private transient final Map<Class<?>, CacheManager> cacheManagers;
@@ -47,6 +49,8 @@ public class CacheableAspect {
     private final AbstractScriptParser scriptParser;
 
     public CacheableAspect() {
+        INSTANCE = this;
+
         CLEANER_SERVICE = Executors.newSingleThreadScheduledExecutor(new ThreadFactoryBuilder()
                 .setNameFormat("cacheable-clean")
                 .setDaemon(true)
@@ -58,7 +62,10 @@ public class CacheableAspect {
                 .build()
         );
 
-        this.defaultCacheManager = new CacheManager(this);
+        this.defaultCacheManager = new CacheManagerConcurrentMap();
+        this.defaultCacheManager.init(this)
+        ;
+
         this.cacheManagers = new ConcurrentHashMap<>(0);
         this.scriptParser = new SpringELParser();
 
@@ -101,9 +108,16 @@ public class CacheableAspect {
     public CacheManager getCacheManager(Class<?> type) {
         CacheManager cacheManager = this.cacheManagers.getOrDefault(type, null);
 
-        if (cacheManager == null && type.getAnnotation(EnableOwnCacheManager.class) != null) {
-            cacheManager = new CacheManager(this);
-            this.cacheManagers.put(type, cacheManager);
+        if (cacheManager == null) {
+            EnableOwnCacheManager annotation = type.getAnnotation(EnableOwnCacheManager.class);
+            if (annotation != null) {
+                try {
+                    cacheManager = annotation.value().newInstance();
+                } catch (Throwable throwable) {
+                    throw new RuntimeException("Something wrong while creating Cache Manager instance for " + type.getName() + "!", throwable);
+                }
+                this.cacheManagers.put(type, cacheManager);
+            }
         }
 
         return cacheManager == null ? this.defaultCacheManager : cacheManager;

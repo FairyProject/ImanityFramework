@@ -30,7 +30,6 @@ import org.imanity.framework.ImanityCommon;
 import org.imanity.framework.bukkit.util.items.ImanityItem;
 import org.imanity.framework.bukkit.util.items.ItemBuilder;
 import org.imanity.framework.config.annotation.ConfigurationElement;
-import org.imanity.framework.config.annotation.IgnoredElement;
 import org.imanity.framework.locale.Locale;
 
 import java.util.HashMap;
@@ -47,7 +46,7 @@ public class ItemStackElement {
     private Map<String, String> DISPLAY_NAME_LOCALES = new HashMap<>();
     private Map<String, String> DISPLAY_LORE_LOCALES = new HashMap<>();
 
-    @IgnoredElement private ImanityItem item;
+    private transient ImanityItem item;
 
     public void register() {
 

@@ -74,7 +74,7 @@ public class ImanityTabHandler {
 
         this.adapter = adapter;
 
-        ImanityCommon.registerAutowired(this);
+        ImanityCommon.injectBean(this);
 
         this.registerImplementation();
         this.setup();
