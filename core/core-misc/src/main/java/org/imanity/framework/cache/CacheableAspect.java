@@ -116,6 +116,7 @@ public class CacheableAspect {
                 } catch (Throwable throwable) {
                     throw new RuntimeException("Something wrong while creating Cache Manager instance for " + type.getName() + "!", throwable);
                 }
+                cacheManager.init(this);
                 this.cacheManagers.put(type, cacheManager);
             }
         }
