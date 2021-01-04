@@ -136,8 +136,6 @@ public final class Imanity {
                 .taskScheduler(new BukkitTaskScheduler())
         .init();
 
-        ImanityCommon.getBean(CommandService.class).registerDefaultPresenceProvider(new DefaultPresenceProvider());
-
         if (ImanityCommon.CORE_CONFIG.USE_LOCALE) {
             new BukkitRepository<LocaleData>(PLUGIN)
                     .async()

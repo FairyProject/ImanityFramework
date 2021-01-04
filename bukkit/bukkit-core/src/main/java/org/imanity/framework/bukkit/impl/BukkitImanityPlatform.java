@@ -112,8 +112,8 @@ public class BukkitImanityPlatform implements ImanityPlatform {
         return Imanity.IMPLEMENTATION.isServerThread();
     }
 
-    @Override
-    public void preServiceLoaded() {
-        Imanity.IMPLEMENTATION = ServerImplementation.load();
-    }
+//    @Override
+//    public void preServiceLoaded() {
+//        Imanity.IMPLEMENTATION = ServerImplementation.load();
+//    }
 }

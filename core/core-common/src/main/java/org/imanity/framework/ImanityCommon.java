@@ -109,7 +109,7 @@ public final class ImanityCommon {
 
         ClassFactory.loadClasses();
 
-        ImanityCommon.PLATFORM.preServiceLoaded();
+//        ImanityCommon.PLATFORM.preServiceLoaded();
 
         ImanityCommon.BEAN_CONTEXT = new BeanContext();
         ImanityCommon.BEAN_CONTEXT.registerServices();

@@ -67,7 +67,13 @@ public abstract class Menu {
 	private boolean updateAfterClick = true;
 	private boolean autoClose = false;
 	private boolean closedByMenu = false;
+
+	@Setter
 	private boolean placeholder = false;
+
+	@Setter
+	private boolean fillBorders = false;
+
 	private long openMillis, lastAccessMillis;
 	private org.imanity.framework.bukkit.menu.Button placeholderButton = org.imanity.framework.bukkit.menu.Button.placeholder(Material.STAINED_GLASS_PANE, (byte) 15, " ");
 
@@ -123,6 +129,30 @@ public abstract class Menu {
 
 		if (this.isPlaceholder()) {
 			for (int index = 0; index < size; index++) {
+				if (this.buttons.get(index) == null) {
+					this.buttons.put(index, this.placeholderButton);
+					inventory.setItem(index, this.placeholderButton.getButtonItem(player));
+				}
+			}
+		} else if (this.isFillBorders() && size >= 27) { // Requires 3 rows of inventory to do it
+			for (int index = 0; index < 9; index++) {
+				if (this.buttons.get(index) == null) {
+					this.buttons.put(index, this.placeholderButton);
+					inventory.setItem(index, this.placeholderButton.getButtonItem(player));
+				}
+			}
+			for (int index = 9; index < size - 9; index+= 9) {
+				if (this.buttons.get(index) == null) {
+					this.buttons.put(index, this.placeholderButton);
+					inventory.setItem(index, this.placeholderButton.getButtonItem(player));
+				}
+
+				if (this.buttons.get(index + 8) == null) {
+					this.buttons.put(index + 8, this.placeholderButton);
+					inventory.setItem(index + 8, this.placeholderButton.getButtonItem(player));
+				}
+			}
+			for (int index = size - 9; index < size; index++) {
 				if (this.buttons.get(index) == null) {
 					this.buttons.put(index, this.placeholderButton);
 					inventory.setItem(index, this.placeholderButton.getButtonItem(player));

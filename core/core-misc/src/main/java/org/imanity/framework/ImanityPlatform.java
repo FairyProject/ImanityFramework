@@ -57,8 +57,4 @@ public interface ImanityPlatform {
 
     boolean isServerThread();
 
-    default void preServiceLoaded() {
-
-    }
-
 }

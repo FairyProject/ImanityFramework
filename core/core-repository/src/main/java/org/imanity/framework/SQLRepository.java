@@ -37,6 +37,10 @@ public abstract class SQLRepository<T, ID extends Serializable> implements Repos
     }
 
     public <T> T performSessionResult(Function<Session, T> sessionConsumer) {
+        if (this.factory == null) {
+            throw new IllegalArgumentException("Attempt to perform action before repository initialized!");
+        }
+
         T result = null;
 
         Transaction transaction = null;
