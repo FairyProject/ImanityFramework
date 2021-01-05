@@ -170,7 +170,13 @@ final class CommandMap extends SimpleCommandMap {
 
 	@Override
 	public boolean dispatch(CommandSender sender, String commandLine) throws CommandException {
-		final String command = commandLine.substring(1);
+		// (Whiizyyy start) - Supposed to fix error when you execute empty command
+		if (commandLine == null || commandLine.equals("") || commandLine.equals(" ")) {
+			return false;
+		}
+		// Whiizyyy end
+
+		final String command = commandLine.substring(1); // Throw error if commandLine is empty
 
 		if (sender instanceof Player) {
 			CommandMap.parameters.put(((Player) sender).getUniqueId(), command.split(" "));
@@ -185,10 +191,8 @@ final class CommandMap extends SimpleCommandMap {
 		if (sender instanceof ConsoleCommandSender) {
 			ServerCommandEvent event = new ServerCommandEvent(sender, commandLine);
 			Bukkit.getPluginManager().callEvent(event);
-			if (event.isCancelled()) return false;
-			return true;
+			return !event.isCancelled();
 		}
-
 		return b;
 	}
 
