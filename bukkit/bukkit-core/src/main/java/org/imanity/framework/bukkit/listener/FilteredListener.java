@@ -24,16 +24,15 @@
 
 package org.imanity.framework.bukkit.listener;
 
-import co.aikar.timings.TimedEventExecutor;
 import com.google.common.collect.ImmutableSet;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.bukkit.event.*;
-import org.bukkit.plugin.EventExecutor;
-import org.bukkit.plugin.IllegalPluginAccessException;
-import org.bukkit.plugin.Plugin;
-import org.bukkit.plugin.RegisteredListener;
+import org.bukkit.plugin.*;
+import org.bukkit.plugin.java.JavaPluginLoader;
 import org.imanity.framework.bukkit.listener.annotation.IgnoredFilters;
+import org.imanity.framework.bukkit.listener.timings.TimedEventExecutor;
+import org.spigotmc.CustomTimingsHandler;
 
 import java.lang.reflect.Method;
 import java.util.HashMap;
@@ -55,7 +54,6 @@ public class FilteredListener<T extends Plugin> implements Listener {
     public void initial(T plugin, FilteredEventList eventChecker) {
         this.plugin = plugin;
         this.checker = eventChecker;
-
         this.init(this.plugin);
     }
 
@@ -98,17 +96,14 @@ public class FilteredListener<T extends Plugin> implements Listener {
 
             boolean ignoredFilters = method.getAnnotation(IgnoredFilters.class) != null;
 
+            final CustomTimingsHandler timings = new CustomTimingsHandler("Plugin: " + plugin.getDescription().getFullName() + " Event: " + this.getClass().getName() + "::" + method.getName() + "(" + eventClass.getSimpleName() + ")", JavaPluginLoader.pluginParentTimer);
             EventExecutor executor = new TimedEventExecutor((listener, event) -> {
                 try {
-                    if (!eventClass.isAssignableFrom(event.getClass())) {
-                        return;
+                    if (eventClass.isAssignableFrom(event.getClass()) && (ignoredFilters || checker.check(event))) {
+                        method.invoke(listener, event);
                     }
-                    if (!ignoredFilters && !checker.check(event)) {
-                        return;
-                    }
-                    method.invoke(listener, event);
-                } catch (Exception ex) {
-                    ex.printStackTrace();
+                } catch (Throwable throwable) {
+                    throwable.printStackTrace();
                 }
             }, plugin, method, eventClass);
             eventSet.add(new RegisteredListener(this, executor, eventHandler.priority(), plugin, eventHandler.ignoreCancelled()));

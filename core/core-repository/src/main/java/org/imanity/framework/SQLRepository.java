@@ -34,6 +34,7 @@ public abstract class SQLRepository<T, ID extends Serializable> implements Repos
         }
 
         this.factory.createTable(this.type());
+        System.out.println("test");
     }
 
     public <T> T performSessionResult(Function<Session, T> sessionConsumer) {

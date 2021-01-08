@@ -28,6 +28,7 @@ import lombok.Getter;
 import lombok.Setter;
 import org.bukkit.Location;
 import org.bukkit.entity.Player;
+import org.imanity.framework.bukkit.packet.PacketService;
 import org.imanity.framework.bukkit.packet.wrapper.WrappedPacket;
 import org.imanity.framework.bukkit.packet.wrapper.server.WrappedPacketOutSpawnEntityLiving;
 import org.imanity.framework.bukkit.reflection.MinecraftReflection;
@@ -91,7 +92,7 @@ public class BossBar {
         }
     }
 
-    private WrappedPacket packetWither;
+    private WrappedPacketOutSpawnEntityLiving packetWither;
 
     private void buildPackets() {
         this.packetWither = new WrappedPacketOutSpawnEntityLiving(
@@ -180,7 +181,7 @@ public class BossBar {
             this.updateDataWatcher(bossBarData);
             this.buildPackets();
 
-            this.packetWither.getPacket().sendPacket(player);
+            PacketService.send(player, this.packetWither);
             movement = true;
         } else {
             this.updateDataWatcher(bossBarData);

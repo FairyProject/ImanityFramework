@@ -208,6 +208,14 @@
             <scope>compile</scope>
         </dependency>
 
+        <!-- Timings Lib -->
+        <dependency>
+            <groupId>org.imanity.framework.timings</groupId>
+            <artifactId>core</artifactId>
+            <version>0.0.1-SNAPSHOT</version>
+            <scope>compile</scope>
+        </dependency>
+
         <!-- CAFFEINE -->
         <dependency>
             <groupId>com.github.ben-manes.caffeine</groupId>
@@ -239,6 +247,7 @@
             <version>6.1.5</version>
             <scope>provided</scope>
         </dependency>
+
         <dependency>
             <groupId>com.sk89q.worldedit</groupId>
             <artifactId>worldedit-core</artifactId>
