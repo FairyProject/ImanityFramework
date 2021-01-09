@@ -96,7 +96,6 @@ public class FilteredListener<T extends Plugin> implements Listener {
 
             boolean ignoredFilters = method.getAnnotation(IgnoredFilters.class) != null;
 
-            final CustomTimingsHandler timings = new CustomTimingsHandler("Plugin: " + plugin.getDescription().getFullName() + " Event: " + this.getClass().getName() + "::" + method.getName() + "(" + eventClass.getSimpleName() + ")", JavaPluginLoader.pluginParentTimer);
             EventExecutor executor = new TimedEventExecutor((listener, event) -> {
                 try {
                     if (eventClass.isAssignableFrom(event.getClass()) && (ignoredFilters || checker.check(event))) {

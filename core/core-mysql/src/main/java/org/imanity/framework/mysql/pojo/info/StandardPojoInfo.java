@@ -210,8 +210,6 @@ public class StandardPojoInfo implements PojoInfo {
 			}
 		}
 
-		System.out.println(prop.getName() + " " + value.toString());
-
 		return value;
 	}
 
@@ -259,7 +257,6 @@ public class StandardPojoInfo implements PojoInfo {
 		}
 
 		if (value != null) {
-			System.out.println(prop.getSerializer() != null);
 			if (prop.getSerializer() != null) {
 				value = prop.getSerializer().deserialize(value);
 				
