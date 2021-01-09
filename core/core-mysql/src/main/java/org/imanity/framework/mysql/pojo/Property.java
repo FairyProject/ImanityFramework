@@ -33,6 +33,5 @@ public class Property {
 	private Column columnAnnotation;
 
 	private ObjectSerializer serializer;
-	private AttributeConverter converter;
 
 }

@@ -1,14 +1,18 @@
 package org.imanity.framework.mysql.pojo.statement;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.imanity.framework.mysql.ImanitySqlException;
 import org.imanity.framework.mysql.pojo.Property;
 import org.imanity.framework.mysql.pojo.Query;
+import org.imanity.framework.mysql.pojo.Where;
 import org.imanity.framework.mysql.pojo.info.StandardPojoInfo;
 import org.imanity.framework.mysql.util.SQLUtil;
 
 import javax.persistence.Column;
 import java.math.BigDecimal;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
@@ -16,13 +20,14 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 public class StandardSqlStatementBuilder implements SqlStatementBuilder {
 
-	private static ConcurrentHashMap<Class<?>, StandardPojoInfo> map = new ConcurrentHashMap<Class<?>, StandardPojoInfo>();
+	private static final Logger LOGGER = LogManager.getLogger(StandardSqlStatementBuilder.class);
+	private static final ConcurrentHashMap<Class<?>, StandardPojoInfo> POJOS = new ConcurrentHashMap<>();
 
 	public StandardPojoInfo getPojoInfo(Class<?> rowClass) {
-		StandardPojoInfo pi = map.get(rowClass);
+		StandardPojoInfo pi = POJOS.get(rowClass);
 		if (pi == null) {
 			pi = new StandardPojoInfo(rowClass);
-			map.put(rowClass, pi);
+			POJOS.put(rowClass, pi);
 			
 			makeInsertSql(pi);
 			makeUpsertSql(pi);
@@ -161,6 +166,33 @@ public class StandardSqlStatementBuilder implements SqlStatementBuilder {
 		String columns = pojoInfo.getSelectColumns();
 		
 		String where = query.getWhere();
+		if (where == null) {
+			if (query.getWheres().size() > 0) {
+				where = "";
+				Iterator<Where> iterator = query.getWheres().iterator();
+
+				while (iterator.hasNext()) {
+
+					Where whereObj = iterator.next();
+
+					Object value;
+					Property property = pojoInfo.getProperty(whereObj.getProperty());
+					if (property != null) {
+						value = pojoInfo.toReadableValue(property, whereObj.getValue());
+					} else {
+						value = whereObj.getValue().toString();
+					}
+
+					where += whereObj.getProperty() + "=\'" + value.toString() + "\'";
+					if (iterator.hasNext()) {
+						where += ",";
+					}
+				}
+			}
+		} else if (query.getWheres().size() > 0) {
+			LOGGER.error(new IllegalArgumentException("There is where statement specified but Where list also not empty!"));
+		}
+
 		String table = query.getTable();
 		if (table == null) {
 			table = pojoInfo.getTable();

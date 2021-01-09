@@ -18,4 +18,6 @@ public interface PojoInfo {
 
 	String getTable();
 
+	Object toReadableValue(Property property, Object value);
+
 }

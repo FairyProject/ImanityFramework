@@ -109,14 +109,35 @@ public class StandardPojoInfo implements PojoInfo {
 
 			AccessUtil.setAccessible(field);
 
-			Property prop = new Property();
-			prop.setName(field.getName());
-			prop.setField(field);
-			prop.setDataType(field.getType());
+			Property property = new Property();
+			property.setName(field.getName());
+			property.setField(field);
 
-			applyAnnotations(prop, field);
+			CustomSerialize deserializerAnnotation = field.getAnnotation(CustomSerialize.class);
+			if (deserializerAnnotation != null) {
+				property.setSerializer(deserializerAnnotation.value().newInstance());
+			}
 
-			properties.add(prop);
+			if (SqlService.INSTANCE != null) {
+
+				ObjectSerializer<?, ?> serializer = property.getSerializer();
+				if (serializer == null) {
+					serializer = SqlService.INSTANCE.findSerializer(field.getType());
+				}
+
+				if (serializer != null) {
+					property.setDataType(serializer.outputClass());
+					property.setSerializer(serializer);
+				} else {
+					property.setDataType(field.getType());
+				}
+			} else {
+				property.setDataType(field.getType());
+			}
+
+			applyAnnotations(property, field);
+
+			properties.add(property);
 		}
 
 		return properties;
@@ -172,11 +193,26 @@ public class StandardPojoInfo implements PojoInfo {
 			}
 		}
 
-		Convert convert = annotatedElement.getAnnotation(Convert.class);
-		if (convert != null) {
-			property.setConverter((AttributeConverter) convert.converter().newInstance());
+	}
+
+	public Object toReadableValue(Property prop, Object value) {
+		if (prop.getSerializer() != null) {
+			value = prop.getSerializer().serialize(value);
+
+		} else if (prop.isEnumField()) {
+			// handle enums according to selected enum type
+			if (prop.getEnumType() == EnumType.ORDINAL) {
+				value = ((Enum) value).ordinal();
+			}
+			// EnumType.STRING and others (if present in the future)
+			else {
+				value = value.toString();
+			}
 		}
 
+		System.out.println(prop.getName() + " " + value.toString());
+
+		return value;
 	}
 
 	public Object getValue(Object pojo, String name) {
@@ -198,22 +234,7 @@ public class StandardPojoInfo implements PojoInfo {
 			}
 
 			if (value != null) {
-				if (prop.getSerializer() != null) {
-					value = prop.getSerializer().serialize(value);
-					
-				} else if (prop.getConverter() != null) {
-					value = prop.getConverter().convertToDatabaseColumn(value);
-					
-				} else if (prop.isEnumField()) {
-					// handle enums according to selected enum type
-					if (prop.getEnumType() == EnumType.ORDINAL) {
-						value = ((Enum) value).ordinal();
-					}
-					// EnumType.STRING and others (if present in the future)
-					else {
-						value = value.toString();
-					}
-				}
+				value = this.toReadableValue(prop, value);
 			}
 
 			return value;
@@ -238,12 +259,10 @@ public class StandardPojoInfo implements PojoInfo {
 		}
 
 		if (value != null) {
+			System.out.println(prop.getSerializer() != null);
 			if (prop.getSerializer() != null) {
 				value = prop.getSerializer().deserialize(value);
 				
-			} else if (prop.getConverter() != null) {
-				value = prop.getConverter().convertToEntityAttribute(value);
-
 			} else if (prop.isEnumField()) {
 				value = getEnumConst(prop.getEnumClass(), prop.getEnumType(), value);
 			}

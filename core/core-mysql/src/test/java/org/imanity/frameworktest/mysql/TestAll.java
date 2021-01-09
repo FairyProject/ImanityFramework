@@ -33,7 +33,7 @@ public class TestAll {
 		factory.query().insert(bill);
 		
 		/* test where clause, also id and generated values */
-		List<Name> list = factory.query().where("firstName=?", "John").results(Name.class);
+		List<Name> list = factory.query().whereQuery("firstName", "John").results(Name.class);
 		dump("john only:", list);
 		
 		/* test delete single record */
@@ -56,7 +56,7 @@ public class TestAll {
 		System.out.println("Num records (should be 1):" + count);
 		
 		/* test delete with where clause */
-		factory.query().table("names").where("firstName=?", "Joe").delete();
+		factory.query().table("names").whereQuery("firstName", "Joe").delete();
 
 		/* make sure the delete happened */
 		count = factory.query().sql("select count(*) as count from names").first(Long.class);

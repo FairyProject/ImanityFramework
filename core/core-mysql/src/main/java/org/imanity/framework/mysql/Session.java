@@ -29,7 +29,7 @@ public class Session implements AutoCloseable {
     }
 
     public <T> T findByQuery(Class<T> clazz, String query, Object value) {
-        return this.query().where(query + "=?", value).first(clazz);
+        return this.query().whereQuery(query, value).first(clazz);
     }
 
     public Query byId(Class<?> clazz, Object id) {

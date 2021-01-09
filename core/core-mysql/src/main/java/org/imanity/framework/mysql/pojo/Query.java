@@ -23,10 +23,12 @@ public class Query {
 
 	private String sql;
 	private String table;
-	private String where;
 	private String orderBy;
 
+	private String where;
 	private Object[] args;
+
+	private List<Where> wheres;
 
 	private int rowsAffected;
 
@@ -40,6 +42,7 @@ public class Query {
 	public Query(AbstractConnectionFactory factory) {
 		this.factory = factory;
 		this.sqlStatementBuilder = factory.builder();
+		this.wheres = new ArrayList<>();
 	}
 
 	/**
@@ -56,8 +59,7 @@ public class Query {
 	}
 
 	public Query whereQuery(String key, Object value) {
-		this.where = key + "=?";
-		this.args = new Object[] {value};
+		this.wheres.add(new Where(key, value));
 		return this;
 	}
 
@@ -77,6 +79,12 @@ public class Query {
 		PojoInfo info = this.sqlStatementBuilder.getPojoInfo(type);
 		if (info != null) {
 			this.where = info.getPrimaryKeyName() + " in ";
+
+			Object[] idArray = new Object[ids.size()];
+			for (int i = 0; i < idArray.length; i++) {
+				idArray[i] = info.toReadableValue(info.getProperty(info.getPrimaryKeyName()), ids.get(i));
+			}
+
 			this.args = new Object[] {ids};
 		} else {
 			throw new IllegalArgumentException("The POJO info for type " + type.getName() + " does not exists!");
@@ -87,8 +95,7 @@ public class Query {
 	public Query byId(Class<?> type, Object id) {
 		PojoInfo info = this.sqlStatementBuilder.getPojoInfo(type);
 		if (info != null) {
-			this.where = info.getPrimaryKeyName() + "=?";
-			this.args = new Object[] {id};
+			this.whereQuery(info.getPrimaryKeyName(), id);
 		} else {
 			throw new IllegalArgumentException("The POJO info for type " + type.getName() + " does not exists!");
 		}
