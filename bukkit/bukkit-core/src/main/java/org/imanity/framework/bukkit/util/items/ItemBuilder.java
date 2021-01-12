@@ -173,6 +173,22 @@ public class ItemBuilder implements Listener, Cloneable {
 		return this;
 	}
 
+	public ItemBuilder itemFlag(ItemFlag itemFlag) {
+		ItemMeta im = itemStack.getItemMeta();
+		im.addItemFlags(itemFlag);
+		itemStack.setItemMeta(im);
+		return this;
+	}
+
+	public ItemBuilder removeItemFlag(ItemFlag itemFlag) {
+		ItemMeta im = itemStack.getItemMeta();
+		if (im.hasItemFlag(itemFlag)) {
+			im.removeItemFlags(itemFlag);
+		}
+		itemStack.setItemMeta(im);
+		return this;
+	}
+
 	@Override
 	public ItemBuilder clone() {
 		return new ItemBuilder(this.itemStack.clone());
