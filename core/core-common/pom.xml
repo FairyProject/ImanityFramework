@@ -256,42 +256,42 @@
         <dependency>
             <groupId>org.imanity.framework</groupId>
             <artifactId>core-mongo</artifactId>
-            <version>${version}</version>
+            <version>${project.version}</version>
             <scope>compile</scope>
         </dependency>
 
         <dependency>
             <groupId>org.imanity.framework</groupId>
             <artifactId>core-mysql</artifactId>
-            <version>${version}</version>
+            <version>${project.version}</version>
             <scope>compile</scope>
         </dependency>
 
         <dependency>
             <groupId>org.imanity.framework</groupId>
             <artifactId>core-misc</artifactId>
-            <version>${version}</version>
+            <version>${project.version}</version>
             <scope>compile</scope>
         </dependency>
 
         <dependency>
             <groupId>org.imanity.framework</groupId>
             <artifactId>core-repository</artifactId>
-            <version>${version}</version>
+            <version>${project.version}</version>
             <scope>compile</scope>
         </dependency>
 
         <dependency>
             <groupId>org.imanity.framework</groupId>
             <artifactId>core-services</artifactId>
-            <version>${version}</version>
+            <version>${project.version}</version>
             <scope>compile</scope>
         </dependency>
 
         <dependency>
             <groupId>org.imanity.framework</groupId>
             <artifactId>core-yaml</artifactId>
-            <version>0.0.1-SNAPSHOT</version>
+            <version>${project.version}</version>
             <scope>compile</scope>
         </dependency>
 

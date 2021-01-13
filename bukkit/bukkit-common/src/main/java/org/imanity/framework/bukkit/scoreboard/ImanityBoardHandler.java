@@ -25,10 +25,9 @@
 package org.imanity.framework.bukkit.scoreboard;
 
 import org.bukkit.entity.Player;
-import org.bukkit.event.EventHandler;
-import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.imanity.framework.bukkit.Imanity;
+import org.imanity.framework.bukkit.listener.events.Events;
 import org.imanity.framework.bukkit.metadata.Metadata;
 import org.imanity.framework.bukkit.util.BukkitUtil;
 
@@ -49,16 +48,7 @@ public class ImanityBoardHandler implements Runnable {
         thread.setDaemon(true);
         thread.start();
 
-        Imanity.PLUGIN.getServer().getPluginManager().registerEvents(new Listener() {
-
-            @EventHandler
-            public void onPlayerQuit(PlayerQuitEvent event) {
-                Player player = event.getPlayer();
-
-                remove(player);
-            }
-
-        }, Imanity.PLUGIN);
+        Events.subscribe(PlayerQuitEvent.class).listen((subscription, event) -> remove(subscription.getActivePlayer()));
     }
 
     public void runQueue() {

@@ -108,9 +108,9 @@ public class WrappedPacketOutSpawnEntityLiving extends WrappedPacket implements 
                 .setFieldByIndex(byte.class, 0, (byte) ((int)(this.yaw * 256.0F / 360.0F)))
                 .setFieldByIndex(byte.class, 1, (byte) ((int)(this.pitch * 256.0F / 360.0F)))
                 .setFieldByIndex(byte.class, 2, (byte) ((int)(this.headPitch * 256.0F / 360.0F)))
-                .setFieldByIndex(int.class, 5, (int) this.velX * 8000.0D)
-                .setFieldByIndex(int.class, 6, (int) this.velY * 8000.0D)
-                .setFieldByIndex(int.class, 7, (int) this.velZ * 8000.0D)
+                .setFieldByIndex(int.class, 5, (int) (this.velX * 8000.0D))
+                .setFieldByIndex(int.class, 6, (int) (this.velY * 8000.0D))
+                .setFieldByIndex(int.class, 7, (int) (this.velZ * 8000.0D))
                 .setFieldByIndex(DataWatcher.TYPE, 0, this.dataWatcher.getDataWatcherObject())
                 .setFieldByIndex(List.class, 0, this.watchableObjects.stream().map(watchableObjectWrapper -> WatchableObjectWrapper.getConverter().getGeneric(watchableObjectWrapper)).collect(Collectors.toList()))
                 .getPacket();

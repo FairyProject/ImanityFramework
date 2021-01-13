@@ -114,8 +114,8 @@
 
         <dependency>
             <groupId>org.imanity.framework</groupId>
-            <artifactId>bukkit-core</artifactId>
-            <version>0.0.1-SNAPSHOT</version>
+            <artifactId>bukkit-common</artifactId>
+            <version>${project.version}</version>
             <scope>provided</scope>
         </dependency>
     </dependencies>
