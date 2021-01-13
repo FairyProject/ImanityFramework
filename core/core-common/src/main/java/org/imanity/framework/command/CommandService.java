@@ -240,7 +240,7 @@ public class CommandService {
 
         if (!commandMeta.canAccess(user)) {
             commandEvent.sendNoPermission();
-            return false;
+            return true; // Whiizyyy - Have to be true.
         }
 
         if (!commandEvent.shouldExecute(commandMeta, arguments)) {

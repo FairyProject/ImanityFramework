@@ -29,6 +29,7 @@ import org.bukkit.Color;
 import org.bukkit.Material;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.event.Listener;
+import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.inventory.meta.LeatherArmorMeta;
@@ -159,8 +160,32 @@ public class ItemBuilder implements Listener, Cloneable {
 		}
 	}
 
+	public ItemBuilder shiny() {
+		ItemMeta meta = this.itemStack.getItemMeta();
+
+		meta.addEnchant(Enchantment.PROTECTION_FIRE, 1, false);
+		meta.addItemFlags(ItemFlag.HIDE_ENCHANTS);
+		return this;
+	}
+
 	public ItemBuilder tag(Object value, String... key) {
 		this.itemStack = NBTEditor.set(this.itemStack, value, key);
+		return this;
+	}
+
+	public ItemBuilder itemFlag(ItemFlag itemFlag) {
+		ItemMeta im = itemStack.getItemMeta();
+		im.addItemFlags(itemFlag);
+		itemStack.setItemMeta(im);
+		return this;
+	}
+
+	public ItemBuilder removeItemFlag(ItemFlag itemFlag) {
+		ItemMeta im = itemStack.getItemMeta();
+		if (im.hasItemFlag(itemFlag)) {
+			im.removeItemFlags(itemFlag);
+		}
+		itemStack.setItemMeta(im);
 		return this;
 	}
 
