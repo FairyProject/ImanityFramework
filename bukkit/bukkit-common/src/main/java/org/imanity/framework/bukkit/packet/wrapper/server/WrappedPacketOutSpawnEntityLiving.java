@@ -99,7 +99,7 @@ public class WrappedPacketOutSpawnEntityLiving extends WrappedPacket implements 
 
     @Override
     public Object asNMSPacket() {
-        return new PacketWrapper(PacketTypeClasses.Server.SPAWN_ENTITY_LIVING)
+        PacketWrapper packetWrapper = new PacketWrapper(PacketTypeClasses.Server.SPAWN_ENTITY_LIVING)
                 .setFieldByIndex(int.class, 0, this.entityId)
                 .setFieldByIndex(int.class, 1, this.entityTypeId)
                 .setFieldByIndex(int.class, 2, (int) Math.floor(this.locX * 32.0D))
@@ -111,9 +111,12 @@ public class WrappedPacketOutSpawnEntityLiving extends WrappedPacket implements 
                 .setFieldByIndex(int.class, 5, (int) (this.velX * 8000.0D))
                 .setFieldByIndex(int.class, 6, (int) (this.velY * 8000.0D))
                 .setFieldByIndex(int.class, 7, (int) (this.velZ * 8000.0D))
-                .setFieldByIndex(DataWatcher.TYPE, 0, this.dataWatcher.getDataWatcherObject())
-                .setFieldByIndex(List.class, 0, this.watchableObjects.stream().map(watchableObjectWrapper -> WatchableObjectWrapper.getConverter().getGeneric(watchableObjectWrapper)).collect(Collectors.toList()))
-                .getPacket();
+                .setFieldByIndex(DataWatcher.TYPE, 0, this.dataWatcher.getDataWatcherObject());
+        if (this.watchableObjects != null) {
+            packetWrapper.setFieldByIndex(List.class, 0, this.watchableObjects.stream().map(watchableObjectWrapper -> WatchableObjectWrapper.getConverter().getGeneric(watchableObjectWrapper)).collect(Collectors.toList()));
+        }
+
+        return packetWrapper.getPacket();
     }
 
 }
