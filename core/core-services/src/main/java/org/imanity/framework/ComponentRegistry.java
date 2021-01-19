@@ -24,9 +24,14 @@
 
 package org.imanity.framework;
 
+import org.imanity.framework.details.BeanDetails;
+import org.imanity.framework.details.ComponentBeanDetails;
 import org.imanity.framework.reflect.ReflectLookup;
 import org.imanity.framework.util.entry.Entry;
 import org.imanity.framework.util.entry.EntryArrayList;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class ComponentRegistry {
 
@@ -68,21 +73,23 @@ public class ComponentRegistry {
         });
     }
 
-    public static void scanComponents(BeanContext beanContext, ReflectLookup reflectLookup) {
+    public static List<ComponentBeanDetails> scanComponents(BeanContext beanContext, ReflectLookup reflectLookup) {
+        List<ComponentBeanDetails> components = new ArrayList<>();
+
         for (Class<?> type : reflectLookup.findAnnotatedClasses(Component.class)) {
             try {
                 ComponentHolder componentHolder = ComponentRegistry.getComponentHolder(type);
                 Object instance = componentHolder.newInstance(type);
 
                 if (instance != null) {
-                    beanContext.registerComponent(instance, type, componentHolder);
-
-                    componentHolder.onEnable(instance);
+                    components.add(beanContext.registerComponent(instance, type, componentHolder));
                 }
             } catch (Throwable throwable) {
                 BeanContext.LOGGER.error("Something wrong will scanning component for " + type.getName(), throwable);
             }
         }
+
+        return components;
     }
 
     private static class ComponentHolderEmpty extends ComponentHolder {

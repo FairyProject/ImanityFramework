@@ -63,6 +63,10 @@ public interface BeanDetails {
 
     boolean isBind();
 
+    default void onEnable() {
+
+    }
+
     default void onDisable() {
 
     }

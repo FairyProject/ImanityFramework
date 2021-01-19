@@ -30,10 +30,7 @@ import lombok.NonNull;
 import lombok.SneakyThrows;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.imanity.framework.details.BeanDetails;
-import org.imanity.framework.details.GenericBeanDetails;
-import org.imanity.framework.details.ServiceBeanDetails;
-import org.imanity.framework.details.SimpleBeanDetails;
+import org.imanity.framework.details.*;
 import org.imanity.framework.exception.ServiceAlreadyExistsException;
 import org.imanity.framework.plugin.AbstractPlugin;
 import org.imanity.framework.plugin.PluginListenerAdapter;
@@ -135,7 +132,7 @@ public class BeanContext {
     }
 
     @SneakyThrows
-    public void registerComponent(Object instance, Class<?> type, ComponentHolder componentHolder) {
+    public ComponentBeanDetails registerComponent(Object instance, Class<?> type, ComponentHolder componentHolder) {
         Component annotation = type.getAnnotation(Component.class);
         if (annotation == null) {
             throw new IllegalArgumentException("The type " + type.getName() + " doesn't have Component annotation!");
@@ -146,17 +143,14 @@ public class BeanContext {
             name = instance.getClass().getName();
         }
 
-        BeanDetails details = new GenericBeanDetails(type, instance, name) {
-            @Override
-            public void onDisable() {
-                componentHolder.onDisable(instance);
-            }
-        };
+        ComponentBeanDetails details = new ComponentBeanDetails(type, instance, name, componentHolder);
         this.registerBean(details);
         this.attemptBindPlugin(details);
 
         details.call(PreInitialize.class);
-        this.injectBeans(instance);
+//        this.injectBeans(instance); // put into BeanContext
+
+        return details;
     }
 
     private void attemptBindPlugin(BeanDetails beanDetails) {
@@ -230,6 +224,10 @@ public class BeanContext {
         log("Finish pre enable beans within " + (System.currentTimeMillis() - start) + "ms");
         start = System.currentTimeMillis();
 
+        beanDetailsList.addAll(ComponentRegistry.scanComponents(this, reflectLookup));
+        log("Finish scanning component " + (System.currentTimeMillis() - start) + "ms");
+        start = System.currentTimeMillis();
+
         beanDetailsList.forEach(beanDetails -> {
             Object instance = beanDetails.getInstance();
             if (instance != null) {
@@ -252,8 +250,8 @@ public class BeanContext {
         log("Finish injecting static fields within " + (System.currentTimeMillis() - start) + "ms");
         start = System.currentTimeMillis();
 
-        ComponentRegistry.scanComponents(this, reflectLookup);
-        log("Finish scanning component " + (System.currentTimeMillis() - start) + "ms");
+        beanDetailsList.forEach(BeanDetails::onEnable);
+        log("Finish call onEnable() within " + (System.currentTimeMillis() - start) + "ms");
         start = System.currentTimeMillis();
 
         this.call(PostInitialize.class, beanDetailsList);
@@ -268,6 +266,7 @@ public class BeanContext {
         this.registerBean(new SimpleBeanDetails(this, "beanContext", this.getClass()));
         log("BeanContext has been registered as bean.");
 
+        ComponentRegistry.registerComponentHolders();
         this.scanClasses("framework", BeanContext.class.getClassLoader(), Collections.singleton("org.imanity.framework"));
 
         if (PluginManager.isInitialized()) {
@@ -319,7 +318,6 @@ public class BeanContext {
             });
         }
 
-        ComponentRegistry.registerComponentHolders();
         FrameworkMisc.EVENT_HANDLER.onPostServicesInitial();
     }
 
