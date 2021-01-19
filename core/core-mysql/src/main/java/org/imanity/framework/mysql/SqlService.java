@@ -7,8 +7,6 @@ import org.imanity.framework.mysql.config.AbstractSqlConfiguration;
 import org.imanity.framework.mysql.connection.AbstractConnectionFactory;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -61,6 +59,11 @@ public class SqlService {
                 factory.connect();
                 connectionFactories.put(configuration.getClass(), factory);
             }
+
+            @Override
+            public void onDisable(Object instance) {
+                shutdownFactory(instance.getClass());
+            }
         });
     }
 
@@ -71,8 +74,21 @@ public class SqlService {
     @PreDestroy
     @SneakyThrows
     public void close() {
-        for (AbstractConnectionFactory factory : this.connectionFactories.values()) {
-            factory.shutdown();
+        for (Class<?> configuration : this.connectionFactories.keySet()) {
+            this.shutdownFactory(configuration);
+        }
+    }
+
+    public void shutdownFactory(Class<?> configuration) {
+        AbstractConnectionFactory connectionFactory = connectionFactories.get(configuration);
+
+        if (connectionFactory != null) {
+            try {
+                connectionFactory.shutdown();
+            } catch (Throwable throwable) {
+                throwable.printStackTrace();
+            }
+            this.connectionFactories.remove(configuration);
         }
     }
 

@@ -4,7 +4,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.mongodb.*;
 import com.mongodb.client.MongoClient;
 import com.mongodb.client.MongoClients;
-import com.mongodb.client.MongoDatabase;
 import org.bson.UuidRepresentation;
 import org.imanity.framework.*;
 import org.imanity.framework.details.BeanDetails;
@@ -12,8 +11,6 @@ import org.imanity.framework.mongo.configuration.AbstractMongoConfiguration;
 import org.imanity.framework.ProvideConfiguration;
 import org.mongojack.JacksonMongoCollection;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -21,13 +18,11 @@ import java.util.concurrent.ConcurrentHashMap;
 public class MongoService {
 
     private Class<?> defaultConfiguration;
-    private Map<Class<?>, MongoDatabase> databases;
-    private List<MongoClient> clients;
+    private Map<Class<?>, MongoFactory> databases;
 
     @PreInitialize
     public void preInit() {
         this.databases = new ConcurrentHashMap<>();
-        this.clients = new ArrayList<>();
 
         ComponentRegistry.registerComponentHolder(new ComponentHolder() {
             @Override
@@ -49,10 +44,29 @@ public class MongoService {
                 MongoClientSettings clientSettings = configuration.mongoClientSettings();
                 MongoClient client = MongoClients.create(clientSettings);
 
-                databases.put(configuration.getClass(), client.getDatabase(configuration.database()));
-                clients.add(client);
+                // TODO: a way to reduce client count by checking if configuration is the same target
+                databases.put(configuration.getClass(), new MongoFactory(client, client.getDatabase(configuration.database())));
+            }
+
+            @Override
+            public void onDisable(Object instance) {
+                shutdownDatabase(instance.getClass());
             }
         });
+    }
+
+    private void shutdownDatabase(Class<?> configuration) {
+        MongoFactory mongoFactory = this.databases.get(configuration);
+
+        if (mongoFactory != null) {
+            try {
+                mongoFactory.getClient().close();
+            } catch (Throwable throwable) {
+                throwable.printStackTrace();
+            }
+
+            this.databases.remove(configuration);
+        }
     }
 
     @PostDestroy
@@ -61,13 +75,9 @@ public class MongoService {
             return;
         }
 
-        if (this.clients == null) {
-            return;
-        }
-
-        for (MongoClient client : this.clients) {
+        for (Class<?> configuration : this.databases.keySet()) {
             try {
-                client.close();
+                this.shutdownDatabase(configuration);
             } catch (Throwable ignored) {
             }
         }
@@ -94,14 +104,14 @@ public class MongoService {
             throw new IllegalArgumentException("The type " + type.getSimpleName() + " wasn't implemented on AbstractMongoConfiguration!");
         }
 
-        MongoDatabase database = this.databases.getOrDefault(type, null);
-        if (database == null) {
+        MongoFactory mongoFactory = this.databases.getOrDefault(type, null);
+        if (mongoFactory == null) {
             throw new IllegalArgumentException("The database hasn't registered");
         }
 
         return JacksonMongoCollection.builder()
                 .withObjectMapper(objectMapper)
-                .build(database, name, tClass, UuidRepresentation.JAVA_LEGACY);
+                .build(mongoFactory.getDatabase(), name, tClass, UuidRepresentation.JAVA_LEGACY);
     }
 
 }

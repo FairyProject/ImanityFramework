@@ -63,7 +63,11 @@ public interface BeanDetails {
 
     boolean isBind();
 
-    public static enum ActivationStage {
+    default void onDisable() {
+
+    }
+
+    enum ActivationStage {
 
         NOT_LOADED,
         PRE_INIT_CALLED,

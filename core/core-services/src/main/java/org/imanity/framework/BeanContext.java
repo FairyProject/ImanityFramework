@@ -135,7 +135,7 @@ public class BeanContext {
     }
 
     @SneakyThrows
-    public void registerComponent(Object instance, Class<?> type) {
+    public void registerComponent(Object instance, Class<?> type, ComponentHolder componentHolder) {
         Component annotation = type.getAnnotation(Component.class);
         if (annotation == null) {
             throw new IllegalArgumentException("The type " + type.getName() + " doesn't have Component annotation!");
@@ -145,8 +145,14 @@ public class BeanContext {
         if (name.length() == 0) {
             name = instance.getClass().getName();
         }
-        BeanDetails details = this.registerBean(instance, name);
 
+        BeanDetails details = new GenericBeanDetails(type, instance, name) {
+            @Override
+            public void onDisable() {
+                componentHolder.onDisable(instance);
+            }
+        };
+        this.registerBean(details);
         this.attemptBindPlugin(details);
 
         details.call(PreInitialize.class);
@@ -160,9 +166,7 @@ public class BeanContext {
             if (plugin != null) {
                 beanDetails.bindWith(plugin);
 
-                if (SHOW_LOGS) {
-                    LOGGER.info("Bean " + beanDetails.getName() + " is now bind with plugin " + plugin.getName());
-                }
+                log("Bean " + beanDetails.getName() + " is now bind with plugin " + plugin.getName());
             }
         }
     }
@@ -262,16 +266,12 @@ public class BeanContext {
         INSTANCE = this;
 
         this.registerBean(new SimpleBeanDetails(this, "beanContext", this.getClass()));
-        if (SHOW_LOGS) {
-            LOGGER.info("BeanContext has been registered as bean.");
-        }
+        log("BeanContext has been registered as bean.");
 
         this.scanClasses("framework", BeanContext.class.getClassLoader(), Collections.singleton("org.imanity.framework"));
 
         if (PluginManager.isInitialized()) {
-            if (SHOW_LOGS) {
-                LOGGER.info("Find PluginManager, attempt to register Plugin Listeners");
-            }
+            log("Find PluginManager, attempt to register Plugin Listeners");
 
             PluginManager.INSTANCE.registerListener(new PluginListenerAdapter() {
                 @Override
@@ -280,9 +280,7 @@ public class BeanContext {
 
                     beanDetails.bindWith(plugin);
                     registerBean(beanDetails, false);
-                    if (SHOW_LOGS) {
-                        LOGGER.info("Plugin " + plugin.getName() + " has been registered as bean.");
-                    }
+                    log("Plugin " + plugin.getName() + " has been registered as bean.");
 
                     try {
                         scanClasses(plugin.getName(), plugin.getPluginClassLoader(), findClassPaths(plugin.getClass()), beanDetails);
@@ -291,26 +289,32 @@ public class BeanContext {
                     }
                 }
 
+                @SneakyThrows
                 @Override
                 public void onPluginDisable(AbstractPlugin plugin) {
-                    findDetailsBindWith(plugin).forEach(beanDetails -> {
-                        if (SHOW_LOGS) {
-                            LOGGER.info("Bean " + beanDetails.getName() + " Disabled, due to plugin " + plugin.getName() + " disabled.");
-                        }
+                    Collection<BeanDetails> beanDetailsList = findDetailsBindWith(plugin);
+                    try {
+                        call(PreDestroy.class, beanDetailsList);
+                    } catch (Throwable throwable) {
+                        LOGGER.error(throwable);
+                    }
 
-                        if (FrameworkMisc.PLATFORM.isShuttingDown()) {
-                            return;
-                        }
+                    beanDetailsList.forEach(details -> {
+                        log("Bean " + details.getName() + " Disabled, due to plugin " + plugin.getName() + " disabled.");
+
                         try {
-                            beanDetails.call(PreDestroy.class);
-
-                            unregisterBean(beanDetails);
-
-                            beanDetails.call(PostDestroy.class);
+                            details.onDisable();
+                            unregisterBean(details);
                         } catch (Throwable throwable) {
                             LOGGER.error(throwable);
                         }
                     });
+
+                    try {
+                        call(PostDestroy.class, beanDetailsList);
+                    } catch (Throwable throwable) {
+                        LOGGER.error(throwable);
+                    }
                 }
             });
         }
@@ -321,24 +325,25 @@ public class BeanContext {
 
     @SneakyThrows
     public void stop() {
-        this.callReverse(PreDestroy.class, this.sortedBeans);
+        List<BeanDetails> detailsList = Lists.newArrayList(this.sortedBeans);
+        Collections.reverse(detailsList);
 
-        // I don't have any idea what should i do on shutdown
+        this.call(PreDestroy.class, detailsList);
 
-        this.callReverse(PostDestroy.class, this.sortedBeans);
+        for (BeanDetails details : detailsList) {
+            log("Bean " + details.getName() + " Disabled, due to framework being disabled.");
+
+            details.onDisable();
+            unregisterBean(details);
+        }
+
+        this.call(PostDestroy.class, detailsList);
     }
 
-    public void call(Class<? extends Annotation> annotation, List<BeanDetails> beanDetailsList) throws InvocationTargetException, IllegalAccessException {
+    public void call(Class<? extends Annotation> annotation, Collection<BeanDetails> beanDetailsList) throws InvocationTargetException, IllegalAccessException {
         for (BeanDetails beanDetails : beanDetailsList) {
             beanDetails.call(annotation);
         }
-    }
-
-    // call reversely so dependencies would shutdown later
-    public void callReverse(Class<? extends Annotation> annotation, List<BeanDetails> beanDetailsList) throws InvocationTargetException, IllegalAccessException {
-        List<BeanDetails> details = Lists.newArrayList(beanDetailsList);
-        Collections.reverse(details);
-        this.call(annotation, details);
     }
 
     private List<BeanDetails> loadInOrder(List<BeanDetails> beanDetailsList) {
@@ -423,11 +428,6 @@ public class BeanContext {
         }
 
         return sorted;
-    }
-
-    public BeanDetails registerBean(Object serviceInstance, String name) {
-        BeanDetails details = new GenericBeanDetails(serviceInstance.getClass(), serviceInstance, name);
-        return this.registerBean(details);
     }
 
     public BeanDetails registerBean(BeanDetails beanDetails) {

@@ -75,7 +75,7 @@ public class ComponentRegistry {
                 Object instance = componentHolder.newInstance(type);
 
                 if (instance != null) {
-                    beanContext.registerComponent(instance, type);
+                    beanContext.registerComponent(instance, type, componentHolder);
 
                     componentHolder.onEnable(instance);
                 }
