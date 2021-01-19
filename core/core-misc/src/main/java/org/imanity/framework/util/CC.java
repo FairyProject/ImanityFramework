@@ -59,7 +59,7 @@ public class CC {
     static {
 
         BLUE = CODE + "9";
-        AQUA = CODE + "a";
+        AQUA = CODE + "b";
         YELLOW = CODE + "e";
         RED = CODE + "c";
         GRAY = CODE + "7";
