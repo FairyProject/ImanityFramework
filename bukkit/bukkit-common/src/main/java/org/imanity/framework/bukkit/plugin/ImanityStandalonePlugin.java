@@ -43,14 +43,20 @@ public final class ImanityStandalonePlugin extends JavaPlugin {
     }
 
     @Override
+    public void onLoad() {
+        Imanity.preInit();
+    }
+
+    @Override
     public void onEnable() {
 
         ClassLoader originalContextClassLoader = Thread.currentThread().getContextClassLoader();
         Thread.currentThread().setContextClassLoader(getClassLoader());
 
-        for (ImanityPlugin plugin : Imanity.PLUGINS) {
-            plugin.preEnable();
-        }
+        // Pre Enable?
+//        for (ImanityPlugin plugin : Imanity.PLUGINS) {
+//            plugin.preEnable();
+//        }
 
         Imanity.init(this);
         Thread.currentThread().setContextClassLoader(originalContextClassLoader);
@@ -60,15 +66,12 @@ public final class ImanityStandalonePlugin extends JavaPlugin {
     @Override
     public void onDisable() {
 
-        for (ImanityPlugin plugin : Imanity.PLUGINS) {
-            plugin.preDisable();
-        }
+        // Pre Disable?
+//        for (ImanityPlugin plugin : Imanity.PLUGINS) {
+//            plugin.preDisable();
+//        }
 
         Imanity.shutdown();
-
-        for (ImanityPlugin plugin : Imanity.PLUGINS) {
-            plugin.postDisable();
-        }
 
     }
 }

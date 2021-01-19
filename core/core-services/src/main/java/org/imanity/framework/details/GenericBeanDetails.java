@@ -35,6 +35,7 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import lombok.SneakyThrows;
 import org.imanity.framework.*;
+import org.imanity.framework.plugin.AbstractPlugin;
 import org.imanity.framework.util.Utility;
 import org.jetbrains.annotations.Nullable;
 
@@ -53,6 +54,8 @@ public class GenericBeanDetails implements BeanDetails {
     private ActivationStage stage;
     private Map<Class<? extends Annotation>, String> disallowAnnotations;
     private Map<Class<? extends Annotation>, Collection<Method>> annotatedMethods;
+
+    private AbstractPlugin plugin;
 
     @Nullable
     private Object instance;
@@ -236,6 +239,21 @@ public class GenericBeanDetails implements BeanDetails {
     @Override
     public void addTag(String key, String value) {
         this.tags.put(key, value);
+    }
+
+    @Override
+    public void bindWith(AbstractPlugin plugin) {
+        this.plugin = plugin;
+    }
+
+    @Override
+    public AbstractPlugin getBindPlugin() {
+        return this.plugin;
+    }
+
+    @Override
+    public boolean isBind() {
+        return this.plugin != null;
     }
 
 }

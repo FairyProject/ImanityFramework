@@ -20,15 +20,14 @@ import java.util.concurrent.ConcurrentHashMap;
 @Service(name = "mongo", dependencies = "serializer")
 public class MongoService {
 
-    private List<AbstractMongoConfiguration> configurations;
-
     private Class<?> defaultConfiguration;
     private Map<Class<?>, MongoDatabase> databases;
     private List<MongoClient> clients;
 
     @PreInitialize
     public void preInit() {
-        this.configurations = new ArrayList<>(1);
+        this.databases = new ConcurrentHashMap<>();
+        this.clients = new ArrayList<>();
 
         ComponentRegistry.registerComponentHolder(new ComponentHolder() {
             @Override
@@ -37,36 +36,23 @@ public class MongoService {
             }
 
             @Override
-            public Object newInstance(Class<?> type) {
-                AbstractMongoConfiguration instance = (AbstractMongoConfiguration) super.newInstance(type);
-                if (!instance.shouldActivate()) {
-                    return null;
+            public void onEnable(Object instance) {
+                AbstractMongoConfiguration configuration = (AbstractMongoConfiguration) instance;
+                if (!configuration.shouldActivate()) {
+                    return;
                 }
-                configurations.add(instance);
-                return instance;
+
+                if (defaultConfiguration == null) {
+                    defaultConfiguration = configuration.getClass();
+                }
+
+                MongoClientSettings clientSettings = configuration.mongoClientSettings();
+                MongoClient client = MongoClients.create(clientSettings);
+
+                databases.put(configuration.getClass(), client.getDatabase(configuration.database()));
+                clients.add(client);
             }
         });
-    }
-
-    @PostInitialize
-    public void init() {
-        this.databases = new ConcurrentHashMap<>(this.configurations.size());
-        this.clients = new ArrayList<>(this.configurations.size());
-
-        for (AbstractMongoConfiguration configuration : this.configurations) {
-            if (this.defaultConfiguration == null) {
-                this.defaultConfiguration = configuration.getClass();
-            }
-
-            MongoClientSettings clientSettings = configuration.mongoClientSettings();
-            MongoClient client = MongoClients.create(clientSettings);
-
-            this.databases.put(configuration.getClass(), client.getDatabase(configuration.database()));
-            this.clients.add(client);
-        }
-
-        this.configurations.clear();
-        this.configurations = null;
     }
 
     @PostDestroy

@@ -22,7 +22,6 @@ public class SqlService {
 
     public static SqlService INSTANCE;
 
-    private List<AbstractSqlConfiguration<?>> preConfigurations;
     private Map<Class<?>, AbstractConnectionFactory> connectionFactories;
     private Class<?> defaultConfiguration;
 
@@ -33,7 +32,8 @@ public class SqlService {
     public void preInit() {
         INSTANCE = this;
 
-        this.preConfigurations = new ArrayList<>();
+        this.connectionFactories = new ConcurrentHashMap<>();
+
         FrameworkMisc.LIBRARY_HANDLER.downloadLibraries(Library.BYTE_BUDDY);
         FrameworkMisc.LIBRARY_HANDLER.obtainClassLoaderWith(Library.BYTE_BUDDY);
 
@@ -44,34 +44,24 @@ public class SqlService {
             }
 
             @Override
-            public Object newInstance(Class<?> type) {
-                AbstractSqlConfiguration<?> configuration = (AbstractSqlConfiguration<?>) super.newInstance(type);
+            @SneakyThrows
+            public void onEnable(Object instance) {
+                AbstractSqlConfiguration configuration = (AbstractSqlConfiguration) instance;
+
                 if (!configuration.shouldActivate()) {
-                    return null;
+                    return;
                 }
-                preConfigurations.add(configuration);
-                return configuration;
+
+                if (defaultConfiguration == null) {
+                    defaultConfiguration = configuration.getClass();
+                }
+
+                AbstractConnectionFactory factory = configuration.factory();
+
+                factory.connect();
+                connectionFactories.put(configuration.getClass(), factory);
             }
         });
-    }
-
-    @SneakyThrows
-    @PostInitialize
-    public void init() {
-        this.connectionFactories = new ConcurrentHashMap<>(this.preConfigurations.size());
-
-        for (AbstractSqlConfiguration<?> configuration : this.preConfigurations) {
-            if (this.defaultConfiguration == null) {
-                this.defaultConfiguration = configuration.getClass();
-            }
-
-            AbstractConnectionFactory factory = configuration.factory();
-
-            factory.connect();
-            this.connectionFactories.put(configuration.getClass(), factory);
-        }
-        this.preConfigurations.clear();
-        this.preConfigurations = null;
     }
 
     public ObjectSerializer<?, ?> findSerializer(Class<?> type) {

@@ -1,4 +1,4 @@
-package org.imanity.framework.libraries;
+package org.imanity.framework.libraries.relocate;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;

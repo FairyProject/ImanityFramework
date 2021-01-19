@@ -25,13 +25,14 @@
 package org.imanity.framework.libraries;
 
 import lombok.Getter;
-import me.lucko.jarrelocator.Relocation;
-import org.bson.BSON;
+import org.imanity.framework.libraries.relocate.Relocate;
 
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Base64;
+import java.util.List;
 
 @Getter
 public class Library {
@@ -151,13 +152,33 @@ public class Library {
             "spring-expression",
             "5.3.2",
             null
+    ),
+
+
+    ASM = new Library(
+            "org.ow2.asm",
+                    "asm",
+                    "7.1",
+                    "SrL6K20sycyx6qBeoynEB7R7E+0pFfYvjEuMyWJY1N4="
+    ),
+    ASM_COMMONS = new Library(
+            "org.ow2.asm",
+                    "asm-commons",
+                    "7.1",
+                    "5VkEidjxmE2Fv+q9Oxc3TFnCiuCdSOxKDrvQGVns01g="
+    ),
+    JAR_RELOCATOR = new Library(
+            "me.lucko",
+                    "jar-relocator",
+                    "1.4",
+                    "1RsiF3BiVztjlfTA+svDCuoDSGFuSpTZYHvUK8yBx8I="
     );
 
     private final String mavenRepoPath;
     private final String version;
     private final String name;
     private final byte[] checksum;
-    private final Relocation[] relocations;
+    private final List<Relocate> relocations;
 
     private static final String MAVEN_FORMAT = "%s/%s/%s/%s-%s.jar";
 
@@ -181,9 +202,9 @@ public class Library {
             this.checksum = null;
         }
 
-        this.relocations = new Relocation[relocations.length];
-        for (int i = 0; i < this.relocations.length; i++) {
-            this.relocations[i] = new Relocation(rewriteEscaping(relocations[i].getPattern()), relocations[i].getShadedPattern());
+        this.relocations = new ArrayList<>();
+        for (Relocate relocate : relocations) {
+            this.relocations.add(new Relocate(rewriteEscaping(relocate.getPattern()), relocate.getShadedPattern()));
         }
     }
 

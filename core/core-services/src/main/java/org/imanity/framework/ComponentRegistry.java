@@ -24,10 +24,7 @@
 
 package org.imanity.framework;
 
-import org.imanity.framework.details.BeanDetails;
-import org.imanity.framework.details.constructor.BeanConstructorDetails;
-import org.imanity.framework.details.constructor.GenericBeanConstructorDetails;
-import org.imanity.framework.factory.ClassFactory;
+import org.imanity.framework.reflect.ReflectLookup;
 import org.imanity.framework.util.entry.Entry;
 import org.imanity.framework.util.entry.EntryArrayList;
 
@@ -55,7 +52,7 @@ public class ComponentRegistry {
 
     }
 
-    private static void registerComponentHolders() {
+    static void registerComponentHolders() {
         ComponentRegistry.registerComponentHolder(new ComponentHolder() {
             @Override
             public Class<?>[] type() {
@@ -63,29 +60,28 @@ public class ComponentRegistry {
             }
 
             @Override
-            public Object newInstance(Class<?> type) {
-                Thread thread = (Thread) super.newInstance(type);
+            public void onEnable(Object instance) {
+                Thread thread = (Thread) instance;
 
                 FrameworkMisc.TASK_SCHEDULER.runSync(thread::start); // Don't start Immediately
-                return thread;
             }
         });
     }
 
-    public static void loadComponents(BeanContext beanContext) {
-        try {
-            ComponentRegistry.registerComponentHolders();
-
-            for (Class<?> type : ClassFactory.getClasses(Component.class)) {
+    public static void scanComponents(BeanContext beanContext, ReflectLookup reflectLookup) {
+        for (Class<?> type : reflectLookup.findAnnotatedClasses(Component.class)) {
+            try {
                 ComponentHolder componentHolder = ComponentRegistry.getComponentHolder(type);
                 Object instance = componentHolder.newInstance(type);
 
                 if (instance != null) {
                     beanContext.registerComponent(instance, type);
+
+                    componentHolder.onEnable(instance);
                 }
+            } catch (Throwable throwable) {
+                BeanContext.LOGGER.error("Something wrong will scanning component for " + type.getName(), throwable);
             }
-        } catch (Throwable throwable) {
-            throw new RuntimeException(throwable);
         }
     }
 

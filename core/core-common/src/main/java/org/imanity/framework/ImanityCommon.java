@@ -39,7 +39,6 @@ import org.imanity.framework.command.PresenceProvider;
 import org.imanity.framework.config.CoreConfig;
 import org.imanity.framework.events.IEventHandler;
 import org.imanity.framework.exception.OptionNotEnabledException;
-import org.imanity.framework.factory.ClassFactory;
 import org.imanity.framework.libraries.Library;
 import org.imanity.framework.libraries.LibraryHandler;
 import org.imanity.framework.locale.Locale;
@@ -107,12 +106,7 @@ public final class ImanityCommon {
         ImanityCommon.CORE_CONFIG = new CoreConfig();
         ImanityCommon.CORE_CONFIG.loadAndSave();
 
-        ClassFactory.loadClasses();
-
-//        ImanityCommon.PLATFORM.preServiceLoaded();
-
         ImanityCommon.BEAN_CONTEXT = new BeanContext();
-        ImanityCommon.BEAN_CONTEXT.registerServices();
         ImanityCommon.BEAN_CONTEXT.init();
     }
 

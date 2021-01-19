@@ -117,24 +117,6 @@ public class IndependentImanityPlatform implements ImanityPlatform {
     }
 
     @Override
-    public List<Entry<String, Object>> getPluginInstances() {
-        return Arrays.asList(
-                new Entry<>("bootable", this.bootable),
-                new Entry<>("independent", this.bootable.getBootableObject())
-        );
-    }
-
-    @Override
-    public Set<ClassLoader> getClassLoaders() {
-        return Collections.singleton(this.bootable.getBootableClass().getClassLoader());
-    }
-
-    @Override
-    public List<File> getPluginFiles() {
-        return new ArrayList<>();
-    }
-
-    @Override
     public boolean isShuttingDown() {
         return this.bootable.isShuttingDown();
     }

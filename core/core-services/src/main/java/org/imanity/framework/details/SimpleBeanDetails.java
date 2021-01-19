@@ -3,6 +3,7 @@ package org.imanity.framework.details;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
+import org.imanity.framework.plugin.AbstractPlugin;
 import org.jetbrains.annotations.Nullable;
 
 import java.lang.annotation.Annotation;
@@ -13,12 +14,19 @@ import java.util.Map;
 
 @Getter
 @Setter
-@AllArgsConstructor
 public class SimpleBeanDetails implements BeanDetails {
 
     private Object instance;
     private String name;
     private Class<?> type;
+
+    private AbstractPlugin plugin;
+
+    public SimpleBeanDetails(Object instance, String name, Class<?> type) {
+        this.instance = instance;
+        this.name = name;
+        this.type = type;
+    }
 
     @Override
     public boolean shouldInitialize() throws InvocationTargetException, IllegalAccessException {
@@ -97,5 +105,20 @@ public class SimpleBeanDetails implements BeanDetails {
     @Override
     public Map<String, String> getTags() {
         return null;
+    }
+
+    @Override
+    public void bindWith(AbstractPlugin plugin) {
+        this.plugin = plugin;
+    }
+
+    @Override
+    public AbstractPlugin getBindPlugin() {
+        return this.plugin;
+    }
+
+    @Override
+    public boolean isBind() {
+        return this.plugin != null;
     }
 }

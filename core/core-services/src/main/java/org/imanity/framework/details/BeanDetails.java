@@ -1,11 +1,13 @@
 package org.imanity.framework.details;
 
 import lombok.SneakyThrows;
+import org.imanity.framework.plugin.AbstractPlugin;
 import org.jetbrains.annotations.Nullable;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.util.Map;
 
 public interface BeanDetails {
 
@@ -44,16 +46,22 @@ public interface BeanDetails {
 
     ActivationStage getStage();
 
-    java.util.Map<Class<? extends Annotation>, String> getDisallowAnnotations();
+    Map<Class<? extends Annotation>, String> getDisallowAnnotations();
 
-    java.util.Map<Class<? extends Annotation>, java.util.Collection<Method>> getAnnotatedMethods();
+    Map<Class<? extends Annotation>, java.util.Collection<Method>> getAnnotatedMethods();
 
     @Nullable
     Object getInstance();
 
     Class<?> getType();
 
-    java.util.Map<String, String> getTags();
+    Map<String, String> getTags();
+
+    void bindWith(AbstractPlugin plugin);
+
+    AbstractPlugin getBindPlugin();
+
+    boolean isBind();
 
     public static enum ActivationStage {
 

@@ -26,10 +26,9 @@ package org.imanity.framework.libraries;
 
 import com.google.common.collect.ImmutableSet;
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
-import me.lucko.jarrelocator.JarRelocator;
-import me.lucko.jarrelocator.Relocation;
 import org.imanity.framework.FrameworkMisc;
 import org.imanity.framework.libraries.classloader.IsolatedClassLoader;
+import org.imanity.framework.libraries.relocate.RelocateHandler;
 
 import java.io.File;
 import java.net.MalformedURLException;
@@ -45,6 +44,7 @@ import java.util.concurrent.Executors;
 public class LibraryHandler {
 
     private final Path libFolder;
+    private final RelocateHandler relocateHandler;
 
     private final Map<Library, Path> loaded = new ConcurrentHashMap<>();
     private final Map<ImmutableSet<Library>, IsolatedClassLoader> loaders = new HashMap<>();
@@ -60,6 +60,8 @@ public class LibraryHandler {
             file.mkdirs();
         }
         this.libFolder = file.toPath();
+
+        this.relocateHandler = new RelocateHandler(this);
     }
 
     public IsolatedClassLoader obtainClassLoaderWith(Collection<Library> libraries) {
@@ -118,7 +120,7 @@ public class LibraryHandler {
                 }
             });
 
-        };
+        }
 
         try {
             latch.await();
@@ -139,9 +141,7 @@ public class LibraryHandler {
     }
 
     private Path remapLibrary(Library library, Path normalFile) {
-        List<Relocation> relocations = new ArrayList<>(Arrays.asList(library.getRelocations()));
-
-        if (relocations.isEmpty()) {
+        if (library.getRelocations().isEmpty()) {
             return normalFile;
         }
 
@@ -150,15 +150,13 @@ public class LibraryHandler {
             return remappedFile;
         }
 
-        JarRelocator relocator = new JarRelocator(normalFile.toFile(), remappedFile.toFile(), relocations);
         try {
             System.out.println("Remapping library " + library.getName() + "...");
 
-            relocator.run();
+            this.relocateHandler.relocate(normalFile, remappedFile, library.getRelocations());
         } catch (Throwable throwable) {
             throw new RuntimeException("Something wrong while relocating library...", throwable);
         }
-
         return remappedFile;
     }
 

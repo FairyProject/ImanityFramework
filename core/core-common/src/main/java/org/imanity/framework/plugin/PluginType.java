@@ -24,8 +24,6 @@
 
 package org.imanity.framework.plugin;
 
-import lombok.Getter;
-
 public enum PluginType {
 
     BUKKIT("plugin.yml"),

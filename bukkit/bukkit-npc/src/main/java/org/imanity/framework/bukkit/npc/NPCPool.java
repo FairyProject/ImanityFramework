@@ -51,16 +51,14 @@ import org.imanity.framework.bukkit.npc.event.PlayerNPCInteractEvent;
 import org.imanity.framework.bukkit.npc.modifier.AnimationModifier;
 import org.imanity.framework.bukkit.npc.modifier.MetadataModifier;
 import org.imanity.framework.bukkit.npc.util.AxisAlignedBB;
-import org.imanity.framework.bukkit.plugin.ImanityPlugin;
+import org.imanity.framework.bukkit.plugin.BukkitPlugin;
 import org.imanity.framework.bukkit.util.CoordXZ;
 import org.imanity.framework.bukkit.util.TaskUtil;
 import org.imanity.framework.bukkit.util.chunk.CachedChunk;
 import org.imanity.framework.bukkit.util.chunk.CraftCachedChunk;
-import org.imanity.framework.Component;
 import org.imanity.framework.util.thread.ServerThreadLock;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import protocolsupport.libs.org.apache.commons.lang3.ObjectUtils;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
@@ -307,7 +305,7 @@ public class NPCPool implements Listener {
     @NoArgsConstructor(access = AccessLevel.PRIVATE)
     public static class Builder {
 
-        private ImanityPlugin plugin;
+        private BukkitPlugin plugin;
         private String name;
         private World world;
         private CoordXZ cornerA;
@@ -321,7 +319,7 @@ public class NPCPool implements Listener {
             return this;
         }
 
-        public Builder plugin(ImanityPlugin plugin) {
+        public Builder plugin(BukkitPlugin plugin) {
             this.plugin = plugin;
             return this;
         }
@@ -363,8 +361,6 @@ public class NPCPool implements Listener {
         }
 
         public void build() {
-            Preconditions.checkArgument(ObjectUtils.allNotNull(name, plugin, world, cornerA, cornerB, spawnDistance, actionDistance, tabListRemoveTicks), "One of field does not exists!");
-
             NPCPool npcPool = new NPCPool(plugin, world, spawnDistance, actionDistance, tabListRemoveTicks, cornerA, cornerB);
             NPCPool.NPC_POOLS.put(name, npcPool);
         }

@@ -3,7 +3,7 @@
     <parent>
         <artifactId>core</artifactId>
         <groupId>org.imanity.framework</groupId>
-        <version>0.0.1-SNAPSHOT</version>
+        <version>0.2-SNAPSHOT</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
@@ -124,6 +124,7 @@
         <java.version>1.8</java.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <mongo-java-driver.version>3.12.7</mongo-java-driver.version>
+        <reflect.version>0.0.1-SNAPSHOT</reflect.version>
     </properties>
 
     <distributionManagement>
@@ -236,14 +237,6 @@
             <scope>provided</scope>
         </dependency>
 
-        <!-- Class Path Scanner with Reflections -->
-        <dependency>
-            <groupId>org.reflections</groupId>
-            <artifactId>reflections</artifactId>
-            <version>0.9.12</version>
-            <scope>compile</scope>
-        </dependency>
-
         <!-- Tests -->
         <dependency>
             <groupId>junit</groupId>
@@ -292,6 +285,13 @@
             <groupId>org.imanity.framework</groupId>
             <artifactId>core-yaml</artifactId>
             <version>${project.version}</version>
+            <scope>compile</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>org.imanity.framework</groupId>
+            <artifactId>reflect</artifactId>
+            <version>${reflect.version}</version>
             <scope>compile</scope>
         </dependency>
 

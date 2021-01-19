@@ -43,12 +43,11 @@ import org.imanity.framework.bukkit.reflection.minecraft.MinecraftVersion;
 import org.imanity.framework.bukkit.reflection.resolver.ConstructorResolver;
 import org.imanity.framework.bukkit.reflection.resolver.FieldResolver;
 import org.imanity.framework.bukkit.reflection.resolver.MethodResolver;
-import org.imanity.framework.bukkit.reflection.resolver.ResolverQuery;
 import org.imanity.framework.bukkit.reflection.resolver.minecraft.NMSClassResolver;
 import org.imanity.framework.bukkit.reflection.resolver.minecraft.OBCClassResolver;
 import org.imanity.framework.bukkit.reflection.wrapper.FieldWrapper;
 import org.imanity.framework.bukkit.reflection.wrapper.MethodWrapper;
-import org.imanity.framework.factory.ClassFactory;
+import org.imanity.framework.reflect.ReflectLookup;
 import org.imanity.framework.util.AccessUtil;
 import org.imanity.framework.bukkit.reflection.wrapper.PacketWrapper;
 import org.imanity.framework.bukkit.reflection.version.PlayerVersion;
@@ -59,6 +58,7 @@ import org.jetbrains.annotations.Nullable;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
+import java.util.Collections;
 import java.util.function.Function;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -194,9 +194,11 @@ public class MinecraftReflection {
 
     @SneakyThrows
     private static void initProtocolCheck() {
-        ClassFactory.scan(ProtocolImpl.class);
+
+        ReflectLookup reflectLookup = new ReflectLookup(Collections.singletonList(Thread.currentThread().getContextClassLoader()), Collections.singletonList("org.imanity.framework"));
+
         Class<?> lastSuccess = null;
-        lookup: for (Class<?> type : ClassFactory.getClasses(ProtocolImpl.class)) {
+        lookup: for (Class<?> type : reflectLookup.findAnnotatedClasses(ProtocolImpl.class)) {
             if (!ProtocolCheck.class.isAssignableFrom(type)) {
                 throw new IllegalArgumentException("The type " + type.getName() + " does not implement to ProtocolCheck!");
             }

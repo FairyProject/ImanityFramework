@@ -37,6 +37,15 @@ public abstract class ComponentHolder {
         return constructorDetails.newInstance(BeanContext.INSTANCE);
     }
 
+    public void onEnable(Object instance) {
+
+    }
+
+    // TODO ?
+    public void onDisable(Object instance) {
+
+    }
+
     public abstract Class<?>[] type();
 
     public BeanConstructorDetails constructorDetails(Class<?> type) {

@@ -27,21 +27,12 @@ package org.imanity.framework.bukkit.impl;
 import org.apache.logging.log4j.Logger;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.imanity.framework.ImanityPlatform;
-import org.imanity.framework.ImanityCommon;
 import org.imanity.framework.bukkit.Imanity;
-import org.imanity.framework.bukkit.impl.server.ServerImplementation;
-import org.imanity.framework.bukkit.plugin.ImanityPlugin;
-import org.imanity.framework.bukkit.util.BukkitUtil;
 import org.imanity.framework.plugin.PluginClassLoader;
-import org.imanity.framework.util.entry.Entry;
 
 import javax.annotation.Nullable;
 import java.io.File;
 import java.lang.reflect.Method;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-import java.util.stream.Collectors;
 
 public class BukkitImanityPlatform implements ImanityPlatform {
     @Override
@@ -70,23 +61,6 @@ public class BukkitImanityPlatform implements ImanityPlatform {
     }
 
     @Override
-    public List<Entry<String, Object>> getPluginInstances() {
-        return Imanity.PLUGINS.stream()
-                .map(plugin -> new Entry<>(plugin.getName(), (Object) plugin))
-                .collect(Collectors.toList());
-    }
-
-    @Override
-    public Set<ClassLoader> getClassLoaders() {
-        Set<ClassLoader> classLoaders = new HashSet<>();
-        classLoaders.add(ImanityCommon.class.getClassLoader());
-        for (ImanityPlugin plugin : Imanity.PLUGINS) {
-            classLoaders.add(plugin.getClass().getClassLoader());
-        }
-        return classLoaders;
-    }
-
-    @Override
     public @Nullable String identifyClassLoader(ClassLoader classLoader) throws Exception {
         Class<?> pluginClassLoaderClass = Class.forName("org.bukkit.plugin.java.PluginClassLoader");
         if (pluginClassLoaderClass.isInstance(classLoader)) {
@@ -100,20 +74,8 @@ public class BukkitImanityPlatform implements ImanityPlatform {
     }
 
     @Override
-    public List<File> getPluginFiles() {
-        return Imanity.PLUGINS
-                .stream()
-                .map(BukkitUtil::getPluginJar)
-                .collect(Collectors.toList());
-    }
-
-    @Override
     public boolean isServerThread() {
         return Imanity.IMPLEMENTATION.isServerThread();
     }
 
-//    @Override
-//    public void preServiceLoaded() {
-//        Imanity.IMPLEMENTATION = ServerImplementation.load();
-//    }
 }

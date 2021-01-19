@@ -119,30 +119,6 @@ public class BungeeImanityPlatform implements ImanityPlatform {
     }
 
     @Override
-    public List<Entry<String, Object>> getPluginInstances() {
-        return Imanity.PLUGINS.stream()
-                .map(plugin -> new Entry<>(plugin.getDescription().getName(), (Object) plugin))
-                .collect(Collectors.toList());
-    }
-
-    @Override
-    public Set<ClassLoader> getClassLoaders() {
-        Set<ClassLoader> classLoaders = new HashSet<>();
-        classLoaders.add(ImanityCommon.class.getClassLoader());
-        for (ImanityPlugin plugin : Imanity.PLUGINS) {
-            classLoaders.add(plugin.getClass().getClassLoader());
-        }
-        return classLoaders;
-    }
-
-    @Override
-    public List<File> getPluginFiles() {
-        return Imanity.PLUGINS.stream()
-                .map(Plugin::getFile)
-                .collect(Collectors.toList());
-    }
-
-    @Override
     public @Nullable String identifyClassLoader(ClassLoader classLoader) throws Exception {
         Class<?> pluginClassLoader = Class.forName("net.md_5.bungee.api.plugin.PluginClassloader");
         if (pluginClassLoader.isInstance(classLoader)) {

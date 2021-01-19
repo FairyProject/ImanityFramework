@@ -45,7 +45,6 @@ import org.imanity.framework.bukkit.bossbar.BossBarAdapter;
 import org.imanity.framework.bukkit.bossbar.BossBarHandler;
 import org.imanity.framework.bukkit.chunk.KeepChunkHandler;
 import org.imanity.framework.bukkit.chunk.block.CacheBlockSetHandler;
-import org.imanity.framework.bukkit.command.presence.DefaultPresenceProvider;
 import org.imanity.framework.bukkit.events.player.PlayerLocaleLoadedEvent;
 import org.imanity.framework.bukkit.hologram.HologramHandler;
 import org.imanity.framework.bukkit.impl.*;
@@ -56,7 +55,7 @@ import org.imanity.framework.bukkit.packet.PacketService;
 import org.imanity.framework.bukkit.packet.wrapper.server.WrappedPacketOutTitle;
 import org.imanity.framework.bukkit.player.movement.MovementListener;
 import org.imanity.framework.bukkit.player.movement.impl.AbstractMovementImplementation;
-import org.imanity.framework.bukkit.plugin.ImanityPlugin;
+import org.imanity.framework.bukkit.plugin.BukkitPlugin;
 import org.imanity.framework.bukkit.reflection.MinecraftReflection;
 import org.imanity.framework.bukkit.reflection.minecraft.MinecraftVersion;
 import org.imanity.framework.bukkit.reflection.wrapper.ChatComponentWrapper;
@@ -68,15 +67,14 @@ import org.imanity.framework.bukkit.util.*;
 import org.imanity.framework.bukkit.tablist.ImanityTabAdapter;
 import org.imanity.framework.bukkit.tablist.ImanityTabHandler;
 import org.imanity.framework.bukkit.visual.VisualBlockHandler;
-import org.imanity.framework.command.CommandService;
 import org.imanity.framework.locale.LocaleRepository;
 import org.imanity.framework.locale.player.LocaleData;
 import org.imanity.framework.plugin.PluginClassLoader;
+import org.imanity.framework.plugin.PluginManager;
 import org.imanity.framework.task.TaskChainFactory;
 import org.imanity.framework.util.FastRandom;
 
 import javax.annotation.Nullable;
-import java.util.ArrayList;
 import java.util.List;
 
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
@@ -106,11 +104,13 @@ public final class Imanity {
 
     private static VisualBlockHandler VISUAL_BLOCK_HANDLER;
 
-    public static List<ImanityPlugin> PLUGINS = new ArrayList<>();
-
     public static boolean SHUTTING_DOWN = false;
 
     public static boolean TESTING = false;
+
+    public static void preInit() {
+        PluginManager.initialize(new BukkitPluginHandler());
+    }
 
     public static void init(Plugin plugin) {
         Imanity.PLUGIN = plugin;
@@ -118,7 +118,6 @@ public final class Imanity {
         Imanity.CLASS_LOADER = new PluginClassLoader(plugin.getClass().getClassLoader());
 
         SpigotUtil.init();
-
         Imanity.initCommon();
 
         Imanity.TASK_CHAIN_FACTORY = BukkitTaskChainFactory.create(plugin);
@@ -186,10 +185,10 @@ public final class Imanity {
 
             if (!plugin.isEnabled()) {
 
-                if (plugin instanceof ImanityPlugin) {
+                if (plugin instanceof BukkitPlugin) {
 
                     Plugin finalPlugin = plugin;
-                    ((ImanityPlugin) plugin).queue(() -> PLUGIN.getServer().getPluginManager().registerEvents(listener, finalPlugin));
+                    ((BukkitPlugin) plugin).addStartupQueue(() -> PLUGIN.getServer().getPluginManager().registerEvents(listener, finalPlugin));
 
                 } else {
 
@@ -355,7 +354,10 @@ public final class Imanity {
         if (Imanity.TAB_HANDLER != null) {
             Imanity.TAB_HANDLER.stop();
         }
+
         ImanityCommon.shutdown();
+
+        PluginManager.INSTANCE.callFrameworkFullyDisable();
     }
 
 }

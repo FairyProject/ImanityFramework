@@ -3,7 +3,7 @@
     <parent>
         <artifactId>core</artifactId>
         <groupId>org.imanity.framework</groupId>
-        <version>0.0.1-SNAPSHOT</version>
+        <version>0.2-SNAPSHOT</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
@@ -11,6 +11,7 @@
     <properties>
         <java.version>1.8</java.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <reflect.version>0.0.1-SNAPSHOT</reflect.version>
     </properties>
 
     <build>
@@ -94,15 +95,15 @@
             <scope>provided</scope>
         </dependency>
         <dependency>
-            <groupId>org.reflections</groupId>
-            <artifactId>reflections</artifactId>
-            <version>0.9.12</version>
+            <groupId>org.imanity.framework</groupId>
+            <artifactId>core-misc</artifactId>
+            <version>${project.version}</version>
             <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>org.imanity.framework</groupId>
-            <artifactId>core-misc</artifactId>
-            <version>${project.version}</version>
+            <artifactId>reflect</artifactId>
+            <version>${reflect.version}</version>
             <scope>provided</scope>
         </dependency>
         <dependency>

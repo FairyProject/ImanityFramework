@@ -29,10 +29,9 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Multimap;
 import lombok.Getter;
 import org.bukkit.entity.Player;
-import org.imanity.framework.ImanityCommon;
-import org.imanity.framework.PostDestroy;
-import org.imanity.framework.PostInitialize;
+import org.imanity.framework.*;
 import org.imanity.framework.bukkit.Imanity;
+import org.imanity.framework.bukkit.impl.server.ServerImplementation;
 import org.imanity.framework.bukkit.packet.netty.INettyInjection;
 import org.imanity.framework.bukkit.packet.netty.NettyInjection1_8;
 import org.imanity.framework.bukkit.packet.type.PacketType;
@@ -43,10 +42,10 @@ import org.imanity.framework.bukkit.packet.wrapper.WrappedPacket;
 import org.imanity.framework.bukkit.packet.wrapper.annotation.AutowiredWrappedPacket;
 import org.imanity.framework.bukkit.reflection.MinecraftReflection;
 import org.imanity.framework.bukkit.util.TaskUtil;
-import org.imanity.framework.factory.ClassFactory;
-import org.imanity.framework.Autowired;
-import org.imanity.framework.Service;
+import org.imanity.framework.reflect.ReflectLookup;
+
 import java.lang.reflect.Method;
+import java.util.Collections;
 
 @Service(name = "packet")
 public class PacketService {
@@ -55,6 +54,9 @@ public class PacketService {
 
     @Autowired
     private static PacketService INSTANCE;
+
+    @Autowired
+    private BeanContext beanContext;
 
     public static void send(Player player, SendableWrapper sendableWrapper) {
         PacketService.INSTANCE.sendPacket(player, sendableWrapper);
@@ -111,9 +113,12 @@ public class PacketService {
         ImmutableMap.Builder<Byte, Class<? extends WrappedPacket>> readBuilder = ImmutableMap.builder();
         ImmutableMap.Builder<Byte, Class<? extends WrappedPacket>> writeBuilder = ImmutableMap.builder();
 
-        ClassFactory.scan(AutowiredWrappedPacket.class);
+        ReflectLookup reflectLookup = new ReflectLookup(
+                Collections.singleton(PacketService.class.getClassLoader()),
+                Collections.singleton("org.imanity.framework")
+        );
 
-        for (java.lang.Class<?> originalType : ClassFactory.getClasses(AutowiredWrappedPacket.class)) {
+        for (java.lang.Class<?> originalType : reflectLookup.findAnnotatedClasses(AutowiredWrappedPacket.class)) {
 
             if (!WrappedPacket.class.isAssignableFrom(originalType)) {
                 throw new IllegalArgumentException("The type " + originalType.getName() + " does not extend WrappedPacket!");

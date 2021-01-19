@@ -40,6 +40,12 @@ import java.lang.reflect.Method;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
+/**
+ * TODO:
+ * Better command
+ *
+ */
+
 @Service(name = "command")
 @Getter
 public class CommandService {

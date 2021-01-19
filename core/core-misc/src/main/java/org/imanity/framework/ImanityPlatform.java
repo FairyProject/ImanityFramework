@@ -43,15 +43,9 @@ public interface ImanityPlatform {
 
     Logger getLogger();
 
-    List<Entry<String, Object>> getPluginInstances();
-
-    Set<ClassLoader> getClassLoaders();
-
     default @Nullable String identifyClassLoader(ClassLoader classLoader) throws Exception {
         return null;
     }
-
-    List<File> getPluginFiles();
 
     boolean isShuttingDown();
 

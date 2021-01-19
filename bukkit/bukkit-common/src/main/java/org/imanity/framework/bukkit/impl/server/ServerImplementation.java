@@ -32,27 +32,31 @@ import org.bukkit.World;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 import org.bukkit.material.MaterialData;
+import org.imanity.framework.BeanContext;
 import org.imanity.framework.bukkit.hologram.HologramSingle;
 import org.imanity.framework.bukkit.impl.annotation.ProviderTestImpl;
 import org.imanity.framework.bukkit.impl.annotation.ServerImpl;
 import org.imanity.framework.bukkit.impl.test.ImplementationFactory;
 import org.imanity.framework.bukkit.player.movement.MovementListener;
 import org.imanity.framework.bukkit.player.movement.impl.AbstractMovementImplementation;
-import org.imanity.framework.factory.ClassFactory;
 import org.imanity.framework.bukkit.util.BlockPosition;
+import org.imanity.framework.reflect.Reflect;
+import org.imanity.framework.reflect.ReflectLookup;
 
-import java.util.Collection;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
 
 public interface ServerImplementation {
 
     @SneakyThrows
-    static ServerImplementation load() {
-        ClassFactory.scan(ServerImpl.class);
+    static ServerImplementation load(BeanContext beanContext) {
+
+        ReflectLookup reflectLookup = new ReflectLookup(
+                Collections.singleton(ServerImplementation.class.getClassLoader()),
+                Collections.singleton("org.imanity.framework")
+        );
+
         Class<?> lastSuccess = null;
-        lookup: for (Class<?> type : ClassFactory.getClasses(ServerImpl.class)) {
+        lookup: for (Class<?> type : reflectLookup.findAnnotatedClasses(ServerImpl.class)) {
             if (!ServerImplementation.class.isAssignableFrom(type)) {
                 throw new IllegalArgumentException("The type " + type.getName() + " does not implement to ProtocolCheck!");
             }
