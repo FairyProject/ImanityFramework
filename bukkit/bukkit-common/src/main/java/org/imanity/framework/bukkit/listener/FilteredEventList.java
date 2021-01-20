@@ -30,11 +30,15 @@ import org.bukkit.event.Event;
 import org.bukkit.event.player.PlayerEvent;
 import org.imanity.framework.bukkit.reflection.resolver.MethodResolver;
 import org.imanity.framework.bukkit.reflection.wrapper.MethodWrapper;
+import org.imanity.framework.reflect.Reflect;
 
+import java.lang.invoke.MethodHandle;
+import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.BiPredicate;
 import java.util.function.Function;
 import java.util.function.Predicate;
@@ -42,6 +46,8 @@ import java.util.function.Supplier;
 
 @Getter
 public class FilteredEventList {
+
+    private static final Map<Class<?>, MethodHandle> EVENT_PLAYER_METHODS = new ConcurrentHashMap<>();
 
     private final Predicate<Event>[] filters;
 
@@ -83,14 +89,38 @@ public class FilteredEventList {
                 if (event instanceof PlayerEvent) {
                     player = ((PlayerEvent) event).getPlayer();
                 } else {
-                    try { // LeeGod - use MethodResolver so it caches methods
-                        MethodResolver methodResolver = new MethodResolver(event.getClass());
-                        MethodWrapper<Player> methodWrapper = methodResolver.resolve(Player.class, 0);
+                    Class<?> type = event.getClass();
+                    MethodHandle methodHandle = null;
 
-                        if (methodWrapper.exists()) {
-                            player = methodWrapper.invoke(event);
+                    if (EVENT_PLAYER_METHODS.containsKey(type)) {
+                        methodHandle = EVENT_PLAYER_METHODS.get(type);
+                    } else {
+                        for (Method method : Reflect.getDeclaredMethods(type)) {
+                            if (method.getParameterCount() == 0) {
+                                Class<?> returnType = method.getReturnType();
+                                if (Player.class.isAssignableFrom(returnType)) {
+                                    try {
+                                        methodHandle = Reflect.lookup().unreflect(method);
+                                        EVENT_PLAYER_METHODS.put(type, methodHandle);
+                                        break;
+                                    } catch (Throwable throwable) {
+                                        throw new IllegalArgumentException("Something wrong while looking for player", throwable);
+                                    }
+                                }
+                            }
                         }
-                    } catch (Exception ex) {
+
+                        if (methodHandle == null) {
+                            EVENT_PLAYER_METHODS.put(type, null);
+                        }
+                    }
+
+                    if (methodHandle != null) {
+                        try {
+                            player = (Player) methodHandle.invoke(event);
+                        } catch (Throwable throwable) {
+                            throw new IllegalArgumentException("Something wrong while looking for player", throwable);
+                        }
                     }
                 }
 
