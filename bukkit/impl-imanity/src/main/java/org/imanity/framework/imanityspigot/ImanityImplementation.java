@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2020 - 2020 Imanity
+ * Copyright (c) 2021 Imanity
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -60,10 +60,10 @@ public class ImanityImplementation extends NormalImplementation {
     public void sendHologramSpawnPacket(Player player, HologramSingle hologramSingle) {
         PacketPlayOutSpawnEntityLiving packet = new PacketPlayOutSpawnEntityLiving();
 
-        packet.setA(hologramSingle.getSkullId());
+        packet.setA(hologramSingle.getArmorStandId());
         packet.setB(30);
         packet.setC((int) Math.floor(hologramSingle.getLocation().getX() * 32.0));
-        packet.setD((int) Math.floor((hologramSingle.getLocation().getY() - 2.25) * 32.0));
+        packet.setD((int) Math.floor(hologramSingle.getLocation().getY() * 32.0));
         packet.setE((int) Math.floor(hologramSingle.getLocation().getZ() * 32.0));
 
         DataWatcher dataWatcher = new DataWatcher((net.minecraft.server.v1_8_R3.Entity) null);
@@ -84,7 +84,7 @@ public class ImanityImplementation extends NormalImplementation {
         dataWatcher.a(2, hologramSingle.getViewHandler().view(player));
         dataWatcher.a(3, (byte) 1);
 
-        MinecraftReflection.sendPacket(player, new PacketPlayOutEntityMetadata(hologramSingle.getSkullId(), dataWatcher, true));
+        MinecraftReflection.sendPacket(player, new PacketPlayOutEntityMetadata(hologramSingle.getArmorStandId(), dataWatcher, true));
 
     }
 

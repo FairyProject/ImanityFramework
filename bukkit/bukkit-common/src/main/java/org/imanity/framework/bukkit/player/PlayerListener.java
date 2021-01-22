@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2020 - 2020 Imanity
+ * Copyright (c) 2021 Imanity
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -31,9 +31,11 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.imanity.framework.bukkit.Imanity;
+import org.imanity.framework.bukkit.events.player.PlayerPostJoinEvent;
 import org.imanity.framework.bukkit.listener.events.Events;
 import org.imanity.framework.bukkit.metadata.Metadata;
 import org.imanity.framework.Component;
+import org.imanity.framework.bukkit.util.TaskUtil;
 
 @Component
 public class PlayerListener implements Listener {
@@ -53,6 +55,8 @@ public class PlayerListener implements Listener {
         if (Imanity.TAB_HANDLER != null) {
             Imanity.TAB_HANDLER.registerPlayerTablist(player);
         }
+
+        TaskUtil.runScheduled(() -> Imanity.callEvent(new PlayerPostJoinEvent(player)), 1L);
     }
 
     @EventHandler

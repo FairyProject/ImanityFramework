@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2020 - 2020 Imanity
+ * Copyright (c) 2021 Imanity
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -256,8 +256,8 @@ public class MinecraftReflection {
                     .resolveWrapper("entityCount");
         }
 
-        int id = ENTITY_ID_RESOLVER.get(null) + newIds;
-        ENTITY_ID_RESOLVER.setSilent(null, id);
+        int id = ENTITY_ID_RESOLVER.get(null);
+        ENTITY_ID_RESOLVER.setSilent(null, id + newIds);
         return id;
     }
 

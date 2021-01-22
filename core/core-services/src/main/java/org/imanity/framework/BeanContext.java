@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2020 - 2020 Imanity
+ * Copyright (c) 2021 Imanity
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -50,7 +50,7 @@ import java.util.stream.Collectors;
 
 public class BeanContext {
 
-    public static boolean SHOW_LOGS = true;
+    public static boolean SHOW_LOGS = false;
 
     public static BeanContext INSTANCE;
 

@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2020 - 2020 Imanity
+ * Copyright (c) 2021 Imanity
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -57,6 +57,7 @@ import org.imanity.framework.bukkit.player.movement.MovementListener;
 import org.imanity.framework.bukkit.player.movement.impl.AbstractMovementImplementation;
 import org.imanity.framework.bukkit.plugin.BukkitPlugin;
 import org.imanity.framework.bukkit.reflection.MinecraftReflection;
+import org.imanity.framework.bukkit.reflection.ProtocolLibService;
 import org.imanity.framework.bukkit.reflection.minecraft.MinecraftVersion;
 import org.imanity.framework.bukkit.reflection.wrapper.ChatComponentWrapper;
 import org.imanity.framework.bukkit.scoreboard.ImanityBoardAdapter;
@@ -185,16 +186,9 @@ public final class Imanity {
 
             if (!plugin.isEnabled()) {
 
-                if (plugin instanceof BukkitPlugin) {
+                Imanity.LOGGER.error("The plugin hasn't enabled but trying to register listener " + listener.getClass().getSimpleName());
+                return;
 
-                    Plugin finalPlugin = plugin;
-                    ((BukkitPlugin) plugin).addStartupQueue(() -> PLUGIN.getServer().getPluginManager().registerEvents(listener, finalPlugin));
-
-                } else {
-
-                    Imanity.LOGGER.error("The plugin hasn't enabled but trying to register listener " + listener.getClass().getSimpleName());
-                    return;
-                }
             } else {
 
                 PLUGIN.getServer().getPluginManager().registerEvents(listener, plugin);

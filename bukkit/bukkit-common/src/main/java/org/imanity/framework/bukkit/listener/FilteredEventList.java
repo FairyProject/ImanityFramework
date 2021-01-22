@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2020 - 2020 Imanity
+ * Copyright (c) 2021 Imanity
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -24,6 +24,7 @@
 
 package org.imanity.framework.bukkit.listener;
 
+import com.google.common.collect.Sets;
 import lombok.Getter;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Event;
@@ -34,10 +35,7 @@ import org.imanity.framework.reflect.Reflect;
 
 import java.lang.invoke.MethodHandle;
 import java.lang.reflect.Method;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.BiPredicate;
 import java.util.function.Function;
@@ -48,6 +46,7 @@ import java.util.function.Supplier;
 public class FilteredEventList {
 
     private static final Map<Class<?>, MethodHandle> EVENT_PLAYER_METHODS = new ConcurrentHashMap<>();
+    private static final Set<Class<?>> NO_METHODS = Sets.newConcurrentHashSet();
 
     private final Predicate<Event>[] filters;
 
@@ -94,7 +93,7 @@ public class FilteredEventList {
 
                     if (EVENT_PLAYER_METHODS.containsKey(type)) {
                         methodHandle = EVENT_PLAYER_METHODS.get(type);
-                    } else {
+                    } else if (!NO_METHODS.contains(type)) {
                         for (Method method : Reflect.getDeclaredMethods(type)) {
                             if (method.getParameterCount() == 0) {
                                 Class<?> returnType = method.getReturnType();
@@ -111,7 +110,7 @@ public class FilteredEventList {
                         }
 
                         if (methodHandle == null) {
-                            EVENT_PLAYER_METHODS.put(type, null);
+                            NO_METHODS.add(type);
                         }
                     }
 
