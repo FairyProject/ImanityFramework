@@ -31,11 +31,13 @@ import org.bukkit.entity.Projectile;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.player.PlayerEvent;
+import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.projectiles.ProjectileSource;
 import org.bukkit.util.BlockIterator;
 import org.imanity.framework.bukkit.reflection.resolver.MethodResolver;
+import org.imanity.framework.reflect.Reflect;
 
 import javax.annotation.Nullable;
 import java.io.File;
@@ -287,5 +289,32 @@ public class BukkitUtil {
         return block;
     }
 
+    public static File getDataFolder(int depth) {
+        Class<?> caller = Reflect.getCallerClass(depth).orElse(null);
+
+        if (caller != null) {
+            Plugin plugin = null;
+
+            try {
+                plugin = JavaPlugin.getProvidingPlugin(caller);
+            } catch (Throwable ignored) {}
+
+            if (plugin != null) {
+                return plugin.getDataFolder();
+            } else {
+                throw new IllegalArgumentException("Caller class from depth " + depth + " is not plugin class.");
+            }
+        } else {
+            throw new IllegalArgumentException("Caller class from depth " + depth + " does not exists.");
+        }
+    }
+
+    public static File getDataFolder() {
+        return getDataFolder(1);
+    }
+
+    public static File getFile(String fileName) {
+        return new File(getDataFolder(1), fileName);
+    }
 
 }
