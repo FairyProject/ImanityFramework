@@ -35,7 +35,11 @@ import org.imanity.framework.bukkit.events.player.PlayerPostJoinEvent;
 import org.imanity.framework.bukkit.listener.events.Events;
 import org.imanity.framework.bukkit.metadata.Metadata;
 import org.imanity.framework.Component;
+import org.imanity.framework.bukkit.timer.TimerList;
+import org.imanity.framework.bukkit.timer.impl.PlayerTimer;
 import org.imanity.framework.bukkit.util.TaskUtil;
+import org.imanity.framework.metadata.MetadataKey;
+import org.imanity.framework.metadata.MetadataMap;
 
 @Component
 public class PlayerListener implements Listener {
@@ -76,8 +80,13 @@ public class PlayerListener implements Listener {
         }
 
         Events.unregisterAll(player);
-        Metadata.provideForPlayer(player.getUniqueId())
-                .clear();
+        MetadataMap metadataMap = Metadata.provideForPlayer(player);
+        metadataMap.ifPresent(PlayerTimer.TIMER_METADATA_KEY, TimerList::clear);
+        for (MetadataKey<?> key : metadataMap.asMap().keySet()) {
+            if (key.removeOnNonExists()) {
+                metadataMap.remove(key);
+            }
+        }
     }
 
 }

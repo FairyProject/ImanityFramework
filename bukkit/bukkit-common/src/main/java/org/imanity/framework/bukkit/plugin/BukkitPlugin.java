@@ -27,30 +27,44 @@ package org.imanity.framework.bukkit.plugin;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.imanity.framework.plugin.AbstractPlugin;
 import org.imanity.framework.plugin.PluginManager;
+import org.imanity.framework.util.Utility;
 
 public abstract class BukkitPlugin extends JavaPlugin implements AbstractPlugin {
 
     @Override
     public final void onLoad() {
+        ClassLoader originalContextClassLoader = Thread.currentThread().getContextClassLoader();
+        Thread.currentThread().setContextClassLoader(getClassLoader());
         PluginManager.INSTANCE.addPlugin(this);
+        PluginManager.INSTANCE.onPluginInitial(this);
 
         this.onInitial();
+        Thread.currentThread().setContextClassLoader(originalContextClassLoader);
     }
 
     @Override
     public final void onEnable() {
+        ClassLoader originalContextClassLoader = Thread.currentThread().getContextClassLoader();
+        Thread.currentThread().setContextClassLoader(getClassLoader());
+
+        Utility.resolveLinkageError();
+
         this.onPreEnable();
 
         PluginManager.INSTANCE.onPluginEnable(this);
 
         this.onPluginEnable();
+        Thread.currentThread().setContextClassLoader(originalContextClassLoader);
     }
 
     @Override
     public final void onDisable() {
+        ClassLoader originalContextClassLoader = Thread.currentThread().getContextClassLoader();
+        Thread.currentThread().setContextClassLoader(getClassLoader());
         this.onPluginDisable();
 
         PluginManager.INSTANCE.onPluginDisable(this);
+        Thread.currentThread().setContextClassLoader(originalContextClassLoader);
     }
 
     @Override

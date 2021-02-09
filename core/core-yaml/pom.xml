@@ -112,6 +112,19 @@
             <scope>provided</scope>
         </dependency>
 
+        <dependency>
+            <groupId>org.imanity.framework</groupId>
+            <artifactId>core-services</artifactId>
+            <version>${project.version}</version>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.imanity.framework</groupId>
+            <artifactId>core-misc</artifactId>
+            <version>${project.version}</version>
+            <scope>provided</scope>
+        </dependency>
+
         <!-- Test -->
         <dependency>
             <groupId>org.junit.platform</groupId>

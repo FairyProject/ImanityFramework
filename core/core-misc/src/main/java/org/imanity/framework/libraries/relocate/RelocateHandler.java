@@ -38,7 +38,7 @@ import java.util.*;
 @AllArgsConstructor
 public class RelocateHandler {
 
-    public static final Library[] DEPENDENCIES = new Library[] {Library.ASM, Library.ASM_COMMONS, Library.JAR_RELOCATOR};
+    public static final Library[] DEPENDENCIES = new Library[] {Library.JAR_RELOCATOR};
     private static final String JAR_RELOCATOR_CLASS = "me.lucko.jarrelocator.JarRelocator";
     private static final String JAR_RELOCATOR_RUN_METHOD = "run";
 
@@ -48,9 +48,17 @@ public class RelocateHandler {
     public RelocateHandler(LibraryHandler libraryHandler) {
         try {
             // download the required dependencies for remapping
-            libraryHandler.downloadLibraries(DEPENDENCIES);
+            libraryHandler.downloadLibraries(false, DEPENDENCIES);
             // get a classloader containing the required dependencies as sources
-            IsolatedClassLoader classLoader = libraryHandler.obtainClassLoaderWith(DEPENDENCIES);
+
+            List<Library> libraries = new ArrayList<>();
+            libraries.add(Library.JAR_RELOCATOR);
+
+            // INCLUDE ASM!
+            libraries.add(Library.ASM);
+            libraries.add(Library.ASM_COMMONS);
+
+            IsolatedClassLoader classLoader = libraryHandler.obtainClassLoaderWith(libraries);
 
             // load the relocator class
             Class<?> jarRelocatorClass = classLoader.loadClass(JAR_RELOCATOR_CLASS);

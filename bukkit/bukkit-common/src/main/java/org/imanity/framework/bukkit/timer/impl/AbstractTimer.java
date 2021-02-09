@@ -65,7 +65,7 @@ public abstract class AbstractTimer implements Timer {
         this(beginTime, duration, null);
     }
 
-    public AbstractTimer(long duration, TimerList<?> timerList) {
+    public AbstractTimer(long duration, TimerList timerList) {
         this(System.currentTimeMillis(), duration, timerList);
     }
 

@@ -26,8 +26,11 @@ package org.imanity.framework.bukkit.listener;
 
 import com.google.common.collect.Sets;
 import lombok.Getter;
+import lombok.RequiredArgsConstructor;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Event;
+import org.bukkit.event.block.BlockBreakEvent;
+import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.event.player.PlayerEvent;
 import org.imanity.framework.bukkit.reflection.resolver.MethodResolver;
 import org.imanity.framework.bukkit.reflection.wrapper.MethodWrapper;
@@ -45,8 +48,19 @@ import java.util.function.Supplier;
 @Getter
 public class FilteredEventList {
 
-    private static final Map<Class<?>, MethodHandle> EVENT_PLAYER_METHODS = new ConcurrentHashMap<>();
+    private static final Map<Class<?>, Function<Event, Player>> EVENT_PLAYER_METHODS = new ConcurrentHashMap<>();
     private static final Set<Class<?>> NO_METHODS = Sets.newConcurrentHashSet();
+
+    static {
+
+        EVENT_PLAYER_METHODS.put(BlockBreakEvent.class, event -> ((BlockBreakEvent) event).getPlayer());
+        EVENT_PLAYER_METHODS.put(BlockPlaceEvent.class, event -> ((BlockPlaceEvent) event).getPlayer());
+
+    }
+
+    public static void putCustomPlayerMethod(Class<?> eventClass, Function<Event, Player> method) {
+        EVENT_PLAYER_METHODS.put(eventClass, method);
+    }
 
     private final Predicate<Event>[] filters;
 
@@ -85,22 +99,26 @@ public class FilteredEventList {
         public Builder filter(BiPredicate<Player, Event> filter) {
             this.filters.add(event -> {
                 Player player = null;
+                Class<?> type = event.getClass();
                 if (event instanceof PlayerEvent) {
                     player = ((PlayerEvent) event).getPlayer();
+                } else if (EVENT_PLAYER_METHODS.containsKey(type)) {
+                    player = EVENT_PLAYER_METHODS.get(type).apply(event);
                 } else {
-                    Class<?> type = event.getClass();
                     MethodHandle methodHandle = null;
 
-                    if (EVENT_PLAYER_METHODS.containsKey(type)) {
-                        methodHandle = EVENT_PLAYER_METHODS.get(type);
-                    } else if (!NO_METHODS.contains(type)) {
+                    if (!NO_METHODS.contains(type)) {
                         for (Method method : Reflect.getDeclaredMethods(type)) {
                             if (method.getParameterCount() == 0) {
                                 Class<?> returnType = method.getReturnType();
                                 if (Player.class.isAssignableFrom(returnType)) {
                                     try {
                                         methodHandle = Reflect.lookup().unreflect(method);
-                                        EVENT_PLAYER_METHODS.put(type, methodHandle);
+
+                                        MethodHandleFunction methodHandleFunction = new MethodHandleFunction(methodHandle);
+                                        EVENT_PLAYER_METHODS.put(event.getClass(), methodHandleFunction);
+
+                                        player = methodHandleFunction.apply(event);
                                         break;
                                     } catch (Throwable throwable) {
                                         throw new IllegalArgumentException("Something wrong while looking for player", throwable);
@@ -111,14 +129,6 @@ public class FilteredEventList {
 
                         if (methodHandle == null) {
                             NO_METHODS.add(type);
-                        }
-                    }
-
-                    if (methodHandle != null) {
-                        try {
-                            player = (Player) methodHandle.invoke(event);
-                        } catch (Throwable throwable) {
-                            throw new IllegalArgumentException("Something wrong while looking for player", throwable);
                         }
                     }
                 }
@@ -136,6 +146,21 @@ public class FilteredEventList {
             return new FilteredEventList(this);
         }
 
+    }
+
+    @RequiredArgsConstructor
+    private static class MethodHandleFunction implements Function<Event, Player> {
+
+        private final MethodHandle methodHandle;
+
+        @Override
+        public Player apply(Event event) {
+            try {
+                return (Player) methodHandle.invoke(event);
+            } catch (Throwable throwable) {
+                throw new IllegalArgumentException("Something wrong while looking for player", throwable);
+            }
+        }
     }
 
 }

@@ -88,8 +88,7 @@ public class HttpService {
                     "4.1.42.Final",
                     null
             );
-            ImanityCommon.LIBRARY_HANDLER.downloadLibraries(library);
-            ImanityCommon.LIBRARY_HANDLER.obtainClassLoaderWith(library);
+            ImanityCommon.LIBRARY_HANDLER.downloadLibraries(true, library);
         }
 
         RouteMethodMapper.preInit();

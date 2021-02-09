@@ -22,20 +22,15 @@
  * SOFTWARE.
  */
 
-package org.imanity.framework.plugin;
+package org.imanity.framework.bukkit.util.items;
 
-public interface PluginListenerAdapter {
+import org.bukkit.block.Block;
+import org.bukkit.entity.Player;
+import org.bukkit.event.block.BlockPlaceEvent;
+import org.bukkit.inventory.ItemStack;
 
-    default void onPluginInitial(AbstractPlugin plugin) {
+public interface ItemPlaceCallback {
 
-    }
-
-    default void onPluginEnable(AbstractPlugin plugin) {
-
-    }
-
-    default void onPluginDisable(AbstractPlugin plugin) {
-
-    }
+    boolean onPlace(Player player, ItemStack itemStack, Block block, BlockPlaceEvent event);
 
 }

@@ -56,8 +56,7 @@ public class SqlService {
 
         this.connectionFactories = new ConcurrentHashMap<>();
 
-        FrameworkMisc.LIBRARY_HANDLER.downloadLibraries(Library.BYTE_BUDDY);
-        FrameworkMisc.LIBRARY_HANDLER.obtainClassLoaderWith(Library.BYTE_BUDDY);
+        FrameworkMisc.LIBRARY_HANDLER.downloadLibraries(true, Library.BYTE_BUDDY);
 
         ComponentRegistry.registerComponentHolder(new ComponentHolder() {
             @Override

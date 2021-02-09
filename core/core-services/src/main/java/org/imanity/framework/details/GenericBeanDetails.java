@@ -187,10 +187,14 @@ public class GenericBeanDetails implements BeanDetails {
 
         if (this.annotatedMethods.containsKey(annotation)) {
             for (Method method : this.annotatedMethods.get(annotation)) {
-                if (method.getParameterCount() == 1) {
-                    method.invoke(instance, this);
-                } else {
-                    method.invoke(instance);
+                try {
+                    if (method.getParameterCount() == 1) {
+                        method.invoke(instance, this);
+                    } else {
+                        method.invoke(instance);
+                    }
+                } catch (Throwable throwable) {
+                    throwable.printStackTrace();
                 }
             }
         }

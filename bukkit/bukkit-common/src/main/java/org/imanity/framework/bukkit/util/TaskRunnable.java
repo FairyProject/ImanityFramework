@@ -22,20 +22,12 @@
  * SOFTWARE.
  */
 
-package org.imanity.framework.plugin;
+package org.imanity.framework.bukkit.util;
 
-public interface PluginListenerAdapter {
+import org.bukkit.scheduler.BukkitTask;
 
-    default void onPluginInitial(AbstractPlugin plugin) {
+public interface TaskRunnable {
 
-    }
-
-    default void onPluginEnable(AbstractPlugin plugin) {
-
-    }
-
-    default void onPluginDisable(AbstractPlugin plugin) {
-
-    }
+    void run(BukkitTask task);
 
 }

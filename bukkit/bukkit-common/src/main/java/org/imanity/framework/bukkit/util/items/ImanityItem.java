@@ -91,6 +91,7 @@ public class ImanityItem {
     private String displayLoreLocale;
 
     private ItemCallback clickCallback;
+    private ItemPlaceCallback placeCallback;
 
     private final List<LocaleRV> displayNamePlaceholders = new ArrayList<>();
     private final List<LocaleRV> displayLorePlaceholders = new ArrayList<>();
@@ -131,12 +132,25 @@ public class ImanityItem {
         return this;
     }
 
+    public ImanityItem placeCallback(ItemPlaceCallback placeCallback) {
+        this.placeCallback = placeCallback;
+        return this;
+    }
+
     public ImanityItem metadata(String key, Object object) {
         this.metadata.put(key, object);
         return this;
     }
 
     public ImanityItem submit() {
+
+        if (this.getItemBuilder() == null) {
+            throw new IllegalArgumentException("No Item registered!");
+        }
+
+        if (this.placeCallback != null && !this.getItemBuilder().getType().isBlock()) {
+            throw new IllegalArgumentException("Registering ItemPlaceCallback but the item isn't a block!");
+        }
 
         this.id = ITEM_COUNTER.getAndIncrement();
         REGISTERED_ITEM.put(this.id, this);
@@ -152,6 +166,10 @@ public class ImanityItem {
     }
 
     public ItemStack build(Player receiver) {
+        if (this.getItemBuilder() == null) {
+            throw new IllegalArgumentException("No Item registered!");
+        }
+
         ItemBuilder itemBuilder = this.itemBuilder.clone();
 
         if (displayNameLocale != null) {

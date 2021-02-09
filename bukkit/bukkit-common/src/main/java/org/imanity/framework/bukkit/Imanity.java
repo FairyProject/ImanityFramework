@@ -271,7 +271,7 @@ public final class Imanity {
 
     public static void broadcast(@NonNull Iterable<? extends Player> players, @Nullable String messageLocale, @Nullable String titleLocale, @Nullable String subTitleLocale, @Nullable Sound sound, LocaleRV... rvs) {
 
-        boolean hasTitle = MinecraftVersion.VERSION.olderThan(MinecraftReflection.Version.v1_7_R4);
+        boolean hasTitle = MinecraftVersion.VERSION.newerThan(MinecraftReflection.Version.v1_7_R4);
 
         players.forEach(player -> {
             if (sound != null) {
@@ -332,7 +332,7 @@ public final class Imanity {
         if (subTitle != null) {
             PacketService.send(player, WrappedPacketOutTitle.builder()
                     .action(WrappedPacketOutTitle.Action.SUBTITLE)
-                    .message(ChatComponentWrapper.fromText(title))
+                    .message(ChatComponentWrapper.fromText(subTitle))
                     .fadeIn(fadeIn)
                     .stay(stay)
                     .fadeOut(fadeOut)

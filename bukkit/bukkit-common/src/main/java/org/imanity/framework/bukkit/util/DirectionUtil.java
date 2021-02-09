@@ -25,6 +25,7 @@
 package org.imanity.framework.bukkit.util;
 
 import lombok.Getter;
+import lombok.RequiredArgsConstructor;
 import org.bukkit.Location;
 import org.bukkit.entity.Player;
 import org.bukkit.util.Vector;
@@ -53,18 +54,16 @@ public class DirectionUtil
         }
     }
 
+    @RequiredArgsConstructor
+    @Getter
     public enum Direction
     {
-        DOWN("\u2193"),
-        UP("\u2191"),
-        RIGHT("\u2192"),
-        LEFT("\u2190");
+        DOWN("\u2193", "⇩"),
+        UP("\u2191", "⇧"),
+        RIGHT("\u2192", "⇨"),
+        LEFT("\u2190", "⇦");
 
-        @Getter
-        private final String text;
-
-        Direction(String text) {
-            this.text = text;
-        }
+        private final String symbolA;
+        private final String symbolB;
     }
 }

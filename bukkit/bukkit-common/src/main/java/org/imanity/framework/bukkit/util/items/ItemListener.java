@@ -25,12 +25,14 @@
 package org.imanity.framework.bukkit.util.items;
 
 import org.bukkit.Material;
+import org.bukkit.block.Block;
 import org.bukkit.entity.Item;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.Action;
+import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerPickupItemEvent;
 import org.bukkit.inventory.ItemStack;
@@ -91,7 +93,29 @@ public class ItemListener implements Listener {
         }
 
         if (imanityItem.getClickCallback() != null &&
-                !imanityItem.getClickCallback().onClick(player, itemStack, action)) {
+                !imanityItem.getClickCallback().onClick(player, itemStack, action, event)) {
+            event.setCancelled(true);
+        }
+    }
+
+    @EventHandler(ignoreCancelled = true, priority = EventPriority.MONITOR)
+    public void onBlockPlace(BlockPlaceEvent event) {
+        Player player = event.getPlayer();
+        ItemStack itemStack = event.getItemInHand();
+        Block block = event.getBlock();
+
+        if (itemStack == null || itemStack.getType() == Material.AIR) {
+            return;
+        }
+
+        ImanityItem imanityItem = ImanityItem.getItemFromBukkit(itemStack);
+
+        if (imanityItem == null) {
+            return;
+        }
+
+        if (imanityItem.getPlaceCallback() != null &&
+                !imanityItem.getPlaceCallback().onPlace(player, itemStack, block, event)) {
             event.setCancelled(true);
         }
     }

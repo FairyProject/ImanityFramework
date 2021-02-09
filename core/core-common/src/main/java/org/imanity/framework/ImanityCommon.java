@@ -59,7 +59,6 @@ public final class ImanityCommon {
             // SQL
             Library.MARIADB_DRIVER,
             Library.HIKARI,
-            Library.H2_DRIVER,
             Library.MYSQL_DRIVER,
             Library.POSTGRESQL_DRIVER,
 
@@ -74,6 +73,11 @@ public final class ImanityCommon {
             Library.SPRING_CORE,
             Library.SPRING_EL
     );
+
+    private static final Set<Library> GLOBAL_LIBRARIES_INDEPENDENT_CLASSLOADER = ImmutableSet.of(
+            Library.H2_DRIVER
+    );
+
     public static final String METADATA_PREFIX = "Imanity_";
 
     public static ImanityPlatform PLATFORM;
@@ -120,35 +124,29 @@ public final class ImanityCommon {
         getLogger().info("Loading Libraries");
 
         ImanityCommon.LIBRARY_HANDLER = new LibraryHandler();
-        ImanityCommon.LIBRARY_HANDLER.downloadLibraries(GLOBAL_LIBRARIES);
-        ImanityCommon.LIBRARY_HANDLER.obtainClassLoaderWith(GLOBAL_LIBRARIES);
+        ImanityCommon.LIBRARY_HANDLER.downloadLibraries(true, GLOBAL_LIBRARIES);
+
+        ImanityCommon.LIBRARY_HANDLER.downloadLibraries(false, GLOBAL_LIBRARIES_INDEPENDENT_CLASSLOADER);
 
         try {
             Class.forName("com.google.common.collect.ImmutableList");
         } catch (ClassNotFoundException ex) {
             // Below 1.8
-            ImanityCommon.LIBRARY_HANDLER.downloadLibraries(Library.GUAVA);
-            ImanityCommon.LIBRARY_HANDLER.obtainClassLoaderWith(Library.GUAVA);
+            ImanityCommon.LIBRARY_HANDLER.downloadLibraries(true, Library.GUAVA);
         }
 
         try {
             Class.forName("it.unimi.dsi.fastutil.Arrays");
         } catch (ClassNotFoundException ex) {
-            ImanityCommon.LIBRARY_HANDLER.downloadLibraries(Library.FAST_UTIL);
-            ImanityCommon.LIBRARY_HANDLER.obtainClassLoaderWith(Library.FAST_UTIL);
+            ImanityCommon.LIBRARY_HANDLER.downloadLibraries(true, Library.FAST_UTIL);
         }
 
         try {
             Class.forName("org.yaml");
         } catch (ClassNotFoundException ex) {
-            ImanityCommon.LIBRARY_HANDLER.downloadLibraries(Library.YAML);
-            ImanityCommon.LIBRARY_HANDLER.obtainClassLoaderWith(Library.YAML);
+            ImanityCommon.LIBRARY_HANDLER.downloadLibraries(true, Library.YAML);
         }
-
-        Library redisson = Library.REDISSON;
-
-        ImanityCommon.LIBRARY_HANDLER.downloadLibraries(redisson);
-        ImanityCommon.LIBRARY_HANDLER.obtainClassLoaderWith(redisson);
+        ImanityCommon.LIBRARY_HANDLER.downloadLibraries(true, Library.REDISSON);
 
         FrameworkMisc.LIBRARY_HANDLER = ImanityCommon.LIBRARY_HANDLER;
     }

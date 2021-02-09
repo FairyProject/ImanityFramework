@@ -27,7 +27,6 @@ package org.imanity.framework;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
 import lombok.NonNull;
-import lombok.SneakyThrows;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.imanity.framework.details.*;
@@ -108,30 +107,32 @@ public class BeanContext {
                 .collect(Collectors.toList());
     }
 
-    @SneakyThrows
     public void injectBeans(Object instance) {
-        Collection<Field> fields = Reflect.getDeclaredFields(instance.getClass());
+        try {
+            Collection<Field> fields = Reflect.getDeclaredFields(instance.getClass());
 
-        for (Field field : fields) {
-            int modifiers = field.getModifiers();
-            Autowired annotation = field.getAnnotation(Autowired.class);
+            for (Field field : fields) {
+                int modifiers = field.getModifiers();
+                Autowired annotation = field.getAnnotation(Autowired.class);
 
-            if (annotation == null || Modifier.isStatic(modifiers) || Modifier.isFinal(modifiers)) {
-                continue;
+                if (annotation == null || Modifier.isStatic(modifiers) || Modifier.isFinal(modifiers)) {
+                    continue;
+                }
+
+                Object service = this.getBean(field.getType());
+
+                if (service != null) {
+                    AccessUtil.setAccessible(field);
+                    Reflect.setField(instance, field, service);
+                } else {
+                    throw new IllegalArgumentException("Couldn't find bean " + field.getType().getName() + " !");
+                }
             }
-
-            Object service = this.getBean(field.getType());
-
-            if (service != null) {
-                AccessUtil.setAccessible(field);
-                Reflect.setField(instance, field, service);
-            } else {
-                throw new IllegalArgumentException("Couldn't find bean " + field.getType().getName() + " !");
-            }
+        } catch (Throwable throwable) {
+            LOGGER.error("Error while injecting beans", throwable);
         }
     }
 
-    @SneakyThrows
     public ComponentBeanDetails registerComponent(Object instance, Class<?> type, ComponentHolder componentHolder) {
         Component annotation = type.getAnnotation(Component.class);
         if (annotation == null) {
@@ -147,7 +148,11 @@ public class BeanContext {
         this.registerBean(details);
         this.attemptBindPlugin(details);
 
-        details.call(PreInitialize.class);
+        try {
+            details.call(PreInitialize.class);
+        } catch (Throwable throwable) {
+            LOGGER.error(throwable);
+        }
 //        this.injectBeans(instance); // put into BeanContext
 
         return details;
@@ -201,7 +206,11 @@ public class BeanContext {
         log("Finish scanning beans within " + (System.currentTimeMillis() - start) + "ms");
         start = System.currentTimeMillis();
 
-        beanDetailsList = this.loadInOrder(beanDetailsList);
+        try {
+            beanDetailsList = this.loadInOrder(beanDetailsList);
+        } catch (Throwable throwable) {
+            LOGGER.error("An error occurs while handling loadInOrder()", throwable);
+        }
         log("Finish initialize beans in order within " + (System.currentTimeMillis() - start) + "ms");
         start = System.currentTimeMillis();
 
@@ -259,7 +268,6 @@ public class BeanContext {
 
     }
 
-    @SneakyThrows
     public void init() {
         INSTANCE = this;
 
@@ -267,7 +275,11 @@ public class BeanContext {
         log("BeanContext has been registered as bean.");
 
         ComponentRegistry.registerComponentHolders();
-        this.scanClasses("framework", BeanContext.class.getClassLoader(), Collections.singleton("org.imanity.framework"));
+        try {
+            this.scanClasses("framework", BeanContext.class.getClassLoader(), Collections.singleton("org.imanity.framework"));
+        } catch (Throwable throwable) {
+            LOGGER.error("Error while scanning classes for framework", throwable);
+        }
 
         if (PluginManager.isInitialized()) {
             log("Find PluginManager, attempt to register Plugin Listeners");
@@ -277,18 +289,21 @@ public class BeanContext {
                 public void onPluginEnable(AbstractPlugin plugin) {
                     BeanDetails beanDetails = new SimpleBeanDetails(plugin, plugin.getName(), plugin.getClass());
 
-                    beanDetails.bindWith(plugin);
-                    registerBean(beanDetails, false);
-                    log("Plugin " + plugin.getName() + " has been registered as bean.");
+                    try {
+                        beanDetails.bindWith(plugin);
+                        registerBean(beanDetails, false);
+                        log("Plugin " + plugin.getName() + " has been registered as bean.");
+                    } catch (Throwable throwable) {
+                        LOGGER.error("An error occurs while registering plugin", throwable);
+                    }
 
                     try {
                         scanClasses(plugin.getName(), plugin.getPluginClassLoader(), findClassPaths(plugin.getClass()), beanDetails);
                     } catch (Throwable throwable) {
-                        LOGGER.error(throwable);
+                        LOGGER.error("An error occurs while handling scanClasses()", throwable);
                     }
                 }
 
-                @SneakyThrows
                 @Override
                 public void onPluginDisable(AbstractPlugin plugin) {
                     Collection<BeanDetails> beanDetailsList = findDetailsBindWith(plugin);
@@ -321,7 +336,6 @@ public class BeanContext {
         FrameworkMisc.EVENT_HANDLER.onPostServicesInitial();
     }
 
-    @SneakyThrows
     public void stop() {
         List<BeanDetails> detailsList = Lists.newArrayList(this.sortedBeans);
         Collections.reverse(detailsList);
@@ -338,9 +352,13 @@ public class BeanContext {
         this.call(PostDestroy.class, detailsList);
     }
 
-    public void call(Class<? extends Annotation> annotation, Collection<BeanDetails> beanDetailsList) throws InvocationTargetException, IllegalAccessException {
+    public void call(Class<? extends Annotation> annotation, Collection<BeanDetails> beanDetailsList) {
         for (BeanDetails beanDetails : beanDetailsList) {
-            beanDetails.call(annotation);
+            try {
+                beanDetails.call(annotation);
+            } catch (Throwable throwable) {
+                LOGGER.error(throwable);
+            }
         }
     }
 

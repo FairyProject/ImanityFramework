@@ -30,10 +30,10 @@ import javax.annotation.Nullable;
 import java.util.Iterator;
 import java.util.LinkedList;
 
-public class TimerList<T extends AbstractTimer> extends LinkedList<T> {
+public class TimerList extends LinkedList<Timer> {
 
-    public boolean isTimerRunning(Class<? extends T> timerClass) {
-        for (T timer : this) {
+    public boolean isTimerRunning(Class<? extends Timer> timerClass) {
+        for (Timer timer : this) {
             if (timerClass.isInstance(timer)) {
                 return true;
             }
@@ -43,21 +43,25 @@ public class TimerList<T extends AbstractTimer> extends LinkedList<T> {
     }
 
     @Nullable
-    public <E extends T> E getTimer(Class<E> timerClass) {
-        for (T timer : this) {
+    public <E extends Timer> E getTimer(Class<E> timerClass) {
+        for (Timer timer : this) {
             if (timerClass.isInstance(timer)) {
-                return (E) timer;
+                return timerClass.cast(timer);
             }
         }
 
         return null;
     }
 
-    public boolean removeTimer(Class<? extends T> timerClass) {
-        Iterator<T> iterator = this.iterator();
+    public boolean removeTimer(Class<? extends Timer> timerClass) {
+        Iterator<Timer> iterator = this.iterator();
 
         while (iterator.hasNext()) {
-            if (timerClass.isInstance(iterator.next())) {
+            Timer timer = iterator.next();
+            if (timerClass.isInstance(timer)) {
+                if (!timer.isTimerElapsed()) {
+                    timer.clear(true);
+                }
                 iterator.remove();
                 return true;
             }
@@ -68,7 +72,7 @@ public class TimerList<T extends AbstractTimer> extends LinkedList<T> {
 
     @Override
     public void clear() {
-        Iterator<T> iterator = this.iterator();
+        Iterator<Timer> iterator = this.iterator();
 
         while (iterator.hasNext()) {
             iterator.next().clear(true);

@@ -22,20 +22,15 @@
  * SOFTWARE.
  */
 
-package org.imanity.framework.plugin;
+package org.imanity.framework.bukkit.visual;
 
-public interface PluginListenerAdapter {
+import org.bukkit.Location;
+import org.bukkit.entity.Player;
 
-    default void onPluginInitial(AbstractPlugin plugin) {
+import java.util.Set;
 
-    }
+public interface VisualBlockGenerator {
 
-    default void onPluginEnable(AbstractPlugin plugin) {
-
-    }
-
-    default void onPluginDisable(AbstractPlugin plugin) {
-
-    }
+    void generate(Player player, Location location, Set<VisualPosition> positions);
 
 }

@@ -30,13 +30,14 @@ import org.bukkit.entity.Player;
 import org.imanity.framework.bukkit.visual.type.VisualType;
 
 import java.util.List;
+import java.util.Set;
 
 @Getter
 public class VisualTask {
     private final Player player;
-    private final List<VisualPosition> blockPositions;
+    private final Set<VisualPosition> blockPositions;
 
-    public VisualTask(final Player player, final List<VisualPosition> blockPositions) {
+    public VisualTask(final Player player, final Set<VisualPosition> blockPositions) {
         this.player = player;
         this.blockPositions = blockPositions;
     }

@@ -29,6 +29,10 @@ import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import org.imanity.framework.FrameworkMisc;
 import org.imanity.framework.libraries.classloader.IsolatedClassLoader;
 import org.imanity.framework.libraries.relocate.RelocateHandler;
+import org.imanity.framework.plugin.AbstractPlugin;
+import org.imanity.framework.plugin.PluginClassLoader;
+import org.imanity.framework.plugin.PluginListenerAdapter;
+import org.imanity.framework.plugin.PluginManager;
 
 import java.io.File;
 import java.net.MalformedURLException;
@@ -47,6 +51,7 @@ public class LibraryHandler {
     private final RelocateHandler relocateHandler;
 
     private final Map<Library, Path> loaded = new ConcurrentHashMap<>();
+    private final Map<AbstractPlugin, PluginClassLoader> pluginClassLoaders = new ConcurrentHashMap<>();
     private final Map<ImmutableSet<Library>, IsolatedClassLoader> loaders = new HashMap<>();
 
     private final ExecutorService EXECUTOR = Executors.newCachedThreadPool(new ThreadFactoryBuilder()
@@ -61,7 +66,31 @@ public class LibraryHandler {
         }
         this.libFolder = file.toPath();
 
+        // ASM
+        this.downloadLibraries(true,
+                Library.ASM,
+                Library.ASM_COMMONS
+        );
+
         this.relocateHandler = new RelocateHandler(this);
+        if (PluginManager.isInitialized()) {
+            PluginManager.INSTANCE.registerListener(new PluginListenerAdapter() {
+                @Override
+                public void onPluginInitial(AbstractPlugin plugin) {
+                    PluginClassLoader classLoader = new PluginClassLoader(plugin.getPluginClassLoader());
+
+                    pluginClassLoaders.put(plugin, classLoader);
+                    for (Path path : loaded.values()) {
+                        classLoader.addJarToClasspath(path);
+                    }
+                }
+
+                @Override
+                public void onPluginDisable(AbstractPlugin plugin) {
+                    pluginClassLoaders.remove(plugin);
+                }
+            });
+        }
     }
 
     public IsolatedClassLoader obtainClassLoaderWith(Collection<Library> libraries) {
@@ -100,18 +129,18 @@ public class LibraryHandler {
         }
     }
 
-    public void downloadLibraries(Collection<Library> libraries) {
-        this.downloadLibraries(libraries.toArray(new Library[0]));
+    public void downloadLibraries(boolean autoLoad, Collection<Library> libraries) {
+        this.downloadLibraries(autoLoad, libraries.toArray(new Library[0]));
     }
 
-    public void downloadLibraries(Library... libraries) {
+    public void downloadLibraries(boolean autoLoad, Library... libraries) {
 
         CountDownLatch latch = new CountDownLatch(libraries.length);
 
         for (Library library : libraries) {
             EXECUTOR.execute(() -> {
                 try {
-                    loadLibrary(library);
+                    loadLibrary(library, autoLoad);
                     FrameworkMisc.PLATFORM.getLogger().info("Loaded Library " + library.name() + " v" + library.getVersion());
                 } catch (Throwable throwable) {
                     FrameworkMisc.PLATFORM.getLogger().warn("Unable to load library " + library.getFileName() + ".", throwable);
@@ -130,14 +159,22 @@ public class LibraryHandler {
 
     }
 
-    private void loadLibrary(Library library) throws Exception {
+    private PluginClassLoader classLoader = new PluginClassLoader(ClassLoader.getSystemClassLoader());
+
+    private void loadLibrary(Library library, boolean addToUCP) throws Exception {
         if (loaded.containsKey(library)) {
             return;
         }
 
         Path file = this.remapLibrary(library, this.downloadLibrary(library));
         this.loaded.put(library, file);
-        FrameworkMisc.PLATFORM.getClassLoader().addJarToClasspath(file);
+        if (addToUCP) {
+            this.classLoader.addJarToClasspath(file);
+//            FrameworkMisc.PLATFORM.getClassLoader().addJarToClasspath(file);
+//            for (PluginClassLoader classLoader : this.pluginClassLoaders.values()) {
+//                classLoader.addJarToClasspath(file);
+//            }
+        }
     }
 
     private Path remapLibrary(Library library, Path normalFile) {

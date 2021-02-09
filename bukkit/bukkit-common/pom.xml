@@ -131,11 +131,11 @@
             <url>https://hub.spigotmc.org/nexus/content/repositories/snapshots/</url>
         </repository>
 
-        <!-- ProtocolLib Repository -->
-        <repository>
-            <id>dmulloy2-repo</id>
-            <url>https://repo.dmulloy2.net/nexus/repository/public/</url>
-        </repository>
+        <!-- ProtocolLib Repository --> <!-- The Web is down for some reason -->
+<!--        <repository>-->
+<!--            <id>dmulloy2-repo</id>-->
+<!--            <url>https://repo.dmulloy2.net/nexus/repository/public/</url>-->
+<!--        </repository>-->
 
         <!-- ViaVersion Repository -->
         <repository>
@@ -159,10 +159,10 @@
             <url>https://maven.imanity.dev/repository/imanity-libraries</url>
         </repository>
 
-<!--        <repository>-->
-<!--            <id>anvil-gui-libraries</id>-->
-<!--            <url>https://repo.codemc.io/repository/maven-snapshots/</url>-->
-<!--        </repository>-->
+        <repository>
+            <id>anvil-gui-libraries</id>
+            <url>https://repo.codemc.io/repository/maven-snapshots/</url>
+        </repository>
     </repositories>
 
     <distributionManagement>
@@ -208,27 +208,27 @@
             <scope>provided</scope>
         </dependency>
         <dependency>
-            <groupId>com.comphenix.protocol</groupId>
+            <groupId>com.github.dmulloy2</groupId>
             <artifactId>ProtocolLib</artifactId>
-            <version>4.5.0</version>
+            <version>4.5.1</version>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.imanity.paperspigot</groupId>
+            <artifactId>paper1.8.8</artifactId>
+            <version>1.8.8</version>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.imanity.paperspigot</groupId>
+            <artifactId>1.7.10</artifactId>
+            <version>1.7.10</version>
             <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>
             <version>1.18.0</version>
-            <scope>provided</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.github.paperspigot</groupId>
-            <artifactId>paperspigot</artifactId>
-            <version>1.8.8-R0.1-SNAPSHOT</version>
-            <scope>provided</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.github.spigot</groupId>
-            <artifactId>1.7.10</artifactId>
-            <version>1.7.10</version>
             <scope>provided</scope>
         </dependency>
         <dependency>

@@ -27,30 +27,80 @@ package org.imanity.framework.bukkit.util;
 import org.bukkit.scheduler.BukkitTask;
 import org.imanity.framework.bukkit.Imanity;
 
+import java.util.concurrent.atomic.AtomicReference;
+
 public class TaskUtil {
 
     public static BukkitTask runAsync(Runnable runnable) {
         return Imanity.PLUGIN.getServer().getScheduler().runTaskAsynchronously(Imanity.PLUGIN, runnable);
     }
 
+    public static BukkitTask runAsync(TaskRunnable runnable) {
+        AtomicReference<BukkitTask> reference = new AtomicReference<>();
+        BukkitTask task = runAsync(() -> runnable.run(reference.get()));
+
+        reference.set(task);
+        return task;
+    }
+
     public static BukkitTask runAsyncScheduled(Runnable runnable, long time) {
         return Imanity.PLUGIN.getServer().getScheduler().runTaskLaterAsynchronously(Imanity.PLUGIN, runnable, time);
+    }
+
+    public static BukkitTask runAsyncScheduled(TaskRunnable runnable, int time) {
+        AtomicReference<BukkitTask> reference = new AtomicReference<>();
+        BukkitTask task = runAsyncScheduled(() -> runnable.run(reference.get()), time);
+
+        reference.set(task);
+        return task;
     }
 
     public static BukkitTask runAsyncRepeated(Runnable runnable, long time) {
         return Imanity.PLUGIN.getServer().getScheduler().runTaskTimerAsynchronously(Imanity.PLUGIN, runnable, time, time);
     }
 
+    public static BukkitTask runAsyncRepeated(TaskRunnable runnable, int time) {
+        AtomicReference<BukkitTask> reference = new AtomicReference<>();
+        BukkitTask task = runAsyncRepeated(() -> runnable.run(reference.get()), time);
+
+        reference.set(task);
+        return task;
+    }
+
     public static BukkitTask runSync(Runnable runnable) {
         return Imanity.PLUGIN.getServer().getScheduler().runTask(Imanity.PLUGIN, runnable);
+    }
+
+    public static BukkitTask runSync(TaskRunnable runnable) {
+        AtomicReference<BukkitTask> reference = new AtomicReference<>();
+        BukkitTask task = runSync(() -> runnable.run(reference.get()));
+
+        reference.set(task);
+        return task;
     }
 
     public static BukkitTask runScheduled(Runnable runnable, long time) {
         return Imanity.PLUGIN.getServer().getScheduler().runTaskLater(Imanity.PLUGIN, runnable, time);
     }
 
+    public static BukkitTask runScheduled(TaskRunnable runnable, int time) {
+        AtomicReference<BukkitTask> reference = new AtomicReference<>();
+        BukkitTask task = runScheduled(() -> runnable.run(reference.get()), time);
+
+        reference.set(task);
+        return task;
+    }
+
     public static BukkitTask runRepeated(Runnable runnable, long time) {
         return Imanity.PLUGIN.getServer().getScheduler().runTaskTimer(Imanity.PLUGIN, runnable, time, time);
+    }
+
+    public static BukkitTask runRepeated(TaskRunnable runnable, int time) {
+        AtomicReference<BukkitTask> reference = new AtomicReference<>();
+        BukkitTask task = runRepeated(() -> runnable.run(reference.get()), time);
+
+        reference.set(task);
+        return task;
     }
 
 }

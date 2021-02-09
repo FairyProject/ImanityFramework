@@ -49,7 +49,7 @@ public class GenericBeanConstructorDetails implements BeanConstructorDetails {
         Constructor<?> constructorRet = null;
         int priorityRet = -1;
 
-        for (Constructor<?> constructor : this.type.getConstructors()) {
+        for (Constructor<?> constructor : this.type.getDeclaredConstructors()) {
             AccessUtil.setAccessible(constructor);
 
             int priority = -1;

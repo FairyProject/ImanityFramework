@@ -26,9 +26,16 @@ package org.imanity.framework.util;
 
 import org.apache.commons.lang3.StringEscapeUtils;
 
+import java.text.DecimalFormat;
 import java.util.concurrent.TimeUnit;
 
 public class FormatUtil {
+
+    private static final DecimalFormat SINGLE_DIGIT_DECIMAL_FORMAT = new DecimalFormat("0.0");
+
+    public static String formatSingleDigitDecimal(Number number) {
+        return SINGLE_DIGIT_DECIMAL_FORMAT.format(number);
+    }
 
     public static String formatToSecondsAndMinutes(int seconds) {
         return String.format("%02d:%02d", seconds / 60, seconds % 60);
@@ -49,6 +56,10 @@ public class FormatUtil {
             return String.format("%02d:%02d:%02d", seconds / 3600, seconds % 3600 / 60, seconds % 60);
         }
         return String.format("%02d:%02d", seconds / 60, seconds % 60);
+    }
+
+    public static String formatMillisToSecondWithDecimal(long millis) {
+        return SINGLE_DIGIT_DECIMAL_FORMAT.format(millis / 1000D);
     }
 
     public static String formatSeconds(int seconds) {

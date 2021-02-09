@@ -44,6 +44,7 @@ import org.imanity.framework.bukkit.listener.asm.MethodHandleEventExecutor;
 import org.imanity.framework.bukkit.listener.asm.StaticMethodHandleEventExecutor;
 import org.imanity.framework.bukkit.listener.timings.TimedEventExecutor;
 
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.HashMap;
@@ -106,7 +107,7 @@ public final class FilteredListenerRegistry {
             eventSet.add(new RegisteredListener(listener, executor, eventHandler.priority(), plugin, eventHandler.ignoreCancelled()));
         }
         for (Map.Entry<Class<? extends Event>, Set<RegisteredListener>> entry : ret.entrySet()) {
-            getEventListeners(getRegistrationClass(entry.getKey())).registerAll(entry.getValue());
+            getHandlerList(entry.getKey()).registerAll(entry.getValue());
         }
     }
 
@@ -161,28 +162,20 @@ public final class FilteredListenerRegistry {
         }
     }
 
-    private static HandlerList getEventListeners(Class<? extends Event> type) {
+    private static HandlerList getHandlerList(Class<? extends Event> clazz) {
         try {
-            Method method = getRegistrationClass(type).getDeclaredMethod("getHandlerList");
-            method.setAccessible(true);
+            Method method = clazz.getDeclaredMethod("getHandlerList");
             return (HandlerList) method.invoke(null);
-        } catch (Exception e) {
-            throw new IllegalPluginAccessException(e.toString());
-        }
-    }
-
-    private static Class<? extends Event> getRegistrationClass(Class<? extends Event> clazz) {
-        try {
-            clazz.getDeclaredMethod("getHandlerList");
-            return clazz;
         } catch (NoSuchMethodException e) {
             if (clazz.getSuperclass() != null
                     && !clazz.getSuperclass().equals(Event.class)
                     && Event.class.isAssignableFrom(clazz.getSuperclass())) {
-                return getRegistrationClass(clazz.getSuperclass().asSubclass(Event.class));
+                return getHandlerList(clazz.getSuperclass().asSubclass(Event.class));
             } else {
                 throw new IllegalPluginAccessException("Unable to find handler list for event " + clazz.getName() + ". Static getHandlerList method required!");
             }
+        } catch (IllegalAccessException | InvocationTargetException e) {
+            throw new IllegalArgumentException("An error occurs while invoking for getHandlerList()", e);
         }
     }
 

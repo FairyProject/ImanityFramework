@@ -26,6 +26,10 @@ package org.imanity.framework.bukkit.timer.impl;
 
 import lombok.Getter;
 import org.bukkit.entity.Player;
+import org.imanity.framework.bukkit.metadata.Metadata;
+import org.imanity.framework.bukkit.timer.Timer;
+import org.imanity.framework.bukkit.timer.TimerList;
+import org.imanity.framework.metadata.MetadataKey;
 
 import java.util.Collection;
 import java.util.Collections;
@@ -33,10 +37,17 @@ import java.util.Collections;
 @Getter
 public class PlayerTimer extends AbstractTimer {
 
+    public static final MetadataKey<TimerList> TIMER_METADATA_KEY = MetadataKey.create("Imanity-TimerList", TimerList.class);
+
+    public static TimerList getTimerList(Player player) {
+        return Metadata.provideForPlayer(player)
+                .getOrNull(TIMER_METADATA_KEY);
+    }
+
     private final Player player;
 
     public PlayerTimer(Player player, long beginTime, long duration) {
-        super(beginTime, duration);
+        super(beginTime, duration, Metadata.provideForPlayer(player).getOrPut(TIMER_METADATA_KEY, TimerList::new));
 
         this.player = player;
     }
@@ -44,7 +55,6 @@ public class PlayerTimer extends AbstractTimer {
     public PlayerTimer(Player player, long duration) {
         this(player, System.currentTimeMillis(), duration);
     }
-
     @Override
     public Collection<? extends Player> getReceivers() {
         return Collections.singleton(player);

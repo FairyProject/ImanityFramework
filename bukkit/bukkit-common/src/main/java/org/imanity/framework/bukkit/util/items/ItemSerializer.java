@@ -22,59 +22,31 @@
  * SOFTWARE.
  */
 
-package org.imanity.framework.metadata;
+package org.imanity.framework.bukkit.util.items;
 
-import com.google.common.reflect.TypeToken;
+import org.bukkit.inventory.ItemStack;
+import org.imanity.framework.Component;
+import org.imanity.framework.ObjectSerializer;
 
-import java.util.Objects;
-
-final class MetadataKeyImpl<T> implements MetadataKey<T> {
-
-    private final String id;
-    private final TypeToken<T> type;
-
-    private boolean removeOnNonExists;
-
-    MetadataKeyImpl(String id, TypeToken<T> type) {
-        this.id = id.toLowerCase();
-        this.type = type;
-        this.removeOnNonExists = true;
+@Component
+public class ItemSerializer implements ObjectSerializer<ItemStack, String> {
+    @Override
+    public String serialize(ItemStack input) {
+        return ItemUtil.serializeItemStack(input);
     }
 
     @Override
-    public String getId() {
-        return this.id;
+    public ItemStack deserialize(String output) {
+        return ItemUtil.deserializeItemStack(output);
     }
 
     @Override
-    public TypeToken<T> getType() {
-        return this.type;
+    public Class<ItemStack> inputClass() {
+        return ItemStack.class;
     }
 
     @Override
-    public boolean removeOnNonExists() {
-        return this.removeOnNonExists;
-    }
-
-    @Override
-    public void setRemoveOnNonExists(boolean bol) {
-        this.removeOnNonExists = bol;
-    }
-
-    @Override
-    public T cast(Object object) throws ClassCastException {
-        Objects.requireNonNull(object, "object");
-        //noinspection unchecked
-        return (T) this.type.getRawType().cast(object);
-    }
-
-    @Override
-    public boolean equals(Object obj) {
-        return obj instanceof MetadataKeyImpl && ((MetadataKeyImpl) obj).getId().equals(this.id);
-    }
-
-    @Override
-    public int hashCode() {
-        return this.id.hashCode();
+    public Class<String> outputClass() {
+        return String.class;
     }
 }

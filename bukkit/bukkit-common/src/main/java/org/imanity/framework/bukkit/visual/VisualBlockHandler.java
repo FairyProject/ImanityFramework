@@ -29,6 +29,8 @@ import com.github.benmanes.caffeine.cache.LoadingCache;
 import com.google.common.base.Predicate;
 import com.google.common.collect.HashBasedTable;
 import com.google.common.collect.Table;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -47,16 +49,28 @@ import org.imanity.framework.bukkit.util.TaskUtil;
 import org.imanity.framework.bukkit.visual.event.PreHandleVisualClaimEvent;
 import org.imanity.framework.bukkit.visual.event.PreHandleVisualEvent;
 import org.imanity.framework.bukkit.visual.type.VisualType;
+import org.imanity.framework.plugin.AbstractPlugin;
+import org.imanity.framework.plugin.PluginListenerAdapter;
+import org.imanity.framework.plugin.PluginManager;
+import org.imanity.framework.util.collection.BiFunction;
+import sun.rmi.runtime.Log;
 
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.function.BiConsumer;
 
 public class VisualBlockHandler implements Runnable {
+
+    private static final Logger LOGGER = LogManager.getLogger(VisualBlockHandler.class);
 
     private final Table<UUID, VisualPosition, VisualBlock> table = HashBasedTable.create();
     private final LoadingCache<CoordinatePair, Optional<VisualBlockClaim>> claimCache;
     private final Table<CoordinatePair, CoordXZ, VisualBlockClaim> claimPositionTable;
     private final Queue<VisualTask> visualTasks = new ConcurrentLinkedQueue<>();
+
+    private final VisualBlockGenerator mainGenerator;
+    private final Map<AbstractPlugin, List<VisualBlockGenerator>> dynamicVisualGenerator = new ConcurrentHashMap<>();
 
     public VisualBlockHandler() {
         this.claimPositionTable = HashBasedTable.create();
@@ -84,6 +98,81 @@ public class VisualBlockHandler implements Runnable {
             }
         })
         .ignoreSameBlock();
+
+        this.mainGenerator = (player, location, positions) -> {
+            final int minHeight = location.getBlockY() - 5;
+            final int maxHeight = location.getBlockY() + 4;
+
+            final int toX = location.getBlockX();
+            final int toZ = location.getBlockZ();
+
+            final Collection<VisualBlockClaim> claimCache = new HashSet<>();
+
+            for (int x = toX - 7; x < toX + 7; x++) {
+                for (int z = toZ - 7; z < toZ + 7; z++) {
+                    final VisualBlockClaim color = getTeamAt(location.getWorld(), x, z);
+                    PreHandleVisualClaimEvent claimEvent = new PreHandleVisualClaimEvent(player, color);
+
+                    Imanity.callEvent(claimEvent);
+
+                    if (color != null && !claimEvent.isCancelled()) {
+                        claimCache.add(color);
+                    }
+                }
+            }
+
+            if (!claimCache.isEmpty()) {
+                final Iterator<VisualBlockClaim> claims = claimCache.iterator();
+                while (claims.hasNext()) {
+
+                    VisualBlockClaim claim = claims.next();
+                    VisualType type = claim.getType();
+
+                    for (final Vector edge : getEdges(claim)) {
+                        if (Math.abs(edge.getBlockX() - toX) > 7) {
+                            continue;
+                        }
+                        if (Math.abs(edge.getBlockZ() - toZ) > 7) {
+                            continue;
+                        }
+                        final Location location2 = edge.toLocation(location.getWorld());
+                        if (location2 == null) {
+                            continue;
+                        }
+                        for (int y = minHeight; y <= maxHeight; y++) {
+                            positions.add(new VisualPosition(location2.getBlockX(), y, location2.getBlockZ(), player.getWorld().getName(), type));
+                        }
+                    }
+
+                    claims.remove();
+                }
+            }
+        };
+
+        PluginManager.INSTANCE.registerListener(new PluginListenerAdapter() {
+            @Override
+            public void onPluginDisable(AbstractPlugin plugin) {
+                dynamicVisualGenerator.remove(plugin);
+            }
+        });
+    }
+
+    public void registerGenerator(VisualBlockGenerator blockGenerator) {
+        AbstractPlugin plugin = PluginManager.INSTANCE.getPluginByClass(blockGenerator.getClass());
+
+        if (plugin == null) {
+            throw new IllegalArgumentException("Not a Plugin?");
+        }
+        List<VisualBlockGenerator> blockGenerators;
+        if (this.dynamicVisualGenerator.containsKey(plugin)) {
+            blockGenerators = this.dynamicVisualGenerator.get(plugin);
+        } else {
+            blockGenerators = new ArrayList<>();
+            this.dynamicVisualGenerator.put(plugin, blockGenerators);
+        }
+
+        blockGenerators.add(blockGenerator);
+        LOGGER.info(this.dynamicVisualGenerator.containsKey(plugin));
     }
 
     public void cacheClaim(VisualBlockClaim claim) {
@@ -205,7 +294,7 @@ public class VisualBlockHandler implements Runnable {
     }
 
     public void handlePositionChanged(final Player player, final Location location) {
-        if (this.claimPositionTable.isEmpty()) {
+        if (this.claimPositionTable.isEmpty() && this.dynamicVisualGenerator.isEmpty()) {
             return;
         }
 
@@ -216,54 +305,10 @@ public class VisualBlockHandler implements Runnable {
             return;
         }
 
-        final int minHeight = location.getBlockY() - 5;
-        final int maxHeight = location.getBlockY() + 4;
-
-        final int toX = location.getBlockX();
-        final int toZ = location.getBlockZ();
-
-        final Collection<VisualBlockClaim> claimCache = new HashSet<>();
-
-        for (int x = toX - 7; x < toX + 7; x++) {
-            for (int z = toZ - 7; z < toZ + 7; z++) {
-                final VisualBlockClaim color = this.getTeamAt(location.getWorld(), x, z);
-                PreHandleVisualClaimEvent claimEvent = new PreHandleVisualClaimEvent(player, color);
-
-                Imanity.callEvent(claimEvent);
-
-                if (color != null && !claimEvent.isCancelled()) {
-                    claimCache.add(color);
-                }
-            }
-        }
-
-        final List<VisualPosition> blockPositions = new ArrayList<>();
-
-        if (!claimCache.isEmpty()) {
-            final Iterator<VisualBlockClaim> claims = claimCache.iterator();
-            while (claims.hasNext()) {
-
-                VisualBlockClaim claim = claims.next();
-                VisualType type = claim.getType();
-
-                for (final Vector edge : this.getEdges(claim)) {
-                    if (Math.abs(edge.getBlockX() - toX) > 7) {
-                        continue;
-                    }
-                    if (Math.abs(edge.getBlockZ() - toZ) > 7) {
-                        continue;
-                    }
-                    final Location location2 = edge.toLocation(location.getWorld());
-                    if (location2 == null) {
-                        continue;
-                    }
-                    for (int y = minHeight; y <= maxHeight; y++) {
-                        blockPositions.add(new VisualPosition(location2.getBlockX(), y, location2.getBlockZ(), player.getWorld().getName(), type));
-                    }
-                }
-
-                claims.remove();
-            }
+        final Set<VisualPosition> blockPositions = new HashSet<>();
+        this.mainGenerator.generate(player, location, blockPositions);
+        for (Map.Entry<AbstractPlugin, List<VisualBlockGenerator>> blockGenerators : this.dynamicVisualGenerator.entrySet()) {
+            blockGenerators.getValue().forEach(blockGenerator -> blockGenerator.generate(player, location, blockPositions));
         }
 
         if (player.isOnline()) {

@@ -24,6 +24,10 @@
 
 package org.imanity.framework.config;
 
+import org.imanity.framework.Autowired;
+import org.imanity.framework.FrameworkMisc;
+import org.imanity.framework.ObjectSerializer;
+import org.imanity.framework.SerializerFactory;
 import org.imanity.framework.config.annotation.Convert;
 
 import java.lang.reflect.Field;
@@ -33,6 +37,9 @@ import java.util.function.Function;
 import static java.util.stream.Collectors.*;
 
 final class Converters {
+    @Autowired
+    private static SerializerFactory SERIALIZER_FACTORY;
+
     private static final Map<Class<? extends Converter<?, ?>>, Converter<?, ?>> cache
             = new WeakHashMap<>();
     static final IdentityConverter IDENTITY_CONVERTER
@@ -107,6 +114,14 @@ final class Converters {
             Class<?> valueType, Converter.ConversionInfo info
     ) {
         Converter<?, ?> converter;
+        if (SERIALIZER_FACTORY != null) {
+            ObjectSerializer<?, ?> serializer = SERIALIZER_FACTORY.findSerializer(valueType);
+
+            if (serializer != null) {
+                return new SerializerConverter(serializer);
+            }
+        }
+
         if (Reflect.hasNoConvert(info.getField())) {
             converter = IDENTITY_CONVERTER;
         } else if (Reflect.hasConverter(info.getField())) {
@@ -431,6 +446,25 @@ final class Converters {
         @Override
         public Object convertFrom(Object element, ConversionInfo info) {
             return element;
+        }
+    }
+
+    private static final class SerializerConverter implements Converter<Object, Object> {
+
+        private ObjectSerializer serializer;
+
+        public SerializerConverter(ObjectSerializer serializer) {
+            this.serializer = serializer;
+        }
+
+        @Override
+        public Object convertTo(Object element, ConversionInfo info) {
+            return this.serializer.serialize(element);
+        }
+
+        @Override
+        public Object convertFrom(Object element, ConversionInfo info) {
+            return this.serializer.deserialize(element);
         }
     }
 

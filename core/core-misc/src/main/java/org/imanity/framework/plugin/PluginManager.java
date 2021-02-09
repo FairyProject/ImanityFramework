@@ -67,6 +67,10 @@ public class PluginManager {
                 .collect(Collectors.toList());
     }
 
+    public void onPluginInitial(AbstractPlugin plugin) {
+        this.listenerAdapters.forEach(listenerAdapter -> listenerAdapter.onPluginInitial(plugin));
+    }
+
     public void onPluginEnable(AbstractPlugin plugin) {
         this.listenerAdapters.forEach(listenerAdapter -> listenerAdapter.onPluginEnable(plugin));
     }
