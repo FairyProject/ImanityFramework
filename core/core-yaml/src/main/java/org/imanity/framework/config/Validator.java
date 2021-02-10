@@ -60,14 +60,13 @@ final class Validator {
     }
 
     private static void checkCollectionType(Object element, Converter.ConversionInfo info) {
-        Class<?> cls = element.getClass();
-        if (cls != info.getElementType()) {
+        if (!info.getElementType().isInstance(element)) {
             String cNameField = selectContainerNameField(info);
             String cValues = selectContainerValues(info);
             String msg = "The type of " + cNameField + " doesn't match the " +
                     "type indicated by the ElementType annotation.\n" +
                     "Required type: '" + getClsName(info.getElementType()) +
-                    "'\tActual type: '" + getClsName(cls) +
+                    "'\tActual type: '" + getClsName(element.getClass()) +
                     "'\n" + cValues;
             throw new ConfigurationException(msg);
         }

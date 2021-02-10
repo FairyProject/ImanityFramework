@@ -26,7 +26,9 @@ package org.imanity.framework.bukkit.util.cuboid;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.google.common.base.Preconditions;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 import org.bukkit.*;
 import org.bukkit.block.Block;
 import org.bukkit.configuration.serialization.ConfigurationSerializable;
@@ -39,15 +41,17 @@ import java.util.*;
 
 @ConfigurationElement
 @NoArgsConstructor
+@Getter
+@Setter
 public class Cuboid implements Iterable<Block>, Cloneable, ConfigurationSerializable {
 
-    @JsonProperty protected String worldName;
-    @JsonProperty protected int x1;
-    @JsonProperty protected int y1;
-    @JsonProperty protected int z1;
-    @JsonProperty protected int x2;
-    @JsonProperty protected int y2;
-    @JsonProperty protected int z2;
+    @JsonProperty protected String worldName = "world";
+    @JsonProperty protected int x1 = 0;
+    @JsonProperty protected int y1 = 0;
+    @JsonProperty protected int z1 = 0;
+    @JsonProperty protected int x2 = 0;
+    @JsonProperty protected int y2 = 0;
+    @JsonProperty protected int z2 = 0;
 
     public Cuboid(Map<String, Object> map) {
         this.worldName = ((String) map.get("worldName"));
@@ -125,6 +129,17 @@ public class Cuboid implements Iterable<Block>, Cloneable, ConfigurationSerializ
 
     public int getMaximumZ() {
         return Math.max(this.z1, this.z2);
+    }
+
+    public void setByLocation(Location first, Location second) {
+        Preconditions.checkNotNull(first, "Location 1 cannot be null");
+        Preconditions.checkNotNull(second, "Location 2 cannot be null");
+        this.x1 = Math.min(first.getBlockX(), second.getBlockX());
+        this.y1 = Math.min(first.getBlockY(), second.getBlockY());
+        this.z1 = Math.min(first.getBlockZ(), second.getBlockZ());
+        this.x2 = Math.max(first.getBlockX(), second.getBlockX());
+        this.y2 = Math.max(first.getBlockY(), second.getBlockY());
+        this.z2 = Math.max(first.getBlockZ(), second.getBlockZ());
     }
 
     public List<Vector> edges() {
@@ -205,46 +220,6 @@ public class Cuboid implements Iterable<Block>, Cloneable, ConfigurationSerializ
 
     public int getSizeZ() {
         return this.z2 - this.z1 + 1;
-    }
-
-    public int getX1() {
-        return this.x1;
-    }
-
-    public void setX1(int x1) {
-        this.x1 = x1;
-    }
-
-    public int getY1() {
-        return this.y1;
-    }
-
-    public void setY1(int y1) {
-        this.y1 = y1;
-    }
-
-    public int getZ1() {
-        return this.z1;
-    }
-
-    public void setZ1(int z1) {
-        this.z1 = z1;
-    }
-
-    public int getX2() {
-        return this.x2;
-    }
-
-    public int getY2() {
-        return this.y2;
-    }
-
-    public void setY2(int y2) {
-        this.y2 = y2;
-    }
-
-    public int getZ2() {
-        return this.z2;
     }
 
     public Location[] getCornerLocations() {

@@ -66,10 +66,10 @@ public abstract class AbstractMovementImplementation {
                 || from.getZ() != to.getZ()) {
             boolean cancelled = false;
 
-            if (this.isIgnoreSameBlock() && from.getX() == to.getX() && from.getY() == to.getY() && from.getZ() == to.getZ()) {
-                cancelled = true;
-            } else if (this.isIgnoreSameY() && from.getX() == to.getX() && from.getZ() == to.getZ()) {
-                cancelled = true;
+            if (this.isIgnoreSameBlock() && from.getBlockX() == to.getBlockX() && from.getBlockZ() == to.getBlockZ()) {
+                if (this.isIgnoreSameY() || from.getBlockY() == to.getBlockY()) {
+                    cancelled = true;
+                }
             }
 
             if (!cancelled) {
