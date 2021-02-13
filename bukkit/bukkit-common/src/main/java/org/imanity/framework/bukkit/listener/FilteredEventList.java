@@ -27,10 +27,12 @@ package org.imanity.framework.bukkit.listener;
 import com.google.common.collect.Sets;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
+import org.bukkit.entity.HumanEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Event;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.block.BlockPlaceEvent;
+import org.bukkit.event.entity.FoodLevelChangeEvent;
 import org.bukkit.event.player.PlayerEvent;
 import org.imanity.framework.bukkit.reflection.resolver.MethodResolver;
 import org.imanity.framework.bukkit.reflection.wrapper.MethodWrapper;
@@ -55,6 +57,7 @@ public class FilteredEventList {
 
         EVENT_PLAYER_METHODS.put(BlockBreakEvent.class, event -> ((BlockBreakEvent) event).getPlayer());
         EVENT_PLAYER_METHODS.put(BlockPlaceEvent.class, event -> ((BlockPlaceEvent) event).getPlayer());
+        EVENT_PLAYER_METHODS.put(FoodLevelChangeEvent.class, event -> (Player) ((FoodLevelChangeEvent) event).getEntity());
 
     }
 
@@ -111,7 +114,7 @@ public class FilteredEventList {
                         for (Method method : Reflect.getDeclaredMethods(type)) {
                             if (method.getParameterCount() == 0) {
                                 Class<?> returnType = method.getReturnType();
-                                if (Player.class.isAssignableFrom(returnType)) {
+                                if (Player.class.isAssignableFrom(returnType) || HumanEntity.class.isAssignableFrom(returnType)) {
                                     try {
                                         methodHandle = Reflect.lookup().unreflect(method);
 
@@ -156,10 +159,14 @@ public class FilteredEventList {
         @Override
         public Player apply(Event event) {
             try {
-                return (Player) methodHandle.invoke(event);
+                Object entity = methodHandle.invoke(event);
+                if (entity instanceof Player) {
+                    return (Player) entity;
+                }
             } catch (Throwable throwable) {
                 throw new IllegalArgumentException("Something wrong while looking for player", throwable);
             }
+            return null;
         }
     }
 

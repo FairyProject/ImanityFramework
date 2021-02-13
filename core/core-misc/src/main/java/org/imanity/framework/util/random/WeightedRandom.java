@@ -26,10 +26,7 @@ package org.imanity.framework.util.random;
 
 import lombok.experimental.UtilityClass;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-import java.util.Random;
+import java.util.*;
 
 @UtilityClass
 public class WeightedRandom {
@@ -43,15 +40,23 @@ public class WeightedRandom {
     }
 
     public static <T extends WeightedItem> T getRandomItem(List<? extends T> collection, Random random) {
-        int total = WeightedRandom.getTotalWeight(collection);
+        return getItemFor(collection, random.nextInt(getTotalWeight(collection)));
+    }
 
-        int index = random.nextInt(total);
-        int sum = 0;
-        int i = 0;
-        while (sum < index) {
-            sum += collection.get(i++).getWeight();
-        }
-        return collection.get(Math.max(0, i - 1));
+    private static <T extends WeightedItem> T getItemFor(List<T> collection, int value) {
+        Iterator<T> iterator = collection.iterator();
+
+        T item;
+        do {
+            if (!iterator.hasNext()) {
+                return null;
+            }
+
+            item = iterator.next();
+            value -= item.getWeight();
+        } while (value >= 0);
+
+        return item;
     }
 
     public static <T extends WeightedItem> T getRandomItem(Collection<? extends T> collection, Random random) {
