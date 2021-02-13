@@ -25,8 +25,8 @@
 package org.imanity.framework.bukkit.hologram.api;
 
 import org.bukkit.entity.Player;
-import org.imanity.framework.bukkit.util.RV;
-import org.imanity.framework.bukkit.util.BukkitUtil;
+import org.imanity.framework.util.RV;
+import org.imanity.framework.util.StringUtil;
 
 import javax.annotation.Nullable;
 
@@ -42,6 +42,6 @@ public class PlaceholderViewHandler implements ViewHandler {
 
     @Override
     public String view(@Nullable Player player) {
-        return BukkitUtil.replace(this.viewHandler.view(player), this.replaceValues);
+        return StringUtil.replace(this.viewHandler.view(player), this.replaceValues);
     }
 }

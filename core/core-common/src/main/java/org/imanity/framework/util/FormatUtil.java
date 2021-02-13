@@ -24,33 +24,35 @@
 
 package org.imanity.framework.util;
 
+import lombok.experimental.UtilityClass;
 import org.apache.commons.lang3.StringEscapeUtils;
 
 import java.text.DecimalFormat;
 import java.util.concurrent.TimeUnit;
 
+@UtilityClass
 public class FormatUtil {
 
-    private static final DecimalFormat SINGLE_DIGIT_DECIMAL_FORMAT = new DecimalFormat("0.0");
+    private final DecimalFormat SINGLE_DIGIT_DECIMAL_FORMAT = new DecimalFormat("0.0");
 
-    public static String formatSingleDigitDecimal(Number number) {
+    public String formatSingleDigitDecimal(Number number) {
         return SINGLE_DIGIT_DECIMAL_FORMAT.format(number);
     }
 
-    public static String formatToSecondsAndMinutes(int seconds) {
+    public String formatToSecondsAndMinutes(int seconds) {
         return String.format("%02d:%02d", seconds / 60, seconds % 60);
     }
 
-    public static String formatToMinutesAndHours(int seconds) {
+    public String formatToMinutesAndHours(int seconds) {
         return String.format("%02d:%02d", seconds / 3600, seconds % 3600 / 60);
     }
 
-    public static String formatMillisToMinutesAndHours(long millis) {
+    public String formatMillisToMinutesAndHours(long millis) {
         long seconds = TimeUnit.MILLISECONDS.toSeconds(millis);
         return String.format("%02d:%02d", seconds / 3600, seconds % 3600 / 60);
     }
 
-    public static String formatMillis(long millis) {
+    public String formatMillis(long millis) {
         long seconds = TimeUnit.MILLISECONDS.toSeconds(millis);
         if (seconds >= 3600) {
             return String.format("%02d:%02d:%02d", seconds / 3600, seconds % 3600 / 60, seconds % 60);
@@ -58,22 +60,22 @@ public class FormatUtil {
         return String.format("%02d:%02d", seconds / 60, seconds % 60);
     }
 
-    public static String formatMillisToSecondWithDecimal(long millis) {
+    public String formatMillisToSecondWithDecimal(long millis) {
         return SINGLE_DIGIT_DECIMAL_FORMAT.format(millis / 1000D);
     }
 
-    public static String formatSeconds(int seconds) {
+    public String formatSeconds(int seconds) {
         if (seconds >= 3600) {
             return String.format("%02d:%02d:%02d", seconds / 3600, seconds % 3600 / 60, seconds % 60);
         }
         return String.format("%02d:%02d", seconds / 60, seconds % 60);
     }
 
-    public static String getBooleanSymbol(boolean bol) {
+    public String getBooleanSymbol(boolean bol) {
         return bol ? "§a" + StringEscapeUtils.unescapeJava("\u221a") : "§cX";
     }
 
-    public static String formatTimes(long millis) {
+    public String formatTimes(long millis) {
         int seconds = (int) TimeUnit.MILLISECONDS.toSeconds(millis);
         return seconds >= 3600 ? (seconds / 3600) + "h" : seconds >= 60 ? (seconds / 60 + 1) + "m" : seconds + "s";
     }

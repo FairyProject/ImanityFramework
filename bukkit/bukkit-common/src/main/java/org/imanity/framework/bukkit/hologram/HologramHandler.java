@@ -27,12 +27,10 @@ package org.imanity.framework.bukkit.hologram;
 import org.bukkit.Location;
 import org.bukkit.entity.Player;
 import org.imanity.framework.Autowired;
-import org.imanity.framework.bukkit.Imanity;
 import org.imanity.framework.ImanityCommon;
 import org.imanity.framework.bukkit.hologram.player.RenderedHolograms;
 import org.imanity.framework.bukkit.metadata.Metadata;
 import org.imanity.framework.bukkit.reflection.ProtocolLibService;
-import org.imanity.framework.bukkit.util.SampleMetadata;
 import org.imanity.framework.metadata.MetadataKey;
 
 import java.util.Collection;

@@ -22,33 +22,45 @@
  * SOFTWARE.
  */
 
-package org.imanity.framework.bukkit.chunk.block;
+package org.imanity.framework.util;
 
-import org.bukkit.Chunk;
-import org.bukkit.event.EventHandler;
-import org.bukkit.event.Listener;
-import org.bukkit.event.world.ChunkPopulateEvent;
-import org.bukkit.event.world.WorldUnloadEvent;
-import org.imanity.framework.bukkit.Imanity;
-import org.imanity.framework.bukkit.metadata.Metadata;
-import org.imanity.framework.Component;
+import lombok.experimental.UtilityClass;
 
-@Component
-public class CacheBlockSetListener implements Listener {
+import java.io.*;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.util.stream.Stream;
 
-    @EventHandler
-    public void onChunkLoad(ChunkPopulateEvent event) {
-        Chunk chunk = event.getChunk();
+@UtilityClass
+public class IOUtil {
 
-        CacheBlockSetHandler blockSetHandler = Imanity.getBlockSetHandler(event.getWorld());
-        if (blockSetHandler != null) {
-            blockSetHandler.placeIfExists(chunk);
+    public byte[] readFully(InputStream inputStream) throws IOException {
+        ByteArrayOutputStream stream = new ByteArrayOutputStream();
+        byte[] buf = new byte[1024];
+        int len = 0;
+        while ((len = inputStream.read(buf)) > 0) {
+            stream.write(buf, 0, len);
         }
+        return stream.toByteArray();
     }
 
-    @EventHandler
-    public void onWorldUnload(WorldUnloadEvent event) {
-        Metadata.provideForWorld(event.getWorld()).remove(CacheBlockSetHandler.METADATA);
+    public String readFile(File file) throws IOException
+    {
+        StringBuilder contentBuilder = new StringBuilder();
+
+        try (Stream<String> stream = Files.lines( file.toPath(), StandardCharsets.UTF_8))
+        {
+            stream.forEach(s -> contentBuilder.append(s).append("\n"));
+        }
+
+        return contentBuilder.toString();
     }
 
+    public void writeFile(File file, String string) throws IOException {
+        BufferedWriter writer = new BufferedWriter(new FileWriter(file));
+        writer.write(string);
+
+        writer.close();
+    }
 }

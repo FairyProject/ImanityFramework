@@ -37,7 +37,7 @@ import org.imanity.framework.bukkit.hologram.api.PlaceholderViewHandler;
 import org.imanity.framework.bukkit.hologram.api.TextViewHandler;
 import org.imanity.framework.bukkit.hologram.api.ViewHandler;
 import org.imanity.framework.bukkit.hologram.player.RenderedHolograms;
-import org.imanity.framework.bukkit.util.RV;
+import org.imanity.framework.util.RV;
 
 import java.util.ArrayList;
 import java.util.Collections;

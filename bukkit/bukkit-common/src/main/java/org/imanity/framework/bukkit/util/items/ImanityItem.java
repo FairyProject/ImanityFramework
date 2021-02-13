@@ -43,6 +43,7 @@ import org.imanity.framework.bukkit.Imanity;
 import org.imanity.framework.bukkit.util.LocaleRV;
 import org.imanity.framework.bukkit.util.BukkitUtil;
 import org.imanity.framework.bukkit.util.nms.NBTEditor;
+import org.imanity.framework.util.StringUtil;
 
 import javax.annotation.Nullable;
 import java.io.IOException;
@@ -175,7 +176,7 @@ public class ImanityItem {
         if (displayNameLocale != null) {
             String name = Imanity.translate(receiver, displayNameLocale);
             for (LocaleRV rv : this.displayNamePlaceholders) {
-                name = BukkitUtil.replace(name, rv.getTarget(), rv.getReplacement(receiver));
+                name = StringUtil.replace(name, rv.getTarget(), rv.getReplacement(receiver));
             }
 
             itemBuilder.name(name);
@@ -184,10 +185,10 @@ public class ImanityItem {
         if (displayLoreLocale != null) {
             String lore = Imanity.translate(receiver, displayLoreLocale);
             for (LocaleRV rv : this.displayLorePlaceholders) {
-                lore = BukkitUtil.replace(lore, rv.getTarget(), rv.getReplacement(receiver));
+                lore = StringUtil.replace(lore, rv.getTarget(), rv.getReplacement(receiver));
             }
 
-            itemBuilder.lore(BukkitUtil.toStringList(lore, "\n"));
+            itemBuilder.lore(StringUtil.toStringList(lore, "\n"));
 
         }
 

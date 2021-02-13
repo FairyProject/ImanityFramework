@@ -27,7 +27,7 @@ package org.imanity.framework.bukkit.player.locale;
 import org.bukkit.entity.Player;
 import org.imanity.framework.bukkit.Imanity;
 import org.imanity.framework.bukkit.util.LocaleRV;
-import org.imanity.framework.bukkit.util.BukkitUtil;
+import org.imanity.framework.util.StringUtil;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -35,8 +35,8 @@ import java.util.function.Function;
 
 public class LocaleMessage {
 
-    private String localeName;
-    private List<LocaleRV> replaceValues;
+    private final String localeName;
+    private final List<LocaleRV> replaceValues;
 
     public LocaleMessage(String localeName) {
         this.localeName = localeName;
@@ -67,7 +67,7 @@ public class LocaleMessage {
         String result = Imanity.translate(player, this.localeName);
 
         for (LocaleRV rv : this.replaceValues) {
-            result = BukkitUtil.replace(result, rv.getTarget(), rv.getReplacement(player));
+            result = StringUtil.replace(result, rv.getTarget(), rv.getReplacement(player));
         }
 
         player.sendMessage(result);

@@ -24,6 +24,8 @@
 
 package org.imanity.framework.util;
 
+import lombok.experimental.UtilityClass;
+
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -31,17 +33,18 @@ import java.io.InputStream;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.net.URLConnection;
-import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 
-public class FileUtils {
+@UtilityClass
+public class FileUtil {
 
-	public static File getSelfJar() throws URISyntaxException {
-		return new File(FileUtils.class.getProtectionDomain().getCodeSource().getLocation()
+	public File getSelfJar() throws URISyntaxException {
+		return new File(FileUtil.class.getProtectionDomain().getCodeSource().getLocation()
 				.toURI());
 	}
 	
 	@SuppressWarnings("rawtypes")
-	public static InputStream getResource(Class target, String filename) {
+	public InputStream getResource(Class target, String filename) {
 		try {
 			final URL url = target.getClassLoader().getResource(filename);
 			if (url == null) {
@@ -57,17 +60,17 @@ public class FileUtils {
 	}
 
 	
-	public static void inputStreamToFile(InputStream inputStream, File file) {
+	public void inputStreamToFile(InputStream inputStream, File file) {
 		try {
-			final String text = new String(IO.readFully(inputStream), Charset.forName("utf-8"));
-			final FileWriter fileWriter = new FileWriter(FileUtils.createNewFile(file));
+			final String text = new String(IOUtil.readFully(inputStream), StandardCharsets.UTF_8);
+			final FileWriter fileWriter = new FileWriter(FileUtil.createNewFile(file));
 			fileWriter.write(text);
 			fileWriter.close();
 		} catch (final IOException ignored) {
 		}
 	}
 
-	public static File createNewFile(File file) {
+	public File createNewFile(File file) {
 		if (file != null && !file.exists()) {
 			try {
 				file.createNewFile();
@@ -77,7 +80,7 @@ public class FileUtils {
 		return file;
 	}
 
-	public static void createNewFileAndPath(File file) {
+	public void createNewFileAndPath(File file) {
 		if (!file.exists()) {
 			final String filePath = file.getPath();
 			final int index = filePath.lastIndexOf(File.separator);

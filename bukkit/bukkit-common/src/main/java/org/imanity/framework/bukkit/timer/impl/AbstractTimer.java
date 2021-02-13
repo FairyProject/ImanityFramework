@@ -32,8 +32,8 @@ import org.imanity.framework.bukkit.timer.TimerList;
 import org.imanity.framework.bukkit.timer.event.TimerElapsedEvent;
 import org.imanity.framework.bukkit.timer.event.TimerExtendEvent;
 import org.imanity.framework.util.CountdownData;
-import org.imanity.framework.bukkit.util.RV;
-import org.imanity.framework.bukkit.util.BukkitUtil;
+import org.imanity.framework.util.RV;
+import org.imanity.framework.util.StringUtil;
 
 import java.util.Collection;
 
@@ -159,7 +159,7 @@ public abstract class AbstractTimer implements Timer {
 
             Collection<? extends Player> players = this.getReceivers();
             if (players != null) {
-                players.forEach(player -> this.sendMessage(player, BukkitUtil.replace(this.announceMessage(player, seconds),
+                players.forEach(player -> this.sendMessage(player, StringUtil.replace(this.announceMessage(player, seconds),
                         RV.o("<player>", player.getName()),
                         RV.o("<seconds>", seconds)
                 ), seconds));

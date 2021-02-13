@@ -31,12 +31,10 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.event.player.PlayerTeleportEvent;
-import org.bukkit.event.world.WorldLoadEvent;
 import org.bukkit.event.world.WorldUnloadEvent;
 import org.imanity.framework.bukkit.Imanity;
 import org.imanity.framework.bukkit.metadata.Metadata;
 import org.imanity.framework.bukkit.player.movement.MovementListener;
-import org.imanity.framework.bukkit.util.SampleMetadata;
 import org.imanity.framework.bukkit.util.TaskUtil;
 import org.imanity.framework.Component;
 

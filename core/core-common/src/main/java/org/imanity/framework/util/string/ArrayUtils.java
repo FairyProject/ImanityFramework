@@ -24,7 +24,7 @@
 
 package org.imanity.framework.util.string;
 
-import org.imanity.framework.util.Strings;
+import org.imanity.framework.util.StringUtil;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -98,7 +98,7 @@ public class ArrayUtils {
 	}
 
 	public static <T> T skipEmpty(T obj, T def) {
-		return Strings.isEmpty(String.valueOf(obj)) ? def : obj;
+		return StringUtil.isEmpty(String.valueOf(obj)) ? def : obj;
 	}
 
 	public static <T> T[] skipEmpty(T[] obj, T[] def) {

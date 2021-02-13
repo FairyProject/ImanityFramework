@@ -55,9 +55,7 @@ import org.imanity.framework.bukkit.packet.PacketService;
 import org.imanity.framework.bukkit.packet.wrapper.server.WrappedPacketOutTitle;
 import org.imanity.framework.bukkit.player.movement.MovementListener;
 import org.imanity.framework.bukkit.player.movement.impl.AbstractMovementImplementation;
-import org.imanity.framework.bukkit.plugin.BukkitPlugin;
 import org.imanity.framework.bukkit.reflection.MinecraftReflection;
-import org.imanity.framework.bukkit.reflection.ProtocolLibService;
 import org.imanity.framework.bukkit.reflection.minecraft.MinecraftVersion;
 import org.imanity.framework.bukkit.reflection.wrapper.ChatComponentWrapper;
 import org.imanity.framework.bukkit.scoreboard.ImanityBoardAdapter;
@@ -73,7 +71,10 @@ import org.imanity.framework.locale.player.LocaleData;
 import org.imanity.framework.plugin.PluginClassLoader;
 import org.imanity.framework.plugin.PluginManager;
 import org.imanity.framework.task.TaskChainFactory;
+import org.imanity.framework.util.CC;
 import org.imanity.framework.util.FastRandom;
+import org.imanity.framework.util.RV;
+import org.imanity.framework.util.StringUtil;
 
 import javax.annotation.Nullable;
 import java.util.List;
@@ -218,19 +219,19 @@ public final class Imanity {
     }
 
     public static String translate(Player player, String key) {
-        return BukkitUtil.color(ImanityCommon.translate(player.getUniqueId(), key));
+        return CC.translate(ImanityCommon.translate(player.getUniqueId(), key));
     }
 
     public static Iterable<String> translateList(Player player, String key) {
-        return BukkitUtil.toStringList(Imanity.translate(player, key), "\n");
+        return StringUtil.toStringList(Imanity.translate(player, key), "\n");
     }
 
     public static String translate(Player player, String key, RV... replaceValues) {
-        return BukkitUtil.replace(Imanity.translate(player, key), replaceValues);
+        return StringUtil.replace(Imanity.translate(player, key), replaceValues);
     }
 
     public static Iterable<String> translateList(Player player, String key, RV... replaceValues) {
-        return BukkitUtil.toStringList(Imanity.translate(player, key, replaceValues), "\n");
+        return StringUtil.toStringList(Imanity.translate(player, key, replaceValues), "\n");
     }
 
     public static String translate(Player player, String key, LocaleRV... replaceValues) {
@@ -238,14 +239,14 @@ public final class Imanity {
         String result = Imanity.translate(player, key);
 
         for (LocaleRV rv : replaceValues) {
-            result = BukkitUtil.replace(result, rv.getTarget(), rv.getReplacement(player));
+            result = StringUtil.replace(result, rv.getTarget(), rv.getReplacement(player));
         }
 
         return result;
     }
 
     public static Iterable<String> translateList(Player player, String key, LocaleRV... replaceValues) {
-        return BukkitUtil.toStringList(Imanity.translate(player, key, replaceValues), "\n");
+        return StringUtil.toStringList(Imanity.translate(player, key, replaceValues), "\n");
     }
 
 

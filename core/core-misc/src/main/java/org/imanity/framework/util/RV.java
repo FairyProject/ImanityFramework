@@ -24,40 +24,27 @@
 
 package org.imanity.framework.util;
 
-import java.io.*;
-import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
-import java.nio.file.Paths;
-import java.util.stream.Stream;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
 
-public class IO {
+@AllArgsConstructor
+@Getter
+public class RV {
 
-    public static byte[] readFully(InputStream inputStream) throws IOException {
-        ByteArrayOutputStream stream = new ByteArrayOutputStream();
-        byte[] buf = new byte[1024];
-        int len = 0;
-        while ((len = inputStream.read(buf)) > 0) {
-            stream.write(buf, 0, len);
-        }
-        return stream.toByteArray();
-    }
+	private final String target;
+	private final String replacement;
 
-    public static String readFile(File file) throws IOException
-    {
-        StringBuilder contentBuilder = new StringBuilder();
+	public RV(String target, Object replacement) {
+		this(target, replacement.toString());
+	}
 
-        try (Stream<String> stream = Files.lines( file.toPath(), StandardCharsets.UTF_8))
-        {
-            stream.forEach(s -> contentBuilder.append(s).append("\n"));
-        }
+	public static RV o(final String target, final String replacement) {
+		return new RV(target, replacement);
+	}
 
-        return contentBuilder.toString();
-    }
+	public static RV o(final String target, final Object replacement) {
+		return new RV(target, replacement);
+	}
 
-    public static void writeFile(File file, String string) throws IOException {
-        BufferedWriter writer = new BufferedWriter(new FileWriter(file));
-        writer.write(string);
 
-        writer.close();
-    }
 }
