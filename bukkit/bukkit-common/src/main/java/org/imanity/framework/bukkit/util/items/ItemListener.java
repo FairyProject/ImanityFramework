@@ -37,13 +37,15 @@ import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerPickupItemEvent;
 import org.bukkit.inventory.ItemStack;
 import org.imanity.framework.ImanityCommon;
-import org.imanity.framework.bukkit.util.SampleMetadata;
+import org.imanity.framework.bukkit.metadata.Metadata;
 import org.imanity.framework.Component;
+import org.imanity.framework.metadata.MetadataKey;
+import org.imanity.framework.metadata.MetadataMap;
 
 @Component
 public class ItemListener implements Listener {
 
-    private static final String SET_ITEM_METADATA = ImanityCommon.METADATA_PREFIX + "SetItem";
+    private static final MetadataKey<Boolean> METADATA = MetadataKey.createBooleanKey(ImanityCommon.METADATA_PREFIX + "Item");
 
     @EventHandler(ignoreCancelled = true, priority = EventPriority.MONITOR)
     public void onPlayerPickupItem(PlayerPickupItemEvent event) {
@@ -51,7 +53,8 @@ public class ItemListener implements Listener {
 
         Item item = event.getItem();
 
-        if (item.hasMetadata(SET_ITEM_METADATA)) {
+        MetadataMap metadataMap = Metadata.get(item).orElse(null);
+        if (metadataMap != null && metadataMap.has(METADATA)) {
             return;
         }
 
@@ -67,7 +70,7 @@ public class ItemListener implements Listener {
         resultItem.setDurability(itemStack.getDurability());
 
         item.setItemStack(resultItem);
-        item.setMetadata(SET_ITEM_METADATA, new SampleMetadata(SET_ITEM_METADATA));
+        Metadata.provide(item).put(METADATA, true);
         event.setCancelled(true);
     }
 

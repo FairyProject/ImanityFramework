@@ -22,7 +22,7 @@
  * SOFTWARE.
  */
 
-package org.imanity.framework.bukkit.util;
+package org.imanity.framework.bukkit.util.sound;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -79,11 +79,11 @@ public class SoundData {
     }
 
     public static SoundData ofVolume(Sound sound, float volume) {
-        return new SoundData(sound, volume, 0.0F);
+        return new SoundData(sound, volume, 1F);
     }
 
     public static SoundData ofPitch(Sound sound, float pitch) {
-        return new SoundData(sound, 0.0F, pitch);
+        return new SoundData(sound, 1F, pitch);
     }
 
 }

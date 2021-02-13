@@ -22,13 +22,35 @@
  * SOFTWARE.
  */
 
-package org.imanity.framework.bukkit.util;
+package org.imanity.framework.bukkit.util.sound;
 
-import org.bukkit.metadata.FixedMetadataValue;
-import org.imanity.framework.bukkit.Imanity;
+import org.bukkit.Sound;
+import org.imanity.framework.Component;
+import org.imanity.framework.ObjectSerializer;
 
-public class SampleMetadata extends FixedMetadataValue {
-    public SampleMetadata(Object value) {
-        super(Imanity.PLUGIN, value);
+@Component
+public class SoundDataSerializer implements ObjectSerializer<SoundData, String> {
+    @Override
+    public String serialize(SoundData input) {
+        return input.getSound().name() + ":" + input.getVolume() + ":" + input.getPitch();
+    }
+
+    @Override
+    public SoundData deserialize(String output) {
+        String[] split = output.split(":");
+        String name = split[0];
+        float volume = Float.parseFloat(split[1]);
+        float pitch = Float.parseFloat(split[2]);
+        return new SoundData(Sound.valueOf(name), volume, pitch);
+    }
+
+    @Override
+    public Class<SoundData> inputClass() {
+        return SoundData.class;
+    }
+
+    @Override
+    public Class<String> outputClass() {
+        return String.class;
     }
 }
