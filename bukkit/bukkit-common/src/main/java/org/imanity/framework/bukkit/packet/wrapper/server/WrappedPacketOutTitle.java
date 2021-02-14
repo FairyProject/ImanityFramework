@@ -73,10 +73,13 @@ public class WrappedPacketOutTitle extends WrappedPacket implements SendableWrap
 
     @Override
     public Object asNMSPacket() {
-        return new PacketWrapper(PacketTypeClasses.Server.TITLE)
-                .setFieldByIndex(MinecraftReflection.getEnumTitleActionClass(), 0, MinecraftReflection.getTitleActionConverter().getGeneric(this.action))
-                .setFieldByIndex(MinecraftReflection.getIChatBaseComponentClass(), 0, this.message.getHandle())
-                .setFieldByIndex(int.class, 0, this.fadeIn)
+        PacketWrapper packetWrapper = new PacketWrapper(PacketTypeClasses.Server.TITLE);
+        packetWrapper.setFieldByIndex(MinecraftReflection.getEnumTitleActionClass(), 0, MinecraftReflection.getTitleActionConverter().getGeneric(this.action));
+        if (this.message != null) {
+            packetWrapper.setFieldByIndex(MinecraftReflection.getIChatBaseComponentClass(), 0, this.message.getHandle());
+        }
+
+        return packetWrapper.setFieldByIndex(int.class, 0, this.fadeIn)
                 .setFieldByIndex(int.class, 1, this.stay)
                 .setFieldByIndex(int.class, 2, this.fadeOut)
                 .getPacket();

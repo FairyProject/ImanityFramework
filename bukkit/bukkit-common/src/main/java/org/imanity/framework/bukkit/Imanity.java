@@ -249,27 +249,32 @@ public final class Imanity {
         return StringUtil.toStringList(Imanity.translate(player, key, replaceValues), "\n");
     }
 
-
+    @Deprecated
     public static void broadcast(String key, LocaleRV... rvs) {
         Imanity.broadcast(Imanity.getPlayers(), key, null, null, null, rvs);
     }
 
+    @Deprecated
     public static void broadcast(Iterable<? extends Player> players, String key, LocaleRV... rvs) {
         Imanity.broadcast(players, key, null, null, null, rvs);
     }
 
+    @Deprecated
     public static void broadcastWithSound(String key, Sound sound, LocaleRV... rvs) {
         Imanity.broadcastWithSound(Imanity.getPlayers(), key, sound, rvs);
     }
 
+    @Deprecated
     public static void broadcastWithSound(Iterable<? extends Player> players, String key, Sound sound, LocaleRV... rvs) {
         Imanity.broadcast(players, key, null, null, sound, rvs);
     }
 
+    @Deprecated
     public static void broadcastTitleWithSound(String messageLocale, String titleLocale, String subTitleLocale, Sound sound, LocaleRV... rvs) {
         Imanity.broadcast(Imanity.getPlayers(), messageLocale, titleLocale, subTitleLocale, sound, rvs);
     }
 
+    @Deprecated
     public static void broadcast(@NonNull Iterable<? extends Player> players, @Nullable String messageLocale, @Nullable String titleLocale, @Nullable String subTitleLocale, @Nullable Sound sound, LocaleRV... rvs) {
 
         boolean hasTitle = MinecraftVersion.VERSION.newerThan(MinecraftReflection.Version.v1_7_R4);
@@ -298,26 +303,32 @@ public final class Imanity {
 
     }
 
+    @Deprecated
     public static void sendSubTitle(Player player, String subTitle) {
         Imanity.sendTitle(player, null, subTitle);
     }
 
+    @Deprecated
     public static void sendSubTitle(Player player, String subTitle, int fadeIn, int stay, int fadeOut) {
         Imanity.sendTitle(player, null, subTitle, fadeIn, stay, fadeOut);
     }
 
+    @Deprecated
     public static void sendTitle(Player player, String title) {
         Imanity.sendTitle(player, title, null);
     }
 
+    @Deprecated
     public static void sendTitle(Player player, String title, String subTitle) {
         Imanity.sendTitle(player, title, subTitle, WrappedPacketOutTitle.DEFAULT_FADE_IN, WrappedPacketOutTitle.DEFAULT_STAY, WrappedPacketOutTitle.DEFAULT_FADE_OUT);
     }
 
+    @Deprecated
     public static void sendTitle(Player player, String title, int fadeIn, int stay, int fadeOut) {
         Imanity.sendTitle(player, title, null, fadeIn, stay, fadeOut);
     }
 
+    @Deprecated
     public static void sendTitle(Player player, @Nullable String title, @Nullable String subTitle, int fadeIn, int stay, int fadeOut) {
 
         if (title != null) {

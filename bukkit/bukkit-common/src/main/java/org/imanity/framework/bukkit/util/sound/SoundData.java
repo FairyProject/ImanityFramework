@@ -39,7 +39,7 @@ public class SoundData {
     private float pitch;
 
     public SoundData(Sound sound) {
-        this(sound, 0.0F, 0.0F);
+        this(sound, 1F, 1F);
     }
 
     public void play(Player... players) {
@@ -48,7 +48,7 @@ public class SoundData {
         }
     }
 
-    public void play(Iterable<Player> players) {
+    public void play(Iterable<? extends Player> players) {
         for (Player player : players) {
             player.playSound(player.getLocation(), this.sound, this.volume, this.pitch);
         }
