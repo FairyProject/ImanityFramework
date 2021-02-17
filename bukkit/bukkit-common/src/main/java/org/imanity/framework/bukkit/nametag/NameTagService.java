@@ -28,14 +28,11 @@ import com.google.common.primitives.Ints;
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
-import org.imanity.framework.ImanityCommon;
-import org.imanity.framework.PostDestroy;
-import org.imanity.framework.PostInitialize;
+import org.imanity.framework.*;
 import org.imanity.framework.bukkit.Imanity;
 import org.imanity.framework.bukkit.metadata.Metadata;
 import org.imanity.framework.metadata.MetadataKey;
 import org.imanity.framework.bukkit.nametag.impl.DefaultNameTagAdapter;
-import org.imanity.framework.Service;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
@@ -57,6 +54,21 @@ public class NameTagService {
     private Queue<NameTagUpdate> pendingUpdates;
 
     private ScheduledExecutorService executorService;
+
+    @PreInitialize
+    public void preInit() {
+        ComponentRegistry.registerComponentHolder(new ComponentHolder() {
+            @Override
+            public Class<?>[] type() {
+                return new Class[] { NameTagAdapter.class };
+            }
+
+            @Override
+            public void onEnable(Object instance) {
+                register((NameTagAdapter) instance);
+            }
+        });
+    }
 
     @PostInitialize
     public void init() {

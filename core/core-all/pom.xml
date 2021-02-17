@@ -61,14 +61,6 @@
                             <createDependencyReducedPom>false</createDependencyReducedPom>
                             <relocations>
                                 <relocation>
-                                    <pattern>org.mongodb</pattern>
-                                    <shadedPattern>org.imanity.framework.libs.mongodb</shadedPattern>
-                                </relocation>
-                                <relocation>
-                                    <pattern>org.bson</pattern>
-                                    <shadedPattern>org.imanity.framework.libs.bson</shadedPattern>
-                                </relocation>
-                                <relocation>
                                     <pattern>com.github.ben-manes.caffeine</pattern>
                                     <shadedPattern>org.imanity.framework.libs.caffeine</shadedPattern>
                                 </relocation>

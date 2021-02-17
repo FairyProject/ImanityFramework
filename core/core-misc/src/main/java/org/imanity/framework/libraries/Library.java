@@ -60,22 +60,19 @@ public class Library {
             "org{}mongodb",
             "mongodb-driver-sync",
             "4.0.4",
-            "yNfnRhpg02+ZUTkc+DBOmAhjCzt2pGJDHbOrOg0H7dE=",
-            new Relocate("org{}mongodb", IMANITY_LIB_PACKAGE + "mongodb")
+            "yNfnRhpg02+ZUTkc+DBOmAhjCzt2pGJDHbOrOg0H7dE="
     ),
     MONGO_DB_CORE = new Library(
             "org{}mongodb",
             "mongodb-driver-core",
             "4.0.4",
-            "O3919jFpB9moeW7FqPuSou2XroNq4MxnVVGmD0qD6m8=",
-            new Relocate("org{}mongodb", IMANITY_LIB_PACKAGE + "mongodb")
+            "O3919jFpB9moeW7FqPuSou2XroNq4MxnVVGmD0qD6m8="
     ),
     BSON = new Library(
             "org{}mongodb",
             "bson",
             "4.0.4",
-            "e93W+2Fbbw7S/c+wnBUFtO9fPtOZ5gBitZ1Jbkp9scI=",
-            new Relocate("org{}bson", IMANITY_LIB_PACKAGE + "bson")
+            "e93W+2Fbbw7S/c+wnBUFtO9fPtOZ5gBitZ1Jbkp9scI="
     ),
     CAFFEINE = new Library(
             "com{}github{}ben-manes{}caffeine",

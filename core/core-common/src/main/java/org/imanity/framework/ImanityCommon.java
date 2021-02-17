@@ -49,6 +49,7 @@ import org.imanity.framework.redis.server.ServerHandler;
 import org.imanity.framework.redis.server.enums.ServerState;
 import org.imanity.framework.task.ITaskScheduler;
 import org.imanity.framework.util.Terminable;
+import org.mongojack.internal.MongoJackModule;
 
 import java.util.*;
 
@@ -106,6 +107,14 @@ public final class ImanityCommon {
 
     public static void init() {
         ImanityCommon.loadLibraries();
+
+        ImanityCommon.JACKSON_MAPPER = new ObjectMapper();
+        ImanityCommon.JACKSON_MAPPER.setVisibility(PropertyAccessor.ALL, JsonAutoDetect.Visibility.NONE);
+        ImanityCommon.JACKSON_MAPPER.setVisibility(PropertyAccessor.FIELD, JsonAutoDetect.Visibility.ANY);
+        ImanityCommon.JACKSON_MAPPER.configure(MapperFeature.PROPAGATE_TRANSIENT_MARKER, true);
+        FrameworkMisc.JACKSON_MAPPER = ImanityCommon.JACKSON_MAPPER;
+
+        MongoJackModule.configure(ImanityCommon.JACKSON_MAPPER);
 
         ImanityCommon.CORE_CONFIG = new CoreConfig();
         ImanityCommon.CORE_CONFIG.loadAndSave();
@@ -261,16 +270,18 @@ public final class ImanityCommon {
                 ImanityCommon.TASK_SCHEDULER = this.taskScheduler;
                 FrameworkMisc.TASK_SCHEDULER = this.taskScheduler;
             }
-            if (this.mapper == null) {
-                ImanityCommon.JACKSON_MAPPER = new ObjectMapper();
-                ImanityCommon.JACKSON_MAPPER.setVisibility(PropertyAccessor.ALL, JsonAutoDetect.Visibility.NONE);
-                ImanityCommon.JACKSON_MAPPER.setVisibility(PropertyAccessor.FIELD, JsonAutoDetect.Visibility.ANY);
-                ImanityCommon.JACKSON_MAPPER.configure(MapperFeature.PROPAGATE_TRANSIENT_MARKER, true);
-            } else {
-                ImanityCommon.JACKSON_MAPPER = this.mapper;
-            }
-
-            FrameworkMisc.JACKSON_MAPPER = ImanityCommon.JACKSON_MAPPER;
+//            if (this.mapper == null) {
+//                ImanityCommon.JACKSON_MAPPER = new ObjectMapper();
+//                ImanityCommon.JACKSON_MAPPER.setVisibility(PropertyAccessor.ALL, JsonAutoDetect.Visibility.NONE);
+//                ImanityCommon.JACKSON_MAPPER.setVisibility(PropertyAccessor.FIELD, JsonAutoDetect.Visibility.ANY);
+//                ImanityCommon.JACKSON_MAPPER.configure(MapperFeature.PROPAGATE_TRANSIENT_MARKER, true);
+//
+//                MongoJackModule.configure(ImanityCommon.JACKSON_MAPPER);
+//            } else {
+//                ImanityCommon.JACKSON_MAPPER = this.mapper;
+//            }
+//
+//            FrameworkMisc.JACKSON_MAPPER = ImanityCommon.JACKSON_MAPPER;
 
             ImanityCommon.init();
         }
