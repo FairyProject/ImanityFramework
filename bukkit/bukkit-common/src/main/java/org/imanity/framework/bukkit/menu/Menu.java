@@ -32,6 +32,7 @@ import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
+import org.imanity.framework.util.CC;
 import org.imanity.framework.util.entry.Entry;
 
 import java.util.*;
@@ -116,7 +117,7 @@ public abstract class Menu {
 		}
 
 		if (inventory == null) {
-			inventory = Bukkit.createInventory(player, size, title);
+			inventory = Bukkit.createInventory(player, size, CC.translate(title));
 		}
 
 		inventory.setContents(new ItemStack[inventory.getSize()]);
