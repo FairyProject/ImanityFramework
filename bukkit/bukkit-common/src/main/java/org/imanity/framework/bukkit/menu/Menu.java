@@ -94,7 +94,7 @@ public abstract class Menu {
 		final org.imanity.framework.bukkit.menu.Menu previousMenu = org.imanity.framework.bukkit.menu.Menu.MENUS.get(player.getUniqueId());
 		Inventory inventory = null;
 		final int size = this.getSize() == -1 ? this.size(this.buttons) : this.getSize();
-		String title = this.getTitle(player);
+		String title = CC.translate(this.getTitle(player));
 
 		if (title.length() > 32) {
 			title = title.substring(0, 32);
@@ -117,7 +117,7 @@ public abstract class Menu {
 		}
 
 		if (inventory == null) {
-			inventory = Bukkit.createInventory(player, size, CC.translate(title));
+			inventory = Bukkit.createInventory(player, size, title);
 		}
 
 		inventory.setContents(new ItemStack[inventory.getSize()]);
