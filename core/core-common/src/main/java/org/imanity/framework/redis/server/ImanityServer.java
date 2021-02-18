@@ -61,9 +61,15 @@ public class ImanityServer {
     }
 
     public void load(Map<String, String> data) {
-        this.onlinePlayers = Integer.parseInt(data.get("onlinePlayers"));
-        this.maxPlayers = Integer.parseInt(data.get("maxPlayers"));
-        this.serverState = ServerState.valueOf(data.get("state").toUpperCase());
+        if (data.containsKey("onlinePlayers")) {
+            this.onlinePlayers = Integer.parseInt(data.get("onlinePlayers"));
+        }
+        if (data.containsKey("maxPlayers")) {
+            this.maxPlayers = Integer.parseInt(data.get("maxPlayers"));
+        }
+        if (data.containsKey("state")) {
+            this.serverState = ServerState.valueOf(data.get("state").toUpperCase());
+        }
 
         data.remove("onlinePlayers");
         data.remove("maxPlayers");

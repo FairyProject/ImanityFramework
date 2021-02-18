@@ -178,11 +178,11 @@ public class BukkitUtil {
     }
 
     public static File getDataFolder() {
-        return getDataFolder(1);
+        return getDataFolder(4);
     }
 
     public static File getFile(String fileName) {
-        return new File(getDataFolder(1), fileName);
+        return new File(getDataFolder(4), fileName);
     }
 
     @Deprecated
