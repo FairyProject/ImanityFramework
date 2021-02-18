@@ -107,6 +107,8 @@ public class ServerHandler {
             return;
         }
 
+        this.redis.getMap(ServerHandler.METADATA + ":" + this.currentServer.getName()).clear();
+
         this.messageService.sendMessage(new ServerDeleteMessage(this.currentServer));
         this.pushThread.shutdown();
 

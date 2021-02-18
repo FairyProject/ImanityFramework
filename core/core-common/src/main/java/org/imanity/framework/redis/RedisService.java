@@ -74,7 +74,7 @@ public class RedisService {
         return this.client.getReadWriteLock(name);
     }
 
-    public RMap<String, String> getMap(String name) {
+    public RMap<String, Object> getMap(String name) {
         return this.client.getMap(name);
     }
 

@@ -69,7 +69,7 @@ public class FetchThread extends Thread {
                 this.serverHandler.addServer(name, server);
             }
 
-            Map<String, String> data = this.serverHandler.getRedis().getMap(key);
+            Map<String, Object> data = this.serverHandler.getRedis().getMap(key);
             server.load(data);
         }
     }

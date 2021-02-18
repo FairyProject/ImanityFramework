@@ -60,22 +60,21 @@ public class ImanityServer {
         this.name = name;
     }
 
-    public void load(Map<String, String> data) {
+    public void load(Map<String, Object> data) {
         if (data.containsKey("onlinePlayers")) {
-            this.onlinePlayers = Integer.parseInt(data.get("onlinePlayers"));
+            this.onlinePlayers = (int) data.get("onlinePlayers");
         }
         if (data.containsKey("maxPlayers")) {
-            this.maxPlayers = Integer.parseInt(data.get("maxPlayers"));
+            this.maxPlayers = (int) data.get("maxPlayers");
         }
         if (data.containsKey("state")) {
-            this.serverState = ServerState.valueOf(data.get("state").toUpperCase());
+            this.serverState = ServerState.valueOf(((String) data.get("state")).toUpperCase());
         }
 
-        data.remove("onlinePlayers");
-        data.remove("maxPlayers");
-        data.remove("state");
-        this.metadata.clear();
-        this.metadata.putAll(data);
+        if (data.containsKey("metadata")) {
+            this.metadata.clear();
+            this.metadata.putAll((Map<? extends String, ? extends String>) data.get("metadata"));
+        }
     }
 
     public int getInt(String key) {

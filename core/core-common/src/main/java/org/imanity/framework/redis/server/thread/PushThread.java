@@ -72,11 +72,11 @@ public class PushThread extends Thread {
 
         ImanityServer server = serverHandler.getCurrentServer();
 
-        RMap<String, String> map = this.serverHandler.getRedis().getMap(ServerHandler.METADATA + ":" + server.getName());
-        map.put("onlinePlayers", String.valueOf(server.getOnlinePlayers()));
-        map.put("maxPlayers", String.valueOf(server.getMaxPlayers()));
+        RMap<String, Object> map = this.serverHandler.getRedis().getMap(ServerHandler.METADATA + ":" + server.getName());
+        map.put("onlinePlayers", server.getOnlinePlayers());
+        map.put("maxPlayers", server.getMaxPlayers());
         map.put("state", server.getServerState().name());
-        map.putAll(server.getMetadata());
+        map.put("metadata", server.getMetadata());
 
     }
 }
