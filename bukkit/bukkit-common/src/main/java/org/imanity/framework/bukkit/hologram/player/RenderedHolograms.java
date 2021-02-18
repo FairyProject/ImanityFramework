@@ -45,7 +45,7 @@ public class RenderedHolograms {
     public void removeFarHolograms(Player player, HologramHandler hologramHandler) {
 
         String newWorldName = player.getWorld().getName();
-        if (this.worldName.equals(newWorldName)) {
+        if (!this.worldName.equals(newWorldName)) {
 
             this.reset(player, hologramHandler);
             this.worldName = newWorldName;
