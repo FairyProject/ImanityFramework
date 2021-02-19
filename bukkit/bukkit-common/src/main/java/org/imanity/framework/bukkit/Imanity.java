@@ -66,6 +66,7 @@ import org.imanity.framework.bukkit.util.*;
 import org.imanity.framework.bukkit.tablist.ImanityTabAdapter;
 import org.imanity.framework.bukkit.tablist.ImanityTabHandler;
 import org.imanity.framework.bukkit.visual.VisualBlockHandler;
+import org.imanity.framework.locale.LocaleHandler;
 import org.imanity.framework.locale.LocaleRepository;
 import org.imanity.framework.locale.player.LocaleData;
 import org.imanity.framework.plugin.PluginClassLoader;
@@ -95,7 +96,7 @@ public final class Imanity {
     public static KeepChunkHandler KEEP_CHUNK_HANDLER;
 
     @Autowired
-    private static LocaleRepository LOCALE_REPOSITORY;
+    private static LocaleHandler LOCALE_HANDLER;
 
     public static Plugin PLUGIN;
 
@@ -140,8 +141,8 @@ public final class Imanity {
         if (ImanityCommon.CORE_CONFIG.USE_LOCALE) {
             new BukkitRepository<LocaleData>(PLUGIN)
                     .async()
-                    .load(player -> LOCALE_REPOSITORY.find(player.getUniqueId()))
-                    .save((player, localeData) -> LOCALE_REPOSITORY.save(localeData))
+                    .load(player -> LOCALE_HANDLER.lookup(player.getUniqueId()))
+                    .save((player, localeData) -> LOCALE_HANDLER.saveAndDelete(localeData))
                     .onLoaded((player, localeData) -> Imanity.callEvent(new PlayerLocaleLoadedEvent(player, localeData)))
                     .init();
         }

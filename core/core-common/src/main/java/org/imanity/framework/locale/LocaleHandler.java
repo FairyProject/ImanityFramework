@@ -26,9 +26,13 @@ package org.imanity.framework.locale;
 
 import lombok.Getter;
 import org.apache.commons.io.IOUtils;
+import org.imanity.framework.Autowired;
 import org.imanity.framework.ImanityCommon;
 import org.imanity.framework.PostInitialize;
 import org.imanity.framework.Service;
+import org.imanity.framework.locale.player.LocaleData;
+import org.imanity.framework.metadata.CommonMetadataRegistries;
+import org.imanity.framework.metadata.MetadataKey;
 import org.yaml.snakeyaml.Yaml;
 
 import java.io.File;
@@ -39,9 +43,16 @@ import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 
 @Service(name = "locale")
 public class LocaleHandler {
+
+    private static final MetadataKey<LocaleData> METADATA = MetadataKey.create("framework:locale", LocaleData.class);
+    private static final Object LOCK = new Object();
+
+    @Autowired
+    private LocaleRepository localeRepository;
 
     private Map<String, Locale> locales;
     @Getter
@@ -114,6 +125,31 @@ public class LocaleHandler {
         }
 
         return null;
+    }
+
+    public LocaleData find(UUID uuid) {
+        return CommonMetadataRegistries.provide(uuid).getOrNull(METADATA);
+    }
+
+    public LocaleData lookup(UUID uuid) {
+        synchronized (LOCK) {
+            LocaleData localeData = this.localeRepository.find(uuid);
+
+            CommonMetadataRegistries.provide(uuid).put(METADATA, localeData);
+            return localeData;
+        }
+    }
+
+    public void saveAndDelete(LocaleData localeData) {
+        if (localeData == null) {
+            return;
+        }
+
+        synchronized (LOCK) {
+            CommonMetadataRegistries.provide(localeData.getUuid()).remove(METADATA);
+
+            this.localeRepository.save(localeData);
+        }
     }
 
 }

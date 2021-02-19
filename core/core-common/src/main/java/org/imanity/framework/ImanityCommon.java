@@ -88,9 +88,6 @@ public final class ImanityCommon {
     @Autowired
     public static LocaleHandler LOCALE_HANDLER;
 
-    @Autowired
-    public static LocaleRepository LOCALE_REPOSITORY;
-
     public static LibraryHandler LIBRARY_HANDLER;
 
     public static ICommandExecutor COMMAND_EXECUTOR;
@@ -195,7 +192,7 @@ public final class ImanityCommon {
         if (!ImanityCommon.CORE_CONFIG.USE_LOCALE) {
             throw new OptionNotEnabledException("use_locale", "org.imanity.framework.config.yml");
         }
-        LocaleData localeData = LOCALE_REPOSITORY.find(uuid);
+        LocaleData localeData = LOCALE_HANDLER.find(uuid);
         Locale locale;
         if (localeData == null || localeData.getLocale() == null) {
             locale = ImanityCommon.LOCALE_HANDLER.getDefaultLocale();
