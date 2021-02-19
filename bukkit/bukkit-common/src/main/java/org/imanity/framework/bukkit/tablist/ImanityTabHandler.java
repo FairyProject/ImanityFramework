@@ -25,6 +25,8 @@
 package org.imanity.framework.bukkit.tablist;
 
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.imanity.framework.ImanityCommon;
@@ -48,6 +50,8 @@ import java.util.concurrent.*;
 
 @Getter
 public class ImanityTabHandler {
+
+    private static final Logger LOGGER = LogManager.getLogger();
 
     //Instance
     @Getter
@@ -139,8 +143,9 @@ public class ImanityTabHandler {
 
         //Start Thread
         this.thread = Executors.newSingleThreadScheduledExecutor(new ThreadFactoryBuilder()
-            .setNameFormat("Imanity-Tablist-Thread")
-            .setDaemon(true)
+                .setNameFormat("Imanity-Tablist-Thread")
+                .setDaemon(true)
+                .setUncaughtExceptionHandler((thread1, throwable) -> LOGGER.error(thread1))
             .build());
 
         this.thread.scheduleAtFixedRate(() -> {
@@ -150,7 +155,11 @@ public class ImanityTabHandler {
                         .getOrNull(TABLIST_KEY);
 
                 if (tablist != null) {
-                    tablist.update();
+                    try {
+                        tablist.update();
+                    } catch (Throwable throwable) {
+                        LOGGER.error(throwable);
+                    }
                 }
             }
         }, 50L, 50L, TimeUnit.MILLISECONDS);

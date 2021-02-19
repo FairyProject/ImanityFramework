@@ -24,6 +24,10 @@
 
 package org.imanity.framework.task;
 
+import jodd.util.concurrent.ThreadFactoryBuilder;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
@@ -32,6 +36,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 @SuppressWarnings("WeakerAccess")
 public class TaskChainAsyncQueue implements AsyncQueue {
     private static final AtomicInteger threadId = new AtomicInteger();
+    private static final Logger LOGGER = LogManager.getLogger();
     private final ThreadPoolExecutor executor;
 
     public TaskChainAsyncQueue() {
@@ -43,11 +48,12 @@ public class TaskChainAsyncQueue implements AsyncQueue {
     }
 
     public static ThreadPoolExecutor createCachedThreadPool() {
-        return (ThreadPoolExecutor) Executors.newCachedThreadPool(r -> {
-            final Thread thread = new Thread(r);
-            thread.setName("TaskChainAsyncQueue Thread " + threadId.getAndIncrement());
-            return thread;
-        });
+        return (ThreadPoolExecutor) Executors.newCachedThreadPool(new ThreadFactoryBuilder()
+                .setNameFormat("TaskChainAsyncQueue Thread " + threadId.getAndIncrement())
+                .setDaemon(true)
+                .setUncaughtExceptionHandler((thread, throwable) -> LOGGER.error(throwable))
+                .get()
+        );
     }
 
     public void postAsync(Runnable runnable) {

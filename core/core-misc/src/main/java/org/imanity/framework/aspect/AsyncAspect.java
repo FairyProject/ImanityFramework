@@ -29,6 +29,8 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
@@ -37,11 +39,13 @@ import org.aspectj.lang.reflect.MethodSignature;
 @Aspect
 public final class AsyncAspect {
 
+    private static final Logger LOGGER = LogManager.getLogger();
     public static final ExecutorService EXECUTOR =
             Executors.newCachedThreadPool(
                     new ThreadFactoryBuilder()
                         .setDaemon(true)
                         .setNameFormat("imanity-async-%d")
+                        .setUncaughtExceptionHandler((thread, throwable) -> LOGGER.error(throwable))
                     .build()
             );
 

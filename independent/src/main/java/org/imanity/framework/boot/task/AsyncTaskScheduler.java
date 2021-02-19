@@ -25,6 +25,8 @@
 package org.imanity.framework.boot.task;
 
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.imanity.framework.task.ITaskScheduler;
 
 import java.util.*;
@@ -36,6 +38,8 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 
 public class AsyncTaskScheduler implements ITaskScheduler {
+
+    private static final Logger LOGGER = LogManager.getLogger();
 
     private final AtomicInteger id = new AtomicInteger(0);
     private final ConcurrentHashMap<Integer, AsyncTask> tasks = new ConcurrentHashMap<>();
@@ -50,6 +54,7 @@ public class AsyncTaskScheduler implements ITaskScheduler {
         this.executorService = Executors.newSingleThreadScheduledExecutor(new ThreadFactoryBuilder()
                 .setDaemon(true)
                 .setNameFormat("Task Scheduler Thread")
+                .setUncaughtExceptionHandler((thread, throwable) -> LOGGER.error(throwable))
                 .build()
         );
         this.executorService.scheduleAtFixedRate(() -> {

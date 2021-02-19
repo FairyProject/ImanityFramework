@@ -61,19 +61,23 @@ public class ImanityServer {
     }
 
     public void load(Map<String, Object> data) {
-        if (data.containsKey("onlinePlayers")) {
-            this.onlinePlayers = (int) data.get("onlinePlayers");
+        Object object = data.get("onlinePlayers");
+        if (object instanceof Integer) {
+            this.onlinePlayers = (int) object;
         }
-        if (data.containsKey("maxPlayers")) {
-            this.maxPlayers = (int) data.get("maxPlayers");
+        object = data.get("maxPlayers");
+        if (object instanceof Integer) {
+            this.maxPlayers = (int) object;
         }
-        if (data.containsKey("state")) {
-            this.serverState = ServerState.valueOf(((String) data.get("state")).toUpperCase());
+        object = data.get("state");
+        if (object instanceof String) {
+            this.serverState = ServerState.valueOf(((String) object).toUpperCase());
         }
 
-        if (data.containsKey("metadata")) {
+        object = data.get("metadata");
+        if (object instanceof Map) {
             this.metadata.clear();
-            this.metadata.putAll((Map<? extends String, ? extends String>) data.get("metadata"));
+            this.metadata.putAll((Map<? extends String, ? extends String>) object);
         }
     }
 

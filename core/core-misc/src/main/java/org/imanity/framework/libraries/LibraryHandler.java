@@ -26,6 +26,8 @@ package org.imanity.framework.libraries;
 
 import com.google.common.collect.ImmutableSet;
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.imanity.framework.FrameworkMisc;
 import org.imanity.framework.libraries.classloader.IsolatedClassLoader;
 import org.imanity.framework.libraries.relocate.RelocateHandler;
@@ -54,9 +56,11 @@ public class LibraryHandler {
     private final Map<AbstractPlugin, PluginClassLoader> pluginClassLoaders = new ConcurrentHashMap<>();
     private final Map<ImmutableSet<Library>, IsolatedClassLoader> loaders = new HashMap<>();
 
+    private final Logger LOGGER = LogManager.getLogger();
     private final ExecutorService EXECUTOR = Executors.newCachedThreadPool(new ThreadFactoryBuilder()
         .setDaemon(true)
         .setNameFormat("Library Downloader - %d")
+        .setUncaughtExceptionHandler((thread, throwable) -> LOGGER.error(throwable))
         .build());
 
     public LibraryHandler() {

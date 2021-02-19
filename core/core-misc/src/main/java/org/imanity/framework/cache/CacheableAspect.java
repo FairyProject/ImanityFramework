@@ -78,11 +78,13 @@ public class CacheableAspect {
         CLEANER_SERVICE = Executors.newSingleThreadScheduledExecutor(new ThreadFactoryBuilder()
                 .setNameFormat("cacheable-clean")
                 .setDaemon(true)
+                .setUncaughtExceptionHandler((thread, throwable) -> LOGGER.error(throwable))
                 .build()
         );
         UPDATER_SERVICE = Executors.newSingleThreadExecutor(new ThreadFactoryBuilder()
                 .setNameFormat("cacheable-update")
                 .setDaemon(true)
+                .setUncaughtExceptionHandler((thread, throwable) -> LOGGER.error(throwable))
                 .build()
         );
 
