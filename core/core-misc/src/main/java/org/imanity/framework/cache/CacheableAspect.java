@@ -45,6 +45,7 @@ import org.imanity.framework.cache.manager.CacheManager;
 import org.imanity.framework.cache.manager.CacheManagerConcurrentMap;
 import org.imanity.framework.cache.script.AbstractScriptParser;
 import org.imanity.framework.cache.script.SpringELParser;
+import org.imanity.framework.util.Stacktrace;
 import org.intellij.lang.annotations.Language;
 
 import java.lang.reflect.Method;
@@ -78,13 +79,13 @@ public class CacheableAspect {
         CLEANER_SERVICE = Executors.newSingleThreadScheduledExecutor(new ThreadFactoryBuilder()
                 .setNameFormat("cacheable-clean")
                 .setDaemon(true)
-                .setUncaughtExceptionHandler((thread, throwable) -> LOGGER.error(throwable))
+                .setUncaughtExceptionHandler((thread, throwable) -> Stacktrace.print(throwable))
                 .build()
         );
         UPDATER_SERVICE = Executors.newSingleThreadExecutor(new ThreadFactoryBuilder()
                 .setNameFormat("cacheable-update")
                 .setDaemon(true)
-                .setUncaughtExceptionHandler((thread, throwable) -> LOGGER.error(throwable))
+                .setUncaughtExceptionHandler((thread, throwable) -> Stacktrace.print(throwable))
                 .build()
         );
 

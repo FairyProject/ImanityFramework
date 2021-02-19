@@ -25,8 +25,6 @@
 package org.imanity.framework.bukkit.tablist;
 
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.imanity.framework.ImanityCommon;
@@ -45,13 +43,12 @@ import org.imanity.framework.bukkit.tablist.util.impl.v1_8.NMS1_8TabImpl;
 import org.imanity.framework.bukkit.tablist.util.impl.ProtocolLibTabImpl;
 import org.imanity.framework.bukkit.reflection.MinecraftReflection;
 import org.imanity.framework.Autowired;
+import org.imanity.framework.util.Stacktrace;
 
 import java.util.concurrent.*;
 
 @Getter
 public class ImanityTabHandler {
-
-    private static final Logger LOGGER = LogManager.getLogger();
 
     //Instance
     @Getter
@@ -145,7 +142,7 @@ public class ImanityTabHandler {
         this.thread = Executors.newSingleThreadScheduledExecutor(new ThreadFactoryBuilder()
                 .setNameFormat("Imanity-Tablist-Thread")
                 .setDaemon(true)
-                .setUncaughtExceptionHandler((thread1, throwable) -> LOGGER.error(thread1))
+                .setUncaughtExceptionHandler((thread1, throwable) -> Stacktrace.print(throwable))
             .build());
 
         this.thread.scheduleAtFixedRate(() -> {
@@ -158,7 +155,7 @@ public class ImanityTabHandler {
                     try {
                         tablist.update();
                     } catch (Throwable throwable) {
-                        LOGGER.error(throwable);
+                        Stacktrace.print(throwable);
                     }
                 }
             }

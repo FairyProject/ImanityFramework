@@ -26,8 +26,6 @@ package org.imanity.framework.bukkit.nametag;
 
 import com.google.common.primitives.Ints;
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.imanity.framework.*;
@@ -35,6 +33,7 @@ import org.imanity.framework.bukkit.Imanity;
 import org.imanity.framework.bukkit.metadata.Metadata;
 import org.imanity.framework.metadata.MetadataKey;
 import org.imanity.framework.bukkit.nametag.impl.DefaultNameTagAdapter;
+import org.imanity.framework.util.Stacktrace;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
@@ -47,7 +46,6 @@ import java.util.concurrent.TimeUnit;
 public class NameTagService {
 
     protected static MetadataKey<NameTagList> TEAM_INFO_KEY = MetadataKey.create(ImanityCommon.METADATA_PREFIX + "TeamInfo", NameTagList.class);
-    private static final Logger LOGGER = LogManager.getLogger();
     private static final int UPDATE_INTERVAL = 2;
 
     private Map<String, NameTagInfo> registeredTeams;
@@ -81,7 +79,7 @@ public class NameTagService {
         this.executorService = Executors.newSingleThreadScheduledExecutor(new ThreadFactoryBuilder()
             .setDaemon(true)
             .setNameFormat("Imanity - Name Tag")
-            .setUncaughtExceptionHandler((thread, throwable) -> LOGGER.error(throwable))
+            .setUncaughtExceptionHandler((thread, throwable) -> Stacktrace.print(throwable))
             .build());
         this.executorService.scheduleWithFixedDelay(this::update, 50 * UPDATE_INTERVAL, 50 * UPDATE_INTERVAL, TimeUnit.MILLISECONDS);
 

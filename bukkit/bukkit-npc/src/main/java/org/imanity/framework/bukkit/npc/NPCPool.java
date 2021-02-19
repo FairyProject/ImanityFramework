@@ -37,8 +37,6 @@ import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.bukkit.*;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -58,6 +56,7 @@ import org.imanity.framework.bukkit.util.CoordXZ;
 import org.imanity.framework.bukkit.util.TaskUtil;
 import org.imanity.framework.bukkit.util.chunk.CachedChunk;
 import org.imanity.framework.bukkit.util.chunk.CraftCachedChunk;
+import org.imanity.framework.util.Stacktrace;
 import org.imanity.framework.util.thread.ServerThreadLock;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -71,11 +70,10 @@ import java.util.concurrent.Executors;
 public class NPCPool implements Listener {
 
     private static final Map<String, NPCPool> NPC_POOLS = new HashMap<>();
-    private static final Logger LOGGER = LogManager.getLogger();
     private static final ExecutorService EXECUTOR_SERVICE = Executors.newCachedThreadPool(new ThreadFactoryBuilder()
             .setNameFormat("NPC-Render-Pool-%d")
             .setDaemon(true)
-            .setUncaughtExceptionHandler((thread, throwable) -> LOGGER.error(throwable))
+            .setUncaughtExceptionHandler((thread, throwable) -> Stacktrace.print(throwable))
             .build());
 
     public static NPCPool getPool(String name) {

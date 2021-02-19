@@ -35,6 +35,7 @@ import org.imanity.framework.plugin.AbstractPlugin;
 import org.imanity.framework.plugin.PluginClassLoader;
 import org.imanity.framework.plugin.PluginListenerAdapter;
 import org.imanity.framework.plugin.PluginManager;
+import org.imanity.framework.util.Stacktrace;
 
 import java.io.File;
 import java.net.MalformedURLException;
@@ -60,7 +61,7 @@ public class LibraryHandler {
     private final ExecutorService EXECUTOR = Executors.newCachedThreadPool(new ThreadFactoryBuilder()
         .setDaemon(true)
         .setNameFormat("Library Downloader - %d")
-        .setUncaughtExceptionHandler((thread, throwable) -> LOGGER.error(throwable))
+        .setUncaughtExceptionHandler((thread, throwable) -> Stacktrace.print(throwable))
         .build());
 
     public LibraryHandler() {

@@ -35,17 +35,17 @@ import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.reflect.MethodSignature;
+import org.imanity.framework.util.Stacktrace;
 
 @Aspect
 public final class AsyncAspect {
 
-    private static final Logger LOGGER = LogManager.getLogger();
     public static final ExecutorService EXECUTOR =
             Executors.newCachedThreadPool(
                     new ThreadFactoryBuilder()
                         .setDaemon(true)
                         .setNameFormat("imanity-async-%d")
-                        .setUncaughtExceptionHandler((thread, throwable) -> LOGGER.error(throwable))
+                        .setUncaughtExceptionHandler((thread, throwable) -> Stacktrace.print(throwable))
                     .build()
             );
 
