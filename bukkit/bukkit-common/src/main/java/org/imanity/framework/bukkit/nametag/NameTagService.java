@@ -162,7 +162,7 @@ public class NameTagService {
     }
 
     protected void applyUpdate(NameTagUpdate update) {
-        Player toRefresh = Bukkit.getPlayerExact(update.getToRefresh());
+        Player toRefresh = Bukkit.getPlayer(update.getToRefresh());
         if (toRefresh == null) {
             return;
         }
@@ -170,7 +170,7 @@ public class NameTagService {
         if (update.getRefreshFor() == null) {
             Imanity.getPlayers().forEach(refreshFor -> this.updateForInternal(toRefresh, refreshFor));
         } else {
-            Player refreshFor = Bukkit.getPlayerExact(update.getRefreshFor());
+            Player refreshFor = Bukkit.getPlayer(update.getRefreshFor());
             if (refreshFor != null) {
                 this.updateForInternal(toRefresh, refreshFor);
             }

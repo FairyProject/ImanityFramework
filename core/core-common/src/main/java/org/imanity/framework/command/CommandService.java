@@ -34,6 +34,7 @@ import org.imanity.framework.command.annotation.CommandPresence;
 import org.imanity.framework.command.annotation.Parameter;
 import org.imanity.framework.command.parameter.ParameterHolder;
 import org.imanity.framework.command.parameter.ParameterMeta;
+import org.imanity.framework.util.Stacktrace;
 
 import javax.annotation.Nullable;
 import java.lang.reflect.Method;
@@ -181,14 +182,20 @@ public class CommandService {
         this.provider = provider;
     }
 
-    public Object transformParameter(CommandEvent event, String parameter, Class<?> type) {
+    public Object transformParameter(CommandEvent event, String parameter, Class type) {
         if (type == String.class) {
             return parameter;
         }
 
+        if (type.isEnum()) {
+            try {
+                return Enum.valueOf(type, parameter);
+            } catch (IllegalArgumentException ignored) {}
+        }
+
         ParameterHolder holder = this.parameters.getOrDefault(type, null);
         if (holder == null) {
-            throw new IllegalArgumentException("Couldn't find the parameter type " + type.getSimpleName() + ".");
+            return null;
         }
 
         return holder.transform(event, parameter);
@@ -257,6 +264,7 @@ public class CommandService {
             commandMeta.execute(commandEvent, arguments);
         } catch (Throwable throwable) {
             commandEvent.sendError(throwable);
+            Stacktrace.print(throwable);
             return false;
         }
         return true;

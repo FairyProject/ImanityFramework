@@ -24,27 +24,23 @@
 
 package org.imanity.framework.bukkit.nametag;
 
+import lombok.Getter;
 import org.bukkit.entity.Player;
 
+import java.util.UUID;
+
+@Getter
 final class NameTagUpdate
 {
-    private String toRefresh;
-    private String refreshFor;
+    private UUID toRefresh;
+    private UUID refreshFor;
 
     public NameTagUpdate(final Player toRefresh) {
-        this.toRefresh = toRefresh.getName();
+        this.toRefresh = toRefresh.getUniqueId();
     }
 
     public NameTagUpdate(final Player toRefresh, final Player refreshFor) {
-        this.toRefresh = toRefresh.getName();
-        this.refreshFor = refreshFor.getName();
-    }
-
-    public String getToRefresh() {
-        return this.toRefresh;
-    }
-
-    public String getRefreshFor() {
-        return this.refreshFor;
+        this.toRefresh = toRefresh.getUniqueId();
+        this.refreshFor = refreshFor.getUniqueId();
     }
 }

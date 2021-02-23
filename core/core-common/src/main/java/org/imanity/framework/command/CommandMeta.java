@@ -27,6 +27,7 @@ package org.imanity.framework.command;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import org.imanity.framework.command.parameter.ParameterMeta;
+import org.imanity.framework.util.Stacktrace;
 
 import java.lang.reflect.Method;
 import java.util.ArrayList;
@@ -110,7 +111,7 @@ public class CommandMeta {
             method.invoke(this.instance, transformedParameters.toArray());
         } catch (Exception e) {
             event.sendError(e);
-            e.printStackTrace();
+            Stacktrace.print(e);
         }
     }
 

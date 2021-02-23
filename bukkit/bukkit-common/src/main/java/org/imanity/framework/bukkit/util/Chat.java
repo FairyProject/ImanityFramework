@@ -80,7 +80,9 @@ public class Chat {
 
     public void broadcast(String messageLocaleKey, String titleLocaleKey, String subTitleLocaleKey, int fadeIn, int stay, int fadeOut, boolean clean, SoundData soundData, LocaleRV... rvs) {
         List<? extends Player> players = Imanity.getPlayers();
-        broadcast(players, messageLocaleKey, rvs);
+        if (messageLocaleKey != null) {
+            broadcast(players, messageLocaleKey, rvs);
+        }
         broadcastTitle(players, titleLocaleKey, subTitleLocaleKey, fadeIn, stay, fadeOut, clean, rvs);
         if (soundData != null) {
             soundData.play(players);
@@ -97,7 +99,9 @@ public class Chat {
 
     public void broadcastRaw(String message, String title, String subTitle, int fadeIn, int stay, int fadeOut, boolean clean, SoundData soundData, LocaleRV... rvs) {
         List<? extends Player> players = Imanity.getPlayers();
-        broadcastRaw(players, message, rvs);
+        if (message != null) {
+            broadcastRaw(players, message, rvs);
+        }
         broadcastTitleRaw(players, title, subTitle, fadeIn, stay, fadeOut, clean, rvs);
         if (soundData != null) {
             soundData.play(players);
@@ -276,6 +280,9 @@ public class Chat {
     }
 
     public void broadcast(Iterable<? extends Player> players, String localeKey, LocaleRV... rvs) {
+        if (localeKey == null) {
+            return;
+        }
         for (Player player : players) {
             sendRaw(player, Imanity.translate(player, localeKey), rvs);
         }
@@ -408,6 +415,9 @@ public class Chat {
     }
 
     public void send(Player player, String localeKey, LocaleRV... rvs) {
+        if (localeKey == null) {
+            return;
+        }
         sendRaw(player, Imanity.translate(player, localeKey), rvs);
     }
 
@@ -486,6 +496,10 @@ public class Chat {
     }
 
     public String setupMessageRaw(Player player, String message, @NonNull LocaleRV... rvs) {
+        if (message == null) {
+            return null;
+        }
+
         for (LocaleRV rv : rvs) {
             message = StringUtil.replace(message, rv.getTarget(), rv.getReplacement(player));
         }

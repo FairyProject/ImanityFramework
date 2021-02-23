@@ -108,6 +108,9 @@ public class CC {
     }
 
     public static String translate(String textToTranslate) {
+        if (textToTranslate == null) {
+            return null;
+        }
         char[] b = textToTranslate.toCharArray();
 
         for(int i = 0; i < b.length - 1; ++i) {
