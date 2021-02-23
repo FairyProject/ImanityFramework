@@ -22,16 +22,41 @@
  * SOFTWARE.
  */
 
-package org.imanity.framework.bukkit.util.items;
+package org.imanity.framework.bukkit.util.items.behaviour;
 
-import org.bukkit.entity.Player;
-import org.bukkit.event.block.Action;
-import org.bukkit.event.player.PlayerInteractEvent;
-import org.bukkit.inventory.ItemStack;
+import lombok.Getter;
+import org.bukkit.event.Event;
+import org.imanity.framework.bukkit.Imanity;
+import org.imanity.framework.bukkit.listener.events.EventSubscription;
+import org.imanity.framework.bukkit.listener.events.Events;
+import org.imanity.framework.bukkit.util.items.ImanityItem;
 
-@Deprecated
-public interface ItemCallback {
+@Getter
+public abstract class ItemBehaviourEvent<E extends Event> extends ItemBehaviour {
 
-    boolean onClick(Player player, ItemStack itemStack, Action action, PlayerInteractEvent event);
+    private final Class<E> classToRegister;
+    private EventSubscription<E> subscription;
+
+    public ItemBehaviourEvent(Class<E> classToRegister) {
+        this.classToRegister = classToRegister;
+    }
+
+    @Override
+    public void init(ImanityItem item) {
+        super.init(item);
+        this.subscription = Events.subscribe(classToRegister)
+                .listen((subscription, e) -> this.call(e))
+                .build(Imanity.PLUGIN);
+    }
+
+    @Override
+    public void unregister() {
+        super.unregister();
+        if (this.subscription != null) {
+            this.subscription.unregister();
+        }
+    }
+
+    public abstract void call(E event);
 
 }

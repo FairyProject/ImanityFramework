@@ -48,7 +48,7 @@ public class ImanityBoardHandler implements Runnable {
         thread.setDaemon(true);
         thread.start();
 
-        Events.subscribe(PlayerQuitEvent.class).listen((subscription, event) -> remove(subscription.getActivePlayer()));
+        Events.subscribe(PlayerQuitEvent.class).listen((subscription, event) -> remove(event.getPlayer()));
     }
 
     public void runQueue() {

@@ -164,8 +164,6 @@ public class LibraryHandler {
 
     }
 
-    private PluginClassLoader classLoader = new PluginClassLoader(ClassLoader.getSystemClassLoader());
-
     private void loadLibrary(Library library, boolean addToUCP) throws Exception {
         if (loaded.containsKey(library)) {
             return;
@@ -174,11 +172,11 @@ public class LibraryHandler {
         Path file = this.remapLibrary(library, this.downloadLibrary(library));
         this.loaded.put(library, file);
         if (addToUCP) {
-            this.classLoader.addJarToClasspath(file);
-//            FrameworkMisc.PLATFORM.getClassLoader().addJarToClasspath(file);
-//            for (PluginClassLoader classLoader : this.pluginClassLoaders.values()) {
-//                classLoader.addJarToClasspath(file);
-//            }
+//            this.classLoader.addJarToClasspath(file);
+            FrameworkMisc.PLATFORM.getClassLoader().addJarToClasspath(file);
+            for (PluginClassLoader classLoader : this.pluginClassLoaders.values()) {
+                classLoader.addJarToClasspath(file);
+            }
         }
     }
 

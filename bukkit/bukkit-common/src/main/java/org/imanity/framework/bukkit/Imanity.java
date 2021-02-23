@@ -35,6 +35,7 @@ import org.bukkit.Sound;
 import org.bukkit.World;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Event;
+import org.bukkit.event.HandlerList;
 import org.bukkit.event.Listener;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -67,7 +68,6 @@ import org.imanity.framework.bukkit.tablist.ImanityTabAdapter;
 import org.imanity.framework.bukkit.tablist.ImanityTabHandler;
 import org.imanity.framework.bukkit.visual.VisualBlockHandler;
 import org.imanity.framework.locale.LocaleHandler;
-import org.imanity.framework.locale.LocaleRepository;
 import org.imanity.framework.locale.player.LocaleData;
 import org.imanity.framework.plugin.PluginClassLoader;
 import org.imanity.framework.plugin.PluginManager;
@@ -196,6 +196,12 @@ public final class Imanity {
                 PLUGIN.getServer().getPluginManager().registerEvents(listener, plugin);
 
             }
+        }
+    }
+
+    public static void unregisterEvents(Listener... listeners) {
+        for (Listener listener : listeners) {
+            HandlerList.unregisterAll(listener);
         }
     }
 

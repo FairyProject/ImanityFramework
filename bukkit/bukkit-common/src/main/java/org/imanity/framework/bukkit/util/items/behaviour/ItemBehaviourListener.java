@@ -22,16 +22,23 @@
  * SOFTWARE.
  */
 
-package org.imanity.framework.bukkit.util.items;
+package org.imanity.framework.bukkit.util.items.behaviour;
 
-import org.bukkit.entity.Player;
-import org.bukkit.event.block.Action;
-import org.bukkit.event.player.PlayerInteractEvent;
-import org.bukkit.inventory.ItemStack;
+import org.bukkit.event.Listener;
+import org.imanity.framework.bukkit.Imanity;
+import org.imanity.framework.bukkit.util.items.ImanityItem;
 
-@Deprecated
-public interface ItemCallback {
+public abstract class ItemBehaviourListener extends ItemBehaviour implements Listener {
 
-    boolean onClick(Player player, ItemStack itemStack, Action action, PlayerInteractEvent event);
+    @Override
+    public void init(ImanityItem item) {
+        super.init(item);
+        Imanity.registerEvents(this);
+    }
 
+    @Override
+    public void unregister() {
+        super.unregister();
+        Imanity.unregisterEvents(this);
+    }
 }

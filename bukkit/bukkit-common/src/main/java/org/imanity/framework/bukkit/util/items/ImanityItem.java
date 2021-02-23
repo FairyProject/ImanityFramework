@@ -33,17 +33,18 @@ import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.fasterxml.jackson.databind.deser.std.StdDeserializer;
 import com.fasterxml.jackson.databind.ser.std.StdSerializer;
-import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
-import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
 import lombok.Getter;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.imanity.framework.bukkit.Imanity;
 import org.imanity.framework.bukkit.util.LocaleRV;
-import org.imanity.framework.bukkit.util.BukkitUtil;
+import org.imanity.framework.bukkit.util.items.behaviour.ItemBehaviour;
 import org.imanity.framework.bukkit.util.nms.NBTEditor;
 import org.imanity.framework.util.StringUtil;
+import org.imanity.framework.util.Terminable;
 
 import javax.annotation.Nullable;
 import java.io.IOException;
@@ -51,23 +52,35 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Function;
 
 @Getter
 @JsonSerialize(using = ImanityItem.Serializer.class)
 @JsonDeserialize(using = ImanityItem.Deserializer.class)
-public class ImanityItem {
+public final class ImanityItem implements Terminable {
 
-    private static final Int2ObjectMap<ImanityItem> REGISTERED_ITEM = new Int2ObjectOpenHashMap<>();
-    private static final AtomicInteger ITEM_COUNTER = new AtomicInteger(0);
+    private static final Map<String, ImanityItem> REGISTERED_ITEM = new ConcurrentHashMap<>();
+    private static final AtomicInteger UNNAMED_ITEM_COUNTER = new AtomicInteger(0);
+    private static final Logger LOGGER = LogManager.getLogger();
 
-    public static ImanityItem getItem(int id) {
+    public static ImanityItem getItem(String id) {
         return REGISTERED_ITEM.get(id);
     }
 
     @Nullable
     public static ImanityItem getItemFromBukkit(ItemStack itemStack) {
+        String value = getItemKeyFromBukkit(itemStack);
+
+        if (value == null) {
+            return null;
+        }
+
+        return REGISTERED_ITEM.get(value);
+    }
+
+    public static String getItemKeyFromBukkit(ItemStack itemStack) {
         if (itemStack == null || itemStack.getType() == Material.AIR) {
             return null;
         }
@@ -76,16 +89,10 @@ public class ImanityItem {
             return null;
         }
 
-        int value = NBTEditor.getInt(itemStack, "imanity", "item", "id");
-
-        if (value == -1) {
-            return null;
-        }
-
-        return REGISTERED_ITEM.get(value);
+        return NBTEditor.getString(itemStack, "imanity", "item", "id");
     }
 
-    private int id;
+    private String id;
     private boolean submitted;
     private ItemBuilder itemBuilder;
     private String displayNameLocale;
@@ -94,10 +101,33 @@ public class ImanityItem {
     private ItemCallback clickCallback;
     private ItemPlaceCallback placeCallback;
 
+    private final List<ItemBehaviour> behaviours = new ArrayList<>();
     private final List<LocaleRV> displayNamePlaceholders = new ArrayList<>();
     private final List<LocaleRV> displayLorePlaceholders = new ArrayList<>();
 
     private final Map<String, Object> metadata = new HashMap<>();
+
+    @Deprecated
+    public ImanityItem() {
+    }
+
+    protected ImanityItem(String id,
+                          ItemBuilder itemBuilder,
+                          String displayNameLocale,
+                          String displayLoreLocale,
+                          List<ItemBehaviour> behaviours,
+                          List<LocaleRV> displayNamePlaceholders,
+                          List<LocaleRV> displayLorePlaceholders,
+                          Map<String, Object> metadata) {
+        this.id = id;
+        this.itemBuilder = itemBuilder;
+        this.displayNameLocale = displayNameLocale;
+        this.displayLoreLocale = displayLoreLocale;
+        this.behaviours.addAll(behaviours);
+        this.displayNamePlaceholders.addAll(displayNamePlaceholders);
+        this.displayLorePlaceholders.addAll(displayLorePlaceholders);
+        this.metadata.putAll(metadata);
+    }
 
     public  Object getMetadata(String key) {
         return this.metadata.get(key);
@@ -128,13 +158,20 @@ public class ImanityItem {
         return this;
     }
 
+    @Deprecated
     public ImanityItem callback(ItemCallback callback) {
         this.clickCallback = callback;
         return this;
     }
 
+    @Deprecated
     public ImanityItem placeCallback(ItemPlaceCallback placeCallback) {
         this.placeCallback = placeCallback;
+        return this;
+    }
+
+    public ImanityItem addBehaviour(ItemBehaviour behaviour) {
+        this.behaviours.add(behaviour);
         return this;
     }
 
@@ -153,9 +190,19 @@ public class ImanityItem {
             throw new IllegalArgumentException("Registering ItemPlaceCallback but the item isn't a block!");
         }
 
-        this.id = ITEM_COUNTER.getAndIncrement();
-        REGISTERED_ITEM.put(this.id, this);
+        if (this.id == null) {
+            this.id = "unnamed-item:" + UNNAMED_ITEM_COUNTER.getAndIncrement();
+            LOGGER.warn("The Item doesn't have an id! (outdated?)", new Throwable());
+        }
 
+        if (REGISTERED_ITEM.containsKey(this.id)) {
+            throw new IllegalArgumentException("The item with name " + this.id + " already exists!");
+        }
+
+        REGISTERED_ITEM.put(this.id, this);
+        for (ItemBehaviour behaviour : this.behaviours) {
+            behaviour.init0(this);
+        }
         this.submitted = true;
 
         return this;
@@ -166,6 +213,24 @@ public class ImanityItem {
         return this.itemBuilder.getType();
     }
 
+    @Override
+    public void close() throws Exception {
+        this.unregister();
+    }
+
+    public void unregister() {
+        for (ItemBehaviour behaviour : this.behaviours) {
+            behaviour.unregister();
+        }
+
+        REGISTERED_ITEM.remove(this.id);
+    }
+
+    public ItemStack get(Player player) {
+        return this.build(player);
+    }
+
+    @Deprecated
     public ItemStack build(Player receiver) {
         if (this.getItemBuilder() == null) {
             throw new IllegalArgumentException("No Item registered!");
@@ -208,7 +273,7 @@ public class ImanityItem {
 
         @Override
         public void serialize(ImanityItem item, JsonGenerator jsonGenerator, SerializerProvider serializerProvider) throws IOException {
-            jsonGenerator.writeNumber(item.id);
+            jsonGenerator.writeString(item.id);
         }
     }
 
@@ -220,7 +285,7 @@ public class ImanityItem {
 
         @Override
         public ImanityItem deserialize(JsonParser jsonParser, DeserializationContext deserializationContext) throws IOException, JsonProcessingException {
-            return ImanityItem.getItem(jsonParser.getIntValue());
+            return ImanityItem.getItem(jsonParser.getValueAsString());
         }
     }
 }

@@ -37,19 +37,7 @@ import java.util.Base64;
 
 public enum LibraryRepository {
 
-    MAVEN_CENTRAL("https://repo1.maven.org/maven2/"),
-    IMANITY_LIBRARIES("https://maven.imanity.dev/repository/imanity-libraries/") {
-        @Override
-        protected URLConnection openConnection(Library library) throws IOException {
-            HttpURLConnection connection = (HttpURLConnection) super.openConnection(library);
-            connection.setRequestMethod("GET");
-            connection.addRequestProperty("User-Agent", "Mozilla/5.0 (Windows NT 6.1; Win64; x64; rv:56.0) Gecko/20100101 Firefox/56.0");
-            connection.addRequestProperty("Content-Type", "text/plain");
-            connection.setDoOutput(true);
-            connection.setDoInput(true);
-            return connection;
-        }
-    };
+    MAVEN_CENTRAL("https://repo1.maven.org/maven2/");
 
     private final String url;
 

@@ -22,46 +22,45 @@
  * SOFTWARE.
  */
 
-package org.imanity.framework.player;
+package org.imanity.framework.bukkit.util.text;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.RequiredArgsConstructor;
+import org.bukkit.entity.Player;
+import org.imanity.framework.bukkit.Imanity;
+import org.imanity.framework.util.CC;
 
-import javax.persistence.Id;
-import java.util.Objects;
-import java.util.UUID;
+public interface IText {
 
-@Getter
-@NoArgsConstructor
-public class PlayerInfo {
+    static IText of(String text) {
+        return new NormalText(text);
+    }
 
-	@Id
-	@JsonProperty
-	private UUID uuid;
+    static IText ofLocale(String locale) {
+        return new LocaleText(locale);
+    }
 
-	@Setter
-	@JsonProperty
-	private String name;
+    String get(Player player);
 
-	public PlayerInfo(final UUID uuid, final String name) {
-		this.uuid = uuid;
-		this.name = name;
-	}
+    @RequiredArgsConstructor
+    class NormalText implements IText {
 
-	@Override
-	public boolean equals(Object o) {
-		if (this == o) return true;
-		if (o == null || getClass() != o.getClass()) return false;
-		PlayerInfo that = (PlayerInfo) o;
-		return Objects.equals(uuid, that.uuid) &&
-				Objects.equals(name, that.name);
-	}
+        private final String text;
 
-	@Override
-	public int hashCode() {
-		return Objects.hash(uuid, name);
-	}
+        @Override
+        public String get(Player player) {
+            return CC.translate(this.text);
+        }
+    }
+
+    @RequiredArgsConstructor
+    class LocaleText implements IText {
+
+        private final String localeKey;
+
+        @Override
+        public String get(Player player) {
+            return Imanity.translate(player, this.localeKey);
+        }
+    }
 
 }

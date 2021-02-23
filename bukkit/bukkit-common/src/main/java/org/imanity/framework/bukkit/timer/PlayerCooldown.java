@@ -22,15 +22,26 @@
  * SOFTWARE.
  */
 
-package org.imanity.framework.bukkit.player;
+package org.imanity.framework.bukkit.timer;
 
+import com.github.benmanes.caffeine.cache.RemovalCause;
 import org.bukkit.entity.Player;
-import org.imanity.framework.player.PlayerInfo;
+import org.bukkit.event.player.PlayerQuitEvent;
+import org.imanity.framework.bukkit.listener.events.Events;
+import org.imanity.framework.util.Cooldown;
 
-public class BukkitPlayerData {
+import java.util.function.BiConsumer;
 
-    public static PlayerInfo toPlayerInfo(Player player) {
-        return new PlayerInfo(player.getUniqueId(), player.getName());
+public class PlayerCooldown extends Cooldown<Player> {
+
+    public PlayerCooldown(long defaultCooldown) {
+        this(defaultCooldown, null);
+    }
+
+    public PlayerCooldown(long defaultCooldown, BiConsumer<Player, RemovalCause> removalListener) {
+        super(defaultCooldown, removalListener);
+
+        Events.subscribe(PlayerQuitEvent.class).listen((subscription, event) -> this.removeCooldown(event.getPlayer()));
     }
 
 }

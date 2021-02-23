@@ -22,16 +22,46 @@
  * SOFTWARE.
  */
 
-package org.imanity.framework.bukkit.util.items;
+package org.imanity.framework.bukkit.util.items.behaviour;
 
+import lombok.RequiredArgsConstructor;
+import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
-import org.bukkit.event.block.Action;
-import org.bukkit.event.player.PlayerInteractEvent;
+import org.bukkit.event.EventHandler;
+import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.inventory.ItemStack;
+import org.imanity.framework.bukkit.util.items.ImanityItem;
 
-@Deprecated
-public interface ItemCallback {
+@RequiredArgsConstructor
+public class ItemBehaviourPlace extends ItemBehaviourListener {
 
-    boolean onClick(Player player, ItemStack itemStack, Action action, PlayerInteractEvent event);
+    private final Callback callback;
+
+    @Override
+    public void init(ImanityItem item) {
+        if (!item.getType().isBlock()) {
+            throw new IllegalArgumentException("Material " + item.getType() + " is not block! but it's trying to register place event!");
+        }
+        super.init(item);
+    }
+
+    @EventHandler
+    public void onBlockPlace(BlockPlaceEvent event) {
+        final Player player = event.getPlayer();
+        Block block = event.getBlock();
+
+        final ItemStack itemInHand = event.getItemInHand();
+        if (!this.matches(player, itemInHand)) {
+            return;
+        }
+
+        this.callback.call(player, itemInHand, block, event);
+    }
+
+    public interface Callback {
+
+        void call(Player player, ItemStack itemStack, Block block, BlockPlaceEvent event);
+
+    }
 
 }

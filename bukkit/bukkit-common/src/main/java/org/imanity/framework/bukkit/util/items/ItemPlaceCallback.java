@@ -29,6 +29,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.inventory.ItemStack;
 
+@Deprecated
 public interface ItemPlaceCallback {
 
     boolean onPlace(Player player, ItemStack itemStack, Block block, BlockPlaceEvent event);

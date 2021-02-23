@@ -22,16 +22,60 @@
  * SOFTWARE.
  */
 
-package org.imanity.framework.bukkit.util.items;
+package org.imanity.framework.bukkit.util.items.behaviour;
 
+import lombok.NonNull;
 import org.bukkit.entity.Player;
+import org.bukkit.event.EventHandler;
 import org.bukkit.event.block.Action;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.ItemStack;
 
-@Deprecated
-public interface ItemCallback {
+public class ItemBehaviourInteract extends ItemBehaviourListener {
 
-    boolean onClick(Player player, ItemStack itemStack, Action action, PlayerInteractEvent event);
+    private final Callback callback;
+    private final Action[] actions;
+
+    public ItemBehaviourInteract(@NonNull Callback callback, Action... actions) {
+        this.callback = callback;
+        this.actions = actions;
+    }
+
+    @EventHandler
+    public void onPlayerInteract(PlayerInteractEvent event) {
+        Player player = event.getPlayer();
+        Action action = event.getAction();
+        ItemStack itemStack = event.getItem();
+
+        if (!this.isActionMatches(action)) {
+            return;
+        }
+
+        if (!this.matches(player, itemStack)) {
+            return;
+        }
+
+        this.callback.call(player, itemStack, action, event);
+    }
+
+    public boolean isActionMatches(Action action) {
+        if (this.actions.length == 0) {
+            return true;
+        }
+
+        for (Action allowed : this.actions) {
+            if (allowed == action) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    public interface Callback {
+
+        void call(Player player, ItemStack itemStack, Action action, PlayerInteractEvent event);
+
+    }
 
 }
