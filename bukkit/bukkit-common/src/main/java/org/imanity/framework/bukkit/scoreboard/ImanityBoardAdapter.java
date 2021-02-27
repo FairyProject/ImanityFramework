@@ -39,8 +39,16 @@ public interface ImanityBoardAdapter {
 
     List<String> getLines(Player player);
 
+    /**
+     *
+     * This will only work when this adapter is highest priority
+     *
+     * @return the update tick, -1 if you want lower priority to decide it or use default one
+     */
     default int tick() {
-        return 2;
+        return -1;
     }
+
+    default int priority() { return 0; }
 
 }

@@ -365,11 +365,6 @@ public class NormalImplementation implements ServerImplementation {
     }
 
     @Override
-    public void sendEntityDestroy(Player player, int... ids) {
-        MinecraftReflection.sendPacket(player, DESTROY_ENTITY_CONSTRUCTOR.newInstance(ids));
-    }
-
-    @Override
     public void sendEntityAttach(Player player, int type, int toAttach, int attachTo) {
 
         PacketWrapper packetWrapper = PacketWrapper.createByPacketName("PacketPlayOutAttachEntity");
@@ -395,16 +390,6 @@ public class NormalImplementation implements ServerImplementation {
         packet.setPacketValue("f", (byte) ((int) (location.getPitch() * 256.0F / 360.0F)));
 
         MinecraftReflection.sendPacket(player, packet);
-
-    }
-
-    @Override
-    public void sendHologramSpawnPacket(Player player, HologramSingle hologramSingle) {
-        // TODO
-    }
-
-    @Override
-    public void sendHologramNamePacket(Player player, HologramSingle hologramSingle) {
 
     }
 

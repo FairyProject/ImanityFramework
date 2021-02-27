@@ -38,4 +38,11 @@ public interface PluginListenerAdapter {
 
     }
 
+    /**
+     * @return The priority of the listener, from highest to lowest
+     */
+    default int priority() {
+        return 0;
+    }
+
 }

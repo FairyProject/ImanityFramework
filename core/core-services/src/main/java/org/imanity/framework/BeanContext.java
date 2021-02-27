@@ -53,6 +53,7 @@ public class BeanContext {
 
     public static BeanContext INSTANCE;
 
+    public static final int PLUGIN_LISTENER_PRIORITY = 100;
     protected static final Logger LOGGER = LogManager.getLogger(BeanContext.class);
     protected static void log(String msg) {
         if (SHOW_LOGS) {
@@ -219,6 +220,7 @@ public class BeanContext {
         beanDetailsList.forEach(beanDetails -> {
             try {
                 if (!beanDetails.shouldInitialize()) {
+                    log("Unregistering " + beanDetails.getName() + " due to it cancelled to register");
                     this.unregisterBean(beanDetails);
                 }
             } catch (InvocationTargetException | IllegalAccessException e) {
@@ -329,6 +331,11 @@ public class BeanContext {
                     } catch (Throwable throwable) {
                         LOGGER.error(throwable);
                     }
+                }
+
+                @Override
+                public int priority() {
+                    return PLUGIN_LISTENER_PRIORITY;
                 }
             });
         }

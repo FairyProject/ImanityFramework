@@ -52,8 +52,8 @@ public class PlayerListener implements Listener {
 
         Player player = event.getPlayer();
 
-        if (Imanity.BOARD_HANDLER != null) {
-            Imanity.BOARD_HANDLER.getOrCreateScoreboard(player);
+        if (Imanity.BOARD_SERVICE != null) {
+            Imanity.BOARD_SERVICE.getOrCreateScoreboard(player);
         }
 
         if (Imanity.TAB_HANDLER != null) {
@@ -71,8 +71,8 @@ public class PlayerListener implements Listener {
 
         Player player = event.getPlayer();
 
-        if (Imanity.BOARD_HANDLER != null) {
-            Imanity.BOARD_HANDLER.remove(player);
+        if (Imanity.BOARD_SERVICE != null) {
+            Imanity.BOARD_SERVICE.remove(player);
         }
 
         if (Imanity.TAB_HANDLER != null) {

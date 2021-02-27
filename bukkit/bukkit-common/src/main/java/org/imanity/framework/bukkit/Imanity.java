@@ -60,7 +60,7 @@ import org.imanity.framework.bukkit.reflection.MinecraftReflection;
 import org.imanity.framework.bukkit.reflection.minecraft.MinecraftVersion;
 import org.imanity.framework.bukkit.reflection.wrapper.ChatComponentWrapper;
 import org.imanity.framework.bukkit.scoreboard.ImanityBoardAdapter;
-import org.imanity.framework.bukkit.scoreboard.ImanityBoardHandler;
+import org.imanity.framework.bukkit.scoreboard.ImanityBoardService;
 import org.imanity.framework.bukkit.impl.BukkitTaskChainFactory;
 import org.imanity.framework.bukkit.timer.TimerHandler;
 import org.imanity.framework.bukkit.util.*;
@@ -85,7 +85,10 @@ public final class Imanity {
 
     public static final Logger LOGGER = LogManager.getLogger(Imanity.class);
     public static FastRandom RANDOM;
-    public static ImanityBoardHandler BOARD_HANDLER;
+
+    @Autowired
+    public static ImanityBoardService BOARD_SERVICE;
+
     public static ImanityTabHandler TAB_HANDLER;
     public static BossBarHandler BOSS_BAR_HANDLER;
 
@@ -213,8 +216,9 @@ public final class Imanity {
         PLUGIN.getServer().getPluginManager().callEvent(event);
     }
 
+    @Deprecated
     public static void registerBoardHandler(ImanityBoardAdapter adapter) {
-        Imanity.BOARD_HANDLER = new ImanityBoardHandler(adapter);
+        Imanity.BOARD_SERVICE.addAdapter(adapter);
     }
 
     public static void registerTablistHandler(ImanityTabAdapter adapter) {

@@ -27,9 +27,7 @@ package org.imanity.framework.plugin;
 import com.google.common.collect.Sets;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.Collection;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
@@ -57,7 +55,7 @@ public class PluginManager {
         this.pluginHandler = pluginHandler;
 
         this.plugins = new ConcurrentHashMap<>();
-        this.listenerAdapters = Sets.newConcurrentHashSet();
+        this.listenerAdapters = new TreeSet<>(Collections.reverseOrder(Comparator.comparingInt(PluginListenerAdapter::priority)));
     }
 
     public Collection<ClassLoader> getClassLoaders() {
@@ -68,15 +66,21 @@ public class PluginManager {
     }
 
     public void onPluginInitial(AbstractPlugin plugin) {
-        this.listenerAdapters.forEach(listenerAdapter -> listenerAdapter.onPluginInitial(plugin));
+        synchronized (this.listenerAdapters) {
+            this.listenerAdapters.forEach(listenerAdapter -> listenerAdapter.onPluginInitial(plugin));
+        }
     }
 
     public void onPluginEnable(AbstractPlugin plugin) {
-        this.listenerAdapters.forEach(listenerAdapter -> listenerAdapter.onPluginEnable(plugin));
+        synchronized (this.listenerAdapters) {
+            this.listenerAdapters.forEach(listenerAdapter -> listenerAdapter.onPluginEnable(plugin));
+        }
     }
 
     public void onPluginDisable(AbstractPlugin plugin) {
-        this.listenerAdapters.forEach(listenerAdapter -> listenerAdapter.onPluginDisable(plugin));
+        synchronized (this.listenerAdapters) {
+            this.listenerAdapters.forEach(listenerAdapter -> listenerAdapter.onPluginDisable(plugin));
+        }
     }
 
     public Collection<AbstractPlugin> getPlugins() {
@@ -96,7 +100,9 @@ public class PluginManager {
     }
 
     public void registerListener(PluginListenerAdapter listenerAdapter) {
-        this.listenerAdapters.add(listenerAdapter);
+        synchronized (this.listenerAdapters) {
+            this.listenerAdapters.add(listenerAdapter);
+        }
     }
 
     @Nullable

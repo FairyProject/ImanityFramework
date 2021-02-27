@@ -114,15 +114,9 @@ public interface ServerImplementation {
 
     void sendMember(Player player, String name, Collection<String> players, int type);
 
-    void sendEntityDestroy(Player player, int... ids);
-
     void sendEntityTeleport(Player player, Location location, int id);
 
     void sendEntityAttach(Player player, int type, int toAttach, int attachTo);
-
-    void sendHologramSpawnPacket(Player player, HologramSingle hologramSingle);
-
-    void sendHologramNamePacket(Player player, HologramSingle hologramSingle);
 
     boolean isServerThread();
 

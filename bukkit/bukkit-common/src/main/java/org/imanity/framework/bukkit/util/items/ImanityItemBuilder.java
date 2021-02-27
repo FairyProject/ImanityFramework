@@ -30,9 +30,12 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.block.Action;
 import org.bukkit.event.entity.PlayerDeathEvent;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.plugin.Plugin;
+import org.bukkit.plugin.java.JavaPlugin;
 import org.imanity.framework.bukkit.util.LocaleRV;
 import org.imanity.framework.bukkit.util.items.behaviour.ItemBehaviour;
 import org.imanity.framework.bukkit.util.text.IText;
+import org.imanity.framework.reflect.Reflect;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -78,6 +81,7 @@ public class ImanityItemBuilder {
         tester.getInventory().addItem(item);
     }
 
+    private final Plugin plugin;
     private final String id;
 
     private ItemBuilder itemBuilder;
@@ -89,8 +93,33 @@ public class ImanityItemBuilder {
 
     private final Map<String, Object> metadata = new HashMap<>();
 
-    public ImanityItemBuilder(@NonNull String id) {
+    public ImanityItemBuilder(String id) {
+        this(id, findPlugin(4));
+    }
+
+    public ImanityItemBuilder(@NonNull String id, Plugin plugin) {
         this.id = id;
+        this.plugin = plugin;
+    }
+
+    public static Plugin findPlugin(int depth) {
+        Class<?> caller = Reflect.getCallerClass(depth).orElse(null);
+
+        if (caller != null) {
+            Plugin plugin = null;
+
+            try {
+                plugin = JavaPlugin.getProvidingPlugin(caller);
+            } catch (Throwable ignored) {}
+
+            if (plugin != null) {
+                return plugin;
+            } else {
+                throw new IllegalArgumentException("Caller class from depth " + depth + " is not plugin class.");
+            }
+        } else {
+            throw new IllegalArgumentException("Caller class from depth " + depth + " does not exists.");
+        }
     }
 
     public ImanityItemBuilder item(ItemBuilder itemBuilder) {
@@ -140,6 +169,7 @@ public class ImanityItemBuilder {
 
     public ImanityItem build() {
         final ImanityItem item = new ImanityItem(
+                this.plugin,
                 this.id,
                 this.itemBuilder,
                 this.displayNameLocale,

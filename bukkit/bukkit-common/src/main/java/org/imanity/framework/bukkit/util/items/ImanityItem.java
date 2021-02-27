@@ -39,6 +39,7 @@ import org.apache.logging.log4j.Logger;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.plugin.Plugin;
 import org.imanity.framework.bukkit.Imanity;
 import org.imanity.framework.bukkit.util.LocaleRV;
 import org.imanity.framework.bukkit.util.items.behaviour.ItemBehaviour;
@@ -61,12 +62,19 @@ import java.util.function.Function;
 @JsonDeserialize(using = ImanityItem.Deserializer.class)
 public final class ImanityItem implements Terminable {
 
-    private static final Map<String, ImanityItem> REGISTERED_ITEM = new ConcurrentHashMap<>();
+    private static final Map<String, ImanityItem> NAME_TO_ITEMS = new ConcurrentHashMap<>();
+    private static final Map<Plugin, List<ImanityItem>> PLUGIN_TO_ITEMS = new ConcurrentHashMap<>();
     private static final AtomicInteger UNNAMED_ITEM_COUNTER = new AtomicInteger(0);
     private static final Logger LOGGER = LogManager.getLogger();
 
+    public static ImanityItemBuilder builder(String id) {
+        final Plugin plugin = ImanityItemBuilder.findPlugin(4);
+        System.out.println(plugin.getName());
+        return new ImanityItemBuilder(id, plugin);
+    }
+
     public static ImanityItem getItem(String id) {
-        return REGISTERED_ITEM.get(id);
+        return NAME_TO_ITEMS.get(id);
     }
 
     @Nullable
@@ -77,7 +85,7 @@ public final class ImanityItem implements Terminable {
             return null;
         }
 
-        return REGISTERED_ITEM.get(value);
+        return NAME_TO_ITEMS.get(value);
     }
 
     public static String getItemKeyFromBukkit(ItemStack itemStack) {
@@ -91,6 +99,8 @@ public final class ImanityItem implements Terminable {
 
         return NBTEditor.getString(itemStack, "imanity", "item", "id");
     }
+
+    private Plugin plugin;
 
     private String id;
     private boolean submitted;
@@ -111,7 +121,8 @@ public final class ImanityItem implements Terminable {
     public ImanityItem() {
     }
 
-    protected ImanityItem(String id,
+    protected ImanityItem(Plugin plugin,
+                          String id,
                           ItemBuilder itemBuilder,
                           String displayNameLocale,
                           String displayLoreLocale,
@@ -119,6 +130,7 @@ public final class ImanityItem implements Terminable {
                           List<LocaleRV> displayNamePlaceholders,
                           List<LocaleRV> displayLorePlaceholders,
                           Map<String, Object> metadata) {
+        this.plugin = plugin;
         this.id = id;
         this.itemBuilder = itemBuilder;
         this.displayNameLocale = displayNameLocale;
@@ -195,11 +207,11 @@ public final class ImanityItem implements Terminable {
             LOGGER.warn("The Item doesn't have an id! (outdated?)", new Throwable());
         }
 
-        if (REGISTERED_ITEM.containsKey(this.id)) {
+        if (NAME_TO_ITEMS.containsKey(this.id)) {
             throw new IllegalArgumentException("The item with name " + this.id + " already exists!");
         }
 
-        REGISTERED_ITEM.put(this.id, this);
+        NAME_TO_ITEMS.put(this.id, this);
         for (ItemBehaviour behaviour : this.behaviours) {
             behaviour.init0(this);
         }
@@ -223,7 +235,7 @@ public final class ImanityItem implements Terminable {
             behaviour.unregister();
         }
 
-        REGISTERED_ITEM.remove(this.id);
+        NAME_TO_ITEMS.remove(this.id);
     }
 
     public ItemStack get(Player player) {

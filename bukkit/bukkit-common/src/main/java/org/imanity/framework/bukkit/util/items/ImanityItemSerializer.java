@@ -22,29 +22,30 @@
  * SOFTWARE.
  */
 
-package org.imanity.framework.util;
+package org.imanity.framework.bukkit.util.items;
 
-import lombok.experimental.UtilityClass;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import org.imanity.framework.Component;
+import org.imanity.framework.ObjectSerializer;
 
-import java.io.PrintWriter;
-import java.io.StringWriter;
-
-@UtilityClass
-public class Stacktrace {
-
-    private static final Logger LOGGER = LogManager.getLogger("ImanityFramework-Error");
-
-    public void print(Throwable throwable) {
-        LOGGER.error("An error occurs! : " + getStacktrace(throwable));
+@Component
+public class ImanityItemSerializer implements ObjectSerializer<ImanityItem, String> {
+    @Override
+    public String serialize(ImanityItem input) {
+        return input.getId();
     }
 
-    public String getStacktrace(Throwable throwable) {
-        StringWriter stack = new StringWriter();
-        throwable.printStackTrace(new PrintWriter(stack));
-
-        return stack.toString();
+    @Override
+    public ImanityItem deserialize(String output) {
+        return ImanityItem.getItem(output);
     }
 
+    @Override
+    public Class<ImanityItem> inputClass() {
+        return ImanityItem.class;
+    }
+
+    @Override
+    public Class<String> outputClass() {
+        return String.class;
+    }
 }
