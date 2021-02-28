@@ -28,10 +28,10 @@ import com.google.common.collect.HashMultimap;
 import org.bukkit.*;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
+import org.bukkit.event.player.PlayerMoveEvent;
 import org.bukkit.material.MaterialData;
 import org.imanity.framework.ImanityCommon;
 import org.imanity.framework.bukkit.Imanity;
-import org.imanity.framework.bukkit.hologram.HologramSingle;
 import org.imanity.framework.bukkit.impl.annotation.ServerImpl;
 import org.imanity.framework.bukkit.metadata.Metadata;
 import org.imanity.framework.bukkit.packet.PacketService;
@@ -396,6 +396,13 @@ public class NormalImplementation implements ServerImplementation {
     @Override
     public boolean isServerThread() {
         return Bukkit.isPrimaryThread();
+    }
+
+    @Override
+    public boolean callMoveEvent(Player player, Location from, Location to) {
+        PlayerMoveEvent event = new PlayerMoveEvent(player, from, to);
+        Imanity.callEvent(event);
+        return !event.isCancelled();
     }
 
     @Override

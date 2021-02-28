@@ -46,6 +46,7 @@ import org.imanity.framework.bukkit.reflection.resolver.FieldResolver;
 import org.imanity.framework.bukkit.reflection.resolver.minecraft.NMSClassResolver;
 import org.imanity.framework.bukkit.reflection.wrapper.FieldWrapper;
 import org.imanity.framework.Autowired;
+import us.myles.ViaVersion.api.remapper.PacketHandler;
 
 import java.util.*;
 
@@ -102,7 +103,13 @@ public class NettyInjection1_8 implements INettyInjection {
         }
 
         // See ChannelInjector in ProtocolLib, line 590
-        channel.eventLoop().execute(() -> channel.pipeline().remove(PacketService.CHANNEL_HANDLER));
+        channel.eventLoop().execute(() -> {
+            try {
+                channel.pipeline().remove(PacketService.CHANNEL_HANDLER);
+            } catch (NoSuchElementException ignored) {
+                // It's fine (?)
+            }
+        });
     }
 
     public Channel getChannel(Player player) {

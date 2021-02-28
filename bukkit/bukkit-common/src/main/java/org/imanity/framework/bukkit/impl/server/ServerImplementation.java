@@ -120,5 +120,7 @@ public interface ServerImplementation {
 
     boolean isServerThread();
 
+    boolean callMoveEvent(Player player, Location from, Location to);
+
     AbstractMovementImplementation movement(MovementListener movementListener);
 }

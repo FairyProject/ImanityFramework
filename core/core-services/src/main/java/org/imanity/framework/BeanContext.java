@@ -134,7 +134,7 @@ public class BeanContext {
         }
     }
 
-    public ComponentBeanDetails registerComponent(Object instance, Class<?> type, ComponentHolder componentHolder) {
+    public ComponentBeanDetails registerComponent(Object instance, Class<?> type, ComponentHolder componentHolder) throws InvocationTargetException, IllegalAccessException {
         Component annotation = type.getAnnotation(Component.class);
         if (annotation == null) {
             throw new IllegalArgumentException("The type " + type.getName() + " doesn't have Component annotation!");
@@ -146,6 +146,10 @@ public class BeanContext {
         }
 
         ComponentBeanDetails details = new ComponentBeanDetails(type, instance, name, componentHolder);
+        if (!details.shouldInitialize()) {
+            return null;
+        }
+
         this.registerBean(details);
         this.attemptBindPlugin(details);
 

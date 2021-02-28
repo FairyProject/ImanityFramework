@@ -35,6 +35,7 @@ import org.bukkit.event.inventory.ClickType;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryCloseEvent;
 import org.imanity.framework.Component;
+import org.imanity.framework.util.Stacktrace;
 
 @Component
 public class ButtonListener implements Listener {
@@ -81,7 +82,7 @@ public class ButtonListener implements Listener {
 					if (newMenu == openMenu) {
 						final boolean buttonUpdate = button.shouldUpdate(player, event.getSlot(), event.getClick());
 
-						if ((newMenu.isUpdateAfterClick() && buttonUpdate) || buttonUpdate) {
+						if (newMenu.isUpdateAfterClick() || buttonUpdate) {
 							openMenu.setClosedByMenu(true);
 							newMenu.openMenu(player);
 						}
@@ -108,12 +109,13 @@ public class ButtonListener implements Listener {
 		final Menu openMenu = Menu.MENUS.get(player.getUniqueId());
 
 		if (openMenu != null) {
-			openMenu.onClose(player);
+			try {
+				openMenu.onClose(player);
+			} catch (Throwable throwable) {
+				Stacktrace.print(throwable);
+			}
 
 			Menu.MENUS.remove(player.getUniqueId());
-
-			if (openMenu instanceof PaginatedMenu)
-				return;
 		}
 
 	}
