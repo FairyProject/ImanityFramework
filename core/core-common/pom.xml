@@ -149,6 +149,7 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <mongo-java-driver.version>3.12.7</mongo-java-driver.version>
         <reflect.version>0.0.1-SNAPSHOT</reflect.version>
+        <caffeine.version>2.9.0</caffeine.version>
     </properties>
 
     <distributionManagement>
@@ -241,17 +242,17 @@
         <dependency>
             <groupId>com.github.ben-manes.caffeine</groupId>
             <artifactId>caffeine</artifactId>
-            <version>2.8.5</version>
+            <version>${caffeine.version}</version>
             <scope>provided</scope>
         </dependency>
 
         <!-- ASM -->
-        <dependency>
-            <groupId>com.esotericsoftware</groupId>
-            <artifactId>reflectasm</artifactId>
-            <version>1.11.9</version>
-            <scope>provided</scope>
-        </dependency>
+<!--        <dependency>-->
+<!--            <groupId>com.esotericsoftware</groupId>-->
+<!--            <artifactId>reflectasm</artifactId>-->
+<!--            <version>1.11.9</version>-->
+<!--            <scope>provided</scope>-->
+<!--        </dependency>-->
 
         <!-- ChatColor Support -->
         <dependency>

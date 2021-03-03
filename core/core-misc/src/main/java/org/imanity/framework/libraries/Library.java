@@ -42,7 +42,7 @@ public class Library {
             "org{}redisson",
             "redisson-all", // Include all
             "3.13.6",
-            (String) "3YN36wajaTShvnJVRh7Q/SyH7HhsZhAIjqxm1vvqQYM=",
+            "3YN36wajaTShvnJVRh7Q/SyH7HhsZhAIjqxm1vvqQYM=",
             new Relocate("io{}netty", IMANITY_LIB_PACKAGE + "redisson.netty"),
             new Relocate("org{}jboss{}marshalling", IMANITY_LIB_PACKAGE + "redisson.marshalling"),
             new Relocate("org{}xerial{}snappy", IMANITY_LIB_PACKAGE + "redisson.snappy"),
@@ -77,8 +77,8 @@ public class Library {
     CAFFEINE = new Library(
             "com{}github{}ben-manes{}caffeine",
             "caffeine",
-            "2.8.4",
-            "KV9YN5gQj6b507VJApJpPF5PkCon0DZqAi0T7Ln0lag=",
+            "2.9.0",
+            "VFMotEO3XLbTHfRKfL3m36GlN72E/dzRFH9B5BJiX2o=",
             new Relocate("com{}github{}ben-manes{}caffeine", IMANITY_LIB_PACKAGE + "caffeine")
     ),
     GUAVA = new Library(
@@ -155,14 +155,14 @@ public class Library {
     ASM = new Library(
             "org.ow2.asm",
                     "asm",
-                    "7.1",
-                    "SrL6K20sycyx6qBeoynEB7R7E+0pFfYvjEuMyWJY1N4="
+                    "9.1",
+                    "zaTeRV+rSP8Ly3xItGOUR9TehZp6/DCglKmG8JNr66I="
     ),
     ASM_COMMONS = new Library(
             "org.ow2.asm",
                     "asm-commons",
-                    "7.1",
-                    "5VkEidjxmE2Fv+q9Oxc3TFnCiuCdSOxKDrvQGVns01g="
+                    "9.1",
+                    "r8sm3B/BLAxKma2mcJCN2C4Y38SIyvXuklRplrRwwAw="
     ),
     JAR_RELOCATOR = new Library(
             "me.lucko",

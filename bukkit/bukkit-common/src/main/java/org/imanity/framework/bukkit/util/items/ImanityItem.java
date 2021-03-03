@@ -45,7 +45,7 @@ import org.imanity.framework.bukkit.util.LocaleRV;
 import org.imanity.framework.bukkit.util.items.behaviour.ItemBehaviour;
 import org.imanity.framework.bukkit.util.nms.NBTEditor;
 import org.imanity.framework.util.StringUtil;
-import org.imanity.framework.util.Terminable;
+import org.imanity.framework.util.terminable.Terminable;
 
 import javax.annotation.Nullable;
 import java.io.IOException;

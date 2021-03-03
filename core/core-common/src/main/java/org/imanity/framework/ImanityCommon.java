@@ -43,12 +43,11 @@ import org.imanity.framework.libraries.Library;
 import org.imanity.framework.libraries.LibraryHandler;
 import org.imanity.framework.locale.Locale;
 import org.imanity.framework.locale.LocaleHandler;
-import org.imanity.framework.locale.LocaleRepository;
 import org.imanity.framework.locale.player.LocaleData;
 import org.imanity.framework.redis.server.ServerHandler;
 import org.imanity.framework.redis.server.enums.ServerState;
 import org.imanity.framework.task.ITaskScheduler;
-import org.imanity.framework.util.Terminable;
+import org.imanity.framework.util.terminable.Terminable;
 import org.mongojack.internal.MongoJackModule;
 
 import java.util.*;

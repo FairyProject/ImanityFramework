@@ -29,10 +29,12 @@ import lombok.Getter;
 import org.checkerframework.checker.index.qual.NonNegative;
 import org.checkerframework.checker.nullness.qual.NonNull;
 
-import java.io.Serializable;
 import java.util.concurrent.TimeUnit;
 import java.util.function.BiConsumer;
 
+/**
+ * The Simple Cooldown Utility for ImanityFramework
+ */
 @Getter
 public class Cooldown<T> {
 

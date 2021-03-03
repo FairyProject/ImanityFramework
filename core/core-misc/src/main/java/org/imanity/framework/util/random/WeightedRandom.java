@@ -31,19 +31,19 @@ import java.util.*;
 @UtilityClass
 public class WeightedRandom {
 
-    private static final Random DEFAULT_RANDOM = new Random();
+    private final Random DEFAULT_RANDOM = new Random();
 
-    public static int getTotalWeight(Collection<? extends WeightedItem> collection) {
+    public int getTotalWeight(Collection<? extends WeightedItem> collection) {
         return collection.stream()
                 .map(WeightedItem::getWeight)
                 .reduce(0, Integer::sum);
     }
 
-    public static <T extends WeightedItem> T getRandomItem(List<? extends T> collection, Random random) {
+    public <T extends WeightedItem> T getRandomItem(List<? extends T> collection, Random random) {
         return getItemFor(collection, random.nextInt(getTotalWeight(collection)));
     }
 
-    private static <T extends WeightedItem> T getItemFor(List<T> collection, int value) {
+    private <T extends WeightedItem> T getItemFor(List<T> collection, int value) {
         Iterator<T> iterator = collection.iterator();
 
         T item;
@@ -59,15 +59,15 @@ public class WeightedRandom {
         return item;
     }
 
-    public static <T extends WeightedItem> T getRandomItem(Collection<? extends T> collection, Random random) {
+    public <T extends WeightedItem> T getRandomItem(Collection<? extends T> collection, Random random) {
         return getRandomItem(new ArrayList<>(collection), random);
     }
 
-    public static <T extends WeightedItem> T getRandomItem(List<? extends T> collection) {
+    public <T extends WeightedItem> T getRandomItem(List<? extends T> collection) {
         return getRandomItem(collection, DEFAULT_RANDOM);
     }
 
-    public static <T extends WeightedItem> T getRandomItem(Collection<? extends T> collection) {
+    public <T extends WeightedItem> T getRandomItem(Collection<? extends T> collection) {
         return getRandomItem(collection, DEFAULT_RANDOM);
     }
 

@@ -24,7 +24,7 @@
 
 package org.imanity.framework.util.thread;
 
-import org.imanity.framework.util.Terminable;
+import org.imanity.framework.util.terminable.Terminable;
 
 /**
  * A tool to synchronize code with the main server thread

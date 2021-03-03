@@ -96,9 +96,6 @@ public final class Imanity {
     public static TimerHandler TIMER_HANDLER;
 
     @Autowired
-    public static KeepChunkHandler KEEP_CHUNK_HANDLER;
-
-    @Autowired
     private static LocaleHandler LOCALE_HANDLER;
 
     public static Plugin PLUGIN;
@@ -111,8 +108,6 @@ public final class Imanity {
     private static VisualBlockHandler VISUAL_BLOCK_HANDLER;
 
     public static boolean SHUTTING_DOWN = false;
-
-    public static boolean TESTING = false;
 
     public static void preInit() {
         PluginManager.initialize(new BukkitPluginHandler());

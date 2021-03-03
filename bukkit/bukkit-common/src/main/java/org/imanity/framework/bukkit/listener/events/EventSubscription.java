@@ -29,7 +29,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.*;
 import org.bukkit.plugin.EventExecutor;
 import org.bukkit.plugin.Plugin;
-import org.imanity.framework.util.Terminable;
+import org.imanity.framework.util.terminable.Terminable;
 
 import java.lang.reflect.Method;
 import java.util.concurrent.atomic.AtomicBoolean;

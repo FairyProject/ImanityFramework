@@ -57,7 +57,7 @@ public class Skin {
 
                     Player player = Bukkit.getPlayer(s);
                     if (player != null) {
-                        try (ServerThreadLock lock = ServerThreadLock.obtain()) {
+                        try (ServerThreadLock ignored = ServerThreadLock.obtain()) {
 
                             EntityPlayer playerNMS = ((CraftPlayer) player).getHandle();
                             GameProfile profile = playerNMS.getProfile();

@@ -47,6 +47,7 @@ import org.imanity.framework.http.cors.AbstractCorsConfiguration;
 import org.imanity.framework.http.factory.RouteMethodMapper;
 import org.imanity.framework.http.netty.HttpServiceHandler;
 import org.imanity.framework.libraries.Library;
+import org.imanity.framework.libraries.relocate.Relocate;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -79,17 +80,23 @@ public class HttpService {
 
     @PreInitialize
     public void preInit() {
-        try {
-            Class.forName("io.netty.handler.codec.http.HttpRequestDecoder");
-        } catch (ClassNotFoundException ex) {
-            Library library = new Library(
-                    "io.netty",
-                    "netty-codec-http",
-                    "4.1.42.Final",
-                    null
-            );
-            ImanityCommon.LIBRARY_HANDLER.downloadLibraries(true, library);
-        }
+        Library nettyLibrary = new Library(
+                "io.netty",
+                "netty-all",
+                "4.1.59.Final",
+                null,
+                new Relocate("io.netty", Library.IMANITY_LIB_PACKAGE + "netty")
+        );
+
+        Library nettyCodecLibrary = new Library(
+                "io.netty",
+                "netty-codec-http",
+                "4.1.59.Final",
+                null,
+                new Relocate("io.netty", Library.IMANITY_LIB_PACKAGE + "netty")
+        );
+
+        ImanityCommon.LIBRARY_HANDLER.downloadLibraries(true, nettyLibrary, nettyCodecLibrary);
 
         RouteMethodMapper.preInit();
 
