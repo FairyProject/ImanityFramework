@@ -22,39 +22,36 @@
  * SOFTWARE.
  */
 
-package org.imanity.framework.bukkit.menu.buttons;
+package org.imanity.framework.details.constructor;
 
-import lombok.AllArgsConstructor;
-import org.bukkit.ChatColor;
-import org.bukkit.Material;
-import org.bukkit.entity.Player;
-import org.bukkit.event.inventory.ClickType;
-import org.bukkit.inventory.ItemStack;
-import org.bukkit.inventory.meta.ItemMeta;
-import org.imanity.framework.bukkit.menu.Button;
-import org.imanity.framework.bukkit.menu.Menu;
+import lombok.Getter;
+import lombok.SneakyThrows;
+import org.imanity.framework.BeanContext;
 
-@AllArgsConstructor
-public class BackButton extends Button {
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 
-	private final Menu back;
+@Getter
+public class BeanParameterDetailsMethod extends BeanParameterDetailsAbstract {
 
-	@Override
-	public ItemStack getButtonItem(final Player player) {
-		final ItemStack itemStack = new ItemStack(Material.BED);
-		final ItemMeta itemMeta = itemStack.getItemMeta();
+    private final Method method;
 
-		itemMeta.setDisplayName(ChatColor.RED + "返回");
-		itemStack.setItemMeta(itemMeta);
+    @SneakyThrows
+    public BeanParameterDetailsMethod(Method method, BeanContext beanContext) {
+        this.method = method;
 
-		return itemStack;
-	}
+        this.parameterTypes = this.method.getParameterTypes();
+        for (Class<?> parameter : this.parameterTypes) {
+            if (!beanContext.isBean(parameter)) {
+                throw new IllegalArgumentException("The type " + parameter.getName() + ", it's not supposed to be in bean constructor!");
+            }
+        }
+    }
 
-	@Override
-	public void clicked(final Player player, final int i, final ClickType clickType, final int hb) {
-		Button.playNeutral(player);
+    public Object invoke(Object instance, BeanContext beanContext) throws InvocationTargetException, IllegalAccessException {
+        Object[] parameters = this.getParameters(beanContext);
 
-		this.back.openMenu(player);
-	}
+        return this.method.invoke(instance, parameters);
+    }
 
 }

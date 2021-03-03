@@ -24,14 +24,31 @@
 
 package org.imanity.framework.details.constructor;
 
+import lombok.Getter;
 import org.imanity.framework.BeanContext;
 
-public interface BeanConstructorDetails {
-    Object newInstance(BeanContext beanContext);
+public class BeanParameterDetailsAbstract implements BeanParameterDetails {
 
-    Class<?> getType();
+    @Getter
+    protected Class<?>[] parameterTypes;
 
-    java.lang.reflect.Constructor<?> getConstructor();
+    @Override
+    public Object[] getParameters(BeanContext beanContext) {
+        if (this.parameterTypes == null) {
+            throw new IllegalArgumentException("No parameters found!");
+        }
 
-    Class<?>[] getParameterTypes();
+        Object[] parameters = new Object[this.parameterTypes.length];
+
+        for (int i = 0; i < parameters.length; i++) {
+            Object bean = beanContext.getBean(this.parameterTypes[i]);
+            if (bean == null) {
+                throw new IllegalArgumentException("Couldn't find bean " + this.parameterTypes[i].getName() + "!");
+            }
+
+            parameters[i] = bean;
+        }
+
+        return parameters;
+    }
 }

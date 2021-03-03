@@ -25,10 +25,18 @@
 package org.imanity.framework.bukkit.menu.pagination;
 
 import lombok.Getter;
+import org.bukkit.ChatColor;
+import org.bukkit.Material;
+import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.ItemMeta;
 import org.imanity.framework.bukkit.menu.Button;
 import org.imanity.framework.bukkit.menu.Menu;
 import org.bukkit.entity.Player;
+import org.imanity.framework.bukkit.util.items.ItemBuilder;
+import org.imanity.framework.util.CC;
 
+import java.util.Arrays;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -61,13 +69,19 @@ public abstract class PaginatedMenu extends Menu {
 	 * @param player player viewing the inventory
 	 */
 	public final int getPages(Player player) {
-		int buttonAmount = getAllPagesButtons(player).size();
+		int buttonAmount = this.getMaxButtonSlot(player);
 
 		if (buttonAmount == 0) {
 			return 1;
 		}
 
 		return (int) Math.ceil(buttonAmount / (double) getMaxItemsPerPage(player));
+	}
+
+	private final int getMaxButtonSlot(Player player) {
+		return getAllPagesButtons(player)
+				.keySet()
+				.stream().max(Comparator.naturalOrder()).orElse(0);
 	}
 
 	@Override
@@ -126,5 +140,44 @@ public abstract class PaginatedMenu extends Menu {
 	 * @return a map of buttons that will be paginated and spread across pages
 	 */
 	public abstract Map<Integer, Button> getAllPagesButtons(Player player);
+
+	/**
+	 * @param player The Viewer
+	 * @param button The Button
+	 * @return The display ItemStack
+	 */
+	public ItemStack getJumpToPageButtonItem(Player player, JumpToPageButton button) {
+		return new ItemBuilder(button.isCurrent() ? Material.ENCHANTED_BOOK : Material.BOOK)
+				.name("&ePage " + button.getPage())
+				.lore(CC.SB_BAR, button.isCurrent() ? "&aThis is the current page" : "&fClick me jump to this page", CC.SB_BAR)
+				.build();
+	}
+
+	/**
+	 * @param player The Viewer
+	 * @param button The Button
+	 * @return The display ItemStack
+	 */
+	public ItemStack getPageButtonItem(Player player, PageButton button) {
+		ItemBuilder itemBuilder = new ItemBuilder(Material.CARPET).lore(CC.SB_BAR);
+		if (button.hasNext(player)) {
+			itemBuilder.name(button.getMod() > 0 ? "&aNext Page" : "&cPrevious Page")
+			.lore(button.getMod() > 0 ? "&eLeft Click jump to next page" : "&eLeft Click me jump to previous page");
+		} else {
+			itemBuilder.name(button.getMod() > 0 ? "&6You are currently at First Page" : "&6You are currently at Last Page")
+			.lore("&cThere is no more page to go!");
+		}
+
+		itemBuilder.lore(" ", "&eRight Click to view all pages!", CC.SB_BAR);
+		return itemBuilder.build();
+	}
+
+	/**
+	 * @param player The Viewer
+	 * @return The display title
+	 */
+	public String getViewAllPagesMenuTitle(Player player) {
+		return "&aAll Pages";
+	}
 
 }

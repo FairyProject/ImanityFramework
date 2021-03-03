@@ -25,6 +25,7 @@
 package org.imanity.framework.bukkit.menu.pagination;
 
 import lombok.AllArgsConstructor;
+import lombok.Getter;
 import org.imanity.framework.bukkit.menu.Button;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
@@ -36,6 +37,7 @@ import org.bukkit.inventory.meta.ItemMeta;
 import java.util.Arrays;
 
 @AllArgsConstructor
+@Getter
 public class PageButton extends Button {
 
 	private final int mod;
@@ -43,33 +45,7 @@ public class PageButton extends Button {
 
 	@Override
 	public ItemStack getButtonItem(final Player player) {
-		final ItemStack itemStack = new ItemStack(Material.CARPET);
-		final ItemMeta itemMeta = itemStack.getItemMeta();
-
-		if (this.hasNext(player)) {
-			itemMeta.setDisplayName(this.mod > 0 ? ChatColor.GREEN +
-					"下一頁"
-					: ChatColor.RED + "上一頁");
-
-			itemMeta.setLore(Arrays.asList(
-					"",
-					"§e右鍵點擊",
-					"§e跳到該頁面",
-					""));
-
-		} else {
-
-			itemMeta.setDisplayName(ChatColor.GRAY + (this.mod > 0 ?
-					"最後一頁" :
-					"第一頁"));
-
-			itemMeta.setLore(Arrays.asList("", "§e右鍵點擊", "§e選擇你想要的頁面", ""));
-
-		}
-
-		itemStack.setItemMeta(itemMeta);
-
-		return itemStack;
+		return this.menu.getPageButtonItem(player, this);
 	}
 
 	@Override
@@ -87,7 +63,7 @@ public class PageButton extends Button {
 		}
 	}
 
-	private boolean hasNext(final Player player) {
+	boolean hasNext(final Player player) {
 		final int pg = this.menu.getPage() + this.mod;
 		return pg > 0 && this.menu.getPages(player) >= pg;
 	}

@@ -26,24 +26,21 @@ package org.imanity.framework.details.constructor;
 
 import lombok.Getter;
 import lombok.SneakyThrows;
-import org.imanity.framework.Autowired;
 import org.imanity.framework.BeanConstructor;
 import org.imanity.framework.BeanContext;
-import org.imanity.framework.details.BeanDetails;
 import org.imanity.framework.util.AccessUtil;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 
 @Getter
-public class GenericBeanConstructorDetails implements BeanConstructorDetails {
+public class BeanParameterDetailsConstructor extends BeanParameterDetailsAbstract {
 
     private final Class<?> type;
     private final Constructor<?> constructor;
-    private final Class<?>[] parameterTypes;
 
     @SneakyThrows
-    public GenericBeanConstructorDetails(Class<?> type, BeanContext beanContext) {
+    public BeanParameterDetailsConstructor(Class<?> type, BeanContext beanContext) {
         this.type = type;
 
         Constructor<?> constructorRet = null;
@@ -73,24 +70,8 @@ public class GenericBeanConstructorDetails implements BeanConstructorDetails {
         }
     }
 
-    @Override
-    public Object newInstance(BeanContext beanContext) {
-        Object[] parameters = new Object[this.parameterTypes.length];
-
-        for (int i = 0; i < parameters.length; i++) {
-            Object bean = beanContext.getBean(this.parameterTypes[i]);
-            if (bean == null) {
-                throw new IllegalArgumentException("Couldn't find bean " + this.parameterTypes[i].getName() + "!");
-            }
-
-            parameters[i] = bean;
-        }
-
-        try {
-            return this.constructor.newInstance(parameters);
-        } catch (IllegalAccessException | InstantiationException | InvocationTargetException e) {
-            throw new RuntimeException("Something wrong while constructing " + this.type.getName() + "!", e);
-        }
+    public Object newInstance(BeanContext beanContext) throws IllegalAccessException, InvocationTargetException, InstantiationException {
+        return this.constructor.newInstance(this.getParameters(beanContext));
     }
 
 }

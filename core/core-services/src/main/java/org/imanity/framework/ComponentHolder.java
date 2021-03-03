@@ -24,8 +24,8 @@
 
 package org.imanity.framework;
 
-import org.imanity.framework.details.constructor.BeanConstructorDetails;
-import org.imanity.framework.details.constructor.GenericBeanConstructorDetails;
+import org.imanity.framework.details.constructor.BeanParameterDetails;
+import org.imanity.framework.details.constructor.BeanParameterDetailsConstructor;
 
 public abstract class ComponentHolder {
 
@@ -33,8 +33,12 @@ public abstract class ComponentHolder {
         return this.newInstance(this.constructorDetails(type));
     }
 
-    public Object newInstance(BeanConstructorDetails constructorDetails) {
-        return constructorDetails.newInstance(BeanContext.INSTANCE);
+    public Object newInstance(BeanParameterDetailsConstructor constructorDetails) {
+        try {
+            return constructorDetails.newInstance(BeanContext.INSTANCE);
+        } catch (Throwable throwable) {
+            throw new RuntimeException(throwable);
+        }
     }
 
     public void onEnable(Object instance) {
@@ -48,8 +52,8 @@ public abstract class ComponentHolder {
 
     public abstract Class<?>[] type();
 
-    public BeanConstructorDetails constructorDetails(Class<?> type) {
-        return new GenericBeanConstructorDetails(type, BeanContext.INSTANCE);
+    public BeanParameterDetailsConstructor constructorDetails(Class<?> type) {
+        return new BeanParameterDetailsConstructor(type, BeanContext.INSTANCE);
     }
 
 }

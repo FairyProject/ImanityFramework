@@ -48,7 +48,13 @@
             <scope>compile</scope>
         </dependency>
         <dependency>
-            <groupId>org.imanity.framework.bukkit-test</groupId>
+            <groupId>org.imanity.framework.bukkit</groupId>
+            <artifactId>test</artifactId>
+            <version>0.1</version>
+            <scope>compile</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.imanity.framework.bukkit.bot</groupId>
             <artifactId>all</artifactId>
             <version>0.1</version>
             <scope>compile</scope>

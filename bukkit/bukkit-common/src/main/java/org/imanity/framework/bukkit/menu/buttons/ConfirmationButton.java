@@ -36,7 +36,7 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 
 @AllArgsConstructor
-public class ConfirmationButton extends org.imanity.framework.bukkit.menu.Button {
+public class ConfirmationButton extends Button {
 
 	private final boolean confirm;
 	private final TypeCallback<Boolean> callback;

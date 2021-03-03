@@ -33,14 +33,14 @@ import org.bukkit.entity.Player;
 import java.util.HashMap;
 import java.util.Map;
 
-public class ConfirmMenu extends org.imanity.framework.bukkit.menu.Menu {
+public class ConfirmMenu extends Menu {
 
 	private final String title;
 	private final TypeCallback<Boolean> response;
 	private final boolean closeAfterResponse;
-	private final org.imanity.framework.bukkit.menu.Button[] centerButtons;
+	private final Button[] centerButtons;
 
-	public ConfirmMenu(final String title, final TypeCallback<Boolean> response, final boolean closeAfter, final org.imanity.framework.bukkit.menu.Button... centerButtons) {
+	public ConfirmMenu(final String title, final TypeCallback<Boolean> response, final boolean closeAfter, final Button... centerButtons) {
 		this.title = title;
 		this.response = response;
 		this.closeAfterResponse = closeAfter;
@@ -49,7 +49,7 @@ public class ConfirmMenu extends org.imanity.framework.bukkit.menu.Menu {
 
 	@Override
 	public Map<Integer, Button> getButtons(final Player player) {
-		final HashMap<Integer, Button> buttons = new HashMap<>();
+		final Map<Integer, Button> buttons = new HashMap<>();
 
 		for (int x = 0; x < 3; x++) {
 			for (int y = 0; y < 3; y++) {

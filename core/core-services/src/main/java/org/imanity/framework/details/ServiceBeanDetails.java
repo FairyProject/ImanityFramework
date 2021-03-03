@@ -29,9 +29,10 @@ import lombok.Getter;
 import lombok.Setter;
 import org.imanity.framework.BeanContext;
 import org.imanity.framework.ServiceDependency;
-import org.imanity.framework.details.constructor.BeanConstructorDetails;
-import org.imanity.framework.details.constructor.GenericBeanConstructorDetails;
+import org.imanity.framework.details.constructor.BeanParameterDetails;
+import org.imanity.framework.details.constructor.BeanParameterDetailsConstructor;
 
+import java.lang.reflect.InvocationTargetException;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Set;
@@ -41,7 +42,7 @@ import java.util.Set;
 public class ServiceBeanDetails extends GenericBeanDetails {
 
     private Set<String> dependencies;
-    private BeanConstructorDetails constructorDetails;
+    private BeanParameterDetailsConstructor constructorDetails;
 
     public ServiceBeanDetails(Class<?> type, String name, String[] dependencies) {
         super(type, name);
@@ -51,7 +52,7 @@ public class ServiceBeanDetails extends GenericBeanDetails {
     }
 
     public void setupConstruction(BeanContext beanContext) {
-        this.constructorDetails = new GenericBeanConstructorDetails(this.getType(), beanContext);
+        this.constructorDetails = new BeanParameterDetailsConstructor(this.getType(), beanContext);
         for (Class<?> parameters : this.constructorDetails.getParameterTypes()) {
             BeanDetails details = beanContext.getBeanDetails(parameters);
 
@@ -64,7 +65,11 @@ public class ServiceBeanDetails extends GenericBeanDetails {
             throw new IllegalArgumentException("The construction for bean details " + this.getType().getName() + " hasn't been called!");
         }
 
-        this.setInstance(this.constructorDetails.newInstance(context));
+        try {
+            this.setInstance(this.constructorDetails.newInstance(context));
+        } catch (IllegalAccessException | InvocationTargetException | InstantiationException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     public boolean hasDependencies() {

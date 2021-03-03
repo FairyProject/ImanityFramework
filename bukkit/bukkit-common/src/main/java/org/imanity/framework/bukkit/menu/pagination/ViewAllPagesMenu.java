@@ -44,7 +44,7 @@ public class ViewAllPagesMenu extends Menu {
 
 	@Override
 	public String getTitle(final Player player) {
-		return "選擇頁面";
+		return this.menu.getViewAllPagesMenuTitle(player);
 	}
 
 	@Override

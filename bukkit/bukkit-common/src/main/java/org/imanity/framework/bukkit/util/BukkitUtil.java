@@ -37,6 +37,7 @@ import org.bukkit.potion.PotionEffect;
 import org.bukkit.projectiles.ProjectileSource;
 import org.bukkit.util.BlockIterator;
 import org.imanity.framework.bukkit.reflection.resolver.MethodResolver;
+import org.imanity.framework.metadata.MetadataKey;
 import org.imanity.framework.reflect.Reflect;
 import org.imanity.framework.util.CC;
 
@@ -188,6 +189,18 @@ public class BukkitUtil {
     @Deprecated
     public static String color(String msg) {
         return CC.translate(msg);
+    }
+
+    public static boolean isNPC(Player player) {
+        if (player.hasMetadata("ImanityBot")) {
+            return true;
+        }
+
+        if (player.hasMetadata("NPC")) {
+            return true;
+        }
+
+        return false;
     }
 
 }

@@ -36,7 +36,7 @@ import org.bukkit.inventory.ItemStack;
 @AllArgsConstructor
 @Getter
 @Setter
-public class DisplayButton extends org.imanity.framework.bukkit.menu.Button {
+public class DisplayButton extends Button {
 
 	private ItemStack itemStack;
 	private boolean cancel;

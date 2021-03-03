@@ -41,7 +41,7 @@ public class MenuUpdateTask implements Runnable {
 
 	@Override
 	public void run() {
-		Menu.MENUS.forEach((uuid, menu) -> {
+		Menu.MENU_BY_UUID.forEach((uuid, menu) -> {
 			final Player player = Bukkit.getPlayer(uuid);
 			if (player == null) {
 				return;

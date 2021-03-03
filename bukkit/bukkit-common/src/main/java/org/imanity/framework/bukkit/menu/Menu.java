@@ -37,63 +37,65 @@ import org.imanity.framework.util.entry.Entry;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.function.Function;
 
 @Getter
 @Setter
 public abstract class Menu {
 
-	public static final Map<UUID, Menu> MENUS = new ConcurrentHashMap<>();
+	public static final Map<UUID, Menu> MENU_BY_UUID = new ConcurrentHashMap<>();
+
+	public static Menu getMenuByUuid(UUID uuid) {
+		return MENU_BY_UUID.get(uuid);
+	}
 
 	public static <T extends Menu> List<Entry<Player, T>> getMenusByType(Class<T> type) {
 		List<Entry<Player, T>> menus = new ArrayList<>();
 
-		for (Map.Entry<UUID, Menu> entry : MENUS.entrySet()) {
-			if (type.isInstance(entry.getValue())) {
-				Player player = Bukkit.getPlayer(entry.getKey());
+		for (Map.Entry<UUID, Menu> entry : MENU_BY_UUID.entrySet()) {
+			final Menu menu = entry.getValue();
+			if (type.isInstance(menu)) {
+				final UUID uuid = entry.getKey();
+				Player player = Bukkit.getPlayer(uuid);
 
 				if (player == null) {
 					continue;
 				}
 
-				menus.add(new Entry<>(player, (T) entry.getValue()));
+				menus.add(new Entry<>(player, type.cast(menu)));
 			}
 		}
 
 		return menus;
 	}
 
-	@Getter
-	private Map<Integer, org.imanity.framework.bukkit.menu.Button> buttons = new HashMap<>();
+	private Map<Integer, Button> buttons = new HashMap<>();
 	private boolean autoUpdate = true;
 	private boolean updateAfterClick = true;
 	private boolean autoClose = false;
 	private boolean closedByMenu = false;
-
-	@Setter
 	private boolean placeholder = false;
-
-	@Setter
 	private boolean fillBorders = false;
 
 	private long openMillis, lastAccessMillis;
-	private org.imanity.framework.bukkit.menu.Button placeholderButton = org.imanity.framework.bukkit.menu.Button.placeholder(Material.STAINED_GLASS_PANE, (byte) 15, " ");
+	private Button placeholderButton = Button.placeholder(Material.STAINED_GLASS_PANE, (byte) 15, " ");
 
-	private ItemStack createItemStack(final Player player, final org.imanity.framework.bukkit.menu.Button button) {
+	private ItemStack createItemStack(final Player player, final Button button) {
 		return button.getButtonItem(player);
 	}
 
 	public void openMenu(final Player player) {
 		this.openMenu(player, false);
-		openMillis = System.currentTimeMillis();
-		lastAccessMillis = openMillis;
+		this.openMillis = System.currentTimeMillis();
+		this.lastAccessMillis = openMillis;
 	}
 
 	public void openMenu(final Player player, boolean update) {
 		this.buttons = this.getButtons(player);
 
-		final org.imanity.framework.bukkit.menu.Menu previousMenu = org.imanity.framework.bukkit.menu.Menu.MENUS.get(player.getUniqueId());
+		Menu previousMenu = Menu.MENU_BY_UUID.get(player.getUniqueId());
 		Inventory inventory = null;
-		final int size = this.getSize() == -1 ? this.size(this.buttons) : this.getSize();
+		int size = this.getSize() == -1 ? this.size(this.buttons) : this.getSize();
 		String title = CC.translate(this.getTitle(player));
 
 		if (title.length() > 32) {
@@ -104,10 +106,11 @@ public abstract class Menu {
 			if (previousMenu == null) {
 				player.closeInventory();
 			} else {
-				final int previousSize = player.getOpenInventory().getTopInventory().getSize();
+				Inventory topInventory = player.getOpenInventory().getTopInventory();
+				int previousSize = topInventory.getSize();
 
-				if (previousSize == size && player.getOpenInventory().getTopInventory().getTitle().equals(title)) {
-					inventory = player.getOpenInventory().getTopInventory();
+				if (previousSize == size && topInventory.getTitle().equals(title)) {
+					inventory = topInventory;
 					update = true;
 				} else {
 					previousMenu.setClosedByMenu(true);
@@ -122,9 +125,9 @@ public abstract class Menu {
 
 		inventory.setContents(new ItemStack[inventory.getSize()]);
 
-		MENUS.put(player.getUniqueId(), this);
+		MENU_BY_UUID.put(player.getUniqueId(), this);
 
-		for (final Map.Entry<Integer, org.imanity.framework.bukkit.menu.Button> buttonEntry : this.buttons.entrySet()) {
+		for (final Map.Entry<Integer, Button> buttonEntry : this.buttons.entrySet()) {
 			inventory.setItem(buttonEntry.getKey(), createItemStack(player, buttonEntry.getValue()));
 		}
 
@@ -183,16 +186,16 @@ public abstract class Menu {
 			if (removingOld) {
 				inventory.setContents(new ItemStack[inventory.getSize()]);
 			}
-			Iterator var4 = this.buttons.entrySet().iterator();
+			Iterator<Map.Entry<Integer, Button>> var4 = this.buttons.entrySet().iterator();
 
 			while(var4.hasNext()) {
-				Map.Entry<Integer, Button> buttonEntry = (Map.Entry)var4.next();
-				inventory.setItem((Integer)buttonEntry.getKey(), this.createItemStack(player, (Button)buttonEntry.getValue()));
+				Map.Entry<Integer, Button> buttonEntry = var4.next();
+				inventory.setItem(buttonEntry.getKey(), this.createItemStack(player, buttonEntry.getValue()));
 			}
 
 			if (this.isPlaceholder()) {
 				for(int index = 0; index < size; ++index) {
-					if (this.buttons.get(index) == null) {
+					if (!this.buttons.containsKey(index)) {
 						this.buttons.put(index, this.placeholderButton);
 						inventory.setItem(index, this.placeholderButton.getButtonItem(player));
 					}
@@ -203,7 +206,7 @@ public abstract class Menu {
 		}
 	}
 
-	public int size(final Map<Integer, org.imanity.framework.bukkit.menu.Button> buttons) {
+	public int size(final Map<Integer, Button> buttons) {
 		int highest = 0;
 
 		for (final int buttonValue : buttons.keySet()) {
@@ -223,9 +226,20 @@ public abstract class Menu {
 		return -1;
 	}
 
+	public <T> Map<Integer, Button> transformToButtons(Iterable<T> list, Function<T, Button> function) {
+		final ImmutableMap.Builder<Integer, Button> map = this.newMap();
+
+		int slot = 0;
+		for (T t : list) {
+			map.put(slot++, function.apply(t));
+		}
+
+		return map.build();
+	}
+
 	public abstract String getTitle(Player player);
 
-	public abstract Map<Integer, org.imanity.framework.bukkit.menu.Button> getButtons(Player player);
+	public abstract Map<Integer, Button> getButtons(Player player);
 
 	protected ImmutableMap.Builder<Integer, Button> newMap() {
 		return ImmutableMap.builder();

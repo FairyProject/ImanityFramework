@@ -73,7 +73,14 @@ public final class Metadata {
             // remove player metadata when they leave the server
             Events.subscribe(PlayerQuitEvent.class)
                     .priority(EventPriority.MONITOR)
-                    .listen((sub, e) -> BukkitMetadataRegistries.PLAYER.remove(e.getPlayer().getUniqueId()));
+                    .listen((sub, e) -> {
+                        final Player player = e.getPlayer();
+                        Metadata.get(player).ifPresent(map -> {
+                            if (map.isEmpty()) {
+                                BukkitMetadataRegistries.PLAYER.remove(player.getUniqueId());
+                            }
+                        });
+                    });
 
             // cache housekeeping task
             TaskUtil.runAsyncRepeated(() -> {

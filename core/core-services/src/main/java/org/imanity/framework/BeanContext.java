@@ -130,7 +130,7 @@ public class BeanContext {
                 }
             }
         } catch (Throwable throwable) {
-            LOGGER.error("Error while injecting beans", throwable);
+            LOGGER.error("Error while injecting beans for " + instance.getClass().getSimpleName(), throwable);
         }
     }
 

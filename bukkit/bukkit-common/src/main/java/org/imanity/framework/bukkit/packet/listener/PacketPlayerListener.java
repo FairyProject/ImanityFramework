@@ -32,6 +32,7 @@ import org.bukkit.event.player.PlayerLoginEvent;
 import org.imanity.framework.bukkit.packet.PacketService;
 import org.imanity.framework.Component;
 import org.imanity.framework.Autowired;
+import org.imanity.framework.bukkit.util.BukkitUtil;
 
 @Component
 public class PacketPlayerListener implements Listener {
@@ -43,6 +44,9 @@ public class PacketPlayerListener implements Listener {
     public void onPlayerLogin(PlayerLoginEvent event) {
         Player player = event.getPlayer();
 
+        if (BukkitUtil.isNPC(player)) {
+            return;
+        }
         this.packetService.inject(player);
     }
 
