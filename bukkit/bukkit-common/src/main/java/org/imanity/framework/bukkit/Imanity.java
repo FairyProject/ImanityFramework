@@ -44,13 +44,11 @@ import org.imanity.framework.ComponentRegistry;
 import org.imanity.framework.ImanityCommon;
 import org.imanity.framework.bukkit.bossbar.BossBarAdapter;
 import org.imanity.framework.bukkit.bossbar.BossBarHandler;
-import org.imanity.framework.bukkit.chunk.KeepChunkHandler;
 import org.imanity.framework.bukkit.chunk.block.CacheBlockSetHandler;
 import org.imanity.framework.bukkit.events.player.PlayerLocaleLoadedEvent;
 import org.imanity.framework.bukkit.hologram.HologramHandler;
 import org.imanity.framework.bukkit.impl.*;
 import org.imanity.framework.bukkit.impl.server.ServerImplementation;
-import org.imanity.framework.bukkit.menu.task.MenuUpdateTask;
 import org.imanity.framework.bukkit.metadata.Metadata;
 import org.imanity.framework.bukkit.packet.PacketService;
 import org.imanity.framework.bukkit.packet.wrapper.server.WrappedPacketOutTitle;
@@ -122,8 +120,6 @@ public final class Imanity {
         Imanity.initCommon();
 
         Imanity.TASK_CHAIN_FACTORY = BukkitTaskChainFactory.create(plugin);
-
-        MenuUpdateTask.init();
     }
 
     private static void initCommon() {

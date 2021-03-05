@@ -29,7 +29,7 @@
     <groupId>org.imanity.framework</groupId>
     <artifactId>parent</artifactId>
     <packaging>pom</packaging>
-    <version>0.2-SNAPSHOT</version>
+    <version>0.3b1</version>
     <modules>
         <module>bungee</module>
         <module>independent</module>

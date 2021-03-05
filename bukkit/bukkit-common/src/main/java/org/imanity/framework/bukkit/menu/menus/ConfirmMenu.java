@@ -48,29 +48,29 @@ public class ConfirmMenu extends Menu {
 	}
 
 	@Override
-	public Map<Integer, Button> getButtons(final Player player) {
-		final Map<Integer, Button> buttons = new HashMap<>();
+	public void draw(boolean firstInitial) {
+		if (!firstInitial) {
+			return;
+		}
 
 		for (int x = 0; x < 3; x++) {
 			for (int y = 0; y < 3; y++) {
-				buttons.put(getSlot(x, y), new ConfirmationButton(true, response, closeAfterResponse));
-				buttons.put(getSlot(8 - x, y), new ConfirmationButton(false, response, closeAfterResponse));
+				this.set(x, y, new ConfirmationButton(true, response, closeAfterResponse));
+				this.set(8 - x, y, new ConfirmationButton(false, response, closeAfterResponse));
 			}
 		}
 
 		if (centerButtons != null) {
 			for (int i = 0; i < centerButtons.length; i++) {
 				if (centerButtons[i] != null) {
-					buttons.put(getSlot(4, i), centerButtons[i]);
+					this.set(getSlot(4, i), centerButtons[i]);
 				}
 			}
 		}
-
-		return buttons;
 	}
 
 	@Override
-	public String getTitle(final Player player) {
+	public String getTitle() {
 		return title;
 	}
 

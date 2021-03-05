@@ -25,6 +25,7 @@
 package org.imanity.framework.bukkit.menu.pagination;
 
 import lombok.Getter;
+import lombok.Setter;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
@@ -33,108 +34,106 @@ import org.imanity.framework.bukkit.menu.Menu;
 import org.imanity.framework.bukkit.util.items.ItemBuilder;
 import org.imanity.framework.util.CC;
 
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.Map;
-
+@Getter
 public abstract class PaginatedMenu extends Menu {
 
-    @Getter
+    private DrawStatus status = DrawStatus.NONE;
+    @Setter
     private int page = 1;
 
-    {
-        setUpdateAfterClick(false);
+    @Override
+    public final String getTitle() {
+        return getPrePaginatedTitle() + " - " + page + "/" + getMaxPages();
     }
 
     @Override
-    public String getTitle(Player player) {
-        return getPrePaginatedTitle(player) + " - " + page + "/" + getPages(player);
+    public final Menu clear() {
+        switch (this.status) {
+            case GLOBAL:
+                return super.clearBetween(1, 7);
+            case PER_PAGE:
+                return super.clearBetween(9, 9 + this.getMaxSizePerPage());
+            default:
+                return super.clear();
+        }
+    }
+
+    @Override
+    protected final Menu set(int slot, Button button) {
+        switch (this.status) {
+            case PER_PAGE:
+                return super.set(slot + 9, button);
+            case GLOBAL:
+            default:
+                return super.set(slot, button);
+        }
+    }
+
+    @Override
+    public final int getSizeLimit() {
+        switch (this.status) {
+            case GLOBAL:
+                return this.getGlobalSize();
+            case PER_PAGE:
+                return this.getMaxSizePerPage() + 9;
+            default:
+                return super.getSizeLimit();
+        }
     }
 
     /**
      * Changes the page number
      *
-     * @param player player viewing the inventory
      * @param mod    delta to modify the page number by
      */
     public final void modPage(Player player, int mod) {
-        page += mod;
-        getButtons().clear();
-        openMenu(player);
+        this.page += mod;
+
+        this.clear();
+        if (!this.isOpening()) {
+            this.open(player);
+        } else {
+            this.render();
+        }
+    }
+
+    public abstract int getMaxPages();
+
+    @Override
+    public final void draw(boolean firstInitial) {
+        this.status = DrawStatus.GLOBAL;
+        this.drawGlobal(firstInitial);
+
+        this.status = DrawStatus.PER_PAGE;
+        this.drawPage(firstInitial, this.page);
+
+        this.status = DrawStatus.NONE;
+    }
+
+    protected void drawGlobal(boolean firstInitial) {
+        if (firstInitial) {
+            this.set(0, new PageButton(PageButton.Action.GO_BACKWARD, this));
+            this.set(this.getGlobalSize() - 1, new PageButton(PageButton.Action.GO_FORWARD, this));
+        }
+    }
+
+    protected abstract void drawPage(boolean firstInitial, int page);
+
+    public int getGlobalSize() {
+        return 9;
     }
 
     /**
-     * @param player player viewing the inventory
+     * @return The Max Slots per page, not including global
      */
-    public final int getPages(Player player) {
-        int buttonAmount = this.getMaxButtonSlot(player);
-
-        if (buttonAmount == 0) {
-            return 1;
-        }
-
-        return (int) Math.ceil(buttonAmount / (double) getMaxItemsPerPage(player));
-    }
-
-    private final int getMaxButtonSlot(Player player) {
-        return getAllPagesButtons(player)
-                .keySet()
-                .stream().max(Comparator.naturalOrder()).orElse(0);
-    }
-
-    @Override
-    public final Map<Integer, Button> getButtons(Player player) {
-        int minIndex = (int) ((double) (page - 1) * getMaxItemsPerPage(player));
-        int maxIndex = (int) ((double) (page) * getMaxItemsPerPage(player));
-
-        HashMap<Integer, Button> buttons = new HashMap<>();
-
-        buttons.put(0, new PageButton(-1, this));
-        buttons.put(8, new PageButton(1, this));
-
-        for (Map.Entry<Integer, Button> entry : getAllPagesButtons(player).entrySet()) {
-            int ind = entry.getKey();
-
-            if (ind >= minIndex && ind < maxIndex) {
-                ind -= (int) ((double) (getMaxItemsPerPage(player)) * (page - 1)) - 9;
-                buttons.put(ind, entry.getValue());
-            }
-        }
-
-        Map<Integer, Button> global = getGlobalButtons(player);
-
-        if (global != null) {
-            for (Map.Entry<Integer, Button> gent : global.entrySet()) {
-                buttons.put(gent.getKey(), gent.getValue());
-            }
-        }
-
-        return buttons;
-    }
-
-    public int getMaxItemsPerPage(Player player) {
+    public int getMaxSizePerPage() {
         return 18;
     }
 
     /**
-     * @param player player viewing the inventory
-     * @return a Map of buttons that returns items which will be present on all pages
-     */
-    public Map<Integer, Button> getGlobalButtons(Player player) {
-        return null;
-    }
-
-    /**
-     * @param player player viewing the inventory
      * @return title of the inventory before the page number is added
      */
-    public abstract String getPrePaginatedTitle(Player player);
-
-    /**
-     * @param player player viewing the inventory
-     * @return a map of buttons that will be paginated and spread across pages
-     */
-    public abstract Map<Integer, Button> getAllPagesButtons(Player player);
+    public abstract String getPrePaginatedTitle();
 
     /**
      * @param player The Viewer
@@ -155,24 +154,48 @@ public abstract class PaginatedMenu extends Menu {
      */
     public ItemStack getPageButtonItem(Player player, PageButton button) {
         ItemBuilder itemBuilder = new ItemBuilder(Material.CARPET).lore(CC.SB_BAR);
-        if (button.hasNext(player)) {
-            itemBuilder.name(button.getMod() > 0 ? "&aNext Page" : "&cPrevious Page")
-                    .lore(button.getMod() > 0 ? "&eLeft Click jump to next page" : "&eLeft Click me jump to previous page");
-        } else {
-            itemBuilder.name(button.getMod() > 0 ? "&6You are currently at First Page" : "&6You are currently at Last Page")
-                    .lore("&cThere is no more page to go!");
+        switch (button.getAction()) {
+            case GO_BACKWARD:
+                if (button.hasNext()) {
+                    itemBuilder.name("&cPrevious Page")
+                            .lore("&eLeft Click me jump to previous page");
+                } else {
+                    itemBuilder.name("&6You are currently at Last Page")
+                            .lore("&cThere is no more page to go!");
+                }
+                itemBuilder.lore(" ", "&eRight Click to view all pages!", CC.SB_BAR);
+                break;
+            case GO_FORWARD:
+                if (button.hasNext()) {
+                    itemBuilder.name("&aNext Page")
+                            .lore("&eLeft Click me jump to next page");
+                } else {
+                    itemBuilder.name("&6You are currently at First Page")
+                            .lore("&cThere is no more page to go!");
+                }
+                itemBuilder.lore(" ", "&eRight Click to view all pages!", CC.SB_BAR);
+                break;
+            default:
+            case VIEW_ALL_PAGES:
+                itemBuilder.name("&eView All Pages")
+                        .lore("&eClick me to view All Pages!", CC.SB_BAR);
+                break;
         }
 
-        itemBuilder.lore(" ", "&eRight Click to view all pages!", CC.SB_BAR);
         return itemBuilder.build();
     }
 
     /**
-     * @param player The Viewer
      * @return The display title
      */
-    public String getViewAllPagesMenuTitle(Player player) {
+    public String getViewAllPagesMenuTitle() {
         return "&aAll Pages";
+    }
+
+    protected enum DrawStatus {
+
+        NONE, GLOBAL, PER_PAGE
+
     }
 
 }

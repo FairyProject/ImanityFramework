@@ -75,8 +75,18 @@ public class ButtonBuilder {
         return this;
     }
 
+    public ButtonBuilder callback(Callback callback) {
+        this.callbacks.add(callback);
+        return this;
+    }
+
     public ButtonBuilder cancel() {
         this.cancelConsumers.add((player, slot, clickType) -> true);
+        return this;
+    }
+
+    public ButtonBuilder noCancel() {
+        this.cancelConsumers.add((player, slot, clickType) -> false);
         return this;
     }
 
@@ -113,23 +123,23 @@ public class ButtonBuilder {
             @Override
             public boolean shouldCancel(Player player, int slot, ClickType clickType) {
                 for (CancelConsumer consumer : cancelConsumers) {
-                    if (consumer.shouldCancel(player, slot, clickType)) {
-                        return true;
+                    if (!consumer.shouldCancel(player, slot, clickType)) {
+                        return false;
                     }
                 }
 
-                return false;
+                return true;
             }
         };
     }
 
-    private interface Callback {
+    public interface Callback {
 
         void click(Player player, int slot, ClickType clickType, int hotbarButton);
 
     }
 
-    private interface CancelConsumer {
+    public interface CancelConsumer {
 
         boolean shouldCancel(Player player, int slot, ClickType clickType);
 

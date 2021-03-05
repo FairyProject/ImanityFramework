@@ -42,7 +42,10 @@ import java.util.List;
 import java.util.concurrent.TimeUnit;
 import java.util.function.BiConsumer;
 import java.util.function.BiPredicate;
+import java.util.function.Consumer;
 import java.util.function.Predicate;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @Getter
 public class EventSubscribeBuilder<T extends Event> {
@@ -147,6 +150,15 @@ public class EventSubscribeBuilder<T extends Event> {
     @SafeVarargs
     public final EventSubscribeBuilder<T> listen(BiConsumer<EventSubscription<T>, T>... listeners) {
         this.handlers.addAll(Arrays.asList(listeners));
+        return this;
+    }
+
+    @SafeVarargs
+    public final EventSubscribeBuilder<T> listen(Consumer<T>... listeners) {
+        this.handlers.addAll(Stream.of(listeners)
+                .map(consumer -> (BiConsumer<EventSubscription<T>, T>) (tEventSubscription, t) -> consumer.accept(t))
+                .collect(Collectors.toList())
+        );
         return this;
     }
 

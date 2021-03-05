@@ -22,39 +22,51 @@
  * SOFTWARE.
  */
 
-package org.imanity.framework.bukkit.menu.buttons;
+package org.imanity.framework.bukkit.menu.pagination;
 
-import lombok.AllArgsConstructor;
-import org.bukkit.ChatColor;
-import org.bukkit.Material;
-import org.bukkit.entity.Player;
-import org.bukkit.event.inventory.ClickType;
-import org.bukkit.inventory.ItemStack;
-import org.bukkit.inventory.meta.ItemMeta;
 import org.imanity.framework.bukkit.menu.Button;
-import org.imanity.framework.bukkit.menu.Menu;
 
-@AllArgsConstructor
-public class BackButton extends Button {
+import java.util.List;
 
-	private final Menu back;
+public abstract class PaginatedListMenu extends PaginatedMenu {
 
-	@Override
-	public ItemStack getButtonItem(final Player player) {
-		final ItemStack itemStack = new ItemStack(Material.BED);
-		final ItemMeta itemMeta = itemStack.getItemMeta();
+    private Button[] buttons;
 
-		itemMeta.setDisplayName(ChatColor.RED + "返回");
-		itemStack.setItemMeta(itemMeta);
+    @Override
+    public final int getMaxPages() {
+        return (int) Math.ceil(buttons.length / (double) this.getMaxSizePerPage());
+    }
 
-		return itemStack;
-	}
+    @Override
+    protected final void drawPage(boolean firstInitial, int page) {
+        this.clear();
 
-	@Override
-	public void clicked(final Player player, final int i, final ClickType clickType, final int hb) {
-		Button.playNeutral(player);
+        if (!this.isOnlyFirstInitial() || firstInitial) {
+            this.buttons = this.getButtons().toArray(new Button[0]);
+        }
 
-		this.back.open(player);
-	}
+        for (int i = 0; i < this.getMaxSizePerPage(); i++) {
+            int index = (page - 1) * this.getMaxSizePerPage() + i;
+            if (index >= this.buttons.length) {
+                break;
+            }
 
+            this.set(i, this.buttons[index]);
+        }
+    }
+
+    @Override
+    public int getSize() {
+        return this.isFixedInventorySize() ? this.getMaxSizePerPage() + this.getGlobalSize() : -1;
+    }
+
+    public abstract List<Button> getButtons();
+
+    public boolean isOnlyFirstInitial() {
+        return false;
+    }
+
+    public boolean isFixedInventorySize() {
+        return false;
+    }
 }

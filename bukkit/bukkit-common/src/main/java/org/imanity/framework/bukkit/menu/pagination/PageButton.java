@@ -27,20 +27,15 @@ package org.imanity.framework.bukkit.menu.pagination;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import org.imanity.framework.bukkit.menu.Button;
-import org.bukkit.ChatColor;
-import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.ClickType;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.inventory.meta.ItemMeta;
-
-import java.util.Arrays;
 
 @AllArgsConstructor
 @Getter
 public class PageButton extends Button {
 
-	private final int mod;
+	private final Action action;
 	private final PaginatedMenu menu;
 
 	@Override
@@ -50,12 +45,12 @@ public class PageButton extends Button {
 
 	@Override
 	public void clicked(final Player player, final int i, final ClickType clickType, final int hb) {
-		if (clickType == ClickType.RIGHT) {
-			new ViewAllPagesMenu(this.menu).openMenu(player);
+		if (action == Action.VIEW_ALL_PAGES || clickType == ClickType.RIGHT) {
+			new ViewAllPagesMenu(this.menu).open(player);
 			playNeutral(player);
 		} else {
-			if (hasNext(player)) {
-				this.menu.modPage(player, this.mod);
+			if (this.hasNext()) {
+				this.menu.modPage(player, this.getModByAction());
 				Button.playNeutral(player);
 			} else {
 				Button.playFail(player);
@@ -63,9 +58,28 @@ public class PageButton extends Button {
 		}
 	}
 
-	boolean hasNext(final Player player) {
-		final int pg = this.menu.getPage() + this.mod;
-		return pg > 0 && this.menu.getPages(player) >= pg;
+	public int getModByAction() {
+		switch (this.action) {
+			case GO_FORWARD:
+				return 1;
+			case GO_BACKWARD:
+				return -1;
+			default:
+				return Integer.MIN_VALUE;
+		}
+	}
+
+	boolean hasNext() {
+		final int pg = this.menu.getPage() + this.getModByAction();
+		return pg > 0 && this.menu.getMaxPages() >= pg;
+	}
+
+	public enum Action {
+
+		GO_FORWARD,
+		GO_BACKWARD,
+		VIEW_ALL_PAGES
+
 	}
 
 }

@@ -29,22 +29,16 @@ import org.bukkit.Sound;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.ClickType;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.inventory.meta.ItemMeta;
+import org.imanity.framework.bukkit.util.items.ItemBuilder;
 
 public abstract class Button {
 
 	public static Button placeholder(final Material material, final byte data, String title) {
-		return new Button() {
-			public ItemStack getButtonItem(Player player) {
-				ItemStack it = new ItemStack(material, 1, data);
-				ItemMeta meta = it.getItemMeta();
-
-				meta.setDisplayName(title);
-				it.setItemMeta(meta);
-
-				return it;
-			}
-		};
+		return ButtonBuilder.of(new ItemBuilder(material)
+				.data(data)
+				.name(title)
+				.build()
+		).cancel().build();
 	}
 
 	public static void playFail(Player player) {
@@ -59,8 +53,22 @@ public abstract class Button {
 		player.playSound(player.getLocation(), Sound.CLICK, 20F, 1F);
 	}
 
+	/**
+	 * Get Display ItemStack
+	 *
+	 * @param player The Player to display on
+	 * @return The Display ItemStack
+	 */
 	public abstract ItemStack getButtonItem(Player player);
 
+	/**
+	 * This method will be called when player clicked this button
+	 *
+	 * @param player The Player Who Clicked
+	 * @param slot Which Slot the player Clicked
+	 * @param clickType How the player clicked it
+	 * @param hotbarButton The hotbar key
+	 */
 	public void clicked(Player player, int slot, ClickType clickType, int hotbarButton) {
 	}
 
