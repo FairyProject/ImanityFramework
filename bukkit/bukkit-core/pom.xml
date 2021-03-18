@@ -34,6 +34,14 @@
     <artifactId>bukkit-core</artifactId>
     <packaging>jar</packaging>
 
+    <repositories>
+        <!-- Imanity Repository -->
+        <repository>
+            <id>imanity-libraries</id>
+            <url>https://maven.imanity.dev/repository/imanity-libraries</url>
+        </repository>
+    </repositories>
+
     <dependencies>
         <dependency>
             <groupId>org.imanity.framework</groupId>
