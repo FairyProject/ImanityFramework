@@ -358,13 +358,10 @@ public final class Imanity {
     @SneakyThrows
     public static void shutdown() {
         SHUTTING_DOWN = true;
-
         if (Imanity.TAB_HANDLER != null) {
             Imanity.TAB_HANDLER.stop();
         }
-
         ImanityCommon.shutdown();
-
         PluginManager.INSTANCE.callFrameworkFullyDisable();
     }
 
