@@ -31,7 +31,7 @@ The framework to let you build plugin/backend/discord-bot or even HTTP server ea
 * [norm](https://github.com/dieselpoint/norm) - Revised to fit the library needs
 
 ## Example Plugins:
-- [DeathSwap](https://github.com/LeeGodSRC/deathswap) (outdated)
+- [Official Example](https://github.com/IF-Project/ImanityFramework-Example)
 
 ## License
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
