@@ -42,9 +42,9 @@
             <scope>compile</scope>
         </dependency>
         <dependency>
-            <groupId>org.imanity.framework</groupId>
-            <artifactId>impl-imanity</artifactId>
-            <version>${project.version}</version>
+            <groupId>org.imanity.framework.bukkit</groupId>
+            <artifactId>impl-all</artifactId>
+            <version>${implementation.version}</version>
             <scope>compile</scope>
         </dependency>
         <dependency>
@@ -64,6 +64,7 @@
     <properties>
         <java.version>1.8</java.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <implementation.version>1.0-SNAPSHOT</implementation.version>
     </properties>
 
     <build>

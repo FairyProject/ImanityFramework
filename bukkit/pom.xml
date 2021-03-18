@@ -36,7 +36,6 @@
     <modules>
         <module>bukkit-core</module>
         <module>bukkit-common</module>
-        <module>impl-imanity</module>
         <module>bukkit-npc</module>
     </modules>
 
