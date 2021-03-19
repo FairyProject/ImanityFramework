@@ -24,30 +24,25 @@
 
 package org.imanity.framework.details;
 
-import com.google.common.collect.Sets;
 import lombok.Getter;
 import lombok.Setter;
 import org.imanity.framework.BeanContext;
 import org.imanity.framework.ServiceDependency;
-import org.imanity.framework.details.constructor.BeanParameterDetails;
 import org.imanity.framework.details.constructor.BeanParameterDetailsConstructor;
 
 import java.lang.reflect.InvocationTargetException;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.Set;
 
 @Getter
 @Setter
-public class ServiceBeanDetails extends GenericBeanDetails {
+public class ServiceBeanDetails extends DependenciesBeanDetails {
 
-    private Set<String> dependencies;
     private BeanParameterDetailsConstructor constructorDetails;
 
     public ServiceBeanDetails(Class<?> type, String name, String[] dependencies) {
-        super(type, name);
+        super(type, name, dependencies);
 
-        this.dependencies = Sets.newHashSet(dependencies);
         this.loadAnnotations();
     }
 
@@ -70,10 +65,6 @@ public class ServiceBeanDetails extends GenericBeanDetails {
         } catch (IllegalAccessException | InvocationTargetException | InstantiationException e) {
             throw new RuntimeException(e);
         }
-    }
-
-    public boolean hasDependencies() {
-        return this.dependencies.size() > 0;
     }
 
     @Override

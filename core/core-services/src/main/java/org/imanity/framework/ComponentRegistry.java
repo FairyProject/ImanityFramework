@@ -82,7 +82,10 @@ public class ComponentRegistry {
                 Object instance = componentHolder.newInstance(type);
 
                 if (instance != null) {
-                    components.add(beanContext.registerComponent(instance, type, componentHolder));
+                    final ComponentBeanDetails beanDetails = beanContext.registerComponent(instance, type, componentHolder);
+                    if (beanDetails != null) {
+                        components.add(beanDetails);
+                    }
                 }
             } catch (Throwable throwable) {
                 BeanContext.LOGGER.error("Something wrong will scanning component for " + type.getName(), throwable);

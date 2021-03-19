@@ -34,7 +34,9 @@ import java.lang.annotation.Annotation;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Map;
+import java.util.Set;
 
 @Getter
 @Setter
@@ -144,5 +146,15 @@ public class SimpleBeanDetails implements BeanDetails {
     @Override
     public boolean isBind() {
         return this.plugin != null;
+    }
+
+    @Override
+    public boolean hasDependencies() {
+        return false;
+    }
+
+    @Override
+    public Set<String> getDependencies() {
+        return Collections.emptySet();
     }
 }

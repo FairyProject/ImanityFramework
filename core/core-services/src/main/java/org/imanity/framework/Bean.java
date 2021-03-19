@@ -22,38 +22,17 @@
  * SOFTWARE.
  */
 
-package org.imanity.framework.locale;
+package org.imanity.framework;
 
-import org.imanity.framework.*;
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 
-@Component
-public class LocaleSerializer implements ObjectSerializer<Locale, String> {
+@Target(ElementType.METHOD)
+@Retention(RetentionPolicy.RUNTIME)
+public @interface Bean {
 
-    @Autowired
-    private LocaleHandler localeHandler;
+    String name() default "";
 
-    @ShouldInitialize
-    public boolean configure() {
-        return ImanityCommon.CORE_CONFIG.USE_LOCALE;
-    }
-
-    @Override
-    public String serialize(Locale input) {
-        return input.getName();
-    }
-
-    @Override
-    public Locale deserialize(String output) {
-        return this.localeHandler.getLocale(output);
-    }
-
-    @Override
-    public Class<Locale> inputClass() {
-        return Locale.class;
-    }
-
-    @Override
-    public Class<String> outputClass() {
-        return String.class;
-    }
 }

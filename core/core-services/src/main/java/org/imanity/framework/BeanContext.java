@@ -25,11 +25,13 @@
 package org.imanity.framework;
 
 import com.google.common.base.Preconditions;
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
 import lombok.NonNull;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.imanity.framework.details.*;
+import org.imanity.framework.details.constructor.BeanParameterDetailsMethod;
 import org.imanity.framework.exception.ServiceAlreadyExistsException;
 import org.imanity.framework.plugin.AbstractPlugin;
 import org.imanity.framework.plugin.PluginListenerAdapter;
@@ -37,10 +39,12 @@ import org.imanity.framework.plugin.PluginManager;
 import org.imanity.framework.reflect.Reflect;
 import org.imanity.framework.reflect.ReflectLookup;
 import org.imanity.framework.util.AccessUtil;
+import org.imanity.framework.util.NonNullArrayList;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
@@ -91,7 +95,7 @@ public class BeanContext {
         return this.beanByType.values().toArray(new BeanDetails[0]);
     }
 
-    private List<String> findClassPaths(Class<?> plugin) {
+    public List<String> findClassPaths(Class<?> plugin) {
         ClasspathScan annotation = plugin.getAnnotation(ClasspathScan.class);
 
         if (annotation != null) {
@@ -185,7 +189,7 @@ public class BeanContext {
         log("Finish build Reflect Lookup instance with in " + (System.currentTimeMillis() - start) + "ms");
         start = System.currentTimeMillis();
 
-        List<BeanDetails> beanDetailsList = new ArrayList<>(Arrays.asList(included));
+        List<BeanDetails> beanDetailsList = new NonNullArrayList<>(Arrays.asList(included));
 
         for (Class<?> type : reflectLookup.findAnnotatedClasses(Service.class)) {
 
@@ -209,6 +213,46 @@ public class BeanContext {
         }
 
         log("Finish scanning beans within " + (System.currentTimeMillis() - start) + "ms");
+        for (Method method : reflectLookup.findAnnotatedStaticMethods(Bean.class)) {
+            if (method.getReturnType() == void.class) {
+                new IllegalArgumentException("The Method " + method.toString() + " has annotated @Bean but no return type!").printStackTrace();
+            }
+            BeanParameterDetailsMethod detailsMethod = new BeanParameterDetailsMethod(method, this);
+            final Object instance = detailsMethod.invoke(null, this);
+
+            Bean bean = method.getAnnotation(Bean.class);
+            if (bean == null) {
+                continue;
+            }
+
+            String name = bean.name();
+            if (name.isEmpty()) {
+                name = instance.getClass().toString();
+            }
+
+            if (this.getBeanByName(name) == null) {
+                List<String> dependencies = new ArrayList<>();
+                for (Class<?> type : detailsMethod.getParameterTypes()) {
+                    BeanDetails details = this.getBeanDetails(type);
+                    if (details != null) {
+                        dependencies.add(details.getName());
+                    }
+                }
+
+                BeanDetails beanDetails = new DependenciesBeanDetails(instance.getClass(), instance, name, dependencies.toArray(new String[0]));
+
+                log("Found " + name + " with type " + instance.getClass().getSimpleName() + ", Registering it as bean...");
+
+                this.attemptBindPlugin(beanDetails);
+                this.registerBean(beanDetails, false);
+
+                beanDetailsList.add(beanDetails);
+            } else {
+                new ServiceAlreadyExistsException(name).printStackTrace();
+            }
+        }
+
+        log("Finish scanning method beans within " + (System.currentTimeMillis() - start) + "ms");
         start = System.currentTimeMillis();
 
         try {
@@ -221,11 +265,13 @@ public class BeanContext {
 
         this.sortedBeans.addAll(beanDetailsList);
 
-        beanDetailsList.forEach(beanDetails -> {
+        List<BeanDetails> finalBeanDetailsList = beanDetailsList;
+        ImmutableList.copyOf(beanDetailsList).forEach(beanDetails -> {
             try {
                 if (!beanDetails.shouldInitialize()) {
                     log("Unregistering " + beanDetails.getName() + " due to it cancelled to register");
                     this.unregisterBean(beanDetails);
+                    finalBeanDetailsList.remove(beanDetails);
                 }
             } catch (InvocationTargetException | IllegalAccessException e) {
                 LOGGER.error(e);
@@ -389,7 +435,7 @@ public class BeanContext {
             Map.Entry<String, BeanDetails> entry = removeIterator.next();
             BeanDetails beanDetails = entry.getValue();
 
-            if (!(beanDetails instanceof ServiceBeanDetails) || !((ServiceBeanDetails) beanDetails).hasDependencies()) {
+            if (!beanDetails.hasDependencies()) {
                 continue;
             }
 
@@ -405,9 +451,8 @@ public class BeanContext {
                 } else {
 
                     // Prevent dependency each other
-                    if (dependencyDetails instanceof ServiceBeanDetails
-                                    && ((ServiceBeanDetails) dependencyDetails).hasDependencies()
-                                    && ((ServiceBeanDetails) dependencyDetails).getDependencies().contains(serviceBeanDetails.getName())) {
+                    if (dependencyDetails.hasDependencies()
+                                    && dependencyDetails.getDependencies().contains(serviceBeanDetails.getName())) {
                         LOGGER.error("Target " + serviceBeanDetails.getName() + " and " + dependency + " depend to each other!");
                         removeIterator.remove();
 
@@ -419,7 +464,7 @@ public class BeanContext {
         }
 
         // Continually loop until all dependency found and loaded
-        List<BeanDetails> sorted = new ArrayList<>();
+        List<BeanDetails> sorted = new NonNullArrayList<>();
 
         while (!unloaded.isEmpty()) {
             Iterator<Map.Entry<String, BeanDetails>> iterator = unloaded.entrySet().iterator();
@@ -429,10 +474,10 @@ public class BeanContext {
                 BeanDetails beanDetails = entry.getValue();
                 boolean missingDependencies = true;
 
-                if (!(beanDetails instanceof ServiceBeanDetails) || !((ServiceBeanDetails) beanDetails).hasDependencies()) {
+                if (!beanDetails.hasDependencies()) {
                     missingDependencies = false;
                 } else {
-                    List<String> list = Lists.newArrayList(((ServiceBeanDetails) beanDetails).getDependencies());
+                    List<String> list = Lists.newArrayList(beanDetails.getDependencies());
                     list.removeIf(dependency -> {
                         BeanDetails dependencyDetails = this.getBeanByName(dependency);
                         return dependencyDetails != null && dependencyDetails.getInstance() != null;

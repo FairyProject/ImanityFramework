@@ -230,6 +230,16 @@ public class GenericBeanDetails implements BeanDetails {
     }
 
     @Override
+    public boolean hasDependencies() {
+        return false;
+    }
+
+    @Override
+    public Set<String> getDependencies() {
+        return Collections.emptySet();
+    }
+
+    @Override
     @Nullable
     public String getTag(String key) {
         return this.tags.getOrDefault(key, null);

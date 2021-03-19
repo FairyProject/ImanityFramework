@@ -70,6 +70,8 @@ import java.util.*;
 @Getter
 public final class FrameworkBootable {
 
+    private static FrameworkBootable INSTANCE;
+
     public static Logger LOGGER;
     public static final SimpleDateFormat LOG_FILE_FORMAT = new SimpleDateFormat("yyyyMdd-hhmmss");
 
@@ -91,7 +93,22 @@ public final class FrameworkBootable {
     @Autowired
     private CommandService commandService;
 
+    @Autowired
+    private BeanContext beanContext;
+
+    @Bean
+    public static FrameworkBootable bean() {
+        return FrameworkBootable.INSTANCE;
+    }
+
+    @Bean
+    public static Object beanBootable() {
+        return FrameworkBootable.INSTANCE.getBootableObject();
+    }
+
     public FrameworkBootable(Class<?> bootableClass) {
+        INSTANCE = this;
+
         this.bootableClass = bootableClass;
         this.errorHandlers = new HashSet<>();
 
@@ -131,7 +148,7 @@ public final class FrameworkBootable {
 
             this.bootableObject = this.bootableClass.newInstance();
 
-            this.call(PreInitialize.class);
+            this.call(PreBooting.class);
             this.initFiles();
 
             this.pluginClassLoader = new PluginClassLoader(ClassLoader.getSystemClassLoader());
@@ -148,12 +165,14 @@ public final class FrameworkBootable {
                     .commandExecutor(new IndependentCommandExecutor());
             builder.init();
 
+            this.beanContext.scanClasses("bootable", ClassLoader.getSystemClassLoader(), this.beanContext.findClassPaths(this.bootableClass));
+
             ImanityCommon.getBean(CommandService.class).registerDefaultPresenceProvider(new ConsolePresenceProvider());
 
             Runtime.getRuntime().addShutdownHook(new Thread(this::shutdown, "Shutdown Thread"));
 
             this.status = ProgramStatus.RUNNING;
-            this.call(PostInitialize.class);
+            this.call(PostBooting.class);
         } catch (Throwable exception) {
             this.handleError(exception);
         }

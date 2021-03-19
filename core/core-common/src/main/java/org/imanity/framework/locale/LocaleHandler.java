@@ -26,10 +26,7 @@ package org.imanity.framework.locale;
 
 import lombok.Getter;
 import org.apache.commons.io.IOUtils;
-import org.imanity.framework.Autowired;
-import org.imanity.framework.ImanityCommon;
-import org.imanity.framework.PostInitialize;
-import org.imanity.framework.Service;
+import org.imanity.framework.*;
 import org.imanity.framework.locale.player.LocaleData;
 import org.imanity.framework.metadata.CommonMetadataRegistries;
 import org.imanity.framework.metadata.MetadataKey;
@@ -150,6 +147,11 @@ public class LocaleHandler {
 
             this.localeRepository.save(localeData);
         }
+    }
+
+    @ShouldInitialize
+    public boolean configure() {
+        return ImanityCommon.CORE_CONFIG.USE_LOCALE;
     }
 
 }

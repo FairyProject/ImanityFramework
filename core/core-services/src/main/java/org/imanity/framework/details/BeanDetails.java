@@ -32,6 +32,7 @@ import java.lang.annotation.Annotation;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.Map;
+import java.util.Set;
 
 public interface BeanDetails {
 
@@ -86,6 +87,10 @@ public interface BeanDetails {
     AbstractPlugin getBindPlugin();
 
     boolean isBind();
+
+    boolean hasDependencies();
+
+    Set<String> getDependencies();
 
     default void onEnable() {
 

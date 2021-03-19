@@ -108,7 +108,9 @@ public class DiscordService {
     public void init() {
         LOGGER.info("Attempting to Login into discord...");
 
-        this.withPresenceProvider(new DiscordPresenceProvider());
+        if (this.presenceProvider == null) {
+            this.withPresenceProvider(new DiscordPresenceProvider());
+        }
 
         String token = this.bootable.get(TOKEN, null);
         Preconditions.checkNotNull(token, "The token couldn't be found! please add [discord.token] into framework bootable configuration!");
