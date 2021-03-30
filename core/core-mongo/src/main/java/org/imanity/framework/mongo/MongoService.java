@@ -31,18 +31,23 @@ import com.mongodb.client.MongoClients;
 import org.bson.UuidRepresentation;
 import org.imanity.framework.*;
 import org.imanity.framework.details.BeanDetails;
+import org.imanity.framework.JacksonService;
 import org.imanity.framework.mongo.configuration.AbstractMongoConfiguration;
 import org.imanity.framework.ProvideConfiguration;
 import org.mongojack.JacksonMongoCollection;
+import org.mongojack.internal.MongoJackModule;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-@Service(name = "mongo", dependencies = "serializer")
+@Service(name = "mongo", dependencies = {"serializer", "jackson"})
 public class MongoService {
 
     private Class<?> defaultConfiguration;
     private Map<Class<?>, MongoFactory> databases;
+
+    @Autowired
+    private JacksonService jacksonService;
 
     @PreInitialize
     public void preInit() {
@@ -108,7 +113,7 @@ public class MongoService {
     }
 
     public <T> JacksonMongoCollection<T> collection(String name, Class<?> use, Class<T> tClass) {
-        return this.collection(name, use, tClass, FrameworkMisc.JACKSON_MAPPER);
+        return this.collection(name, use, tClass, this.jacksonService.getOrCreateJacksonMapper("mongo", MongoJackModule::configure));
     }
 
     public <T> JacksonMongoCollection<T> collection(String name, Class<?> use, Class<T> tClass, ObjectMapper objectMapper) {

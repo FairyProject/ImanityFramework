@@ -30,6 +30,7 @@ import lombok.Getter;
 import org.bson.BsonDocument;
 import org.imanity.framework.mongo.MongoService;
 import org.mongojack.JacksonMongoCollection;
+import org.mongojack.internal.MongoJackModule;
 
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -40,6 +41,9 @@ public abstract class MongoRepository<T, ID extends Serializable> implements Rep
 
     @Autowired
     private static MongoService MONGO_SERVICE;
+
+    @Autowired
+    private static JacksonService JACKSON_SERVICE;
 
     @Getter
     protected JacksonMongoCollection<T> collection;
@@ -52,7 +56,7 @@ public abstract class MongoRepository<T, ID extends Serializable> implements Rep
     }
 
     public ObjectMapper objectMapper() {
-        return FrameworkMisc.JACKSON_MAPPER;
+        return JACKSON_SERVICE.getOrCreateJacksonMapper("mongo", MongoJackModule::configure);
     }
 
     public abstract String name();

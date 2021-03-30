@@ -31,6 +31,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.ImmutableSet;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
+import lombok.experimental.UtilityClass;
 import org.apache.logging.log4j.Logger;
 import org.imanity.framework.cache.CacheableAspect;
 import org.imanity.framework.cache.manager.CacheManager;
@@ -52,10 +53,10 @@ import org.mongojack.internal.MongoJackModule;
 
 import java.util.*;
 
-@NoArgsConstructor(access = AccessLevel.PRIVATE)
+@UtilityClass
 public final class ImanityCommon {
 
-    private static final Set<Library> GLOBAL_LIBRARIES = ImmutableSet.of(
+    private final Set<Library> GLOBAL_LIBRARIES = ImmutableSet.of(
             // SQL
             Library.MARIADB_DRIVER,
             Library.HIKARI,
@@ -74,43 +75,34 @@ public final class ImanityCommon {
             Library.SPRING_EL
     );
 
-    private static final Set<Library> GLOBAL_LIBRARIES_INDEPENDENT_CLASSLOADER = ImmutableSet.of(
+    private final Set<Library> GLOBAL_LIBRARIES_INDEPENDENT_CLASSLOADER = ImmutableSet.of(
             Library.H2_DRIVER
     );
 
-    public static final String METADATA_PREFIX = "Imanity_";
+    public final String METADATA_PREFIX = "Imanity_";
 
-    public static ImanityPlatform PLATFORM;
-    public static CoreConfig CORE_CONFIG;
-    public static BeanContext BEAN_CONTEXT;
-
-    @Autowired
-    public static LocaleHandler LOCALE_HANDLER;
-
-    public static LibraryHandler LIBRARY_HANDLER;
-
-    public static ICommandExecutor COMMAND_EXECUTOR;
-    public static IEventHandler EVENT_HANDLER;
-    public static ITaskScheduler TASK_SCHEDULER;
-    public static ObjectMapper JACKSON_MAPPER;
+    public ImanityPlatform PLATFORM;
+    public CoreConfig CORE_CONFIG;
+    public BeanContext BEAN_CONTEXT;
 
     @Autowired
-    public static ServerHandler SERVER_HANDLER;
+    public LocaleHandler LOCALE_HANDLER;
 
-    private static final List<Terminable> TERMINATES = new ArrayList<>();
+    public LibraryHandler LIBRARY_HANDLER;
 
-    private static boolean LIBRARIES_INITIALIZED, BRIDGE_INITIALIZED;
+    public ICommandExecutor COMMAND_EXECUTOR;
+    public IEventHandler EVENT_HANDLER;
+    public ITaskScheduler TASK_SCHEDULER;
 
-    public static void init() {
+    @Autowired
+    public ServerHandler SERVER_HANDLER;
+
+    private final List<Terminable> TERMINATES = new ArrayList<>();
+
+    private boolean LIBRARIES_INITIALIZED, BRIDGE_INITIALIZED;
+
+    public void init() {
         ImanityCommon.loadLibraries();
-
-        ImanityCommon.JACKSON_MAPPER = new ObjectMapper();
-        ImanityCommon.JACKSON_MAPPER.setVisibility(PropertyAccessor.ALL, JsonAutoDetect.Visibility.NONE);
-        ImanityCommon.JACKSON_MAPPER.setVisibility(PropertyAccessor.FIELD, JsonAutoDetect.Visibility.ANY);
-        ImanityCommon.JACKSON_MAPPER.configure(MapperFeature.PROPAGATE_TRANSIENT_MARKER, true);
-        FrameworkMisc.JACKSON_MAPPER = ImanityCommon.JACKSON_MAPPER;
-
-        MongoJackModule.configure(ImanityCommon.JACKSON_MAPPER);
 
         ImanityCommon.CORE_CONFIG = new CoreConfig();
         ImanityCommon.CORE_CONFIG.loadAndSave();
@@ -119,7 +111,7 @@ public final class ImanityCommon {
         ImanityCommon.BEAN_CONTEXT.init();
     }
 
-    public static void loadLibraries() {
+    public void loadLibraries() {
 
         if (ImanityCommon.LIBRARIES_INITIALIZED) {
             return;
@@ -156,23 +148,23 @@ public final class ImanityCommon {
         FrameworkMisc.LIBRARY_HANDLER = ImanityCommon.LIBRARY_HANDLER;
     }
 
-    public static Logger getLogger() {
+    public Logger getLogger() {
         return ImanityCommon.PLATFORM.getLogger();
     }
 
-    public static CacheManager getCacheManagerFor(Class<?> bean) {
+    public CacheManager getCacheManagerFor(Class<?> bean) {
         return CacheableAspect.INSTANCE.getCacheManager(bean);
     }
 
-    public static <T> T getBean(Class<T> type) {
+    public <T> T getBean(Class<T> type) {
         return (T) BEAN_CONTEXT.getBean(type);
     }
 
-    public static void injectBean(Object instance) {
+    public void injectBean(Object instance) {
         BEAN_CONTEXT.injectBeans(instance);
     }
 
-    public static void shutdown() throws Throwable {
+    public void shutdown() throws Throwable {
         if (ImanityCommon.CORE_CONFIG.USE_REDIS) {
             SERVER_HANDLER.changeServerState(ServerState.STOPPING);
         }
@@ -187,7 +179,7 @@ public final class ImanityCommon {
         FrameworkMisc.close();
     }
 
-    public static String translate(UUID uuid, String key) {
+    public String translate(UUID uuid, String key) {
         if (!ImanityCommon.CORE_CONFIG.USE_LOCALE) {
             throw new OptionNotEnabledException("use_locale", "org.imanity.framework.config.yml");
         }
@@ -201,13 +193,13 @@ public final class ImanityCommon {
         return locale.get(key);
     }
 
-    public static void addTerminable(Terminable terminable) {
+    public void addTerminable(Terminable terminable) {
         synchronized (ImanityCommon.TERMINATES) {
             ImanityCommon.TERMINATES.add(terminable);
         }
     }
 
-    public static Builder builder() {
+    public Builder builder() {
         if (ImanityCommon.BRIDGE_INITIALIZED) {
             throw new IllegalStateException("Already build!");
         }
@@ -216,7 +208,7 @@ public final class ImanityCommon {
         return new Builder();
     }
 
-    public static class Builder {
+    public class Builder {
 
         private PresenceProvider<?> presenceProvider;
         private ImanityPlatform platform;

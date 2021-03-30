@@ -31,6 +31,7 @@ import io.netty.handler.codec.http.FullHttpResponse;
 import io.netty.handler.codec.http.HttpResponseStatus;
 import org.imanity.framework.Autowired;
 import org.imanity.framework.FrameworkMisc;
+import org.imanity.framework.JacksonService;
 import org.imanity.framework.boot.FrameworkBootable;
 import org.imanity.framework.http.entity.HttpHeaders;
 import org.imanity.framework.http.entity.ResponseEntity;
@@ -47,6 +48,9 @@ public class FullHttpResponseFactory {
 
     @Autowired
     private static FrameworkBootable BOOTABLE;
+
+    @Autowired
+    private static JacksonService JACKSON_SERVICE;
 
     public static FullHttpResponse getSuccessResponse(Method targetMethod, List<Object> targetMethodParams, Object targetObject) {
 
@@ -107,7 +111,7 @@ public class FullHttpResponseFactory {
 
     private static byte[] toContentBytes(Object contentObject) {
         try {
-            return FrameworkMisc.JACKSON_MAPPER.writeValueAsBytes(contentObject);
+            return JACKSON_SERVICE.getMainMapper().writeValueAsBytes(contentObject);
         } catch (JsonProcessingException ex) {
             throw new RuntimeException(ex);
         }

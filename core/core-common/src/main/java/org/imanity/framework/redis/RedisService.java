@@ -37,6 +37,7 @@ import org.redisson.config.Config;
 import java.io.File;
 
 @Service(name = "redis")
+@ServiceDependency(dependencies = "jackson")
 @Getter
 public class RedisService {
 
@@ -54,7 +55,7 @@ public class RedisService {
             return;
         }
 
-        this.client = Redisson.create(Config.fromYAML(configFile).setCodec(new JsonJacksonCodec()));
+        this.client = Redisson.create(Config.fromYAML(configFile).setCodec(new JsonJacksonCodec(JacksonService.INSTANCE.getMainMapper())));
     }
 
     @PostInitialize

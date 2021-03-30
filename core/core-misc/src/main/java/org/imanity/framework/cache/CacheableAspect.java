@@ -200,10 +200,13 @@ public class CacheableAspect {
 
         final CachePut annotation = method.getAnnotation(CachePut.class);
         CacheKeyAbstract key = this.toKey(point, readAnnotationKey(point, annotation.value(), annotation.preventArgumentNull()));
-        @Language("JavaScript") String condition = annotation.condition();
+        @Language("SpEL") String condition = annotation.condition();
 
         CacheManager manager = this.getCacheManager(method.getDeclaringClass());
 
+        if (method.getReturnType() == void.class) {
+            throw new IllegalArgumentException("The method " + method.toString() + " marked @CachePut but return type is null!");
+        }
         Object result = point.proceed();
 
         if (condition.length() != 0 && !this.checkCondition(condition, point.getTarget(), point.getArgs(), result, true)) {

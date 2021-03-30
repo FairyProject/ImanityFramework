@@ -25,24 +25,21 @@
 package org.imanity.framework;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.imanity.framework.aspect.AsyncAspect;
-import org.imanity.framework.cache.CacheableAspect;
-import org.imanity.framework.events.IEventHandler;
-import org.imanity.framework.libraries.LibraryHandler;
-import org.imanity.framework.task.ITaskScheduler;
+import com.fasterxml.jackson.databind.module.SimpleModule;
+import lombok.AllArgsConstructor;
+import org.imanity.framework.jackson.JacksonConfigure;
 
-public class FrameworkMisc {
+@AllArgsConstructor
+public class SerializerJacksonConfigure implements JacksonConfigure {
 
-    public static ImanityPlatform PLATFORM;
-    public static ITaskScheduler TASK_SCHEDULER;
-    public static IEventHandler EVENT_HANDLER;
-    public static LibraryHandler LIBRARY_HANDLER;
+    private final ObjectSerializer serializer;
 
-    public static void close() {
-        AsyncAspect.EXECUTOR.shutdown();
+    @Override
+    public void configure(ObjectMapper objectMapper) {
+        final SimpleModule module = new SimpleModule();
+        module.addSerializer(new SerializerFactory.JacksonSerailizer(serializer));
+        module.addDeserializer(serializer.inputClass(), new SerializerFactory.JacksonDeserailizer(serializer));
 
-        CacheableAspect.CLEANER_SERVICE.shutdown();
-        CacheableAspect.UPDATER_SERVICE.shutdown();
+        objectMapper.registerModule(module);
     }
-
 }

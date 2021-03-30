@@ -38,16 +38,24 @@ import javax.annotation.Nullable;
 import javax.persistence.AttributeConverter;
 import java.io.IOException;
 import java.util.Map;
+import java.util.Queue;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentLinkedQueue;
 
 @Service(name = "serializer")
+@ServiceDependency(dependencies = "jackson")
 @Getter
 public class SerializerFactory {
 
     private Map<Class<?>, ObjectSerializer> serializers;
 
+    @Autowired
+    private JacksonService jacksonService;
+    private Queue<ObjectSerializer> serializerQueue;
+
     @PreInitialize
     public void preInit() {
+        this.serializerQueue = new ConcurrentLinkedQueue<>();
         this.serializers = new ConcurrentHashMap<>();
 
         ComponentRegistry.registerComponentHolder(new ComponentHolder() {
@@ -64,27 +72,30 @@ public class SerializerFactory {
                     throw new IllegalArgumentException("The Serializer for " + serializer.inputClass().getName() + " already exists!");
                 }
 
+                if (jacksonService == null) {
+                    serializerQueue.add(serializer);
+                } else {
+                    jacksonService.registerJacksonConfigure(new SerializerJacksonConfigure(serializer));
+                }
                 serializers.put(serializer.inputClass(), serializer);
                 return serializer;
             }
         });
     }
 
+    @PostInitialize
+    public void postInit() {
+        ObjectSerializer serializer;
+        while ((serializer = serializerQueue.poll()) != null) {
+            jacksonService.registerJacksonConfigure(new SerializerJacksonConfigure(serializer));
+        }
+
+        serializerQueue = null;
+    }
+
     @Nullable
     public ObjectSerializer findSerializer(Class<?> type) {
         return this.serializers.getOrDefault(type, null);
-    }
-
-    @PostInitialize
-    public void postInit() {
-        SimpleModule module = new SimpleModule();
-
-        for (ObjectSerializer serializer : this.serializers.values()) {
-            module.addSerializer(new JacksonSerailizer(serializer));
-            module.addDeserializer(serializer.inputClass(), new JacksonDeserailizer(serializer));
-        }
-
-        FrameworkMisc.JACKSON_MAPPER.registerModule(module);
     }
 
     public static class JacksonSerailizer extends StdSerializer {

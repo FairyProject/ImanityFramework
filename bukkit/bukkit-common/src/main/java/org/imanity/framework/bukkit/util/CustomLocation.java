@@ -150,6 +150,34 @@ public class CustomLocation {
 			return Bukkit.getServer().getWorld(this.world);
 	}
 
+	public CustomLocation add(CustomLocation location) {
+		this.x += location.x;
+		this.y += location.y;
+		this.z += location.z;
+		return this;
+	}
+
+	public CustomLocation subtract(CustomLocation location) {
+		this.x -= location.x;
+		this.y -= location.y;
+		this.z -= location.z;
+		return this;
+	}
+
+	public CustomLocation multiply(CustomLocation location) {
+		this.x *= location.x;
+		this.y *= location.y;
+		this.z *= location.z;
+		return this;
+	}
+
+	public CustomLocation divide(CustomLocation location) {
+		this.x /= location.x;
+		this.y /= location.y;
+		this.z /= location.z;
+		return this;
+	}
+
 	@Override
 	public boolean equals(Object o) {
 		if (this == o) return true;
