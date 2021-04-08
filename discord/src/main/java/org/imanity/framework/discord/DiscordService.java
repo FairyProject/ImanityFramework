@@ -33,6 +33,7 @@ import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import net.dv8tion.jda.api.requests.GatewayIntent;
 import net.dv8tion.jda.api.utils.ChunkingFilter;
 import net.dv8tion.jda.api.utils.MemberCachePolicy;
+import net.dv8tion.jda.api.utils.cache.CacheFlag;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.imanity.framework.discord.provider.DiscordBotProvider;
@@ -125,6 +126,7 @@ public class DiscordService {
             }
 
             builder
+                    .disableCache(CacheFlag.ACTIVITY)
                     .setMemberCachePolicy(MemberCachePolicy.ALL)
                     .setChunkingFilter(ChunkingFilter.ALL)
                     .enableIntents(EnumSet.allOf(GatewayIntent.class));

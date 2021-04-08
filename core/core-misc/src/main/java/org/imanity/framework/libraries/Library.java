@@ -59,20 +59,20 @@ public class Library {
     MONGO_DB_SYNC = new Library(
             "org{}mongodb",
             "mongodb-driver-sync",
-            "4.0.4",
-            "yNfnRhpg02+ZUTkc+DBOmAhjCzt2pGJDHbOrOg0H7dE="
+            "4.2.3",
+            "Ve/rvcBxLXAKcDBAuNMNP5I1OIFoMWHCtWWEttetsh0="
     ),
     MONGO_DB_CORE = new Library(
             "org{}mongodb",
             "mongodb-driver-core",
-            "4.0.4",
-            "O3919jFpB9moeW7FqPuSou2XroNq4MxnVVGmD0qD6m8="
+            "4.2.3",
+            "WeyB1ROaL4qqyomQfh03xuU/UxsJWsqcQl6xCQXZ65k="
     ),
     BSON = new Library(
             "org{}mongodb",
             "bson",
-            "4.0.4",
-            "e93W+2Fbbw7S/c+wnBUFtO9fPtOZ5gBitZ1Jbkp9scI="
+            "4.2.3",
+            "yARrppaYx9/Yb0mHglvZPPxwqa98aJ+Muw4V5X3AtK8="
     ),
     CAFFEINE = new Library(
             "com{}github{}ben-manes{}caffeine",
