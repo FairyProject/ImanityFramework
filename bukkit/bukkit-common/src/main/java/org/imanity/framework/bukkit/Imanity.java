@@ -93,9 +93,6 @@ public final class Imanity {
     @Autowired
     public static TimerHandler TIMER_HANDLER;
 
-    @Autowired
-    private static LocaleHandler LOCALE_HANDLER;
-
     public static Plugin PLUGIN;
 
     public static ServerImplementation IMPLEMENTATION;
@@ -132,14 +129,12 @@ public final class Imanity {
                 .taskScheduler(new BukkitTaskScheduler())
         .init();
 
-        if (ImanityCommon.CORE_CONFIG.USE_LOCALE) {
-            new BukkitRepository<LocaleData>(PLUGIN)
-                    .async()
-                    .load(player -> LOCALE_HANDLER.lookup(player.getUniqueId()))
-                    .save((player, localeData) -> LOCALE_HANDLER.saveAndDelete(localeData))
-                    .onLoaded((player, localeData) -> Imanity.callEvent(new PlayerLocaleLoadedEvent(player, localeData)))
-                    .init();
-        }
+        ImanityCommon.LOCALE_HANDLER.ifPresent(localeHandler -> new BukkitRepository<LocaleData>(PLUGIN)
+                .async()
+                .load(player -> localeHandler.lookup(player.getUniqueId()))
+                .save((player, localeData) -> localeHandler.saveAndDelete(localeData))
+                .onLoaded((player, localeData) -> Imanity.callEvent(new PlayerLocaleLoadedEvent(player, localeData)))
+                .init());
     }
 
     public static VisualBlockHandler getVisualBlockHandler() {

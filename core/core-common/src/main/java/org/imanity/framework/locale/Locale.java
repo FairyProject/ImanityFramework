@@ -27,15 +27,11 @@ package org.imanity.framework.locale;
 import it.unimi.dsi.fastutil.chars.Char2ObjectOpenHashMap;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import lombok.Getter;
-import org.imanity.framework.Autowired;
 import org.imanity.framework.util.Utility;
 
 import java.util.Map;
 
 public class Locale {
-
-    @Autowired
-    public static LocaleHandler LOCALE_HANDLER;
 
     private final Char2ObjectOpenHashMap<Map<String, String>> translateEntries = new Char2ObjectOpenHashMap<>();
 

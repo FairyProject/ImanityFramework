@@ -33,6 +33,7 @@ import java.util.UUID;
 
 @EnableOwnCacheManager
 @Service(name = "locale-repository")
+@ServiceDependency(dependencies = "locale", type = @DependencyType(ServiceDependencyType.SUB_DISABLE))
 public class LocaleRepository extends ConfigurableRepository<LocaleData, UUID> {
 
     @Override
@@ -64,11 +65,6 @@ public class LocaleRepository extends ConfigurableRepository<LocaleData, UUID> {
     @Cacheable.ClearAfter
     public void stop() {
 
-    }
-
-    @ShouldInitialize
-    public boolean configure() {
-        return ImanityCommon.CORE_CONFIG.USE_LOCALE;
     }
 
 }

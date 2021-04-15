@@ -35,4 +35,6 @@ public @interface ServiceDependency {
 
     String[] dependencies();
 
+    DependencyType type() default @DependencyType;
+
 }

@@ -24,7 +24,6 @@
 
 package org.imanity.framework;
 
-import org.imanity.framework.details.BeanDetails;
 import org.imanity.framework.details.ComponentBeanDetails;
 import org.imanity.framework.reflect.ReflectLookup;
 import org.imanity.framework.util.entry.Entry;
@@ -36,8 +35,6 @@ import java.util.List;
 public class ComponentRegistry {
 
     private static final EntryArrayList<Class<?>, ComponentHolder> COMPONENT_HOLDERS = new EntryArrayList<>();
-
-    private static final ComponentHolder EMPTY = new ComponentHolderEmpty();
 
     public static void registerComponentHolder(ComponentHolder componentHolder) {
         for (Class<?> type : componentHolder.type()) {
@@ -53,7 +50,7 @@ public class ComponentRegistry {
             }
         }
 
-        return EMPTY;
+        return null;
 
     }
 
@@ -78,7 +75,16 @@ public class ComponentRegistry {
 
         for (Class<?> type : reflectLookup.findAnnotatedClasses(Component.class)) {
             try {
+                Component component = type.getAnnotation(Component.class);
+
                 ComponentHolder componentHolder = ComponentRegistry.getComponentHolder(type);
+                if (componentHolder == null) {
+                    if (component.throwIfNotRegistered()) {
+                        BeanContext.LOGGER.error("No ComponentHolder was registered for class " + type.getName() + "!");
+                    }
+                    continue;
+                }
+
                 Object instance = componentHolder.newInstance(type);
 
                 if (instance != null) {
@@ -93,14 +99,6 @@ public class ComponentRegistry {
         }
 
         return components;
-    }
-
-    private static class ComponentHolderEmpty extends ComponentHolder {
-
-        @Override
-        public Class<?>[] type() {
-            return new Class[0];
-        }
     }
 
 }

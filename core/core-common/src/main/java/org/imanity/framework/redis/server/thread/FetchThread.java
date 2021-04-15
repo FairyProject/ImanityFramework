@@ -32,7 +32,7 @@ import java.util.Map;
 
 public class FetchThread extends Thread {
 
-    private ServerHandler serverHandler;
+    private final ServerHandler serverHandler;
 
     public FetchThread(ServerHandler serverHandler) {
         super();

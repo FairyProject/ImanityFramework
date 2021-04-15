@@ -24,7 +24,6 @@
 
 package org.imanity.framework.locale.player;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -45,15 +44,15 @@ import java.util.UUID;
 public class LocaleData {
 
     @Id
-    @JsonProperty
     private UUID uuid;
-
-    @JsonProperty
     private Locale locale;
 
     public LocaleData(UUID uuid) {
+        if (!ImanityCommon.LOCALE_HANDLER.isPresent()) {
+            throw new IllegalStateException("Trying to register Locale while Locale is not enabled!");
+        }
         this.uuid = uuid;
-        this.locale = ImanityCommon.LOCALE_HANDLER.getDefaultLocale();
+        this.locale = ImanityCommon.LOCALE_HANDLER.get().getDefaultLocale();
     }
 
 }

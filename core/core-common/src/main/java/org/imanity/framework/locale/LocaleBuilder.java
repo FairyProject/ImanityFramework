@@ -70,7 +70,10 @@ public class LocaleBuilder {
     }
 
     public Locale build() {
-        Locale locale = ImanityCommon.LOCALE_HANDLER.getOrRegister(name);
+        if (!ImanityCommon.LOCALE_HANDLER.isPresent()) {
+            throw new IllegalStateException("Trying to register Locale while Locale is not enabled!");
+        }
+        Locale locale = ImanityCommon.LOCALE_HANDLER.get().getLocale(name);
         for (Entry<String, String> entry : this.entries) {
             locale.registerEntry(entry.getKey(), entry.getValue());
         }

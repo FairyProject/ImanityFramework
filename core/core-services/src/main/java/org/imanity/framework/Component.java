@@ -35,4 +35,6 @@ public @interface Component {
 
     String value() default "";
 
+    boolean throwIfNotRegistered() default true;
+
 }

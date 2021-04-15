@@ -27,15 +27,11 @@ package org.imanity.framework.locale;
 import org.imanity.framework.*;
 
 @Component
+@ServiceDependency(dependencies = "locale", type = @DependencyType(ServiceDependencyType.SUB_DISABLE))
 public class LocaleSerializer implements ObjectSerializer<Locale, String> {
 
     @Autowired
     private LocaleHandler localeHandler;
-
-    @ShouldInitialize
-    public boolean configure() {
-        return ImanityCommon.CORE_CONFIG.USE_LOCALE;
-    }
 
     @Override
     public String serialize(Locale input) {

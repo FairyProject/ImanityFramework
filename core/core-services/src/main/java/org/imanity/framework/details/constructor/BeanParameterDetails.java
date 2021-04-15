@@ -26,9 +26,11 @@ package org.imanity.framework.details.constructor;
 
 import org.imanity.framework.BeanContext;
 
+import java.lang.reflect.Parameter;
+
 public interface BeanParameterDetails {
 
     Object[] getParameters(BeanContext beanContext);
 
-    Class<?>[] getParameterTypes();
+    Parameter[] getParameters();
 }

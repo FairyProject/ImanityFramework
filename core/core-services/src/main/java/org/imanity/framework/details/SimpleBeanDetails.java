@@ -24,19 +24,16 @@
 
 package org.imanity.framework.details;
 
-import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
+import org.imanity.framework.ServiceDependencyType;
 import org.imanity.framework.plugin.AbstractPlugin;
 import org.jetbrains.annotations.Nullable;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 @Getter
 @Setter
@@ -47,11 +44,13 @@ public class SimpleBeanDetails implements BeanDetails {
     private Class<?> type;
 
     private AbstractPlugin plugin;
+    private Set<String> children;
 
     public SimpleBeanDetails(Object instance, String name, Class<?> type) {
         this.instance = instance;
         this.name = name;
         this.type = type;
+        this.children = new HashSet<>();
     }
 
     @Override
@@ -153,8 +152,27 @@ public class SimpleBeanDetails implements BeanDetails {
         return false;
     }
 
+    public Set<String> getChildren() {
+        return Collections.unmodifiableSet(this.children);
+    }
+
     @Override
-    public Set<String> getDependencies() {
+    public void addChildren(String children) {
+        this.children.add(children);
+    }
+
+    @Override
+    public void removeChildren(String children) {
+        this.children.remove(children);
+    }
+
+    @Override
+    public List<String> getDependencies(ServiceDependencyType type) {
+        return Collections.emptyList();
+    }
+
+    @Override
+    public Set<Map.Entry<ServiceDependencyType, List<String>>> getDependencyEntries() {
         return Collections.emptySet();
     }
 }

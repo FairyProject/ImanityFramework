@@ -26,17 +26,23 @@ package org.imanity.framework.bukkit.yaml;
 
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
+import org.imanity.framework.Autowired;
 import org.imanity.framework.ImanityCommon;
 import org.imanity.framework.bukkit.util.items.ImanityItem;
 import org.imanity.framework.bukkit.util.items.ItemBuilder;
 import org.imanity.framework.config.annotation.ConfigurationElement;
 import org.imanity.framework.locale.Locale;
+import org.imanity.framework.locale.LocaleHandler;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 
 @ConfigurationElement
 public class ItemStackElement {
+
+    @Autowired
+    private static Optional<LocaleHandler> LOCALE_HANDLER;
 
     private Material MATERIAL = Material.AIR;
     private short DATA = 0;
@@ -50,26 +56,28 @@ public class ItemStackElement {
 
     public void register() {
 
-        for (Map.Entry<String, String> entry : DISPLAY_NAME_LOCALES.entrySet()) {
+        LOCALE_HANDLER.ifPresent(localeHandler -> {
+            for (Map.Entry<String, String> entry : DISPLAY_NAME_LOCALES.entrySet()) {
 
-            Locale locale = ImanityCommon.LOCALE_HANDLER.getOrRegister(entry.getKey());
-            locale.registerEntry(this.getLocaleName(), entry.getValue());
+                Locale locale = localeHandler.getOrRegister(entry.getKey());
+                locale.registerEntry(this.getLocaleName(), entry.getValue());
 
-        }
+            }
 
-        for (Map.Entry<String, String> entry : DISPLAY_LORE_LOCALES.entrySet()) {
+            for (Map.Entry<String, String> entry : DISPLAY_LORE_LOCALES.entrySet()) {
 
-            Locale locale = ImanityCommon.LOCALE_HANDLER.getOrRegister(entry.getKey());
-            locale.registerEntry(this.getLocaleLore(), entry.getValue());
+                Locale locale = localeHandler.getOrRegister(entry.getKey());
+                locale.registerEntry(this.getLocaleLore(), entry.getValue());
 
-        }
+            }
+        });
 
-        this.item = new ImanityItem()
+        this.item = ImanityItem.builder(IDENTITY_NAME)
                 .item(new ItemBuilder(MATERIAL)
                         .durability(DATA))
                 .displayNameLocale(this.getLocaleName())
                 .displayLoreLocale(this.getLocaleLore())
-                .submit();
+                .build();
 
     }
 

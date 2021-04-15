@@ -32,6 +32,7 @@ import org.imanity.framework.util.AccessUtil;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Parameter;
 
 @Getter
 public class BeanParameterDetailsConstructor extends BeanParameterDetailsAbstract {
@@ -62,10 +63,10 @@ public class BeanParameterDetailsConstructor extends BeanParameterDetailsAbstrac
         }
 
         this.constructor = constructorRet;
-        this.parameterTypes = this.constructor.getParameterTypes();
-        for (Class<?> parameter : this.parameterTypes) {
-            if (!beanContext.isBean(parameter)) {
-                throw new IllegalArgumentException("The type " + parameter.getName() + ", it's not supposed to be in bean constructor!");
+        this.parameters = this.constructor.getParameters();
+        for (Parameter parameter : this.parameters) {
+            if (!beanContext.isBean(parameter.getType())) {
+                throw new IllegalArgumentException("The type " + parameter.getType().getName() + " it's not supposed to be in bean constructor!");
             }
         }
     }

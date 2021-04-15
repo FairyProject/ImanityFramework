@@ -36,7 +36,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-@Service(name = "messageService", dependencies = {"serverHandler"})
+@Service(name = "messageService")
+@ServiceDependency(dependencies = "serverHandler", type = @DependencyType(ServiceDependencyType.SUB_DISABLE))
 public class MessageService {
 
     private RedisPubSub<Object> redisPubSub;
@@ -49,10 +50,6 @@ public class MessageService {
 
     @PreInitialize
     public void preInit() {
-        if (!ImanityCommon.CORE_CONFIG.USE_REDIS) {
-            return;
-        }
-
         this.messageListeners = new ConcurrentHashMap<>(12);
 
         ComponentRegistry.registerComponentHolder(new ComponentHolder() {
@@ -76,10 +73,6 @@ public class MessageService {
     @PostInitialize
     public void init() {
         this.channel = "imanity-server";
-
-        if (!ImanityCommon.CORE_CONFIG.USE_REDIS) {
-            return;
-        }
 
         this.redisPubSub = new RedisPubSub<>(this.channel, this.redisService, Object.class);
         this.redisPubSub.subscribe((message -> {

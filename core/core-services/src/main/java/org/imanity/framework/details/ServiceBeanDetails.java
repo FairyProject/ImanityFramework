@@ -27,11 +27,13 @@ package org.imanity.framework.details;
 import lombok.Getter;
 import lombok.Setter;
 import org.imanity.framework.BeanContext;
+import org.imanity.framework.DependencyType;
 import org.imanity.framework.ServiceDependency;
+import org.imanity.framework.ServiceDependencyType;
 import org.imanity.framework.details.constructor.BeanParameterDetailsConstructor;
 
 import java.lang.reflect.InvocationTargetException;
-import java.util.Arrays;
+import java.lang.reflect.Parameter;
 import java.util.Collection;
 
 @Getter
@@ -48,10 +50,15 @@ public class ServiceBeanDetails extends DependenciesBeanDetails {
 
     public void setupConstruction(BeanContext beanContext) {
         this.constructorDetails = new BeanParameterDetailsConstructor(this.getType(), beanContext);
-        for (Class<?> parameters : this.constructorDetails.getParameterTypes()) {
-            BeanDetails details = beanContext.getBeanDetails(parameters);
+        for (Parameter parameter : this.constructorDetails.getParameters()) {
+            BeanDetails details = beanContext.getBeanDetails(parameter.getType());
 
-            this.dependencies.add(details.getName());
+            ServiceDependencyType type = ServiceDependencyType.FORCE;
+            final DependencyType annotation = parameter.getAnnotation(DependencyType.class);
+            if (annotation != null) {
+                type = annotation.value();
+            }
+            this.addDependencies(type, details.getName());
         }
     }
 
@@ -72,9 +79,8 @@ public class ServiceBeanDetails extends DependenciesBeanDetails {
         super.loadAnnotations(superClasses);
 
         for (Class<?> type : superClasses) {
-            ServiceDependency dependencyAnnotation = type.getAnnotation(ServiceDependency.class);
-            if (dependencyAnnotation != null) {
-                dependencies.addAll(Arrays.asList(dependencyAnnotation.dependencies()));
+            for (ServiceDependency dependency : type.getAnnotationsByType(ServiceDependency.class)) {
+                this.addDependencies(dependency.type().value(), dependency.dependencies());
             }
         }
     }

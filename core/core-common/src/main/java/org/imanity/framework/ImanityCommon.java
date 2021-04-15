@@ -24,13 +24,8 @@
 
 package org.imanity.framework;
 
-import com.fasterxml.jackson.annotation.JsonAutoDetect;
-import com.fasterxml.jackson.annotation.PropertyAccessor;
-import com.fasterxml.jackson.databind.MapperFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.ImmutableSet;
-import lombok.AccessLevel;
-import lombok.NoArgsConstructor;
 import lombok.experimental.UtilityClass;
 import org.apache.logging.log4j.Logger;
 import org.imanity.framework.cache.CacheableAspect;
@@ -49,7 +44,6 @@ import org.imanity.framework.redis.server.ServerHandler;
 import org.imanity.framework.redis.server.enums.ServerState;
 import org.imanity.framework.task.ITaskScheduler;
 import org.imanity.framework.util.terminable.Terminable;
-import org.mongojack.internal.MongoJackModule;
 
 import java.util.*;
 
@@ -86,7 +80,7 @@ public final class ImanityCommon {
     public BeanContext BEAN_CONTEXT;
 
     @Autowired
-    public LocaleHandler LOCALE_HANDLER;
+    public Optional<LocaleHandler> LOCALE_HANDLER;
 
     public LibraryHandler LIBRARY_HANDLER;
 
@@ -95,7 +89,7 @@ public final class ImanityCommon {
     public ITaskScheduler TASK_SCHEDULER;
 
     @Autowired
-    public ServerHandler SERVER_HANDLER;
+    public Optional<ServerHandler> SERVER_HANDLER;
 
     private final List<Terminable> TERMINATES = new ArrayList<>();
 
@@ -165,10 +159,7 @@ public final class ImanityCommon {
     }
 
     public void shutdown() throws Throwable {
-        if (ImanityCommon.CORE_CONFIG.USE_REDIS) {
-            SERVER_HANDLER.changeServerState(ServerState.STOPPING);
-        }
-
+        SERVER_HANDLER.ifPresent(serverHandler -> serverHandler.changeServerState(ServerState.STOPPING));
         synchronized (ImanityCommon.TERMINATES) {
             for (Terminable terminable : ImanityCommon.TERMINATES) {
                 terminable.close();
@@ -180,13 +171,14 @@ public final class ImanityCommon {
     }
 
     public String translate(UUID uuid, String key) {
-        if (!ImanityCommon.CORE_CONFIG.USE_LOCALE) {
+        if (!LOCALE_HANDLER.isPresent()) {
             throw new OptionNotEnabledException("use_locale", "org.imanity.framework.config.yml");
         }
-        LocaleData localeData = LOCALE_HANDLER.find(uuid);
+        LocaleHandler localeHandler = LOCALE_HANDLER.get();
+        LocaleData localeData = localeHandler.find(uuid);
         Locale locale;
         if (localeData == null || localeData.getLocale() == null) {
-            locale = ImanityCommon.LOCALE_HANDLER.getDefaultLocale();
+            locale = localeHandler.getDefaultLocale();
         } else {
             locale = localeData.getLocale();
         }

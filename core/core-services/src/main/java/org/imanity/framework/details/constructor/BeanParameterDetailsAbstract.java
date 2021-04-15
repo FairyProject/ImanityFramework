@@ -27,23 +27,25 @@ package org.imanity.framework.details.constructor;
 import lombok.Getter;
 import org.imanity.framework.BeanContext;
 
+import java.lang.reflect.Parameter;
+
 public class BeanParameterDetailsAbstract implements BeanParameterDetails {
 
     @Getter
-    protected Class<?>[] parameterTypes;
+    protected Parameter[] parameters;
 
     @Override
     public Object[] getParameters(BeanContext beanContext) {
-        if (this.parameterTypes == null) {
+        if (this.parameters == null) {
             throw new IllegalArgumentException("No parameters found!");
         }
 
-        Object[] parameters = new Object[this.parameterTypes.length];
+        Object[] parameters = new Object[this.parameters.length];
 
         for (int i = 0; i < parameters.length; i++) {
-            Object bean = beanContext.getBean(this.parameterTypes[i]);
+            Object bean = beanContext.getBean(this.parameters[i].getType());
             if (bean == null) {
-                throw new IllegalArgumentException("Couldn't find bean " + this.parameterTypes[i].getName() + "!");
+                throw new IllegalArgumentException("Couldn't find bean " + this.parameters[i].getName() + "!");
             }
 
             parameters[i] = bean;

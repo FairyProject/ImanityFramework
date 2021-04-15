@@ -37,7 +37,8 @@ import org.imanity.framework.redis.server.thread.PushThread;
 import java.util.HashMap;
 import java.util.Map;
 
-@Service(name = "serverHandler", dependencies = "redis")
+@Service(name = "serverHandler")
+@ServiceDependency(dependencies = "redis", type = @DependencyType(ServiceDependencyType.SUB_DISABLE))
 @Getter
 public class ServerHandler {
 
@@ -57,10 +58,6 @@ public class ServerHandler {
 
     @PostInitialize
     public void init() {
-        if (!ImanityCommon.CORE_CONFIG.USE_REDIS) {
-            return;
-        }
-
         this.currentServer = new ImanityServer(ImanityCommon.CORE_CONFIG.CURRENT_SERVER);
         this.currentServer.setServerState(ServerState.BOOTING);
 
@@ -103,10 +100,6 @@ public class ServerHandler {
 
     @PostDestroy
     public void stop() {
-        if (!ImanityCommon.CORE_CONFIG.USE_REDIS) {
-            return;
-        }
-
         this.redis.getMap(ServerHandler.METADATA + ":" + this.currentServer.getName()).clear();
 
         this.messageService.sendMessage(new ServerDeleteMessage(this.currentServer));

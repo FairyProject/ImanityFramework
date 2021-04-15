@@ -24,9 +24,7 @@
 
 package org.imanity.framework.redis.server.message.listener;
 
-import org.imanity.framework.Autowired;
-import org.imanity.framework.Component;
-import org.imanity.framework.ImanityCommon;
+import org.imanity.framework.*;
 import org.imanity.framework.redis.message.MessageListener;
 import org.imanity.framework.redis.message.annotation.HandleMessage;
 import org.imanity.framework.redis.server.ImanityServer;
@@ -37,7 +35,8 @@ import org.imanity.framework.redis.server.message.ServerCommandMessage;
 import org.imanity.framework.redis.server.message.ServerDeleteMessage;
 import org.imanity.framework.redis.server.message.ServerStateChangedMessage;
 
-@Component
+@Component(throwIfNotRegistered = false)
+@ServiceDependency(dependencies = "serverHandler", type = @DependencyType(ServiceDependencyType.SUB_DISABLE))
 public class ServerListener implements MessageListener {
 
     @Autowired

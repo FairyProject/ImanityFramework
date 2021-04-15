@@ -43,18 +43,23 @@ public class RedisService {
 
     private RedissonClient client;
 
-    @SneakyThrows
-    @PreInitialize
-    public void preInit() {
-        File configFile = new File(ImanityCommon.PLATFORM.getDataFolder(), "redisson.yml");
+    private final File configFile;
+
+    public RedisService() {
+        this.configFile = new File(ImanityCommon.PLATFORM.getDataFolder(), "redisson.yml");
         if (!configFile.exists()) {
             ImanityCommon.PLATFORM.saveResources("redisson.yml", false);
         }
+    }
 
-        if (!ImanityCommon.CORE_CONFIG.USE_REDIS) {
-            return;
-        }
+    @ShouldInitialize
+    public boolean shouldInitialize() {
+        return ImanityCommon.CORE_CONFIG.USE_REDIS;
+    }
 
+    @SneakyThrows
+    @PreInitialize
+    public void preInit() {
         this.client = Redisson.create(Config.fromYAML(configFile).setCodec(new JsonJacksonCodec(JacksonService.INSTANCE.getMainMapper())));
     }
 
@@ -64,10 +69,6 @@ public class RedisService {
 
     @PostDestroy
     public void stop() {
-        if (!ImanityCommon.CORE_CONFIG.USE_REDIS) {
-            return;
-        }
-
         this.client.shutdown();
     }
 

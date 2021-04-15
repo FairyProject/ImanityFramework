@@ -22,37 +22,17 @@
  * SOFTWARE.
  */
 
-package org.imanity.framework.details.constructor;
+package org.imanity.framework;
 
-import lombok.Getter;
-import lombok.SneakyThrows;
-import org.imanity.framework.BeanContext;
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
-import java.lang.reflect.Parameter;
+@Target(ElementType.TYPE)
+@Retention(RetentionPolicy.RUNTIME)
+public @interface DependencyType {
 
-@Getter
-public class BeanParameterDetailsMethod extends BeanParameterDetailsAbstract {
-
-    private final Method method;
-
-    @SneakyThrows
-    public BeanParameterDetailsMethod(Method method, BeanContext beanContext) {
-        this.method = method;
-
-        this.parameters = this.method.getParameters();
-        for (Parameter parameter : this.parameters) {
-            if (!beanContext.isBean(parameter.getType())) {
-                throw new IllegalArgumentException("The type " + parameter.getType().getName() + ", it's not supposed to be in bean constructor!");
-            }
-        }
-    }
-
-    public Object invoke(Object instance, BeanContext beanContext) throws InvocationTargetException, IllegalAccessException {
-        Object[] parameters = this.getParameters(beanContext);
-
-        return this.method.invoke(instance, parameters);
-    }
+    ServiceDependencyType value() default ServiceDependencyType.FORCE;
 
 }

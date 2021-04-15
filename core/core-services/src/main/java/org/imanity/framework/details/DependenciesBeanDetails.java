@@ -24,19 +24,20 @@
 
 package org.imanity.framework.details;
 
+import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import lombok.Getter;
 import org.imanity.framework.Service;
+import org.imanity.framework.ServiceDependencyType;
 import org.imanity.framework.details.GenericBeanDetails;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.HashSet;
-import java.util.Set;
+import java.util.*;
+import java.util.stream.Collectors;
 
 public class DependenciesBeanDetails extends GenericBeanDetails {
 
-    @Getter
-    protected final Set<String> dependencies;
+    protected final Map<ServiceDependencyType, List<String>> dependencies;
 
     public DependenciesBeanDetails(Object instance) {
         this(instance.getClass(), instance, "dummy");
@@ -48,22 +49,42 @@ public class DependenciesBeanDetails extends GenericBeanDetails {
 
     public DependenciesBeanDetails(Class<?> type, String name) {
         super(type, name);
-        this.dependencies = new HashSet<>();
+        this.dependencies = new HashMap<>();
+        for (ServiceDependencyType dependencyType : ServiceDependencyType.values()) {
+            this.dependencies.put(dependencyType, Lists.newArrayList());
+        }
     }
 
     public DependenciesBeanDetails(Class<?> type, String name, String[] dependencies) {
-        super(type, name);
-        this.dependencies = Sets.newHashSet(dependencies);
+        this(type, name);
+        this.addDependencies(ServiceDependencyType.FORCE, dependencies);
     }
 
     public DependenciesBeanDetails(Class<?> type, @Nullable Object instance, String name) {
         super(type, instance, name);
-        this.dependencies = new HashSet<>();
+        this.dependencies = new HashMap<>();
+        for (ServiceDependencyType dependencyType : ServiceDependencyType.values()) {
+            this.dependencies.put(dependencyType, Lists.newArrayList());
+        }
     }
 
     public DependenciesBeanDetails(Class<?> type, @Nullable Object instance, String name, String[] dependencies) {
-        super(type, instance, name);
-        this.dependencies = Sets.newHashSet(dependencies);
+        this(type, instance, name);
+        this.addDependencies(ServiceDependencyType.FORCE, dependencies);
+    }
+
+    public void addDependencies(ServiceDependencyType type, String... dependencies) {
+        for (String dependency : dependencies) {
+            this.getDependencies(type).add(dependency);
+        }
+    }
+
+    public List<String> getDependencies(ServiceDependencyType type) {
+        return this.dependencies.get(type);
+    }
+
+    public Set<Map.Entry<ServiceDependencyType, List<String>>> getDependencyEntries() {
+        return this.dependencies.entrySet();
     }
 
     @Override

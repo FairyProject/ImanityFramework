@@ -25,14 +25,18 @@
 package org.imanity.framework.details;
 
 import lombok.SneakyThrows;
+import org.imanity.framework.ServiceDependencyType;
 import org.imanity.framework.plugin.AbstractPlugin;
 import org.jetbrains.annotations.Nullable;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.util.Collection;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 public interface BeanDetails {
 
@@ -90,7 +94,22 @@ public interface BeanDetails {
 
     boolean hasDependencies();
 
-    Set<String> getDependencies();
+    Set<String> getChildren();
+
+    void addChildren(String children);
+
+    void removeChildren(String children);
+
+    List<String> getDependencies(ServiceDependencyType type);
+
+    Set<Map.Entry<ServiceDependencyType, List<String>>> getDependencyEntries();
+
+    default Set<String> getAllDependencies() {
+        return this.getDependencyEntries().stream()
+                .map(Map.Entry::getValue)
+                .flatMap(List::stream)
+                .collect(Collectors.toSet());
+    }
 
     default void onEnable() {
 

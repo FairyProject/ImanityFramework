@@ -22,37 +22,26 @@
  * SOFTWARE.
  */
 
-package org.imanity.framework.details.constructor;
+package org.imanity.framework.util;
 
-import lombok.Getter;
-import lombok.SneakyThrows;
-import org.imanity.framework.BeanContext;
+import java.util.function.LongConsumer;
 
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
-import java.lang.reflect.Parameter;
+public class SimpleTiming implements AutoCloseable {
 
-@Getter
-public class BeanParameterDetailsMethod extends BeanParameterDetailsAbstract {
-
-    private final Method method;
-
-    @SneakyThrows
-    public BeanParameterDetailsMethod(Method method, BeanContext beanContext) {
-        this.method = method;
-
-        this.parameters = this.method.getParameters();
-        for (Parameter parameter : this.parameters) {
-            if (!beanContext.isBean(parameter.getType())) {
-                throw new IllegalArgumentException("The type " + parameter.getType().getName() + ", it's not supposed to be in bean constructor!");
-            }
-        }
+    public static SimpleTiming create(LongConsumer consumer) {
+        return new SimpleTiming(consumer);
     }
 
-    public Object invoke(Object instance, BeanContext beanContext) throws InvocationTargetException, IllegalAccessException {
-        Object[] parameters = this.getParameters(beanContext);
+    private final LongConsumer consumer;
+    private final long startMillis;
 
-        return this.method.invoke(instance, parameters);
+    private SimpleTiming(LongConsumer consumer) {
+        this.consumer = consumer;
+        this.startMillis = System.currentTimeMillis();
     }
 
+    @Override
+    public void close() throws Exception {
+        this.consumer.accept(System.currentTimeMillis() - this.startMillis);
+    }
 }

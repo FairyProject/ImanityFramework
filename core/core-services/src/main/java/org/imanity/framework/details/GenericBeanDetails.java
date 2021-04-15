@@ -61,6 +61,7 @@ public class GenericBeanDetails implements BeanDetails {
     private Object instance;
     private Class<?> type;
 
+    private Set<String> children;
     private Map<String, String> tags;
 
     public GenericBeanDetails(Object instance) {
@@ -76,15 +77,12 @@ public class GenericBeanDetails implements BeanDetails {
         this.name = name;
         this.stage = ActivationStage.NOT_LOADED;
         this.tags = new ConcurrentHashMap<>(0);
+        this.children = new HashSet<>();
     }
 
     public GenericBeanDetails(Class<?> type, @Nullable Object instance, String name) {
-        this.type = type;
+        this(type, name);
         this.instance = instance;
-        this.name = name;
-        this.stage = ActivationStage.NOT_LOADED;
-        this.tags = new ConcurrentHashMap<>(0);
-
         this.loadAnnotations();
     }
 
@@ -235,7 +233,12 @@ public class GenericBeanDetails implements BeanDetails {
     }
 
     @Override
-    public Set<String> getDependencies() {
+    public List<String> getDependencies(ServiceDependencyType type) {
+        return Collections.emptyList();
+    }
+
+    @Override
+    public Set<Map.Entry<ServiceDependencyType, List<String>>> getDependencyEntries() {
         return Collections.emptySet();
     }
 
@@ -263,6 +266,20 @@ public class GenericBeanDetails implements BeanDetails {
     @Override
     public AbstractPlugin getBindPlugin() {
         return this.plugin;
+    }
+
+    public Set<String> getChildren() {
+        return Collections.unmodifiableSet(this.children);
+    }
+
+    @Override
+    public void addChildren(String children) {
+        this.children.add(children);
+    }
+
+    @Override
+    public void removeChildren(String children) {
+        this.children.remove(children);
     }
 
     @Override
