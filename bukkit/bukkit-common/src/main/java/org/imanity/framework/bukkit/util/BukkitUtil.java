@@ -24,7 +24,9 @@
 
 package org.imanity.framework.bukkit.util;
 
+import lombok.experimental.UtilityClass;
 import org.bukkit.*;
+import org.bukkit.block.Block;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 import org.bukkit.entity.Projectile;
@@ -37,24 +39,18 @@ import org.bukkit.potion.PotionEffect;
 import org.bukkit.projectiles.ProjectileSource;
 import org.bukkit.util.BlockIterator;
 import org.imanity.framework.bukkit.reflection.resolver.MethodResolver;
-import org.imanity.framework.metadata.MetadataKey;
 import org.imanity.framework.reflect.Reflect;
 import org.imanity.framework.util.CC;
 
 import javax.annotation.Nullable;
 import java.io.File;
-import java.io.IOException;
-import java.net.URISyntaxException;
-import java.net.URL;
-import java.net.URLDecoder;
 import java.util.*;
-import java.util.jar.JarEntry;
-import java.util.jar.JarFile;
 import java.util.stream.Collectors;
 
+@UtilityClass
 public class BukkitUtil {
 
-    public static List<Player> getPlayersFromUuids(Collection<UUID> uuids) {
+    public List<Player> getPlayersFromUuids(Collection<UUID> uuids) {
         return uuids
                 .stream()
                 .map(Bukkit::getPlayer)
@@ -62,8 +58,12 @@ public class BukkitUtil {
                 .collect(Collectors.toList());
     }
 
+    public List<Player> getPlayersFromUuids(UUID... uuids) {
+        return BukkitUtil.getPlayersFromUuids(Arrays.asList(uuids));
+    }
+
     @Nullable
-    public static Player getDamager(EntityDamageEvent event) {
+    public Player getDamager(EntityDamageEvent event) {
         if (event instanceof EntityDamageByEntityEvent) {
             EntityDamageByEntityEvent damageByEntityEvent = (EntityDamageByEntityEvent) event;
             Entity damager = damageByEntityEvent.getDamager();
@@ -82,7 +82,7 @@ public class BukkitUtil {
         return null;
     }
 
-    public static String getProgressBar(int current, int max, int totalBars, String symbol, String completedColor, String notCompletedColor){
+    public String getProgressBar(int current, int max, int totalBars, String symbol, String completedColor, String notCompletedColor){
 
         float percent = (float) current / max;
 
@@ -102,7 +102,7 @@ public class BukkitUtil {
         return sb.toString();
     }
 
-    public static void clear(final Player player) {
+    public void clear(final Player player) {
         player.setHealth(20.0);
         player.setFoodLevel(20);
         player.setExp(0.0f);
@@ -116,20 +116,20 @@ public class BukkitUtil {
         player.getActivePotionEffects().stream().map(PotionEffect::getType).forEach(player::removePotionEffect);
     }
 
-    public static void sendMessages(Player player, Iterable<String> iterable) {
+    public void sendMessages(Player player, Iterable<String> iterable) {
         for (String message : iterable) {
             player.sendMessage(message);
         }
     }
 
-    public static File getPluginJar(JavaPlugin plugin) {
+    public File getPluginJar(JavaPlugin plugin) {
 
         MethodResolver resolver = new MethodResolver(JavaPlugin.class);
         return (File) resolver.resolveWrapper("getFile").invoke(plugin);
 
     }
 
-    public static void delayedUpdateInventory(Player player) {
+    public void delayedUpdateInventory(Player player) {
         TaskUtil.runScheduled(() -> {
             if (player.isOnline()) {
                 player.updateInventory();
@@ -137,7 +137,7 @@ public class BukkitUtil {
         }, 1L);
     }
 
-    public static boolean isPlayerEvent(Class<?> event) {
+    public boolean isPlayerEvent(Class<?> event) {
 
         if (PlayerEvent.class.isAssignableFrom(event)) {
             return true;
@@ -148,17 +148,17 @@ public class BukkitUtil {
 
     }
 
-    public static org.bukkit.block.Block getBlockLookingAt(final Player player, final int distance) {
+    public Block getBlockLookingAt(final Player player, final int distance) {
         final Location location = player.getEyeLocation();
         final BlockIterator blocksToAdd = new BlockIterator(location, 0.0D, distance);
-        org.bukkit.block.Block block = null;
+        Block block = null;
         while (blocksToAdd.hasNext()) {
             block = blocksToAdd.next();
         }
         return block;
     }
 
-    public static File getDataFolder(int depth) {
+    public File getDataFolder(int depth) {
         Class<?> caller = Reflect.getCallerClass(depth).orElse(null);
 
         if (caller != null) {
@@ -178,20 +178,20 @@ public class BukkitUtil {
         }
     }
 
-    public static File getDataFolder() {
+    public File getDataFolder() {
         return getDataFolder(4);
     }
 
-    public static File getFile(String fileName) {
+    public File getFile(String fileName) {
         return new File(getDataFolder(4), fileName);
     }
 
     @Deprecated
-    public static String color(String msg) {
+    public String color(String msg) {
         return CC.translate(msg);
     }
 
-    public static boolean isNPC(Player player) {
+    public boolean isNPC(Player player) {
         if (player.hasMetadata("ImanityBot")) {
             return true;
         }
