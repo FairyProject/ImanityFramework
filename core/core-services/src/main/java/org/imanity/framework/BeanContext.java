@@ -51,7 +51,7 @@ import java.util.stream.Collectors;
 
 public class BeanContext {
 
-    public static boolean SHOW_LOGS = true;
+    public static boolean SHOW_LOGS = false;
     public static BeanContext INSTANCE;
     public static final int PLUGIN_LISTENER_PRIORITY = 100;
 
@@ -94,6 +94,8 @@ public class BeanContext {
             this.scanClasses("framework", BeanContext.class.getClassLoader(), Collections.singleton("org.imanity.framework"));
         } catch (Throwable throwable) {
             LOGGER.error("Error while scanning classes for framework", throwable);
+            FrameworkMisc.PLATFORM.shutdown();
+            return;
         }
 
         if (PluginManager.isInitialized()) {
@@ -110,12 +112,15 @@ public class BeanContext {
                         log("Plugin " + plugin.getName() + " has been registered as bean.");
                     } catch (Throwable throwable) {
                         LOGGER.error("An error occurs while registering plugin", throwable);
+                        plugin.close();
+                        return;
                     }
 
                     try {
                         scanClasses(plugin.getName(), plugin.getPluginClassLoader(), findClassPaths(plugin.getClass()), beanDetails);
                     } catch (Throwable throwable) {
                         LOGGER.error("An error occurs while handling scanClasses()", throwable);
+                        plugin.close();
                     }
                 }
 
@@ -175,6 +180,59 @@ public class BeanContext {
         this.call(PostDestroy.class, detailsList);
     }
 
+    public BeanDetails registerBean(BeanDetails beanDetails) {
+        return this.registerBean(beanDetails, true);
+    }
+
+    public BeanDetails registerBean(BeanDetails beanDetails, boolean sort) {
+        this.beanByType.put(beanDetails.getType(), beanDetails);
+        this.beanByName.put(beanDetails.getName(), beanDetails);
+        if (sort) {
+            this.sortedBeans.add(beanDetails);
+        }
+
+        return beanDetails;
+    }
+
+    public Collection<BeanDetails> unregisterBean(Class<?> type) {
+        return this.unregisterBean(this.getBeanDetails(type));
+    }
+
+    public Collection<BeanDetails> unregisterBean(String name) {
+        return this.unregisterBean(this.getBeanByName(name));
+    }
+
+    // UNFINISHED, or finished? idk
+    public Collection<BeanDetails> unregisterBean(@NonNull BeanDetails beanDetails) {
+        this.beanByType.remove(beanDetails.getType());
+        this.beanByName.remove(beanDetails.getName());
+
+        this.lock.writeLock().lock();
+        this.sortedBeans.remove(beanDetails);
+        this.lock.writeLock().unlock();
+
+        final ImmutableList.Builder<BeanDetails> builder = ImmutableList.builder();
+
+        // Unregister Child Dependency
+        for (String child : beanDetails.getChildren()) {
+            BeanDetails childDetails = this.getBeanByName(child);
+
+            builder.add(childDetails);
+            builder.addAll(this.unregisterBean(childDetails));
+        }
+
+        // Remove Children from dependencies
+        for (String dependency : beanDetails.getAllDependencies()) {
+            BeanDetails dependDetails = this.getBeanByName(dependency);
+
+            if (dependDetails != null) {
+                dependDetails.removeChildren(beanDetails.getName());
+            }
+        }
+
+        return builder.build();
+    }
+
     public BeanDetails getBeanDetails(Class<?> type) {
         return this.beanByType.get(type);
     }
@@ -189,6 +247,24 @@ public class BeanContext {
 
     public BeanDetails getBeanByName(String name) {
         return this.beanByName.get(name);
+    }
+
+    public boolean isRegisteredBeans(String... beans) {
+        for (String bean : beans) {
+            BeanDetails dependencyDetails = this.getBeanByName(bean);
+            if (dependencyDetails == null || dependencyDetails.getInstance() == null) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    public boolean isBean(Class<?> beanClass) {
+        return this.beanByType.containsKey(beanClass);
+    }
+
+    public boolean isBean(Object bean) {
+        return this.isBean(bean.getClass());
     }
 
     public Collection<BeanDetails> findDetailsBindWith(AbstractPlugin plugin) {
@@ -574,75 +650,6 @@ public class BeanContext {
         }
 
         return sorted;
-    }
-
-    public BeanDetails registerBean(BeanDetails beanDetails) {
-        return this.registerBean(beanDetails, true);
-    }
-
-    public BeanDetails registerBean(BeanDetails beanDetails, boolean sort) {
-        this.beanByType.put(beanDetails.getType(), beanDetails);
-        this.beanByName.put(beanDetails.getName(), beanDetails);
-        if (sort) {
-            this.sortedBeans.add(beanDetails);
-        }
-
-        return beanDetails;
-    }
-
-    public Collection<BeanDetails> unregisterBean(Class<?> type) {
-        return this.unregisterBean(this.getBeanDetails(type));
-    }
-
-    public Collection<BeanDetails> unregisterBean(String name) {
-        return this.unregisterBean(this.getBeanByName(name));
-    }
-
-    // UNFINISHED, or finished? idk
-    public Collection<BeanDetails> unregisterBean(@NonNull BeanDetails beanDetails) {
-        this.beanByType.remove(beanDetails.getType());
-        this.beanByName.remove(beanDetails.getName());
-
-        this.lock.writeLock().lock();
-        this.sortedBeans.remove(beanDetails);
-        this.lock.writeLock().unlock();
-
-        final ImmutableList.Builder<BeanDetails> builder = ImmutableList.builder();
-
-        for (String child : beanDetails.getChildren()) {
-            BeanDetails childDetails = this.getBeanByName(child);
-
-            builder.add(childDetails);
-            builder.addAll(this.unregisterBean(childDetails));
-        }
-
-        for (String dependency : beanDetails.getAllDependencies()) {
-            BeanDetails dependDetails = this.getBeanByName(dependency);
-
-            if (dependDetails != null) {
-                dependDetails.removeChildren(beanDetails.getName());
-            }
-        }
-
-        return builder.build();
-    }
-
-    public boolean isRegisteredBeans(String... beans) {
-        for (String bean : beans) {
-            BeanDetails dependencyDetails = this.getBeanByName(bean);
-            if (dependencyDetails == null || dependencyDetails.getInstance() == null) {
-                return false;
-            }
-        }
-        return true;
-    }
-
-    public boolean isBean(Class<?> beanClass) {
-        return this.beanByType.containsKey(beanClass);
-    }
-
-    public boolean isBean(Object bean) {
-        return this.isBean(bean.getClass());
     }
 
     public List<String> findClassPaths(Class<?> plugin) {

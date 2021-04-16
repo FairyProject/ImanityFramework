@@ -24,74 +24,38 @@
 
 package org.imanity.framework.bungee.plugin;
 
-import lombok.Getter;
+import net.md_5.bungee.api.ProxyServer;
 import net.md_5.bungee.api.plugin.Plugin;
 import org.imanity.framework.bungee.Imanity;
+import org.imanity.framework.plugin.PluginHandler;
+import org.imanity.framework.reflect.ReflectObject;
+import org.jetbrains.annotations.Nullable;
 
-import java.util.ArrayDeque;
-import java.util.Queue;
+public class BungeePluginHandler implements PluginHandler {
 
-public abstract class ImanityPlugin extends Plugin {
+    private final Class<?> pluginLoaderClass;
 
-    private Queue<Runnable> enableQueues = new ArrayDeque<>();
-    @Getter
-    private boolean enabled;
-
-    public final void queue(Runnable runnable) {
-        if (this.enabled) {
-            runnable.run();
-            return;
+    public BungeePluginHandler() {
+        try {
+            pluginLoaderClass = Class.forName("net.md_5.bungee.api.plugin.PluginClassloader");
+        } catch (ClassNotFoundException ex) {
+            throw new IllegalStateException("net.md_5.bungee.api.plugin.PluginClassloader wasn't found!");
         }
-        this.enableQueues.add(runnable);
     }
 
-    private final void runQueue() {
-        Runnable runnable;
-        while ((runnable = this.enableQueues.poll()) != null) {
-            runnable.run();
+    @Override
+    public @Nullable String getPluginByClass(Class<?> type) {
+        try {
+            ClassLoader classLoader = type.getClassLoader();
+            if (!pluginLoaderClass.isInstance(classLoader)) {
+                return Imanity.PLUGIN.getDescription().getName();
+            }
+
+            ReflectObject reflectObject = new ReflectObject(classLoader);
+            Plugin plugin = reflectObject.get("plugin");
+            return plugin.getDescription().getName();
+        } catch (Throwable ignored) {
+            return Imanity.PLUGIN.getDescription().getName();
         }
-        this.enableQueues = null;
     }
-
-    public ImanityPlugin() {
-        Imanity.PLUGINS.add(this);
-    }
-
-    @Override
-    public final void onLoad() {
-        this.load();
-    }
-
-    public void load() {
-
-    }
-
-    @Override
-    public final void onEnable() {
-        this.enabled = true;
-
-        this.postEnable();
-        this.runQueue();
-    }
-
-    @Override
-    public final void onDisable() {
-    }
-
-    public void preEnable() {
-
-    }
-
-    public void postEnable() {
-
-    }
-
-    public void preDisable() {
-
-    }
-
-    public void postDisable() {
-
-    }
-
 }

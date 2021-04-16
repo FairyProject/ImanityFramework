@@ -117,6 +117,11 @@ public class IndependentImanityPlatform implements ImanityPlatform {
     }
 
     @Override
+    public void shutdown() {
+        System.exit(0);
+    }
+
+    @Override
     public boolean isShuttingDown() {
         return this.bootable.isShuttingDown();
     }

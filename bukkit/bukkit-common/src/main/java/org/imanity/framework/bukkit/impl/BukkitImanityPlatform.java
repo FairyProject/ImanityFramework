@@ -25,6 +25,7 @@
 package org.imanity.framework.bukkit.impl;
 
 import org.apache.logging.log4j.Logger;
+import org.bukkit.Bukkit;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.imanity.framework.ImanityPlatform;
 import org.imanity.framework.bukkit.Imanity;
@@ -71,6 +72,11 @@ public class BukkitImanityPlatform implements ImanityPlatform {
             return plugin.getName();
         }
         return null;
+    }
+
+    @Override
+    public void shutdown() {
+        Bukkit.shutdown();
     }
 
     @Override

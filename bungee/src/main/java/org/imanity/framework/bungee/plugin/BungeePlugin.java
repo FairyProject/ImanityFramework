@@ -22,20 +22,25 @@
  * SOFTWARE.
  */
 
-package org.imanity.framework.bukkit.plugin;
+package org.imanity.framework.bungee.plugin;
 
-import org.bukkit.Bukkit;
-import org.bukkit.plugin.java.JavaPlugin;
+import lombok.Getter;
+import net.md_5.bungee.api.ProxyServer;
+import net.md_5.bungee.api.plugin.Plugin;
+import org.imanity.framework.bungee.Imanity;
 import org.imanity.framework.plugin.AbstractPlugin;
 import org.imanity.framework.plugin.PluginManager;
 import org.imanity.framework.util.Utility;
 
-public abstract class BukkitPlugin extends JavaPlugin implements AbstractPlugin {
+import java.util.ArrayDeque;
+import java.util.Queue;
+
+public abstract class BungeePlugin extends Plugin implements AbstractPlugin {
 
     @Override
     public final void onLoad() {
         ClassLoader originalContextClassLoader = Thread.currentThread().getContextClassLoader();
-        Thread.currentThread().setContextClassLoader(getClassLoader());
+        Thread.currentThread().setContextClassLoader(getPluginClassLoader());
         PluginManager.INSTANCE.addPlugin(this);
         PluginManager.INSTANCE.onPluginInitial(this);
 
@@ -46,7 +51,7 @@ public abstract class BukkitPlugin extends JavaPlugin implements AbstractPlugin 
     @Override
     public final void onEnable() {
         ClassLoader originalContextClassLoader = Thread.currentThread().getContextClassLoader();
-        Thread.currentThread().setContextClassLoader(getClassLoader());
+        Thread.currentThread().setContextClassLoader(getPluginClassLoader());
 
         Utility.resolveLinkageError();
 
@@ -61,7 +66,7 @@ public abstract class BukkitPlugin extends JavaPlugin implements AbstractPlugin 
     @Override
     public final void onDisable() {
         ClassLoader originalContextClassLoader = Thread.currentThread().getContextClassLoader();
-        Thread.currentThread().setContextClassLoader(getClassLoader());
+        Thread.currentThread().setContextClassLoader(getPluginClassLoader());
         this.onPluginDisable();
 
         PluginManager.INSTANCE.onPluginDisable(this);
@@ -70,12 +75,12 @@ public abstract class BukkitPlugin extends JavaPlugin implements AbstractPlugin 
 
     @Override
     public final void close() {
-        Bukkit.getPluginManager().disablePlugin(this);
+        // ?
     }
 
     @Override
     public final ClassLoader getPluginClassLoader() {
-        return this.getClassLoader();
+        return this.getClass().getClassLoader();
     }
 
 }

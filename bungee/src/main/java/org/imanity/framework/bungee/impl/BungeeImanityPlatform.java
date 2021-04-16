@@ -25,22 +25,16 @@
 package org.imanity.framework.bungee.impl;
 
 import net.md_5.bungee.api.ProxyServer;
-import net.md_5.bungee.api.plugin.Plugin;
 import net.md_5.bungee.api.plugin.PluginDescription;
 import org.imanity.framework.ImanityPlatform;
-import org.imanity.framework.ImanityCommon;
 import org.imanity.framework.bungee.Imanity;
-import org.imanity.framework.bungee.plugin.ImanityPlugin;
 import org.imanity.framework.plugin.PluginClassLoader;
-import org.imanity.framework.util.entry.Entry;
 import org.jetbrains.annotations.Nullable;
 
 import java.io.*;
 import java.net.URL;
 import java.net.URLConnection;
-import java.util.*;
 import java.util.logging.Level;
-import java.util.stream.Collectors;
 
 public class BungeeImanityPlatform implements ImanityPlatform {
     @Override
@@ -126,6 +120,11 @@ public class BungeeImanityPlatform implements ImanityPlatform {
             return desc.getName();
         }
         return null;
+    }
+
+    @Override
+    public void shutdown() {
+        ProxyServer.getInstance().stop();
     }
 
     @Override

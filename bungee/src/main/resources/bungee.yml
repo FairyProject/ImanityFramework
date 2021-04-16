@@ -1,4 +1,4 @@
 name: "framework"
 version: ${project.version}
-main: org.imanity.framework.bungee.plugin.StandalonePlugin
+main: org.imanity.framework.bungee.plugin.ImanityStandalonePlugin
 author: LeeGod

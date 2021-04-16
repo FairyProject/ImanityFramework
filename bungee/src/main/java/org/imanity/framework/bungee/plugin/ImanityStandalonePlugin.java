@@ -26,30 +26,26 @@ package org.imanity.framework.bungee.plugin;
 
 import net.md_5.bungee.api.plugin.Plugin;
 import org.imanity.framework.bungee.Imanity;
+import org.imanity.framework.plugin.PluginManager;
 
-public class StandalonePlugin extends Plugin {
+public class ImanityStandalonePlugin extends Plugin {
+
+    @Override
+    public void onLoad() {
+        PluginManager.initialize(new BungeePluginHandler());
+    }
 
     @Override
     public void onEnable() {
+        ClassLoader originalContextClassLoader = Thread.currentThread().getContextClassLoader();
+        Thread.currentThread().setContextClassLoader(this.getClass().getClassLoader());
 
-        for (ImanityPlugin plugin : Imanity.PLUGINS) {
-            plugin.preEnable();
-        }
         Imanity.init(this);
-
+        Thread.currentThread().setContextClassLoader(originalContextClassLoader);
     }
 
     @Override
     public void onDisable() {
-
-        for (ImanityPlugin plugin : Imanity.PLUGINS) {
-            plugin.preDisable();
-        }
-
         Imanity.shutdown();
-
-        for (ImanityPlugin plugin : Imanity.PLUGINS) {
-            plugin.postDisable();
-        }
     }
 }

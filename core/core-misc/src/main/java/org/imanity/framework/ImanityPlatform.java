@@ -47,6 +47,8 @@ public interface ImanityPlatform {
         return null;
     }
 
+    void shutdown();
+
     boolean isShuttingDown();
 
     boolean isServerThread();

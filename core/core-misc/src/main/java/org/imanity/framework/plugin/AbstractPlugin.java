@@ -46,6 +46,8 @@ public interface AbstractPlugin {
 
     }
 
+    void close();
+
     ClassLoader getPluginClassLoader();
 
     String getName();
