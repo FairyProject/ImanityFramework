@@ -44,7 +44,7 @@ public class BeanParameterDetailsMethod extends BeanParameterDetailsAbstract {
         this.parameters = this.method.getParameters();
         for (Parameter parameter : this.parameters) {
             if (!beanContext.isBean(parameter.getType())) {
-                throw new IllegalArgumentException("The type " + parameter.getType().getName() + ", it's not supposed to be in bean constructor!");
+                throw new IllegalArgumentException("The type " + parameter.getType().getName() + " is not a bean!, it's not supposed to be in bean method!");
             }
         }
     }

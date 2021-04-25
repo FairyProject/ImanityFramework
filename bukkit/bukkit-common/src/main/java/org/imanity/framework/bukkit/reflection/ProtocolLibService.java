@@ -25,44 +25,30 @@
 package org.imanity.framework.bukkit.reflection;
 
 import com.comphenix.protocol.ProtocolLibrary;
-import com.comphenix.protocol.ProtocolManager;
 import com.comphenix.protocol.events.PacketContainer;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-import org.bukkit.Bukkit;
+import com.google.common.base.Preconditions;
 import org.bukkit.entity.Player;
 import org.imanity.framework.PreInitialize;
 import org.imanity.framework.Service;
-import org.imanity.framework.util.CC;
 
 @Service(name = "protocollib")
 public class ProtocolLibService {
 
-    private static final Logger LOGGER = LogManager.getLogger(ProtocolLibService.class);
-
-    private ProtocolManager protocolManager;
     private boolean enabled;
 
     @PreInitialize
     public void onInitialize() {
-        if (Bukkit.getPluginManager().getPlugin("ProtocolLib") == null) {
-            LOGGER.warn(CC.YELLOW + "The ProtocolLib plugin hasn't been installed! Some feature may not work in this case!");
-            return;
-        }
-
         this.enabled = true;
-        this.protocolManager = ProtocolLibrary.getProtocolManager();
     }
 
     public void validEnabled() {
-        if (!this.enabled) {
-            throw new IllegalArgumentException("ProtocolLib isn't enabled! this feature couldn't work!");
-        }
+        Preconditions.checkArgument(this.enabled, "ProtocolLib isn't enabled! this feature couldn't work!");
     }
 
-    public void send(Player player, PacketContainer packetContainer) {
+    public void send(Player player, Object packetContainer) {
+        Preconditions.checkArgument(packetContainer instanceof PacketContainer, "ProtocolLibService.send(Player, Object) must be PacketContainer in second parameter!");
         try {
-            this.protocolManager.sendServerPacket(player, packetContainer);
+            ProtocolLibrary.getProtocolManager().sendServerPacket(player, (PacketContainer) packetContainer);
         } catch (Throwable throwable) {
             throw new IllegalArgumentException("Error while sending packet", throwable);
         }
