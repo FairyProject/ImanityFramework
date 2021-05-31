@@ -477,21 +477,18 @@ public class BeanContext {
         try (SimpleTiming ignored = logTiming("Unregistering Disabled Beans")) {
             this.sortedBeans.addAll(beanDetailsList);
 
-            for (int i = 0; i < beanDetailsList.size(); i++) {
-                BeanDetails beanDetails = beanDetailsList.get(i);
-
+            for (BeanDetails beanDetails : ImmutableList.copyOf(beanDetailsList)) {
+                if (!beanDetailsList.contains(beanDetails)) {
+                    continue;
+                }
                 try {
                     if (!beanDetails.shouldInitialize()) {
                         log("Unregistering " + beanDetails.getName() + " due to it cancelled to register");
 
-                        beanDetailsList.remove(i--);
+                        beanDetailsList.remove(beanDetails);
                         for (BeanDetails details : this.unregisterBean(beanDetails)) {
                             log("Unregistering " + details.getName() + " due to it dependency unregistered");
 
-                            int index = beanDetailsList.indexOf(details);
-                            if (index >= i) {
-                                i--;
-                            }
                             beanDetailsList.remove(details);
                         }
                     }
