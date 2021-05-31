@@ -27,7 +27,7 @@
     <parent>
         <artifactId>core</artifactId>
         <groupId>org.imanity.framework</groupId>
-        <version>0.3b1</version>
+        <version>0.3b2</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
@@ -77,12 +77,6 @@
                         </goals>
                         <configuration>
                             <minimizeJar>false</minimizeJar>
-                            <relocations>
-                                <relocation>
-                                    <pattern>com.google.guava</pattern>
-                                    <shadedPattern>org.imanity.framework.external.guava</shadedPattern>
-                                </relocation>
-                            </relocations>
                         </configuration>
                     </execution>
                 </executions>
@@ -168,7 +162,7 @@
         <dependency>
             <groupId>com.google.guava</groupId>
             <artifactId>guava</artifactId>
-            <version>29.0-jre</version>
+            <version>30.0-jre</version>
             <scope>provided</scope>
         </dependency>
         <dependency>
@@ -212,7 +206,7 @@
         <dependency>
             <groupId>commons-io</groupId>
             <artifactId>commons-io</artifactId>
-            <version>2.6</version>
+            <version>2.7</version>
             <scope>provided</scope>
         </dependency>
         <!-- https://mvnrepository.com/artifact/com.google.code.gson/gson -->

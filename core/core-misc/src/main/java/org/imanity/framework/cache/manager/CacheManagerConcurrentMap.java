@@ -98,9 +98,9 @@ public class CacheManagerConcurrentMap implements CacheManager {
     }
 
     @Override
-    public void flush(JoinPoint point) {
+    public void flush(Class<?> parentClass) {
         for (final CacheKeyAbstract key : this.cache.keySet()) {
-            if (!key.sameTarget(point, null)) {
+            if (parentClass != null && !parentClass.isAssignableFrom(key.getParentClass())) {
                 continue;
             }
             this.cache.remove(key);

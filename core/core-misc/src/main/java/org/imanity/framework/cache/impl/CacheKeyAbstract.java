@@ -24,6 +24,7 @@
 
 package org.imanity.framework.cache.impl;
 
+import lombok.Getter;
 import org.aspectj.lang.JoinPoint;
 import org.aspectj.lang.reflect.MethodSignature;
 
@@ -33,25 +34,11 @@ import java.util.Objects;
 
 public abstract class CacheKeyAbstract {
 
-    private final Object target;
+    @Getter
+    private final Class<?> parentClass;
 
-    public CacheKeyAbstract(JoinPoint point) {
-        this.target = CacheKeyAbstract.findTarget(point);
-    }
-
-    public boolean sameTarget(final JoinPoint point, String key) {
-        return CacheKeyAbstract.findTarget(point).equals(this.target);
-    }
-
-    public static Object findTarget(final JoinPoint point) {
-        Object target;
-        Method method = ((MethodSignature) point.getSignature()).getMethod();
-        if (Modifier.isStatic(method.getModifiers())) {
-            target = method.getDeclaringClass();
-        } else {
-            target = point.getTarget();
-        }
-        return target;
+    public CacheKeyAbstract(Class<?> parentClass) {
+        this.parentClass = parentClass;
     }
 
     @Override
@@ -61,11 +48,11 @@ public abstract class CacheKeyAbstract {
 
         CacheKeyAbstract that = (CacheKeyAbstract) o;
 
-        return Objects.equals(target, that.target);
+        return this.parentClass == that.parentClass;
     }
 
     @Override
     public int hashCode() {
-        return target != null ? target.hashCode() : 0;
+        return this.parentClass.hashCode();
     }
 }

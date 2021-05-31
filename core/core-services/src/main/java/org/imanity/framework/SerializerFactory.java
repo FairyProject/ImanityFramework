@@ -47,11 +47,11 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 @Getter
 public class SerializerFactory {
 
-    private Map<Class<?>, ObjectSerializer> serializers;
+    private Map<Class<?>, ObjectSerializer<?, ?>> serializers;
 
     @Autowired
     private JacksonService jacksonService;
-    private Queue<ObjectSerializer> serializerQueue;
+    private Queue<ObjectSerializer<?, ?>> serializerQueue;
 
     @PreInitialize
     public void preInit() {
@@ -66,7 +66,7 @@ public class SerializerFactory {
 
             @Override
             public Object newInstance(Class<?> type) {
-                ObjectSerializer serializer = (ObjectSerializer) super.newInstance(type);
+                ObjectSerializer<?, ?> serializer = (ObjectSerializer<?, ?>) super.newInstance(type);
 
                 if (serializers.containsKey(serializer.inputClass())) {
                     throw new IllegalArgumentException("The Serializer for " + serializer.inputClass().getName() + " already exists!");
@@ -85,7 +85,7 @@ public class SerializerFactory {
 
     @PostInitialize
     public void postInit() {
-        ObjectSerializer serializer;
+        ObjectSerializer<?, ?> serializer;
         while ((serializer = serializerQueue.poll()) != null) {
             jacksonService.registerJacksonConfigure(new SerializerJacksonConfigure(serializer));
         }
@@ -94,7 +94,7 @@ public class SerializerFactory {
     }
 
     @Nullable
-    public ObjectSerializer findSerializer(Class<?> type) {
+    public ObjectSerializer<?, ?> findSerializer(Class<?> type) {
         return this.serializers.getOrDefault(type, null);
     }
 

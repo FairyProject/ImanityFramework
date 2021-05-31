@@ -32,7 +32,7 @@ import org.imanity.framework.jackson.JacksonConfigure;
 @AllArgsConstructor
 public class SerializerJacksonConfigure implements JacksonConfigure {
 
-    private final ObjectSerializer serializer;
+    private final ObjectSerializer<?, ?> serializer;
 
     @Override
     public void configure(ObjectMapper objectMapper) {

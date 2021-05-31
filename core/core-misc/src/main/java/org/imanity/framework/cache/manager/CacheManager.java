@@ -47,5 +47,5 @@ public interface CacheManager {
 
     void evict(JoinPoint point, String keyString);
 
-    void flush(JoinPoint point);
+    void flush(Class<?> parentClass);
 }

@@ -31,6 +31,7 @@ import org.imanity.framework.CachePut;
 import org.imanity.framework.Cacheable;
 import org.imanity.framework.cache.EnableOwnCacheManager;
 import org.junit.Test;
+import org.springframework.util.Assert;
 
 import java.security.SecureRandom;
 import java.util.Random;
@@ -66,6 +67,26 @@ public class CacheableTest {
                 CacheableTest.Foo.staticGet(),
                 CoreMatchers.not(CoreMatchers.equalTo(first))
         );
+    }
+
+    @Test
+    public void flushAndEnsureNonNull() {
+        CacheableTest.Imanity imanity = new Imanity();
+        for (int i = 0; i < 100000; i++) {
+            final String hi = imanity.test("hi");
+            Assert.notNull(hi, "The result is null!");
+            imanity.clear();
+        }
+    }
+
+    @Test
+    public void evictAndEnsureNonNull() {
+        CacheableTest.Imanity imanity = new Imanity();
+        for (int i = 0; i < 100000; i++) {
+            final String hi = imanity.test("hi");
+            Assert.notNull(hi, "The result is null!");
+            imanity.evict("hi");
+        }
     }
 
     @Test
@@ -145,9 +166,19 @@ public class CacheableTest {
 
         }
 
+        @CacheEvict(value = "'test-' + #args[0]")
+        public void evict(String id) {
+
+        }
+
         @CachePut(value = "'test-' + #args[0]")
         public long put(int id, long value) {
             return value;
+        }
+
+        @Cacheable.ClearBefore
+        public void clear() {
+
         }
 
     }

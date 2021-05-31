@@ -33,8 +33,8 @@ public class CacheKeyString extends CacheKeyAbstract {
 
     private final String key;
 
-    public CacheKeyString(JoinPoint point, String key) {
-        super(point);
+    public CacheKeyString(Class<?> parentClass, String key) {
+        super(parentClass);
         this.key = key;
     }
 
@@ -45,7 +45,7 @@ public class CacheKeyString extends CacheKeyAbstract {
 
         CacheKeyString that = (CacheKeyString) o;
 
-        return Objects.equals(key, that.key) && super.equals(o);
+        return Objects.equals(key, that.key);
     }
 
     @Override

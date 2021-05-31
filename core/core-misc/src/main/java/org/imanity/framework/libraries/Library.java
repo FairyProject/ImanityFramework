@@ -84,9 +84,8 @@ public class Library {
     GUAVA = new Library(
             "com{}google{}guava",
             "guava",
-            "29.0-jre",
-            "SIXFTM1H57LSJTHQSY+RW1FY6AQGTA7NKCYL+WEW2IU=",
-            new Relocate("com{}google{}guava", IMANITY_LIB_PACKAGE + "guava")
+            "30.0-jre",
+            "SIXFTM1H57LSJTHQSY+RW1FY6AQGTA7NKCYL+WEW2IU="
     ),
     FAST_UTIL = new Library(
             "it{}unimi{}dsi",

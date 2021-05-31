@@ -152,11 +152,14 @@ public class CacheableAspect {
     }
 
     public CacheKeyAbstract toKey(JoinPoint point, String key) {
+        final Method method = ((MethodSignature) point.getSignature()).getMethod();
+        Class<?> parentClass = method.getDeclaringClass();
+
         if (key != null && !key.isEmpty()) {
-            return new CacheKeyString(point, key);
+            return new CacheKeyString(parentClass, key);
         }
 
-        return new CacheKeyMethod(point);
+        return new CacheKeyMethod(parentClass, point);
     }
 
     @SneakyThrows
@@ -244,7 +247,7 @@ public class CacheableAspect {
                             + " && @annotation(org.imanity.framework.Cacheable.ClearBefore)"
             )
     public void preFlush(final JoinPoint point) {
-        this.flush(point, "before the call");
+        this.flush(point);
     }
 
     @After
@@ -254,13 +257,13 @@ public class CacheableAspect {
                             + " && @annotation(org.imanity.framework.Cacheable.ClearAfter)"
             )
     public void postFlush(final JoinPoint point) {
-        this.flush(point, "after the call");
+        this.flush(point);
     }
 
-    private void flush(final JoinPoint point, final String when) {
+    private void flush(final JoinPoint point) {
         Method method = ((MethodSignature) point.getSignature()).getMethod();
 
-        this.getCacheManager(method.getDeclaringClass()).flush(point);
+        this.getCacheManager(method.getDeclaringClass()).flush(method.getDeclaringClass());
     }
 
 }

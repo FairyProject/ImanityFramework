@@ -35,8 +35,8 @@ public class CacheKeyMethod extends CacheKeyAbstract {
     private final Method method;
     private final Object[] arguments;
 
-    public CacheKeyMethod(final JoinPoint point) {
-        super(point);
+    public CacheKeyMethod(Class<?> parentClass, final JoinPoint point) {
+        super(parentClass);
         this.method = ((MethodSignature) point.getSignature()).getMethod();
         this.arguments = point.getArgs();
     }

@@ -55,7 +55,6 @@ public class AsyncTaskScheduler implements ITaskScheduler {
                 .build()
         );
         this.executorService.scheduleAtFixedRate(() -> {
-
             if (this.changed.get()) {
                 this.parsePending();
             }
@@ -64,7 +63,11 @@ public class AsyncTaskScheduler implements ITaskScheduler {
             while ((task = this.pending.poll()) != null) {
                 task.setNext(task.getNext() - 1);
                 if (task.getNext() == 0) {
-                    task.getRunnable().run();
+                    try {
+                        task.getRunnable().run();
+                    } catch (Throwable throwable) {
+                        Stacktrace.print(throwable);
+                    }
 
                     if (task.getPeriod() < 1) {
                         this.tasks.remove(task.getId());

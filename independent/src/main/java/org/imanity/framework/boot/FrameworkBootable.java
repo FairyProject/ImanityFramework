@@ -380,6 +380,7 @@ public final class FrameworkBootable {
             LOGGER.info("Shutting down...");
             Utility.tryCatch(() -> this.call(PreDestroy.class));
 
+            this.taskScheduler.shutdown();
             ImanityCommon.shutdown();
 
             Utility.tryCatch(() -> this.call(PostDestroy.class));
