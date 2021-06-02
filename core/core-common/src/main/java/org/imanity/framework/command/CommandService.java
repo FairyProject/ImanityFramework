@@ -187,15 +187,15 @@ public class CommandService {
             return parameter;
         }
 
+        ParameterHolder holder = this.parameters.getOrDefault(type, null);
+        if (holder == null) {
+            return null;
+        }
+
         if (type.isEnum()) {
             try {
                 return Enum.valueOf(type, parameter);
             } catch (IllegalArgumentException ignored) {}
-        }
-
-        ParameterHolder holder = this.parameters.getOrDefault(type, null);
-        if (holder == null) {
-            return null;
         }
 
         return holder.transform(event, parameter);
