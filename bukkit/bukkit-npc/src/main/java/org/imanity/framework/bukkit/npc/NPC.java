@@ -43,16 +43,16 @@ import org.imanity.framework.bukkit.npc.modifier.*;
 import org.imanity.framework.bukkit.npc.profile.Profile;
 import org.imanity.framework.bukkit.npc.tracker.NPCTrackerEntry;
 import org.imanity.framework.bukkit.npc.util.AxisAlignedBB;
+import org.imanity.framework.task.Task;
 import org.imanity.framework.util.FastRandom;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
+import java.util.concurrent.CompletableFuture;
 
 /**
- *
  * @credit https://github.com/juliarn/NPC-Lib
  * @modified by LeeGod
- *
  */
 @Getter
 public class NPC {
@@ -213,16 +213,17 @@ public class NPC {
         VisibilityModifier visibilityModifier = new VisibilityModifier(this);
         visibilityModifier.queuePlayerListChange(EnumWrappers.PlayerInfoAction.ADD_PLAYER).send(player);
 
-        Imanity.TASK_CHAIN_FACTORY
-                .newChain()
-                .delay(10)
-                .sync(() -> {
+
+        CompletableFuture.runAsync(() -> {
+
                     visibilityModifier.queueSpawn().send(player);
                     this.spawnCustomizer.handleSpawn(this, player);
-                })
-                .delay((int) this.pool.getTabListRemoveTicks())
-                .sync(() -> visibilityModifier.queuePlayerListChange(EnumWrappers.PlayerInfoAction.REMOVE_PLAYER).send(player))
-        .execute();
+
+                }, Task.mainLater(10)).thenRunAsync(() -> {
+
+                    visibilityModifier.queuePlayerListChange(EnumWrappers.PlayerInfoAction.REMOVE_PLAYER).send(player);
+
+                }, Task.mainLater(this.pool.getTabListRemoveTicks()));
     }
 
     public void hide(@NotNull Player player) {

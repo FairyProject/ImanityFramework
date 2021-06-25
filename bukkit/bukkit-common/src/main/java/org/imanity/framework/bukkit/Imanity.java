@@ -59,17 +59,14 @@ import org.imanity.framework.bukkit.reflection.minecraft.MinecraftVersion;
 import org.imanity.framework.bukkit.reflection.wrapper.ChatComponentWrapper;
 import org.imanity.framework.bukkit.scoreboard.ImanityBoardAdapter;
 import org.imanity.framework.bukkit.scoreboard.ImanityBoardService;
-import org.imanity.framework.bukkit.impl.BukkitTaskChainFactory;
 import org.imanity.framework.bukkit.timer.TimerHandler;
 import org.imanity.framework.bukkit.util.*;
 import org.imanity.framework.bukkit.tablist.ImanityTabAdapter;
 import org.imanity.framework.bukkit.tablist.ImanityTabHandler;
 import org.imanity.framework.bukkit.visual.VisualBlockHandler;
-import org.imanity.framework.locale.LocaleHandler;
 import org.imanity.framework.locale.player.LocaleData;
 import org.imanity.framework.plugin.PluginClassLoader;
 import org.imanity.framework.plugin.PluginManager;
-import org.imanity.framework.task.TaskChainFactory;
 import org.imanity.framework.util.CC;
 import org.imanity.framework.util.FastRandom;
 import org.imanity.framework.util.RV;
@@ -98,7 +95,6 @@ public final class Imanity {
     public static ServerImplementation IMPLEMENTATION;
 
     public static PluginClassLoader CLASS_LOADER;
-    public static TaskChainFactory TASK_CHAIN_FACTORY;
 
     private static VisualBlockHandler VISUAL_BLOCK_HANDLER;
 
@@ -115,8 +111,6 @@ public final class Imanity {
 
         SpigotUtil.init();
         Imanity.initCommon();
-
-        Imanity.TASK_CHAIN_FACTORY = BukkitTaskChainFactory.create(plugin);
     }
 
     private static void initCommon() {

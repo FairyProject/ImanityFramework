@@ -29,7 +29,7 @@
     <parent>
         <artifactId>bukkit</artifactId>
         <groupId>org.imanity.framework</groupId>
-        <version>0.3b2</version>
+        <version>0.3b3</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
 

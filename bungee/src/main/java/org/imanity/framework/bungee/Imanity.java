@@ -31,15 +31,10 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.imanity.framework.ImanityCommon;
 import org.imanity.framework.bungee.impl.*;
-import org.imanity.framework.bungee.plugin.BungeePlugin;
 import org.imanity.framework.ComponentRegistry;
 import org.imanity.framework.command.CommandService;
 import org.imanity.framework.plugin.PluginClassLoader;
 import org.imanity.framework.plugin.PluginManager;
-import org.imanity.framework.task.TaskChainFactory;
-
-import java.util.List;
-import java.util.concurrent.TimeUnit;
 
 public class Imanity {
 
@@ -50,15 +45,11 @@ public class Imanity {
 
     public static boolean SHUTTING_DOWN;
 
-    public static TaskChainFactory TASK_CHAIN_FACTORY;
-
     public static void init(Plugin plugin) {
         Imanity.PLUGIN = plugin;
         Imanity.CLASS_LOADER = new PluginClassLoader(PLUGIN.getClass().getClassLoader());
 
         Imanity.initCommon();
-
-        TASK_CHAIN_FACTORY = new BungeeTaskChainFactory();
     }
 
     private static void initCommon() {
@@ -81,7 +72,6 @@ public class Imanity {
     @SneakyThrows
     public static void shutdown() {
         SHUTTING_DOWN = true;
-        TASK_CHAIN_FACTORY.shutdown(60, TimeUnit.SECONDS);
         ImanityCommon.shutdown();
         PluginManager.INSTANCE.callFrameworkFullyDisable();
     }
