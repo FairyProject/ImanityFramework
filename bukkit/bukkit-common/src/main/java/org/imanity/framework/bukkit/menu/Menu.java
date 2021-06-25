@@ -378,7 +378,7 @@ public abstract class Menu implements TerminableConsumer {
                 .bindWith(this);
     }
 
-    protected final void render() {
+    public final void render() {
         this.render(false);
     }
 
