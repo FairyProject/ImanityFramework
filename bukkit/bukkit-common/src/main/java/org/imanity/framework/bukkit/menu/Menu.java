@@ -27,6 +27,7 @@ package org.imanity.framework.bukkit.menu;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
+import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
 import lombok.Getter;
 import lombok.Setter;
@@ -98,7 +99,7 @@ public abstract class Menu implements TerminableConsumer {
 
     public static <T extends Menu> List<T> getMenusByType(Class<T> type) {
         List<T> menuList = new ArrayList<>();
-        for (Menu menu : MENU_BY_TYPE.get(type)) {
+        for (Menu menu : MENU_BY_TYPE.getOrDefault(type, Collections.emptyList())) {
             menuList.add(type.cast(menu));
         }
         return menuList;
@@ -110,8 +111,9 @@ public abstract class Menu implements TerminableConsumer {
     protected Player player;
     private Inventory inventory;
 
-    private boolean opening, rendering;
+    private boolean opening, rendering, reopening;
     private long openMillis, lastAccessMillis;
+    private int updateCount;
     private Button placeholderButton = Button.placeholder(Material.STAINED_GLASS_PANE, (byte) 15, " ");
 
     @NotNull
@@ -236,6 +238,14 @@ public abstract class Menu implements TerminableConsumer {
         return this;
     }
 
+    public void clear(int x, int y) {
+        this.clear(getSlot(x, y));
+    }
+
+    public void clear(int slot) {
+        this.buttonsMap.remove(slot);
+    }
+
     public Menu clearBetween(int minSlot, int maxSlot) {
         this.buttonsMap.int2ObjectEntrySet().removeIf(entry -> entry.getIntKey() >= minSlot && entry.getIntKey() <= maxSlot);
         return this;
@@ -264,6 +274,9 @@ public abstract class Menu implements TerminableConsumer {
 
     public void remove() {
         if (!this.opening) {
+            return;
+        }
+        if (this.reopening) {
             return;
         }
         this.opening = false;
@@ -369,6 +382,9 @@ public abstract class Menu implements TerminableConsumer {
                 .filter(event -> event.getInventory().getHolder().equals(this.player))
                 .listen(event -> {
                     try {
+                        if (this.rerendering) {
+                            return;
+                        }
                         this.remove();
                     } catch (Throwable throwable) {
                         Stacktrace.print(throwable);
@@ -381,6 +397,8 @@ public abstract class Menu implements TerminableConsumer {
     public final void render() {
         this.render(false);
     }
+
+    private boolean rerendering = false;
 
     private void render(boolean firstInitial) {
         if (this.rendering) {
@@ -404,13 +422,15 @@ public abstract class Menu implements TerminableConsumer {
 
         if (player.getOpenInventory() != null) {
             Inventory topInventory = player.getOpenInventory().getTopInventory();
-            if (this.inventory != null && this.inventory.equals(topInventory) && size == topInventory.getSize()) {
+            if (this.inventory != null && title.equals(topInventory.getTitle()) && size == topInventory.getSize()) {
                 inventory = this.inventory;
             }
         }
 
+        boolean recreate = false;
         if (inventory == null) {
             inventory = Bukkit.createInventory(player, size, title);
+            recreate = true;
         }
 
         for (final Map.Entry<Integer, Button> buttonEntry : this.buttonsMap.int2ObjectEntrySet()) {
@@ -430,7 +450,14 @@ public abstract class Menu implements TerminableConsumer {
         }
 
         this.inventory = inventory;
-        player.openInventory(inventory);
+        if (recreate) {
+            this.rerendering = true;
+            player.closeInventory();
+            player.openInventory(inventory);
+            this.rerendering = false;
+        } else {
+            player.updateInventory();
+        }
     }
 
     public abstract void draw(boolean firstInitial);
