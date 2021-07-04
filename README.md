@@ -1,6 +1,6 @@
 # ImanityFramework
 
-The Project has been moved and renamed to Fairy, checkout the brand new ImanityFramework here: ![Fairy](https://github.com/FairyProject/fairy)
+The Project has been moved and renamed to Fairy, checkout the brand new ImanityFramework here: [Fairy](https://github.com/FairyProject/fairy)
 
 ![](https://img.shields.io/nexus/imanity-libraries/org.imanity.framework/parent?label=ImanityFramework&server=https%3A%2F%2Fmaven.imanity.dev&style=flat-square) ![](https://img.shields.io/github/languages/code-size/Imanity-Software/ImanityFramework) [![Build Status](https://ci.imanity.dev/job/ImanityFramework/badge/icon)](https://ci.imanity.dev/job/ImanityFramework/)
 
